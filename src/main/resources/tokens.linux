@@ -1,0 +1,4 @@
+3b9f958131fe9f006646530501001171df000006000015 /usr/lib/ePass2003-Linux-x64/redist/libcastle.so.1.0.0 https://firmadigital.bo/herramientas/descargas/driver_epass/linux_64.zip
+3b9f958131fe9f006646530501001171df000003900080 /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so https://github.com/OpenSC/OpenSC/wiki
+3bdc18ff8191fe1fc38073c8211366010b0352000538 /usr/lib/x64-athena/libASEP11.so https://firmadigital.bo/herramientas/descargas/driver_athena/idprotectclient_637.01-0_amd64.zip
+3bd518008131fe7d8073c82110f4 /usr/lib/libeTPkcs11.so https://firmadigital.bo/herramientas/descargas/driver_safenet/SafenetAuthenticationClient-9.1.7-0_amd64.zip

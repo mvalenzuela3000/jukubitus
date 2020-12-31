@@ -1,0 +1,42 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bo.firmadigital.jacobitus4.resources;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+/**
+ *
+ * @author ADSIB
+ */
+@Path("/status")
+public class Estado {
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String status() {
+        JSONObject json = new JSONObject();
+        String r = "{}";
+        try {
+            JSONObject datos = new JSONObject();
+            datos.put("compilacion", 3100);
+            datos.put("api_version", "1.0.2");
+            json.put("datos", datos);
+            json.put("finalizado", true);
+            json.put("mensaje", "Servicio ejecutandose correctamente");
+            r = json.toString();
+        } catch (JSONException ex) {
+            Logger.getLogger(Estado.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return r;
+    }
+}
