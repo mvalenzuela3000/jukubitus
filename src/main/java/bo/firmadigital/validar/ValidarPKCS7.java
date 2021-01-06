@@ -50,7 +50,9 @@ public class ValidarPKCS7 extends Validar {
                 InputStream is = new FileInputStream(file);
                 CMSSignedData signedData = new CMSSignedData(is);
                 CMSProcessable sc = signedData.getSignedContent();
-                sc.write(new FileOutputStream(f));
+                FileOutputStream os = new FileOutputStream(f);
+                sc.write(os);
+                os.close();
                 return f.getAbsolutePath();
             } catch (CMSException | IOException ex) {
                 Logger.getLogger(ValidarPKCS7.class.getName()).log(Level.SEVERE, null, ex);

@@ -64,10 +64,11 @@ public class Main {
         try {
             createServerConnectorHTTPS();
             jettyServer.start();
+            App.run(true);
         } catch (Exception ex) {
+            App.run(false);
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        App.run();
     }
 
     /**

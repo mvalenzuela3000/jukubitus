@@ -13,6 +13,7 @@ import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfAnnotation;
@@ -30,7 +31,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -90,10 +93,16 @@ public class App extends Application {
     private TableView table;
     private TableView tableFile;
     private File destino;
+    private static boolean servicio;
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("ADSIB - Jacobitus Total");
+        if (!servicio) {
+            Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con páginas web", ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
         String javaVersion = System.getProperty("java.version");
         String javafxVersion = System.getProperty("javafx.version");
@@ -220,7 +229,7 @@ public class App extends Application {
         Menu helpMenu = new Menu("Ayuda");
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(AlertType.NONE, "Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".", ButtonType.OK);
+            Alert alert = new Alert(AlertType.NONE, "Jacobitus Total, JavaFX " + javafxVersion + ", con Java " + javaVersion + ".", ButtonType.OK);
             alert.showAndWait();
         });
         helpMenu.getItems().addAll(aboutItem);
@@ -344,64 +353,80 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
+                StringBuilder errores = new StringBuilder();
                 List<Validar> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
                     for (int i = 0; i < files.size(); i++) {
                         InputStream is = new FileInputStream(files.get(i).getAbsolutePath());
-                        PdfReader reader = new PdfReader(is);
-                        ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        try {
+                            PdfReader reader = new PdfReader(is);
+                            ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                        if (bloquear) {
-                            PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
-                            PdfFormField field = PdfFormField.createSignature(stp.getWriter());
-                            field.setFieldName("Signature " + (signatures.size() + 1));
-                            PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
-                            field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
-                            field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
-                            field.setFlags(PdfAnnotation.FLAGS_PRINT);
-                            stp.addAnnotation(field, 1);
-                            stp.close();
+                            if (bloquear) {
+                                PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
+                                PdfFormField field = PdfFormField.createSignature(stp.getWriter());
+                                field.setFieldName("Signature " + (signatures.size() + 1));
+                                PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
+                                field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
+                                field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
+                                field.setFlags(PdfAnnotation.FLAGS_PRINT);
+                                stp.addAnnotation(field, 1);
+                                stp.close();
+                                reader.close();
+                                reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+                                baos = new ByteArrayOutputStream();
+                            }
+                            PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
+                            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+                            if (bloquear) {
+                                appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
+                                AcroFields form = stamper.getAcroFields();
+                                form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
+                            } else {
+                                appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
+                            }
+                            ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
+                            MakeSignature.signExternalContainer(appearance, external, 8192);
+                            stamper.flush();
+                            stamper.close();
                             reader.close();
-                            reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                            baos = new ByteArrayOutputStream();
-                        }
-                        PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
-                        PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
-                        if (bloquear) {
-                            appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
-                            AcroFields form = stamper.getAcroFields();
-                            form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
-                        } else {
-                            appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
-                        }
-                        ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-                        MakeSignature.signExternalContainer(appearance, external, 8192);
-                        stamper.flush();
-                        stamper.close();
-                        reader.close();
 
-                        String name = new File(files.get(i).getAbsolutePath()).getName();
-                        if (!name.endsWith(".pdf")) {
-                            name += ".firmado.pdf";
-                        } else {
-                            name = name.replace(".pdf", ".firmado.pdf");
+                            String name = new File(files.get(i).getAbsolutePath()).getName();
+                            if (!name.endsWith(".pdf")) {
+                                name += ".firmado.pdf";
+                            } else {
+                                name = name.replace(".pdf", ".firmado.pdf");
+                            }
+                            File out = new File(destino, name);
+                            PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+                            FileOutputStream os2 = new FileOutputStream(out);
+                            ExternalSignatureContainer external2 = new ExternalSignatureLocal(slot, label, pass);
+                            MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
+                            os2.close();
+                            updateProgress(i + 1, files.size());
+                            tableFile.getItems().set(i, new ValidarPdf(out));
+                        } catch (DocumentException | IOException | GeneralSecurityException ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
                         }
-                        File out = new File(destino, name);
-                        PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                        FileOutputStream os2 = new FileOutputStream(out);
-                        ExternalSignatureContainer external2 = new ExternalSignatureLocal(slot, label, pass);
-                        MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
-                        updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarPdf(out));
                     }
                 }
-                return true;
+                if (errores.isEmpty()) {
+                    return true;
+                } else {
+                    throw new RuntimeException(errores.toString());
+                }
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 
@@ -476,7 +501,8 @@ public class App extends Application {
         return task;
     }
 
-    public static void run() {
+    public static void run(boolean servicio) {
+        App.servicio = servicio;
         launch();
     }
 }
