@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
@@ -178,19 +181,22 @@ public class Pdf extends Stage {
                 Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        MenuItem agregarTwainItem = new MenuItem("Agregar Twain");
-        agregarTwainItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "No se encontro un escaner conectado.", ButtonType.OK);
-            alert.setTitle("Jacobitus");
-            alert.showAndWait();
-        });
         MenuItem guardarItem = new MenuItem("Guardar");
         guardarItem.setOnAction((ActionEvent e) -> {
             document.close();
-            path = out.getPath();
-            close();
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(this);
+            try {
+                Files.copy(Paths.get(out.getPath()), Paths.get(file.getPath()), StandardCopyOption.REPLACE_EXISTING);
+                path = file.getPath();
+                close();
+            } catch (IOException ex) {
+                error(ex.getMessage());
+            }
         });
-        mainMenu.getItems().addAll(agregarPdfItem, agregarImagenItem, agregarTwainItem, guardarItem);
+        mainMenu.getItems().addAll(agregarPdfItem, agregarImagenItem, guardarItem);
         menuBar.getMenus().add(mainMenu);
         root.setTop(menuBar);
 

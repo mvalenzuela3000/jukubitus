@@ -49,6 +49,7 @@ public class ExternalSignatureLocal implements ExternalSignatureContainer {
             /*if (MyApplication.isTimeStamp()) {
                 tsc = new TSAClientBouncyCastle(MyApplication.getUrlTS(), MyApplication.getUserTS(), MyApplication.getPassTS());
             }*/
+            token.salir();
             return pdfPKCS7.getEncodedPKCS7(hash, tsc, null, null, MakeSignature.CryptoStandard.CADES);
         } catch (IOException | InvalidKeyException e) {
             throw new GeneralSecurityException(e.getMessage());

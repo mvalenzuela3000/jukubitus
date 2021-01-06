@@ -67,11 +67,6 @@
             <version>1.9.13</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>io.wia</groupId>
-            <artifactId>wia-java</artifactId>
-            <version>0.1.0</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -35,7 +35,11 @@ public class SmartCard {
                 }
             }
         } catch (CardException | JSONException ex) {
-            throw new RuntimeException(ex.getMessage());
+            if (ex.getMessage().equals("list() failed")) {
+                throw new RuntimeException("No se encontró ningún token conectado. Por favor conecte su token criptográfico.");
+            } else {
+                throw new RuntimeException(ex.getMessage());
+            }
         }
         return res;
     }

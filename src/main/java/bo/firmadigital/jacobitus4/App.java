@@ -9,7 +9,10 @@ import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
+import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.Validar;
+import bo.firmadigital.validar.ValidarPdf;
+import bo.firmadigital.validar.ValidarPKCS7;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfAnnotation;
@@ -28,6 +31,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,11 +62,24 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cms.CMSProcessableFile;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.Store;
 
 /**
  *
@@ -69,10 +89,12 @@ public class App extends Application {
     private ProgressBar progressBar;
     private TableView table;
     private TableView tableFile;
+    private File destino;
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("ADSIB - Jacobitus Fido");
+        stage.setTitle("ADSIB - Jacobitus Total");
+        stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
         String javaVersion = System.getProperty("java.version");
         String javafxVersion = System.getProperty("javafx.version");
         BorderPane root = new BorderPane();
@@ -90,8 +112,28 @@ public class App extends Application {
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
             fileChooser.getExtensionFilters().add(extFilter);
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
-            if (files.size() > 0) {
+            if (files != null && files.size() > 0) {
                 new Thread(validar(files)).start();
+            }
+        });
+        MenuItem abrirPKCS7Item = new MenuItem("Abrir PKCS#7");
+        abrirPKCS7Item.setOnAction((ActionEvent e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Abrir P7S");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos P7S (*.p7s)", "*.p7s");
+            fileChooser.getExtensionFilters().add(extFilter);
+            List<File> files = fileChooser.showOpenMultipleDialog(stage);
+            if (files != null && files.size() > 0) {
+                new Thread(validarPKCS7(files)).start();
+            }
+        });
+        MenuItem abrirOtroItem = new MenuItem("Abrir Otro");
+        abrirOtroItem.setOnAction((ActionEvent e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Abrir Otro");
+            List<File> files = fileChooser.showOpenMultipleDialog(stage);
+            if (files != null && files.size() > 0) {
+                new Thread(validarPKCS7(files)).start();
             }
         });
         MenuItem limpiarItem = new MenuItem("Limpiar Lista");
@@ -108,7 +150,7 @@ public class App extends Application {
                 Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, limpiarItem, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirPKCS7Item, abrirOtroItem, limpiarItem, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");
@@ -125,6 +167,9 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setTitle("Seleccione directorio de destino");
+                    destino = directoryChooser.showDialog(stage);
                     Firmante firmante = new Firmante(stage, item.getSlot());
                     firmante.showAndWait();
                     if (firmante.getLabel() != null) {
@@ -133,7 +178,31 @@ public class App extends Application {
                 }
             }
         });
-        firmaMenu.getItems().addAll(firmarItem);
+        MenuItem firmarPKCS7Item = new MenuItem("Firmar PKCS#7");
+        firmarPKCS7Item.setOnAction((ActionEvent e) -> {
+            if (tableFile.getItems().isEmpty()) {
+                Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.setTitle("Jacobitus");
+                alert.showAndWait();
+            } else {
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                if (item == null) {
+                    Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.setTitle("Jacobitus");
+                    alert.showAndWait();
+                } else {
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setTitle("Seleccione directorio de destino");
+                    destino = directoryChooser.showDialog(stage);
+                    Firmante firmante = new Firmante(stage, item.getSlot());
+                    firmante.showAndWait();
+                    if (firmante.getLabel() != null) {
+                        new Thread(firmarPKCS7(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                    }
+                }
+            }
+        });
+        firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item);
         menuBar.getMenus().add(firmaMenu);
         
         Menu pdfMenu = new Menu("PDF");
@@ -142,7 +211,7 @@ public class App extends Application {
             Pdf pdf = new Pdf(stage);
             pdf.showAndWait();
             if (pdf.getPath() != null) {
-                tableFile.getItems().add(new Validar(new File(pdf.getPath())));
+                tableFile.getItems().add(new ValidarPdf(new File(pdf.getPath())));
             }
         });
         pdfMenu.getItems().addAll(nuevoItem);
@@ -225,6 +294,7 @@ public class App extends Application {
                     return true;
                 } catch (RuntimeException ex) {
                     updateProgress(100, 100);
+                    table.getItems().clear();
                     throw ex;
                 }
             }
@@ -258,7 +328,7 @@ public class App extends Application {
             protected Object call() throws Exception {
                 List<Validar> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
-                    certs.add(new Validar(files.get(i)));
+                    certs.add(new ValidarPdf(files.get(i)));
                     updateProgress(i + 1, files.size());
                 }
                 tableFile.setItems(FXCollections.observableList(certs));
@@ -319,14 +389,85 @@ public class App extends Application {
                         } else {
                             name = name.replace(".pdf", ".firmado.pdf");
                         }
-                        File out = new File(System.getProperty("java.io.tmpdir"), name);
+                        File out = new File(destino, name);
                         PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
                         FileOutputStream os2 = new FileOutputStream(out);
                         ExternalSignatureContainer external2 = new ExternalSignatureLocal(slot, label, pass);
                         MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new Validar(out));
+                        tableFile.getItems().set(i, new ValidarPdf(out));
                     }
+                }
+                return true;
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        return task;
+    }
+
+    public Task validarPKCS7(List<File> files) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                List<Validar> certs = new LinkedList();
+                for (int i = 0; i < files.size(); i++) {
+                    certs.add(new ValidarPKCS7(files.get(i)));
+                    updateProgress(i + 1, files.size());
+                }
+                tableFile.setItems(FXCollections.observableList(certs));
+                return true;
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        return task;
+    }
+
+    public Task firmarPKCS7(long slot, String label, String pass) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                List<Validar> files = tableFile.getItems();
+                if (files.isEmpty()) {
+                    updateProgress(100, 100);
+                } else {
+                    if (Security.getProvider("BC") == null) {
+                        Security.addProvider(new BouncyCastleProvider());
+                    }
+                    Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+                    token.iniciar(pass);
+                    PrivateKey privateKey = token.obtenerClavePrivada(label);
+                    X509Certificate x509Certificate = token.obtenerCertificado(label);
+                    for (int i = 0; i < files.size(); i++) {
+                        List<Certificate> certlist = new ArrayList<>();
+                        certlist.add(x509Certificate);
+                        Store certstore = new JcaCertStore(certlist);
+                        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(privateKey);
+                        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
+                        generator.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider("BC").
+                                build()).build(signer, (X509Certificate) x509Certificate));
+                        generator.addCertificates(certstore);
+
+                        CMSTypedData cmsdata;
+                        if (files.get(i).getFile().getAbsolutePath().endsWith(".p7s")) {
+                            try (InputStream is = new FileInputStream(files.get(i).getFile())) {
+                                CMSSignedData signedData = new CMSSignedData(is);
+                                cmsdata = signedData.getSignedContent();
+                                generator.addSigners(signedData.getSignerInfos());
+                            }
+                        } else {
+                            cmsdata = new CMSProcessableFile(files.get(i).getFile());
+                        }
+                        CMSSignedData signeddata = generator.generate(cmsdata, true);
+                        String name = new File(files.get(i).getAbsolutePath()).getName();
+                        File out = new File(destino, name + ".p7s");
+                        new FileOutputStream(out).write(signeddata.getEncoded());
+
+                        updateProgress(i + 1, files.size());
+                        tableFile.getItems().set(i, new ValidarPKCS7(out));
+                    }
+                    token.salir();
                 }
                 return true;
             }

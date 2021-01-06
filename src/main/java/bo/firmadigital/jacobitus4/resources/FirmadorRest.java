@@ -7,9 +7,23 @@ package bo.firmadigital.jacobitus4.resources;
 
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
+import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.PdfAnnotation;
+import com.itextpdf.text.pdf.PdfFormField;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSigLockDictionary;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.security.ExternalBlankSignatureContainer;
+import com.itextpdf.text.pdf.security.ExternalSignatureContainer;
+import com.itextpdf.text.pdf.security.MakeSignature;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -19,10 +33,12 @@ import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
@@ -32,6 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -47,6 +64,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -144,6 +162,69 @@ public class FirmadorRest {
             json.put("mensaje", "Se firmo la solicitud correctamente!");
             json.put("datos", jsonResult);
         } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
+
+    @POST
+    @Path("/firmar_pdf")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarPdf(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            boolean bloquear = req.has("bloquear") && req.getBoolean("bloquear");
+            JSONObject datos = new JSONObject();
+            json.put("datos", datos);
+            byte[] file = Base64.getDecoder().decode(req.getString("pdf"));
+            PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
+            ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            if (bloquear) {
+                PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
+                PdfFormField field = PdfFormField.createSignature(stp.getWriter());
+                field.setFieldName("Signature " + (signatures.size() + 1));
+                PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
+                field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
+                field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
+                field.setFlags(PdfAnnotation.FLAGS_PRINT);
+                stp.addAnnotation(field, 1);
+                stp.close();
+                reader.close();
+                reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+                baos = new ByteArrayOutputStream();
+            }
+            PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
+            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+            if (bloquear) {
+                appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
+                AcroFields form = stamper.getAcroFields();
+                form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
+            } else {
+                appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
+            }
+            ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
+            MakeSignature.signExternalContainer(appearance, external, 8192);
+            stamper.flush();
+            stamper.close();
+            reader.close();
+
+            ByteArrayOutputStream os2 = new ByteArrayOutputStream();
+            PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+            ExternalSignatureContainer external2 = new ExternalSignatureLocal(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
+            MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
+            datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
+            json.put("finalizado", true);
+            json.put("mensaje", "Se firmo el pdf correctamente!");
+        } catch (JSONException | IOException | DocumentException | GeneralSecurityException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());

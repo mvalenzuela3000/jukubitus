@@ -8,11 +8,18 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.DatosCertificado;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.LinkedList;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.event.Event;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -85,7 +92,7 @@ public class Firmante extends Stage {
         progressBar.progressProperty().unbind();
         Task task = new Task() {
             @Override
-            protected Object call() throws Exception {
+            protected Object call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     Token token = gestorSlot.obtenerSlot(slot).getToken();
@@ -99,12 +106,30 @@ public class Firmante extends Stage {
                     table.setItems(FXCollections.observableList(certificados));
                     updateProgress(100, 100);
                     return true;
-                } catch (RuntimeException ex) {
-                    throw ex;
+                } catch (IOException ex) {
+                    if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                        if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                            throw new RuntimeException("Por favor verifique el pin.");
+                        }
+                    }
+                    if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                        if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                            throw new RuntimeException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
+                        }
+                    }
+                    throw new RuntimeException(ex.getMessage());
+                } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
+                    throw new RuntimeException(ex.getMessage());
                 }
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            String err = task.getException().getMessage();
+            Alert alert = new Alert(AlertType.WARNING, err);
+            alert.showAndWait();
+            close();
+        });
         return task;
     }
 }

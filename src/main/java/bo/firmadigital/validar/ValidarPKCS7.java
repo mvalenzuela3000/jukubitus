@@ -1,0 +1,95 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bo.firmadigital.validar;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.bouncycastle.asn1.ASN1UTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_signingTime;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.util.Store;
+
+/**
+ *
+ * @author ADSIB
+ */
+public class ValidarPKCS7 extends Validar {
+    public ValidarPKCS7(File file) {
+        try {
+            super.file = file;
+            certificados = listarCertificados(file);
+        } catch (Exception ignore) {
+        }
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        if (file.getName().endsWith(".p7s")) {
+            try {
+                File f = new File(System.getProperty("java.io.tmpdir"), file.getName().replace(".p7s", ""));
+                InputStream is = new FileInputStream(file);
+                CMSSignedData signedData = new CMSSignedData(is);
+                CMSProcessable sc = signedData.getSignedContent();
+                sc.write(new FileOutputStream(f));
+                return f.getAbsolutePath();
+            } catch (CMSException | IOException ex) {
+                Logger.getLogger(ValidarPKCS7.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return file.getAbsolutePath();
+    }
+
+    public List<CertDate> listarCertificados(File file) throws Exception {
+        List<CertDate> certs = new ArrayList<>();
+        try {
+            InputStream is = new FileInputStream(file);
+            CMSSignedData signedData = new CMSSignedData(is);
+
+            Collection<SignerInformation> firmas = signedData.getSignerInfos().getSigners();
+
+            for (SignerInformation signerInfo : firmas) {
+                Attribute attribute = signerInfo.getSignedAttributes().get(pkcs_9_at_signingTime);
+                Calendar fecha = Calendar.getInstance();
+                fecha.setTime(((ASN1UTCTime)attribute.getAttrValues().getObjectAt(0)).getDate());
+                // Integridad del documento
+                X509Certificate cert = null;
+                boolean integrity = false;
+                Store store = signedData.getCertificates();
+                Collection<X509CertificateHolder> allCerts = store.getMatches(null);
+                for (X509CertificateHolder holder : allCerts) {
+                    cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
+                    if (signerInfo.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert))) {
+                        integrity = true;
+                        break;
+                    }
+                }
+                CertDate certDate = new CertDate(cert, fecha, null, false);
+                certDate.setValid(integrity);
+                certDate.setPKI(verificarPKI(certDate.getCertificate()));
+                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate()));
+                certs.add(certDate);
+            }
+        } catch (CMSException ignore) { }
+        return certs;
+    }
+}
