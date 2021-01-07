@@ -30,5 +30,5 @@ jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --mai
 
 ## MacOS
 ´´´
-/Library/Java/JavaVirtualMachines/jdk-14.0.2.jdk/Contents/Home/bin/jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type pkg --icon iconos\icon.icns
+/Library/Java/JavaVirtualMachines/jdk-14.0.2.jdk/Contents/Home/bin/jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type pkg --icon iconos/icon.icns
 ´´´

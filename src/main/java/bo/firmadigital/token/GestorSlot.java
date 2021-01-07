@@ -91,6 +91,9 @@ public class GestorSlot {
         slots.clear();
         try {
             List<JSONObject> tokens = SmartCard.cards();
+            if (tokens.size() == 0) {
+                throw new RuntimeException("No se encontro ningun token conectado.");
+            }
             if (tokens.size() != 1) {
                 throw new RuntimeException("Tokens de diferentes marcas conectados.");
             }
