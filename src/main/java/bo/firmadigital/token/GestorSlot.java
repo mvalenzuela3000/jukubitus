@@ -91,13 +91,15 @@ public class GestorSlot {
         slots.clear();
         try {
             List<JSONObject> tokens = SmartCard.cards();
-            if (tokens.size() == 0) {
+            if (tokens.isEmpty() && libreria == null) {
                 throw new RuntimeException("No se encontro ningun token conectado.");
             }
-            if (tokens.size() != 1) {
+            if (tokens.size() > 1) {
                 throw new RuntimeException("Tokens de diferentes marcas conectados.");
             }
-            libreria = getLib(tokens.get(0).getString("id"));
+            if (!tokens.isEmpty()) {
+                libreria = getLib(tokens.get(0).getString("id"));
+            }
             sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null));
             Security.addProvider(sunPKCS11);
             PKCS11 p11 = new PKCS11(sunPKCS11);

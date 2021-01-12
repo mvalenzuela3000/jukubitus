@@ -414,7 +414,7 @@ public class App extends Application {
                         }
                     }
                 }
-                if (errores.isEmpty()) {
+                if (errores.length() == 0) {
                     return true;
                 } else {
                     throw new RuntimeException(errores.toString());
