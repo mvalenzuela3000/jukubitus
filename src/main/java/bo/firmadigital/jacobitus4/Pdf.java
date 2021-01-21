@@ -249,10 +249,10 @@ public class Pdf extends Stage {
                             }
                             javafx.scene.image.Image img = new javafx.scene.image.Image(new ByteArrayInputStream(b), WIDTH * 1.5, HEIGHT * 1.5, false, true);
                             if (img.getException() == null) {
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
-                                image = Image.getInstance(baos.toByteArray(), true);
-                                baos.close();
+                                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                                    ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
+                                    image = Image.getInstance(baos.toByteArray(), true);
+                                }
                             } else {
                                 image = Image.getInstance(writer.getImportedPage(reader, i));
                             }
@@ -289,10 +289,11 @@ public class Pdf extends Stage {
                     FileInputStream imgFile = new FileInputStream(file.getAbsolutePath());
                     System.out.println(imgFile);
                     javafx.scene.image.Image img = new javafx.scene.image.Image(imgFile, WIDTH * 1.5, HEIGHT * 1.5, false, true);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
-                    Image image = Image.getInstance(baos.toByteArray(), true);
-                    baos.close();
+                    Image image;
+                    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                        ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
+                        image = Image.getInstance(baos.toByteArray(), true);
+                    }
                     //Image image = Image.getInstance(file.getAbsolutePath(), true);
                     /*float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()) / image.getWidth()) * 100;
                     image.scalePercent(scaler);*/
@@ -338,6 +339,7 @@ public class Pdf extends Stage {
         });
         alert.getDialogPane().setContent(content);
         alert.showAndWait();
+        document.setPageSize(new Rectangle(WIDTH, HEIGHT));
     }
 
     public String getPath() {
