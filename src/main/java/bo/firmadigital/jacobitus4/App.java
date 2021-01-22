@@ -179,10 +179,16 @@ public class App extends Application {
                     DirectoryChooser directoryChooser = new DirectoryChooser();
                     directoryChooser.setTitle("Seleccione directorio de destino");
                     destino = directoryChooser.showDialog(stage);
-                    Firmante firmante = new Firmante(stage, item.getSlot());
-                    firmante.showAndWait();
-                    if (firmante.getLabel() != null) {
-                        new Thread(firmar(false, item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                    if (destino == null) {
+                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.setTitle("Jacobitus");
+                        alert.showAndWait();
+                    } else {
+                        Firmante firmante = new Firmante(stage, item.getSlot());
+                        firmante.showAndWait();
+                        if (firmante.getLabel() != null) {
+                            new Thread(firmar(false, item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                        }
                     }
                 }
             }
@@ -203,10 +209,16 @@ public class App extends Application {
                     DirectoryChooser directoryChooser = new DirectoryChooser();
                     directoryChooser.setTitle("Seleccione directorio de destino");
                     destino = directoryChooser.showDialog(stage);
-                    Firmante firmante = new Firmante(stage, item.getSlot());
-                    firmante.showAndWait();
-                    if (firmante.getLabel() != null) {
-                        new Thread(firmarPKCS7(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                    if (destino == null) {
+                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.setTitle("Jacobitus");
+                        alert.showAndWait();
+                    } else {
+                        Firmante firmante = new Firmante(stage, item.getSlot());
+                        firmante.showAndWait();
+                        if (firmante.getLabel() != null) {
+                            new Thread(firmarPKCS7(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                        }
                     }
                 }
             }
