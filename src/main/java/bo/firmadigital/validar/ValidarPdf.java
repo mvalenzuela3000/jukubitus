@@ -99,7 +99,7 @@ public class ValidarPdf extends Validar {
             }
             certDate.setValid(pkcs7.verify());
             certDate.setPKI(verificarPKI(certDate.getCertificate()));
-            certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate()));
+            certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
             certs.add(certDate);
         }
         return certs;
