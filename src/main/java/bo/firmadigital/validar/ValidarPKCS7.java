@@ -88,7 +88,7 @@ public class ValidarPKCS7 extends Validar {
                 CertDate certDate = new CertDate(cert, fecha, null, false);
                 certDate.setValid(integrity);
                 certDate.setPKI(verificarPKI(certDate.getCertificate()));
-                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate()));
+                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
                 certs.add(certDate);
             }
         } catch (CMSException ignore) { }

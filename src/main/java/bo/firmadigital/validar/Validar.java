@@ -23,6 +23,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +103,7 @@ public abstract class Validar implements Iterable<CertDate> {
         }
     }
 
-    public boolean verificarOcsp(X509Certificate cert) {
+    public boolean verificarOcsp(X509Certificate cert, Date signDate) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             URL[] urls = getCrlURLs(cert);
@@ -132,7 +133,14 @@ public abstract class Validar implements Iterable<CertDate> {
                 return false;
             }
             X509CRLEntry entry = crl.getRevokedCertificate(cert.getSerialNumber());
-            return entry == null;
+            if (entry == null) {
+                return true;
+            }
+            if (entry.getRevocationDate().compareTo(signDate) > 0) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (CertificateException | IOException | CRLException ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
