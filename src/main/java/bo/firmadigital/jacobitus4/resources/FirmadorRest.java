@@ -217,7 +217,7 @@ public class FirmadorRest {
 
             ByteArrayOutputStream os2 = new ByteArrayOutputStream();
             PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-            ExternalSignatureContainer external2 = new ExternalSignatureLocal(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
+            ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
             MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
             datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
             json.put("finalizado", true);

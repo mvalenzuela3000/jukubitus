@@ -415,7 +415,7 @@ public class App extends Application {
                             File out = new File(destino, name);
                             PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
                             FileOutputStream os2 = new FileOutputStream(out);
-                            ExternalSignatureContainer external2 = new ExternalSignatureLocal(slot, label, pass);
+                            ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, label, pass);
                             MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
                             os2.close();
                             updateProgress(i + 1, files.size());

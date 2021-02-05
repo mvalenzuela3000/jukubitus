@@ -17,18 +17,30 @@ import java.security.Signature;
 import java.security.cert.Certificate;
 
 public class ExternalSignatureLocal implements ExternalSignatureContainer {
+    private static ExternalSignatureLocal externalSignatureLocal;
     private final long slot;
     private final String label;
     private final String pass;
 
-    public ExternalSignatureLocal(long slot, String label, String pass) {
+    private ExternalSignatureLocal(long slot, String label, String pass) {
         this.slot = slot;
         this.label = label;
         this.pass = pass;
     }
 
+    public static ExternalSignatureLocal getInstance(long slot, String label, String pass) {
+        if (externalSignatureLocal == null) {
+            externalSignatureLocal = new ExternalSignatureLocal(slot, label, pass);
+        } else {
+            if (externalSignatureLocal.slot != slot || !externalSignatureLocal.label.equals(label) || !externalSignatureLocal.pass.equals(pass)) {
+                externalSignatureLocal = new ExternalSignatureLocal(slot, label, pass);
+            }
+        }
+        return externalSignatureLocal;
+    }
+
     @Override
-    public byte[] sign(InputStream is) throws GeneralSecurityException {
+    public synchronized byte[] sign(InputStream is) throws GeneralSecurityException {
         try {
             Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
             token.iniciar(pass);
