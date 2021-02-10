@@ -55,6 +55,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -66,6 +67,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
@@ -90,9 +92,11 @@ import org.bouncycastle.util.Store;
  */
 public class App extends Application {
     private ProgressBar progressBar;
+    private ContextMenu contextMenu;
     private TableView table;
     private TableView tableFile;
     private File destino;
+    private Validar validar;
     private static boolean servicio;
 
     @Override
@@ -248,6 +252,14 @@ public class App extends Application {
         menuBar.getMenus().add(helpMenu);
         root.setTop(menuBar);
 
+        contextMenu = new ContextMenu();
+        MenuItem detalleItem = new MenuItem("Detalle Validación");
+        detalleItem.setOnAction((ActionEvent e) -> {
+            Detalle detalle = new Detalle(stage, validar);
+            detalle.showAndWait();
+        });
+        contextMenu.getItems().add(detalleItem);
+
         table = new TableView();
         TableColumn tokenCol = new TableColumn("Token");
         tokenCol.setCellValueFactory(new PropertyValueFactory("label"));
@@ -266,6 +278,10 @@ public class App extends Application {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
                     HostServices hostServices = getHostServices();
                     hostServices.showDocument(row.getItem().getAbsolutePath());
+                }
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    validar = row.getItem();
+                    contextMenu.show(table, event.getScreenX(), event.getScreenY());
                 }
             });
             return row;

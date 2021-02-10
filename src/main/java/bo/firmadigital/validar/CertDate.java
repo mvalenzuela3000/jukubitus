@@ -16,7 +16,7 @@ public class CertDate {
 
     private boolean valid = false;
     private boolean pki = false;
-    private boolean ocsp = false;
+    private Validar.OCSPState ocsp = Validar.OCSPState.UNKNOWN;
 
     public CertDate(Certificate certificate, Calendar signDate, Calendar timeStamp, boolean bloquea) {
         this.certificate = certificate;
@@ -78,15 +78,35 @@ public class CertDate {
         }
     }
 
-    public void setOCSP(boolean ocsp) {
+    public void setOCSP(Validar.OCSPState ocsp) {
         this.ocsp = ocsp;
     }
 
-    public boolean isOCSP() {
+    public Validar.OCSPState getOCSP() {
         return ocsp;
+    }
+
+    public boolean isOCSP() {
+        return ocsp == Validar.OCSPState.OK || ocsp == Validar.OCSPState.ALERT;
     }
 
     public boolean isOk() {
         return isValid() && isPKI() && isActive() && isOCSP();
+    }
+
+    public boolean isAlerted() {
+        return isActiveAlerted() || isOCSPAlerted();
+    }
+
+    public boolean isActiveAlerted() {
+        if (getTimeStamp() == null) {
+            return !(((X509Certificate) certificate).getNotBefore().compareTo(new Date()) < 0 && ((X509Certificate) certificate).getNotAfter().compareTo(new Date()) > 0);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isOCSPAlerted() {
+        return ocsp == Validar.OCSPState.ALERT;
     }
 }

@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.validar;
 
-import bo.firmadigital.jacobitus4.App;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -27,8 +26,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -61,7 +58,11 @@ public abstract class Validar implements Iterable<CertDate> {
             if (cert.isOk()) {
                 res.append("\n\t✔ ");
             } else {
-                res.append("\n\t✘ ");
+                if (cert.getOCSP() == OCSPState.CONNECTION) {
+                    res.append("\n\t✘? ");
+                } else {
+                    res.append("\n\t✘ ");
+                }
             }
             res.append(cert.getDatos().getNombreComunSubject());
         }
@@ -103,12 +104,12 @@ public abstract class Validar implements Iterable<CertDate> {
         }
     }
 
-    public boolean verificarOcsp(X509Certificate cert, Date signDate) {
+    public OCSPState verificarOcsp(X509Certificate cert, Date signDate) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             URL[] urls = getCrlURLs(cert);
             if (urls.length == 0) {
-                return false;
+                return OCSPState.UNKNOWN_SERVER;
             }
             HttpURLConnection connection = (HttpURLConnection) urls[0].openConnection();
             InputStream responseStream;
@@ -130,21 +131,20 @@ public abstract class Validar implements Iterable<CertDate> {
             connection.disconnect();
             X509CRL crl = (X509CRL) cf.generateCRL(new ByteArrayInputStream(stringBuilder.toString().getBytes()));
             if (crl == null) {
-                return false;
+                return OCSPState.UNKNOWN;
             }
             X509CRLEntry entry = crl.getRevokedCertificate(cert.getSerialNumber());
             if (entry == null) {
-                return true;
+                return OCSPState.OK;
             }
             if (entry.getRevocationDate().compareTo(signDate) > 0) {
-                return true;
+                return OCSPState.ALERT;
             } else {
-                return false;
+                return OCSPState.REVOKED;
             }
         } catch (CertificateException | IOException | CRLException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            return OCSPState.CONNECTION;
         }
-        return false;
     }
 
     public static URL[] getCrlURLs(X509Certificate cert) {
@@ -177,5 +177,14 @@ public abstract class Validar implements Iterable<CertDate> {
     @Override
     public Iterator<CertDate> iterator() {
         return certificados.iterator();
+    }
+
+    public enum OCSPState {
+        OK,
+        REVOKED,
+        UNKNOWN,
+        ALERT,
+        CONNECTION,
+        UNKNOWN_SERVER
     }
 }

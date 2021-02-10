@@ -19,7 +19,7 @@ import org.codehaus.jettison.json.JSONObject;
  * @author ADSIB
  */
 @Path("/status")
-public class Estado {
+public class EstadoRest {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -35,7 +35,7 @@ public class Estado {
             json.put("mensaje", "Servicio ejecutandose correctamente");
             r = json.toString();
         } catch (JSONException ex) {
-            Logger.getLogger(Estado.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EstadoRest.class.getName()).log(Level.SEVERE, null, ex);
         }
         return r;
     }
