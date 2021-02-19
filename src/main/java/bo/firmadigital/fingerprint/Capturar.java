@@ -38,8 +38,9 @@ public class Capturar {
                 Image img = DPFPGlobal.getSampleConversionFactory().createImage(e.getSample());
                 capture.stopCapture();
                 try {
+                    BufferedImage ajusted = ((BufferedImage)img).getSubimage(65, 0, 420, 550);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write((BufferedImage)img, "bmp", baos);
+                    ImageIO.write(ajusted, "bmp", baos);
                     fingerprint.fingerprintCaptured(baos.toByteArray());
                 } catch (IOException ex) {
                     throw new RuntimeException(ex.getMessage());
