@@ -13,9 +13,14 @@ import com.digitalpersona.onetouch.readers.DPFPReadersCollection;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
 import org.jnbis.Bitmap;
 import org.jnbis.WSQEncoder;
@@ -48,6 +53,48 @@ public class Capturar {
             }
         });
         capture.startCapture();
+    }
+
+    public static void capturarLinux(Fingerprint fingerprint) {
+        try {
+            File file = new File("captured.bmp");
+            if (file.exists()) {
+                file.delete();
+            }
+            String lectorCaptura = "/usr/local/dermalog/x64/bin/VC3Console.64";
+            Process p;
+            p = Runtime.getRuntime().exec(lectorCaptura);
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                while (in.readLine() != null) { }
+                if (file.exists()) {
+                    try {
+                        p.waitFor();
+                    } catch (InterruptedException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                    InputStream is = new FileInputStream(file);
+                    long length = file.length();
+                    if (length > Integer.MAX_VALUE) {
+                        throw new RuntimeException("La longitud del archivo es demasiado largo");
+                    }
+                    byte[] bytes = new byte[(int) length];
+                    int offset = 0;
+                    int numRead = 0;
+                    while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+                        offset += numRead;
+                    }
+                    if (offset < bytes.length) {
+                        throw new RuntimeException("No se pudo completar la lectura del archivo " + file.getName());
+                    }
+                    is.close();
+                    fingerprint.fingerprintCaptured(bytes);
+                } else {
+                    throw new RuntimeException("No se pudo capturar la huella");
+                }
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     public static byte[] toWSQ(byte[] bmp) {

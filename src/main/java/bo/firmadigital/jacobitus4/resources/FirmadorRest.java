@@ -37,6 +37,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
@@ -63,6 +65,7 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -223,6 +226,48 @@ public class FirmadorRest {
             json.put("finalizado", true);
             json.put("mensaje", "Se firmo el pdf correctamente!");
         } catch (JSONException | IOException | DocumentException | GeneralSecurityException ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
+
+    @POST
+    @Path("/firmar_solicitudes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarSolicitudes(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.listarSlots();
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+            Token token = slot.getToken();
+            token.iniciar(req.getString("pin"));
+            JSONArray data = req.getJSONArray("data");
+            JSONArray datos = new JSONArray();
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject element = new JSONObject();
+                element.put("id", data.getJSONObject(i).getString("id"));
+                JWSSigner jwsSigner = new RSASSASigner(token.obtenerClavePrivada(req.getString("alias")));
+                JWSHeader.Builder builder = new JWSHeader.Builder(JWSAlgorithm.RS256);
+                if (!data.getJSONObject(i).isNull("url")) {
+                    builder.x509CertURL(new URI(data.getJSONObject(i).getString("url")));
+                }
+                JWSObject jwsObject = new JWSObject(builder.build(),new Payload(data.getJSONObject(i).getString("payload")));
+                jwsObject.sign(jwsSigner);
+                element.put("jws", jwsObject.serialize());
+                datos.put(element);
+            }
+            json.put("datos", datos);
+            json.put("finalizado", true);
+            json.put("mensaje", "Se firmo las solicitudes correctamente!");
+        } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | URISyntaxException | JOSEException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
