@@ -9,12 +9,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
@@ -57,7 +60,13 @@ public class Main {
         filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
         servletContextHandler.addFilter(filterHolder, "/*", null);
         // Aplicar
-        jettyServer.setHandler(servletContextHandler);
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
+        resourceHandler.setResourceBase(jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
+        
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] { resourceHandler, servletContextHandler });
+        jettyServer.setHandler(handlers);
         ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
         servletHolder.setInitOrder(0);
         servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");

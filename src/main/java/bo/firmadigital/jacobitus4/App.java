@@ -245,12 +245,17 @@ public class App extends Application {
         menuBar.getMenus().add(pdfMenu);
         
         Menu helpMenu = new Menu("Ayuda");
+        MenuItem servicioItem = new MenuItem("Verificar servicio");
+        servicioItem.setOnAction((ActionEvent e) -> {
+            HostServices hostServices = getHostServices();
+            hostServices.showDocument("https://localhost:9000");
+        });
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
             Alert alert = new Alert(AlertType.NONE, "Jacobitus Total, JavaFX " + javafxVersion + ", con Java " + javaVersion + ".", ButtonType.OK);
             alert.showAndWait();
         });
-        helpMenu.getItems().addAll(aboutItem);
+        helpMenu.getItems().addAll(servicioItem, aboutItem);
         menuBar.getMenus().add(helpMenu);
         root.setTop(menuBar);
 
