@@ -61,6 +61,20 @@ public class ValidarPKCS7 extends Validar {
         return file.getAbsolutePath();
     }
 
+    @Override
+    public void export(File f) {
+        try {
+            InputStream is = new FileInputStream(file);
+            CMSSignedData signedData = new CMSSignedData(is);
+            CMSProcessable sc = signedData.getSignedContent();
+            FileOutputStream os = new FileOutputStream(f);
+            sc.write(os);
+            os.close();
+        } catch (CMSException | IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
     public List<CertDate> listarCertificados(File file) throws Exception {
         List<CertDate> certs = new ArrayList<>();
         try {

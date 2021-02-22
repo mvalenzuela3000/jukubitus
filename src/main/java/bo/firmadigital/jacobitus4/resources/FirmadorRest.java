@@ -41,8 +41,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -125,9 +128,10 @@ public class FirmadorRest {
             }            
             // Conversion del certificado de X509 a PEM para su inclusion en el flat json
             X509Certificate cert = token.obtenerCertificado(req.getString("alias"));
-            String pemCert = "-----BEGIN CERTIFICATE-----\n\n";
+            String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
+            /*String pemCert = "-----BEGIN CERTIFICATE-----\n\n";
             pemCert += java.util.Base64.getEncoder().encodeToString(cert.getEncoded());
-            pemCert += "\n-----END CERTIFICATE-----";
+            pemCert += "\n-----END CERTIFICATE-----";*/
 
             token.salir();
 
@@ -155,7 +159,7 @@ public class FirmadorRest {
             String fechaFirma = dateFormat.format(new java.sql.Timestamp(calendar.getTime().getTime()));
             
             JSONObject jsonResult = new JSONObject();
-            jsonResult.put("json_firmado", resultado);
+            jsonResult.put("json_firmado", Base64.getEncoder().encodeToString(resultado.getBytes()));
             X500Name x500Name = new JcaX509CertificateHolder(token.obtenerCertificado(req.getString("alias"))).getSubject();
             jsonResult.put("cn", IETFUtils.valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
             jsonResult.put("fecha_firma", fechaFirma);
@@ -264,10 +268,45 @@ public class FirmadorRest {
                 element.put("jws", jwsObject.serialize());
                 datos.put(element);
             }
+            token.salir();
             json.put("datos", datos);
             json.put("finalizado", true);
             json.put("mensaje", "Se firmo las solicitudes correctamente!");
         } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | URISyntaxException | JOSEException ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
+
+    @POST
+    @Path("/firmar_hash")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarHash(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.listarSlots();
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+            Token token = slot.getToken();
+            token.iniciar(req.getString("pin"));
+            JSONObject datos = new JSONObject();
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(token.obtenerClavePrivada(req.getString("alias")));
+            signature.update(Base64.getDecoder().decode(req.getString("hash")));
+            byte[] signed = signature.sign();
+            token.salir();
+            datos.put("firma", Base64.getEncoder().encodeToString(signed));
+            json.put("datos", datos);
+            json.put("finalizado", true);
+            json.put("mensaje", "Firma realizada correctamente.");
+        } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | InvalidKeyException | UnrecoverableEntryException | SignatureException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());

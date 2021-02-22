@@ -10,6 +10,7 @@ import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
+import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
@@ -93,6 +94,7 @@ import org.bouncycastle.util.Store;
 public class App extends Application {
     private ProgressBar progressBar;
     private ContextMenu contextMenu;
+    private MenuItem exportarItem;
     private TableView table;
     private TableView tableFile;
     private File destino;
@@ -258,7 +260,17 @@ public class App extends Application {
             Detalle detalle = new Detalle(stage, validar);
             detalle.showAndWait();
         });
-        contextMenu.getItems().add(detalleItem);
+        exportarItem = new MenuItem("Exportar contenido");
+        exportarItem.setVisible(false);
+        exportarItem.setOnAction((ActionEvent e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Exportar archivo");
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                validar.export(file);
+            }
+        });
+        contextMenu.getItems().addAll(detalleItem, exportarItem);
 
         table = new TableView();
         TableColumn tokenCol = new TableColumn("Token");
@@ -281,6 +293,11 @@ public class App extends Application {
                 }
                 if (event.getButton() == MouseButton.SECONDARY) {
                     validar = row.getItem();
+                    try {
+                        exportarItem.setVisible(MagicBytes.P7S.is(validar.getFile()));
+                    } catch (IOException ignore) {
+                        exportarItem.setVisible(false);
+                    }
                     contextMenu.show(table, event.getScreenX(), event.getScreenY());
                 }
             });
@@ -465,7 +482,11 @@ public class App extends Application {
             protected Object call() throws Exception {
                 List<Validar> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
-                    certs.add(new ValidarPKCS7(files.get(i)));
+                    if (MagicBytes.PDF.is(files.get(i))) {
+                        certs.add(new ValidarPdf(files.get(i)));
+                    } else {
+                        certs.add(new ValidarPKCS7(files.get(i)));
+                    }
                     updateProgress(i + 1, files.size());
                 }
                 tableFile.setItems(FXCollections.observableList(certs));
