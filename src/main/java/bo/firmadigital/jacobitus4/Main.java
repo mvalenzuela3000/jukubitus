@@ -5,9 +5,12 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javax.imageio.ImageIO;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -73,9 +76,40 @@ public class Main {
         try {
             createServerConnectorHTTPS();
             jettyServer.start();
-            App.run(true);
+            if (java.awt.SystemTray.isSupported()) {
+                java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
+                java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
+                java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
+                trayIcon.addActionListener((ActionEvent e) -> {
+                    App.show();
+                });
+                java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
+                exitItem.addActionListener(event -> {
+                    try {
+                        jettyServer.stop();
+                        jettyServer.destroy();
+                    } catch (Exception ex) {
+                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    Platform.exit();
+                    tray.remove(trayIcon);
+                });
+                final java.awt.PopupMenu popup = new java.awt.PopupMenu();
+                popup.add(exitItem);
+                trayIcon.setPopupMenu(popup);
+                tray.add(trayIcon);
+                App.run(true, true);
+            } else {
+                App.run(true, false);
+            }
         } catch (Exception ex) {
-            App.run(false);
+            try {
+                jettyServer.stop();
+                jettyServer.destroy();
+            } catch (Exception ex2) {
+                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex2);
+            }
+            App.run(false, false);
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

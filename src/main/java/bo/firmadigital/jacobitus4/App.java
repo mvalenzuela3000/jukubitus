@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -100,6 +101,8 @@ public class App extends Application {
     private File destino;
     private Validar validar;
     private static boolean servicio;
+    private static boolean taskBar;
+    private static Stage stage;
 
     @Override
     public void start(Stage stage) {
@@ -324,16 +327,25 @@ public class App extends Application {
         Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);
         stage.show();
+        if (taskBar) {
+            Platform.setImplicitExit(false);
+            stage.hide();
+        }
         stage.setOnCloseRequest((WindowEvent e) -> {
-            try {
-                Main.jettyServer.stop();
-                Main.jettyServer.destroy();
-            } catch (Exception ex) {
-                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            if (servicio && !taskBar) {
+                try {
+                    Main.jettyServer.stop();
+                    Main.jettyServer.destroy();
+                } catch (Exception ex) {
+                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
 
-        new Thread(listarTokens()).start();
+        if (!taskBar) {
+            new Thread(listarTokens()).start();
+        }
+        App.stage = stage;
     }
     
     public Task listarTokens() {
@@ -555,8 +567,15 @@ public class App extends Application {
         return task;
     }
 
-    public static void run(boolean servicio) {
+    static void show() {
+        Platform.runLater(() -> {
+            stage.show();
+        });
+    }
+
+    public static void run(boolean servicio, boolean taskBar) {
         App.servicio = servicio;
+        App.taskBar = taskBar;
         launch();
     }
 }
