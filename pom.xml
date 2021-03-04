@@ -100,7 +100,7 @@
                 <executions>
                     <execution>
                         <id>dpotapi</id>
-                        <phase>initialize</phase>
+                        <phase>clean</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -114,7 +114,7 @@
                     </execution>
                     <execution>
                         <id>dpotjni</id>
-                        <phase>initialize</phase>
+                        <phase>clean</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
