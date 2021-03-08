@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
@@ -342,10 +343,22 @@ public class App extends Application {
             }
         });
 
+        new Thread(registrarCertificado()).start();
         if (!taskBar) {
             new Thread(listarTokens()).start();
         }
         App.stage = stage;
+    }
+
+    public Task registrarCertificado() {
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                Firefox.registrarCertificado();
+                return true;
+            }
+        };
+        return task;
     }
     
     public Task listarTokens() {
