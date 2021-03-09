@@ -29,9 +29,13 @@ public class Firefox {
             if (db == null) {
                 return false;
             }
-            String certutil = System.getProperty("user.dir") + "\\ca\\nss\\install.bat";
+            String path = System.getProperty("user.dir");
+            if (path.endsWith("runtime\\bin")) {
+                path = new File(path).getParentFile().getParent();
+            }
+            String certutil = path + "\\ca\\nss\\install.bat";
             Process p;
-            p = Runtime.getRuntime().exec(certutil);
+            p = Runtime.getRuntime().exec(new String[] { certutil });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;
                 while ((s = in.readLine()) != null) {
@@ -40,7 +44,7 @@ public class Firefox {
                     }
                 }
             }
-            String cert = System.getProperty("user.dir") + "\\ca\\server.crt";
+            String cert = path + "\\ca\\server.crt";
             p = Runtime.getRuntime().exec(new String[] { certutil, cert });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;
