@@ -50,6 +50,7 @@ import org.codehaus.jettison.json.JSONObject;
 public class TokenRest {
     @GET
     @Path("/status")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String status() {
         JSONObject json = new JSONObject();
@@ -78,6 +79,7 @@ public class TokenRest {
 
     @GET
     @Path("/connected")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String connected() {
         JSONObject json = new JSONObject();
@@ -221,6 +223,7 @@ public class TokenRest {
 
     @GET
     @Path("/generate_keypar")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String generate_keypar(@QueryParam("pin") String pin, @QueryParam("slot") Integer slotNumber) {
         JSONObject json = new JSONObject();

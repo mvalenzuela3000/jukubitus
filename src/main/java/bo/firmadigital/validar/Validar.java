@@ -52,6 +52,18 @@ public abstract class Validar implements Iterable<CertDate> {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    public boolean isRemoto() {
+        return false;
+    }
+
+    public String getPost() {
+        throw new UnsupportedOperationException("Not supported in " + this.getClass() + ".");
+    }
+
+    public String getToken() {
+        throw new UnsupportedOperationException("Not supported in " + this.getClass() + ".");
+    }
+
     public String getPath() {
         StringBuilder res = new StringBuilder(file.getPath());
         for (CertDate cert : certificados) {

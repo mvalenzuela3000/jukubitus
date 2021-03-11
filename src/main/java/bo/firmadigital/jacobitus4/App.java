@@ -35,6 +35,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -104,6 +107,7 @@ public class App extends Application {
     private static boolean servicio;
     private static boolean taskBar;
     private static Stage stage;
+    private static App app;
 
     @Override
     public void start(Stage stage) {
@@ -186,9 +190,13 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    DirectoryChooser directoryChooser = new DirectoryChooser();
-                    directoryChooser.setTitle("Seleccione directorio de destino");
-                    destino = directoryChooser.showDialog(stage);
+                    if (((Validar)tableFile.getItems().get(0)).isRemoto()) {
+                        destino = new File(System.getProperty("java.io.tmpdir"));
+                    } else {
+                        DirectoryChooser directoryChooser = new DirectoryChooser();
+                        directoryChooser.setTitle("Seleccione directorio de destino");
+                        destino = directoryChooser.showDialog(stage);
+                    }
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.setTitle("Jacobitus");
@@ -348,6 +356,7 @@ public class App extends Application {
             new Thread(listarTokens()).start();
         }
         App.stage = stage;
+        App.app = this;
     }
 
     public Task registrarCertificado() {
@@ -481,6 +490,10 @@ public class App extends Application {
                             ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, label, pass);
                             MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
                             os2.close();
+                            if (files.get(i).isRemoto()) {
+                                Request req = new Request();
+                                req.enviar(out, files.get(i).getPost(), files.get(i).getToken());
+                            }
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidarPdf(out));
                         } catch (DocumentException | IOException | GeneralSecurityException ex) {
@@ -580,15 +593,87 @@ public class App extends Application {
         return task;
     }
 
-    static void show() {
+    public Task download(String urlFile, String token, String urlPost) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                URL url = new URL(urlFile);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                if (token != null) {
+                    connection.setRequestProperty("Authorization", token);
+                }
+                connection.connect();
+                int size = 0;
+                List values = connection.getHeaderFields().get("content-Length");
+                if (values != null && !values.isEmpty()) {
+                    String sLength = (String) values.get(0);
+                    if (sLength != null) {
+                        size = Integer.parseInt(sLength);
+                    }
+                }
+                if (connection.getResponseCode() >= HttpURLConnection.HTTP_OK &&
+                        connection.getResponseCode() <= HttpURLConnection.HTTP_PARTIAL) {
+                    InputStream responseStream = connection.getInputStream();
+                    File f = new File(System.getProperty("java.io.tmpdir"), "prueba.pdf");
+                    try (OutputStream outStream = new FileOutputStream(f)) {
+                        byte[] buffer = new byte[8 * 1024];
+                        int t = 0, bytesRead;
+                        while ((bytesRead = responseStream.read(buffer)) != -1) {
+                            outStream.write(buffer, 0, bytesRead);
+                            if (size > 0) {
+                                t += bytesRead;
+                                updateProgress(t, size);
+                            }
+                        }
+                    }
+                    List<Validar> certs = new LinkedList();
+                    certs.add(new ValidarPdf(f, urlPost, token));
+                    tableFile.setItems(FXCollections.observableList(certs));
+                    return true;
+                } else {
+                    Alert alert = new Alert(AlertType.ERROR, "No se pudo descargar el archivo.", ButtonType.OK);
+                    alert.setTitle("Jacobitus");
+                    alert.showAndWait();
+                    return false;
+                }
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        return task;
+    }
+
+    public static void show() {
         Platform.runLater(() -> {
             stage.show();
         });
+    }
+
+    public static void show(String error) {
+        Alert alert = new Alert(AlertType.ERROR, error, ButtonType.OK);
+        alert.setTitle("Jacobitus");
+        alert.showAndWait();
+    }
+
+    public static void show(String url, String token, String urlPost) {
+        if (!stage.isShowing()) {
+            Platform.runLater(() -> {
+                stage.show();
+                new Thread(app.download(url, token, urlPost)).start();
+            });
+        }
     }
 
     public static void run(boolean servicio, boolean taskBar) {
         App.servicio = servicio;
         App.taskBar = taskBar;
         launch();
+    }
+
+    public static void run(boolean servicio, boolean taskBar, String url, String token, String urlPost) {
+        App.servicio = servicio;
+        App.taskBar = taskBar;
+        launch();
+        new Thread(app.download(url, token, urlPost)).start();
     }
 }

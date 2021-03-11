@@ -9,6 +9,7 @@ import bo.firmadigital.fingerprint.Capturar;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,6 +29,7 @@ public class HuellaRest {
 
     @GET
     @Path("/capturar")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public void capturar(@Suspended final AsyncResponse response) {
         JSONObject json = new JSONObject();

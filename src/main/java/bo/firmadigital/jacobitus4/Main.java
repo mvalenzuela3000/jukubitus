@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javax.imageio.ImageIO;
+import org.codehaus.jettison.json.JSONObject;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -37,80 +38,84 @@ public class Main {
     public static Server jettyServer = new Server();
 
     public static void main(String[] args) {
-        /*String configName = "/tmp/fido_pkcs11_7305928436468159072.cfg";
-        Provider p = Security.getProvider("SunPKCS11");
-        p = p.configure(configName);
-        Security.addProvider(p);
-        PKCS11 p11 = new PKCS11(p);
-        long[] slots = p11.C_GetSlotList(true);
-        for (long s : slots) {
-            System.out.println(s);
-        }*/
-        /*GestorSlot gestorSlot = GestorSlot.getInstance();
-        try {
-            gestorSlot.adicionarProveedor(proveedores());
-        } catch (IOException | PKCS11Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        ServletContextHandler servletContextHandler = new ServletContextHandler(NO_SESSIONS);
-        servletContextHandler.setContextPath("/");
-        // AGREGAR FILTER CORS
-        FilterHolder filterHolder = new FilterHolder(CrossOriginFilter.class);
-        filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-        filterHolder.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-        filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-        filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE");
-        filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-        servletContextHandler.addFilter(filterHolder, "/*", null);
-        // Aplicar
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
-        resourceHandler.setResourceBase(jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
-        
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resourceHandler, servletContextHandler });
-        jettyServer.setHandler(handlers);
-        ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
-        servletHolder.setInitOrder(0);
-        servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");
-        try {
-            createServerConnectorHTTPS();
-            jettyServer.start();
-            if (java.awt.SystemTray.isSupported()) {
-                java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
-                java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
-                java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
-                trayIcon.addActionListener((ActionEvent e) -> {
-                    App.show();
-                });
-                java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
-                exitItem.addActionListener(event -> {
-                    try {
-                        jettyServer.stop();
-                        jettyServer.destroy();
-                    } catch (Exception ex) {
-                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Platform.exit();
-                    tray.remove(trayIcon);
-                });
-                final java.awt.PopupMenu popup = new java.awt.PopupMenu();
-                popup.add(exitItem);
-                trayIcon.setPopupMenu(popup);
-                tray.add(trayIcon);
-                App.run(true, true);
+        Request req = new Request();
+        if (req.estado()) {
+            if (args.length == 1) {
+                req.show(args[0]);
             } else {
-                App.run(true, false);
+                req.show();
             }
-        } catch (Exception ex) {
+        } else {
+            ServletContextHandler servletContextHandler = new ServletContextHandler(NO_SESSIONS);
+            servletContextHandler.setContextPath("/");
+            // AGREGAR FILTER CORS
+            FilterHolder filterHolder = new FilterHolder(CrossOriginFilter.class);
+            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+            filterHolder.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE");
+            filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
+            servletContextHandler.addFilter(filterHolder, "/*", null);
+            // Aplicar
+            ResourceHandler resourceHandler = new ResourceHandler();
+            resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
+            resourceHandler.setResourceBase(jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
+
+            HandlerList handlers = new HandlerList();
+            handlers.setHandlers(new Handler[] { resourceHandler, servletContextHandler });
+            jettyServer.setHandler(handlers);
+            ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
+            servletHolder.setInitOrder(0);
+            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");
             try {
-                jettyServer.stop();
-                jettyServer.destroy();
-            } catch (Exception ex2) {
-                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex2);
+                createServerConnectorHTTPS();
+                jettyServer.start();
+                if (java.awt.SystemTray.isSupported()) {
+                    java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
+                    java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
+                    java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
+                    trayIcon.addActionListener((ActionEvent e) -> {
+                        App.show();
+                    });
+                    java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
+                    exitItem.addActionListener(event -> {
+                        try {
+                            jettyServer.stop();
+                            jettyServer.destroy();
+                        } catch (Exception ex) {
+                            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        Platform.exit();
+                        tray.remove(trayIcon);
+                    });
+                    final java.awt.PopupMenu popup = new java.awt.PopupMenu();
+                    popup.add(exitItem);
+                    trayIcon.setPopupMenu(popup);
+                    tray.add(trayIcon);
+                    App.run(true, true);
+                } else {
+                    if (args.length == 1) {
+                        String[] parts = args[0].split("\\?");
+                        if (parts.length == 2) {
+                            JSONObject body = Request.splitQuery(parts[1]);
+                            App.run(true, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
+                        } else {
+                            App.run(true, false);
+                        }
+                    } else {
+                        App.run(true, false);
+                    }
+                }
+            } catch (Exception ex) {
+                try {
+                    jettyServer.stop();
+                    jettyServer.destroy();
+                } catch (Exception ex2) {
+                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex2);
+                }
+                App.run(false, false);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            App.run(false, false);
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

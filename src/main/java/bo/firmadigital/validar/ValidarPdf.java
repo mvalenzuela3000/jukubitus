@@ -24,12 +24,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ValidarPdf extends Validar {
+    protected String urlPost = null;
+    protected String token = null;
+
     public ValidarPdf(File file) {
         try {
             super.file = file;
             certificados = listarCertificados(file);
         } catch (Exception ignore) {
         }
+    }
+
+    public ValidarPdf(File file, String urlPost, String token) {
+        this(file);
+        this.urlPost = urlPost;
+        this.token = token;
+    }
+
+    @Override
+    public boolean isRemoto() {
+        return urlPost != null;
+    }
+
+    @Override
+    public String getPost() {
+        return urlPost;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
     }
 
     private boolean bloqueaDocumento(PdfArray referenceArray) {
