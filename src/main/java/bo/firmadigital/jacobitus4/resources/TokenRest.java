@@ -208,10 +208,10 @@ public class TokenRest {
                     }
                 }
                 data_token.put("private_keys", llaves.size());
-            } catch (CertificateException ex) {
+            } catch (CertificateException | IOException ex) {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
-            } catch (KeyStoreException | NoSuchAlgorithmException | IOException ex) {
+            } catch (KeyStoreException | NoSuchAlgorithmException ex) {
                 Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
             }
             token.salir();

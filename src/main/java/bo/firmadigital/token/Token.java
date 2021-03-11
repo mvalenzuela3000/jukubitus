@@ -86,7 +86,21 @@ public class Token {
         sunPKCS11 = sunPKCS11.configure(slot.getConfiguracion());
 
         this.keystore = KeyStore.getInstance(PKCS11_NOMBRE, sunPKCS11);
-        this.keystore.load(null, this.PIN.toCharArray());
+        try {
+            this.keystore.load(null, this.PIN.toCharArray());
+        } catch (IOException ex) {
+            if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                    throw new IOException("Por favor verifique el pin.");
+                }
+            }
+            if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                    throw new IOException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
+                }
+            }
+            throw ex;
+        }
         Security.addProvider(sunPKCS11);
     }
 

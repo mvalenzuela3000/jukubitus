@@ -2,6 +2,7 @@ package bo.firmadigital.token;
 
 import bo.firmadigital.pkcs11.PKCS11;
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.*;
@@ -61,14 +62,33 @@ public class GestorSlot {
                 String[] datos = line.split(" ");
                 if (id.equals(datos[0])) {
                     line = datos[1];
-                    if (!new File(line).exists()) {
-                        if (datos.length == 3) {
-                            throw new RuntimeException(datos[2]);
+                    if (new File(line).exists()) {
+                        if (!datos[2].equals("0")) {
+                            try {
+                                String hash = MD5Checksum.getMD5Checksum(line);
+                                if (!hash.equalsIgnoreCase(datos[2])) {
+                                    if (datos.length == 4) {
+                                        throw new RuntimeException(datos[3]);
+                                    } else {
+                                        if (System.getProperty("os.arch").equals("x86")) {
+                                            throw new RuntimeException(datos[3]);
+                                        } else {
+                                            throw new RuntimeException(datos[4]);
+                                        }
+                                    }
+                                }
+                            } catch (NoSuchAlgorithmException ex) {
+                                Logger.getLogger(GestorSlot.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    } else {
+                        if (datos.length == 4) {
+                            throw new RuntimeException(datos[3]);
                         } else {
                             if (System.getProperty("os.arch").equals("x86")) {
-                                throw new RuntimeException(datos[2]);
-                            } else {
                                 throw new RuntimeException(datos[3]);
+                            } else {
+                                throw new RuntimeException(datos[4]);
                             }
                         }
                     }
