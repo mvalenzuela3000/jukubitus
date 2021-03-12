@@ -645,7 +645,11 @@ public class App extends Application {
 
     public static void show() {
         Platform.runLater(() -> {
-            stage.show();
+            if (taskBar) {
+                stage.show();
+            } else {
+                stage.setIconified(false);
+            }
         });
     }
 
@@ -658,7 +662,11 @@ public class App extends Application {
     public static void show(String url, String token, String urlPost) {
         if (!stage.isShowing()) {
             Platform.runLater(() -> {
-                stage.show();
+                if (taskBar) {
+                    stage.show();
+                } else {
+                    stage.setIconified(false);
+                }
                 new Thread(app.download(url, token, urlPost)).start();
             });
         }

@@ -36,6 +36,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
  */
 public class Main {
     public static Server jettyServer = new Server();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     public static void main(String[] args) {
         Request req = new Request();
@@ -70,7 +71,7 @@ public class Main {
             try {
                 createServerConnectorHTTPS();
                 jettyServer.start();
-                if (java.awt.SystemTray.isSupported()) {
+                if (java.awt.SystemTray.isSupported() && !(OS.contains("mac") || OS.contains("darwin"))) {
                     java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
                     java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
                     java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
