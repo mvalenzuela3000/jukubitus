@@ -26,6 +26,7 @@ public class GestorSlot {
     private String libreria;
     private final Map<Long, Slot> slots;
     private static final String OS = System.getProperty("os.name").toLowerCase();
+    private static final String ARCH = System.getProperty("os.arch");
 
     private GestorSlot() {
         slots = new HashMap<>();
@@ -63,17 +64,23 @@ public class GestorSlot {
                 if (id.equals(datos[0])) {
                     line = datos[1];
                     if (new File(line).exists()) {
-                        if (!datos[2].equals("0")) {
+                        String hash;
+                        if (ARCH.equals("x86")) {
+                            hash = datos[3];
+                        } else {
+                            hash = datos[2];
+                        }
+                        if (!hash.equals("0")) {
                             try {
-                                String hash = MD5Checksum.getMD5Checksum(line);
-                                if (!hash.equalsIgnoreCase(datos[2])) {
-                                    if (datos.length == 4) {
-                                        throw new RuntimeException(datos[3]);
+                                String hashFile = MD5Checksum.getMD5Checksum(line);
+                                if (!hashFile.equalsIgnoreCase(hash)) {
+                                    if (datos.length == 5) {
+                                        throw new RuntimeException(datos[4]);
                                     } else {
-                                        if (System.getProperty("os.arch").equals("x86")) {
-                                            throw new RuntimeException(datos[3]);
-                                        } else {
+                                        if (ARCH.equals("x86")) {
                                             throw new RuntimeException(datos[4]);
+                                        } else {
+                                            throw new RuntimeException(datos[5]);
                                         }
                                     }
                                 }
@@ -82,13 +89,13 @@ public class GestorSlot {
                             }
                         }
                     } else {
-                        if (datos.length == 4) {
-                            throw new RuntimeException(datos[3]);
+                        if (datos.length == 5) {
+                            throw new RuntimeException(datos[4]);
                         } else {
-                            if (System.getProperty("os.arch").equals("x86")) {
-                                throw new RuntimeException(datos[3]);
-                            } else {
+                            if (ARCH.equals("x86")) {
                                 throw new RuntimeException(datos[4]);
+                            } else {
+                                throw new RuntimeException(datos[5]);
                             }
                         }
                     }
