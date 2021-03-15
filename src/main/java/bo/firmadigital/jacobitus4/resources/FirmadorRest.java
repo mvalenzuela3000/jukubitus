@@ -44,6 +44,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
@@ -67,6 +68,9 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -93,7 +97,12 @@ public class FirmadorRest {
             Token token = slot.getToken();
             token.iniciar(req.getString("pin"));
             // Crea un firmador RSA256
-            JWSSigner signer = new RSASSASigner(token.obtenerClavePrivada(req.getString("alias")));
+            PrivateKey pk = token.obtenerClavePrivada(req.getString("alias"));
+            if (pk == null) {
+                token.salir();
+                throw new KeyStoreException("No se encontró la clave con alias: " + req.getString("alias"));
+            }
+            JWSSigner signer = new RSASSASigner(pk);
             CompleteSign enviadoJson;
             boolean inicial = true;
 
@@ -177,58 +186,123 @@ public class FirmadorRest {
         return json.toString();
     }
 
+    /**
+     * @api {post} https://localhost:9000/api/token/firmar_pdf Firma un documento pdf.
+     * @apiGroup Firmador
+     * @apiVersion 1.0.0
+     *
+     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
+     * @apiParam {Boolean} [bloquear] Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.
+     * @apiParam {String} pdf Archivo pdf en base64 que se desea firmar.
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678",
+     *     "alias": "355409121073",
+     *     "pdf": "MII...truncated...=="
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "pdf_firmado": "MII...truncated...=="
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Se firmo el pdf correctamente."
+     * }
+     */
     @POST
     @Path("/firmar_pdf")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String firmarPdf(String body) {
+    public String firmarPdf(InputStream body) {
         JSONObject json = new JSONObject();
         try {
-            JSONObject req = new JSONObject(body);
-            boolean bloquear = req.has("bloquear") && req.getBoolean("bloquear");
-            JSONObject datos = new JSONObject();
-            json.put("datos", datos);
-            byte[] file = Base64.getDecoder().decode(req.getString("pdf"));
-            PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
-            ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            String pin = null, alias = null;
+            Long slot = null;
+            boolean bloquear = false;
+            byte[] file = null;
+            JsonFactory factory = new ObjectMapper().getJsonFactory();
+            try (JsonParser jsonReader = factory.createJsonParser(body)) {
+                jsonReader.nextToken();
+                while (jsonReader.nextToken() == JsonToken.FIELD_NAME) {
+                    String label = jsonReader.getText();
+                    jsonReader.nextToken();
+                    switch (label) {
+                        case "slot":
+                            slot = Long.parseLong(jsonReader.readValueAs(String.class));
+                            break;
+                        case "pin":
+                            pin = jsonReader.readValueAs(String.class);
+                            break;
+                        case "alias":
+                            alias = jsonReader.readValueAs(String.class);
+                            break;
+                        case "bloquear":
+                            bloquear = Boolean.parseBoolean(jsonReader.readValueAs(String.class));
+                            break;
+                        case "pdf":
+                            file = Base64.getDecoder().decode(jsonReader.readValueAs(String.class));
+                            break;
+                        default:
+                            throw new IOException("No se esperaba la etiqueta: " + label);
+                    }
+                }
+            }
+            if (slot != null && pin != null && alias != null && file != null) {
+                JSONObject datos = new JSONObject();
+                json.put("datos", datos);
+                PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
+                ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            if (bloquear) {
-                PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
-                PdfFormField field = PdfFormField.createSignature(stp.getWriter());
-                field.setFieldName("Signature " + (signatures.size() + 1));
-                PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
-                field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
-                field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
-                field.setFlags(PdfAnnotation.FLAGS_PRINT);
-                stp.addAnnotation(field, 1);
-                stp.close();
+                if (bloquear) {
+                    PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
+                    PdfFormField field = PdfFormField.createSignature(stp.getWriter());
+                    field.setFieldName("Signature " + (signatures.size() + 1));
+                    PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
+                    field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
+                    field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
+                    field.setFlags(PdfAnnotation.FLAGS_PRINT);
+                    stp.addAnnotation(field, 1);
+                    stp.close();
+                    reader.close();
+                    reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+                    baos = new ByteArrayOutputStream();
+                }
+                PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
+                PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+                if (bloquear) {
+                    appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
+                    AcroFields form = stamper.getAcroFields();
+                    form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
+                } else {
+                    appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
+                }
+                ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
+                MakeSignature.signExternalContainer(appearance, external, 8192);
+                stamper.flush();
+                stamper.close();
                 reader.close();
-                reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                baos = new ByteArrayOutputStream();
-            }
-            PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
-            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
-            if (bloquear) {
-                appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
-                AcroFields form = stamper.getAcroFields();
-                form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
-            } else {
-                appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
-            }
-            ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-            MakeSignature.signExternalContainer(appearance, external, 8192);
-            stamper.flush();
-            stamper.close();
-            reader.close();
+                file = null;
+                System.gc();
 
-            ByteArrayOutputStream os2 = new ByteArrayOutputStream();
-            PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-            ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
-            MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
-            datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
-            json.put("finalizado", true);
-            json.put("mensaje", "Se firmo el pdf correctamente!");
+                ByteArrayOutputStream os2 = new ByteArrayOutputStream();
+                PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
+                ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, alias, pin);
+                MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
+                baos = null;
+                System.gc();
+                datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
+                json.put("finalizado", true);
+                json.put("mensaje", "Se firmo el pdf correctamente!");
+            } else {
+                json.put("finalizado", false);
+                json.put("mensaje", "Datos requeridos slot, pin, alias y pdf.");
+            }
         } catch (JSONException | IOException | DocumentException | GeneralSecurityException ex) {
             try {
                 json.put("finalizado", false);
@@ -258,7 +332,12 @@ public class FirmadorRest {
             for (int i = 0; i < data.length(); i++) {
                 JSONObject element = new JSONObject();
                 element.put("id", data.getJSONObject(i).getString("id"));
-                JWSSigner jwsSigner = new RSASSASigner(token.obtenerClavePrivada(req.getString("alias")));
+                PrivateKey pk = token.obtenerClavePrivada(req.getString("alias"));
+                if (pk == null) {
+                    token.salir();
+                    throw new KeyStoreException("No se encontró la clave con alias: " + req.getString("alias"));
+                }
+                JWSSigner jwsSigner = new RSASSASigner(pk);
                 JWSHeader.Builder builder = new JWSHeader.Builder(JWSAlgorithm.RS256);
                 if (!data.getJSONObject(i).isNull("url")) {
                     builder.x509CertURL(new URI(data.getJSONObject(i).getString("url")));
@@ -283,6 +362,28 @@ public class FirmadorRest {
         return json.toString();
     }
 
+    /**
+     * @api {post} https://localhost:9000/api/token/firmar_hash Obtiene la firma encriptando el hash.
+     * @apiGroup Firmador
+     * @apiVersion 1.0.0
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678",
+     *     "alias": "355409121073",
+     *     "hash": "e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Firma realizada correctamente."
+     * }
+     */
     @POST
     @Path("/firmar_hash")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -298,7 +399,12 @@ public class FirmadorRest {
             token.iniciar(req.getString("pin"));
             JSONObject datos = new JSONObject();
             Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(token.obtenerClavePrivada(req.getString("alias")));
+            PrivateKey pk = token.obtenerClavePrivada(req.getString("alias"));
+            if (pk == null) {
+                token.salir();
+                throw new KeyStoreException("No se encontró la clave con alias: " + req.getString("alias"));
+            }
+            signature.initSign(pk);
             signature.update(Base64.getDecoder().decode(req.getString("hash")));
             byte[] signed = signature.sign();
             token.salir();

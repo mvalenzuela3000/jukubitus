@@ -259,6 +259,7 @@ public class App extends Application {
         Menu helpMenu = new Menu("Ayuda");
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
+            Firefox.registrarCertificado();
             HostServices hostServices = getHostServices();
             hostServices.showDocument("https://localhost:9000");
         });
@@ -555,6 +556,10 @@ public class App extends Application {
                     Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     PrivateKey privateKey = token.obtenerClavePrivada(label);
+                    if (privateKey == null) {
+                        token.salir();
+                        throw new RuntimeException("No se encontró la clave con alias: " + label);
+                    }
                     X509Certificate x509Certificate = token.obtenerCertificado(label);
                     for (int i = 0; i < files.size(); i++) {
                         List<Certificate> certlist = new ArrayList<>();

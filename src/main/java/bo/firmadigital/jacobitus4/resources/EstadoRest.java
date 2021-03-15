@@ -21,6 +21,21 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/status")
 public class EstadoRest {
+    /**
+     * @api {get} https://localhost:9000/api/status Verifica el estado del servicio.
+     * @apiGroup Estado
+     * @apiVersion 1.0.0
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "compilacion": 3100,
+     *         "api_version": "1.0.2"
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Servicio ejecutandose correctamente"
+     * }
+     */
     @GET
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)

@@ -57,7 +57,7 @@ public class Slot {
      *
      * @return Retorna una instancia de un Token.
      */
-    public Token getToken() {
+    public synchronized Token getToken() {
         if (token == null) {
             token = new Token(this);
         }

@@ -114,7 +114,7 @@ public class GestorSlot {
      *
      * @return Retorna la lista de Slot de todos los token disponibles.
      */
-    public Slot[] listarSlots() {
+    public synchronized Slot[] listarSlots() {
         slots.clear();
         try {
             List<JSONObject> tokens = SmartCard.cards();
@@ -148,7 +148,10 @@ public class GestorSlot {
      * conectado el token.
      * @return Retorna un objeto Slot.
      */
-    public Slot obtenerSlot(long slotID) {
+    public synchronized Slot obtenerSlot(long slotID) {
+        if (!slots.containsKey(slotID)) {
+            listarSlots();
+        }
         return slots.get(slotID);
     }
 

@@ -48,6 +48,23 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/token")
 public class TokenRest {
+    /**
+     * @api {get} https://localhost:9000/api/token/status Verifica el estado de la consola SmartCard.
+     * @apiGroup Token
+     * @apiVersion 1.0.0
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "connected": true,
+     *         "tokens": [
+     *             "FT ePass2003Auto"
+     *         ]
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Lista de Tokens obtenida"
+     * }
+     */
     @GET
     @Path("/status")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -77,6 +94,27 @@ public class TokenRest {
         return json.toString();
     }
 
+    /**
+     * @api {get} https://localhost:9000/api/token/connected Obtiene información de los tokens conectados.
+     * @apiGroup Token
+     * @apiVersion 1.0.0
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "connected": true,
+     *         "tokens": [
+     *             {
+     *                 "serial": "203531650003002A",
+     *                 "name": "Feitian Technologies Co., Ltd",
+     *                 "slot": 1
+     *             }
+     *         ]
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Lista de Tokens obtenida"
+     * }
+     */
     @GET
     @Path("/connected")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -114,6 +152,65 @@ public class TokenRest {
         return json.toString();
     }
 
+    /**
+     * @api {post} https://localhost:9000/api/token/data Obtiene información de los certificados en el token conectado al slot.
+     * @apiGroup Token
+     * @apiVersion 1.0.0
+     * 
+     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "data_token": {
+     *             "certificates": 1,
+     *             "data": [
+     *                 {
+     *                     "tipo": "PRIMARY_KEY",
+     *                     "tipo_desc": "Clave Privada",
+     *                     "alias": "355409121073",
+     *                     "id": "355409121073",
+     *                     "tiene_certificado": true
+     *                 },
+     *                 {
+     *                     "tipo": "X509_CERTIFICATE",
+     *                     "tipo_desc": "Certificado",
+     *                     "adsib": false,
+     *                     "serialNumber": "27cbd28f79876b40",
+     *                     "alias": "355409121073",
+     *                     "id": "355409121073",
+     *                     "pem": "-----BEGIN CERTIFICATE-----\nMII...truncated...==\n-----END CERTIFICATE-----",
+     *                     "validez": {
+     *                         "desde": "2021-01-29 11:21:19",
+     *                         "hasta": "2022-01-29 11:21:19"
+     *                     },
+     *                     "titular": {
+     *                         "dnQualifier": "CI",
+     *                         "CN": "Juan Perez",
+     *                         "OU": "Gerencia",
+     *                         "O": "Perez S.A.",
+     *                         "uidNumber": "12345678"
+     *                     },
+     *                     "emisor": {
+     *                         "CN": "ADSIB",
+     *                         "O": "ADSIB"
+     *                     }
+     *                 }
+     *             ],
+     *             "private_keys": 1
+     *         }
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Datos de token obtenidos correctamente"
+     * }
+     */
     @POST
     @Path("/data")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -126,95 +223,100 @@ public class TokenRest {
             InputStream is = getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
             List<X509Certificate> intermediates = (List<X509Certificate>) fact.generateCertificates(is);
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot((Integer)req.get("slot"));
-            Token token = slot.getToken();
-            json.put("datos", new JSONObject());
-            try {
-                token.iniciar((String)req.get("pin"));
-                json.put("finalizado", true);
-                json.put("mensaje", "Datos de token obtenidos correctamente");
-                List<String> llaves = token.listarIdentificadorClaves();
-                JSONObject data_token = new JSONObject();
-                ((JSONObject)json.get("datos")).put("data_token", data_token);
-                data_token.put("certificates", llaves.size());
-                data_token.put("data", new JSONArray());
-                for (int i = 0; i < llaves.size(); i++) {
-                    JSONObject key = new JSONObject();
-                    key.put("tipo", "PRIMARY_KEY");
-                    key.put("tipo_desc", "Clave Privada");
-                    key.put("alias", llaves.get(i));
-                    key.put("id", llaves.get(i));
-                    X509Certificate cert = token.obtenerCertificado(llaves.get(i));
-                    key.put("tiene_certificado", cert != null);
-                    ((JSONArray)data_token.get("data")).put(key);
-                    if (key.getBoolean("tiene_certificado")) {
-                        JSONObject x509 = new JSONObject();
-                        x509.put("tipo", "X509_CERTIFICATE");
-                        x509.put("tipo_desc", "Certificado");
-                        x509.put("adsib", false);
-                        for (X509Certificate intermediate : intermediates) {
-                            try {
-                                cert.verify(intermediate.getPublicKey());
-                                x509.put("adsib", true);
-                                break;
-                            } catch (GeneralSecurityException ex) {
+            if (req.has("slot") && req.has("pin")) {
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                Slot slot = gestorSlot.obtenerSlot((Integer)req.get("slot"));
+                Token token = slot.getToken();
+                json.put("datos", new JSONObject());
+                try {
+                    token.iniciar((String)req.get("pin"));
+                    json.put("finalizado", true);
+                    json.put("mensaje", "Datos de token obtenidos correctamente");
+                    List<String> llaves = token.listarIdentificadorClaves();
+                    JSONObject data_token = new JSONObject();
+                    ((JSONObject)json.get("datos")).put("data_token", data_token);
+                    data_token.put("certificates", llaves.size());
+                    data_token.put("data", new JSONArray());
+                    for (int i = 0; i < llaves.size(); i++) {
+                        JSONObject key = new JSONObject();
+                        key.put("tipo", "PRIMARY_KEY");
+                        key.put("tipo_desc", "Clave Privada");
+                        key.put("alias", llaves.get(i));
+                        key.put("id", llaves.get(i));
+                        X509Certificate cert = token.obtenerCertificado(llaves.get(i));
+                        key.put("tiene_certificado", cert != null);
+                        ((JSONArray)data_token.get("data")).put(key);
+                        if (key.getBoolean("tiene_certificado")) {
+                            JSONObject x509 = new JSONObject();
+                            x509.put("tipo", "X509_CERTIFICATE");
+                            x509.put("tipo_desc", "Certificado");
+                            x509.put("adsib", false);
+                            for (X509Certificate intermediate : intermediates) {
+                                try {
+                                    cert.verify(intermediate.getPublicKey());
+                                    x509.put("adsib", true);
+                                    break;
+                                } catch (GeneralSecurityException ex) {
+                                }
                             }
-                        }
-                        x509.put("serialNumber", cert.getSerialNumber().toString(16));
-                        x509.put("alias", llaves.get(i));
-                        x509.put("id", llaves.get(i));
-                        String pem = "-----BEGIN CERTIFICATE-----\n";
-                        pem += Base64.getEncoder().encodeToString(cert.getEncoded());
-                        pem += "\n-----END CERTIFICATE-----";
-                        x509.put("pem", pem);
-                        x509.put("validez", new JSONObject());
-                        ((JSONObject)x509.get("validez")).put("desde", dateFormat.format(cert.getNotBefore()));
-                        ((JSONObject)x509.get("validez")).put("hasta", dateFormat.format(cert.getNotAfter()));
-                        X500Name x500Name = new JcaX509CertificateHolder(cert).getSubject();
-                        x509.put("titular", new JSONObject());
-                        for(RDN rdn : x500Name.getRDNs()) {
-                            switch (rdn.getFirst().getType().getId()) {
-                                case "2.5.4.46":
-                                    ((JSONObject)x509.get("titular")).put("dnQualifier", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
-                                case "1.3.6.1.1.1.1.0":
-                                    ((JSONObject)x509.get("titular")).put("uidNumber", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
-                                case "2.5.4.3":
-                                    ((JSONObject)x509.get("titular")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
-                                case "2.5.4.10":
-                                    ((JSONObject)x509.get("titular")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
-                                case "2.5.4.11":
-                                    ((JSONObject)x509.get("titular")).put("OU", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
+                            x509.put("serialNumber", cert.getSerialNumber().toString(16));
+                            x509.put("alias", llaves.get(i));
+                            x509.put("id", llaves.get(i));
+                            String pem = "-----BEGIN CERTIFICATE-----\n";
+                            pem += Base64.getEncoder().encodeToString(cert.getEncoded());
+                            pem += "\n-----END CERTIFICATE-----";
+                            x509.put("pem", pem);
+                            x509.put("validez", new JSONObject());
+                            ((JSONObject)x509.get("validez")).put("desde", dateFormat.format(cert.getNotBefore()));
+                            ((JSONObject)x509.get("validez")).put("hasta", dateFormat.format(cert.getNotAfter()));
+                            X500Name x500Name = new JcaX509CertificateHolder(cert).getSubject();
+                            x509.put("titular", new JSONObject());
+                            for(RDN rdn : x500Name.getRDNs()) {
+                                switch (rdn.getFirst().getType().getId()) {
+                                    case "2.5.4.46":
+                                        ((JSONObject)x509.get("titular")).put("dnQualifier", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                    case "1.3.6.1.1.1.1.0":
+                                        ((JSONObject)x509.get("titular")).put("uidNumber", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                    case "2.5.4.3":
+                                        ((JSONObject)x509.get("titular")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                    case "2.5.4.10":
+                                        ((JSONObject)x509.get("titular")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                    case "2.5.4.11":
+                                        ((JSONObject)x509.get("titular")).put("OU", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                }
                             }
-                        }
-                        X500Name x500IssuerName = new JcaX509CertificateHolder(cert).getSubject();
-                        x509.put("emisor", new JSONObject());
-                        for(RDN rdn : x500IssuerName.getRDNs()) {
-                            switch (rdn.getFirst().getType().getId()) {
-                                case "2.5.4.3":
-                                    ((JSONObject)x509.get("emisor")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
-                                case "2.5.4.10":
-                                    ((JSONObject)x509.get("emisor")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                    break;
+                            X500Name x500IssuerName = new JcaX509CertificateHolder(cert).getSubject();
+                            x509.put("emisor", new JSONObject());
+                            for(RDN rdn : x500IssuerName.getRDNs()) {
+                                switch (rdn.getFirst().getType().getId()) {
+                                    case "2.5.4.3":
+                                        ((JSONObject)x509.get("emisor")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                    case "2.5.4.10":
+                                        ((JSONObject)x509.get("emisor")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        break;
+                                }
                             }
+                            ((JSONArray)data_token.get("data")).put(x509);
                         }
-                        ((JSONArray)data_token.get("data")).put(x509);
                     }
+                    data_token.put("private_keys", llaves.size());
+                } catch (CertificateException | IOException ex) {
+                    json.put("finalizado", false);
+                    json.put("mensaje", ex.getMessage());
+                } catch (KeyStoreException | NoSuchAlgorithmException ex) {
+                    Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                data_token.put("private_keys", llaves.size());
-            } catch (CertificateException | IOException ex) {
+                token.salir();
+            } else {
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
-            } catch (KeyStoreException | NoSuchAlgorithmException ex) {
-                Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
+                json.put("mensaje", "Datos requeridos slot y pin.");
             }
-            token.salir();
         } catch (JSONException | CertificateException ex) {
             Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
         }

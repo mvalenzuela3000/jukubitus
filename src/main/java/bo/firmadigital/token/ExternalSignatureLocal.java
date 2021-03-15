@@ -45,6 +45,10 @@ public class ExternalSignatureLocal implements ExternalSignatureContainer {
             Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
             token.iniciar(pass);
             PrivateKey privateKey = token.obtenerClavePrivada(label);
+            if (privateKey == null) {
+                token.salir();
+                throw new GeneralSecurityException("No se encontró la clave con alias: " + label);
+            }
             String signMode = DigestAlgorithms.getDigest(DigestAlgorithms.getAllowedDigests("SHA256"));
             signMode += "with" + privateKey.getAlgorithm();
             Signature signature = Signature.getInstance(signMode, token.getProviderName());
