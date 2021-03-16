@@ -163,14 +163,18 @@ public class App extends Application {
         limpiarItem.setOnAction((ActionEvent e) -> {
             tableFile.getItems().clear();
         });
-        MenuItem closeItem = new MenuItem("Salir");
+        MenuItem closeItem = new MenuItem("Cerrar");
         closeItem.setOnAction((ActionEvent e) -> {
-            try {
-                Main.jettyServer.stop();
-                Main.jettyServer.destroy();
+            if (servicio && !taskBar) {
+                try {
+                    Main.jettyServer.stop();
+                    Main.jettyServer.destroy();
+                    stage.close();
+                } catch (Exception ex) {
+                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
                 stage.close();
-            } catch (Exception ex) {
-                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
         mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirPKCS7Item, abrirOtroItem, limpiarItem, closeItem);
