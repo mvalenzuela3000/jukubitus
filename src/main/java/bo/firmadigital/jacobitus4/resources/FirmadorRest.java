@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.jacobitus4.Pdf;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
 import bo.firmadigital.jacobitus4.util.Base64StreamParser;
@@ -302,15 +301,12 @@ public class FirmadorRest {
                 stamper.flush();
                 stamper.close();
                 reader.close();
-                file = null;
-                System.gc();
 
                 ByteArrayOutputStream os2 = new ByteArrayOutputStream();
                 PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
                 ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, alias, pin);
                 MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
-                baos = null;
-                System.gc();
+
                 datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
                 json.put("finalizado", true);
                 json.put("mensaje", "Se firmo el pdf correctamente!");
