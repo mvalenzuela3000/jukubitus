@@ -5,8 +5,10 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
+import bo.firmadigital.jacobitus4.Pdf;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
+import bo.firmadigital.jacobitus4.util.Base64StreamParser;
 import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
@@ -226,7 +228,8 @@ public class FirmadorRest {
             boolean bloquear = false;
             byte[] file = null;
             JsonFactory factory = new ObjectMapper().getJsonFactory();
-            try (JsonParser jsonReader = factory.createJsonParser(body)) {
+            JsonParser jsonReader = factory.createJsonParser(body);
+            try {
                 jsonReader.nextToken();
                 while (jsonReader.nextToken() == JsonToken.FIELD_NAME) {
                     String label = jsonReader.getText();
@@ -245,12 +248,24 @@ public class FirmadorRest {
                             bloquear = Boolean.parseBoolean(jsonReader.readValueAs(String.class));
                             break;
                         case "pdf":
-                            file = Base64.getDecoder().decode(jsonReader.readValueAs(String.class));
+                            try (InputStream is = (InputStream)jsonReader.getInputSource()) {
+                                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                                    jsonReader.releaseBuffered(os);
+                                    byte[] buff = os.toByteArray();
+                                    Base64StreamParser parser = new Base64StreamParser(is, buff);
+                                    file = parser.getFile();
+                                    jsonReader.close();
+                                    jsonReader = factory.createJsonParser(parser.getRemanent());
+                                    jsonReader.nextToken();
+                                }
+                            }
                             break;
                         default:
                             throw new IOException("No se esperaba la etiqueta: " + label);
                     }
                 }
+            } finally {
+                jsonReader.close();
             }
             if (slot != null && pin != null && alias != null && file != null) {
                 JSONObject datos = new JSONObject();
