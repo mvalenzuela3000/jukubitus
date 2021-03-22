@@ -314,7 +314,7 @@ public class FirmadorRest {
                 json.put("finalizado", false);
                 json.put("mensaje", "Datos requeridos slot, pin, alias y pdf.");
             }
-        } catch (JSONException | IOException | DocumentException | GeneralSecurityException ex) {
+        } catch (JSONException | IOException | DocumentException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
