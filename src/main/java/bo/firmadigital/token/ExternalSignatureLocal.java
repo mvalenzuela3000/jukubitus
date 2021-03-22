@@ -67,7 +67,7 @@ public class ExternalSignatureLocal implements ExternalSignatureContainer {
             }*/
             token.salir();
             return pdfPKCS7.getEncodedPKCS7(hash, tsc, null, null, MakeSignature.CryptoStandard.CADES);
-        } catch (IOException | InvalidKeyException e) {
+        } catch (IOException | InvalidKeyException | RuntimeException e) {
             throw new GeneralSecurityException(e.getMessage());
         }
     }
