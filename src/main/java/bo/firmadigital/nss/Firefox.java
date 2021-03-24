@@ -80,7 +80,12 @@ public class Firefox {
                     }
                 }
             }
-            String cert = System.getProperty("user.dir") + "/ca/server.crt";
+            String cert = Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            if (cert.endsWith(".jar")) {
+                cert = new File(cert).getParentFile().getParent() + "/ca/server.crt";
+            } else {
+                cert = System.getProperty("user.dir") + "/ca/server.crt";
+            }
             p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", cert, "-t", "cTC,cTC,cTC", "-d", db.getParent() });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;

@@ -106,8 +106,10 @@ public class App extends Application {
     private Validar validar;
     private static boolean servicio;
     private static boolean taskBar;
+    private static String url = null, token, urlPost;
     private static Stage stage;
     private static App app;
+    public static final String VERSION = "1.0.0";
 
     @Override
     public void start(Stage stage) {
@@ -269,7 +271,7 @@ public class App extends Application {
         });
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(AlertType.NONE, "Jacobitus Total, JavaFX " + javafxVersion + ", con Java " + javaVersion + ".", ButtonType.OK);
+            Alert alert = new Alert(AlertType.NONE, "Jacobitus Total " + VERSION + ", JavaFX " + javafxVersion + ", con Java " + javaVersion + ".", ButtonType.OK);
             alert.showAndWait();
         });
         helpMenu.getItems().addAll(servicioItem, aboutItem);
@@ -357,8 +359,12 @@ public class App extends Application {
         });
 
         new Thread(registrarCertificado()).start();
-        if (!taskBar) {
-            new Thread(listarTokens()).start();
+        if (url == null) {
+            if (!taskBar) {
+                new Thread(listarTokens()).start();
+            }
+        } else {
+            new Thread(download(url, token, urlPost)).start();
         }
         App.stage = stage;
         App.app = this;
@@ -639,6 +645,9 @@ public class App extends Application {
                     List<Validar> certs = new LinkedList();
                     certs.add(new ValidarPdf(f, urlPost, token));
                     tableFile.setItems(FXCollections.observableList(certs));
+                    if (size == 0) {
+                        updateProgress(1, 1);
+                    }
                     return true;
                 } else {
                     Alert alert = new Alert(AlertType.ERROR, "No se pudo descargar el archivo.", ButtonType.OK);
@@ -669,16 +678,19 @@ public class App extends Application {
     }
 
     public static void show(String url, String token, String urlPost) {
-        if (!stage.isShowing()) {
-            Platform.runLater(() -> {
+        Platform.runLater(() -> {
+            if (stage.isShowing()) {
+                stage.setAlwaysOnTop(true);
+                stage.setAlwaysOnTop(false);
+            } else {
                 if (taskBar) {
                     stage.show();
                 } else {
                     stage.setIconified(false);
                 }
-                new Thread(app.download(url, token, urlPost)).start();
-            });
-        }
+            }
+            new Thread(app.download(url, token, urlPost)).start();
+        });
     }
 
     public static void run(boolean servicio, boolean taskBar) {
@@ -690,7 +702,9 @@ public class App extends Application {
     public static void run(boolean servicio, boolean taskBar, String url, String token, String urlPost) {
         App.servicio = servicio;
         App.taskBar = taskBar;
+        App.url = url;
+        App.token = token;
+        App.urlPost = urlPost;
         launch();
-        new Thread(app.download(url, token, urlPost)).start();
     }
 }
