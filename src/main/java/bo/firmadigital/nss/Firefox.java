@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +30,12 @@ public class Firefox {
             if (db == null) {
                 return false;
             }
-            String path = System.getProperty("user.dir");
+            String path = URLDecoder.decode(Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+            if (path.endsWith(".jar")) {
+                path = new File(path).getParentFile().getParent();
+            } else {
+                path = System.getProperty("user.dir");
+            }
             if (path.endsWith("runtime\\bin")) {
                 path = new File(path).getParentFile().getParent();
             }

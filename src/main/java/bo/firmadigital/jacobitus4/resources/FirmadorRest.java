@@ -107,7 +107,7 @@ public class FirmadorRest {
             CompleteSign enviadoJson;
             boolean inicial = true;
 
-            try {            
+            try {
                 String enviado = new String(dataByte);
                 ObjectMapper mapper = new ObjectMapper();
                 enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
