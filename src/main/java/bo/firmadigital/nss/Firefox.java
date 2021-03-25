@@ -32,12 +32,12 @@ public class Firefox {
             }
             String path = URLDecoder.decode(Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
             if (path.endsWith(".jar")) {
-                path = new File(path).getParentFile().getParent();
+                path = new File(path).getParent();
             } else {
                 path = System.getProperty("user.dir");
             }
-            if (path.endsWith("runtime\\bin")) {
-                path = new File(path).getParentFile().getParent();
+            if (path.endsWith("app")) {
+                path = new File(path).getParent();
             }
             String certutil = path + "\\ca\\nss\\install.bat";
             Process p;
@@ -86,7 +86,7 @@ public class Firefox {
                     }
                 }
             }
-            String cert = Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String cert = URLDecoder.decode(Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
             if (cert.endsWith(".jar")) {
                 cert = new File(cert).getParentFile().getParent() + "/ca/server.crt";
             } else {
