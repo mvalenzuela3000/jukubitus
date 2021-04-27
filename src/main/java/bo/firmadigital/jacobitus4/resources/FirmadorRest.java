@@ -350,8 +350,14 @@ public class FirmadorRest {
                 }
                 JWSSigner jwsSigner = new RSASSASigner(pk);
                 JWSHeader.Builder builder = new JWSHeader.Builder(JWSAlgorithm.RS256);
-                if (!data.getJSONObject(i).isNull("url")) {
-                    builder.x509CertURL(new URI(data.getJSONObject(i).getString("url")));
+                if (data.getJSONObject(i).isNull("url")) {
+                    builder.x509CertURL(new URI("https://agencia.firmadigital.bo/services_ar/certificado?serial_number=" + token.obtenerCertificado(req.getString("alias")).getSerialNumber()));
+                } else {
+                    if (data.getJSONObject(i).getString("url").contains("?")) {
+                        builder.x509CertURL(new URI(data.getJSONObject(i).getString("url")));
+                    } else {
+                        builder.x509CertURL(new URI(data.getJSONObject(i).getString("url") + "?serial_number=" + token.obtenerCertificado(req.getString("alias")).getSerialNumber()));
+                    }
                 }
                 JWSObject jwsObject = new JWSObject(builder.build(),new Payload(data.getJSONObject(i).getString("payload")));
                 jwsObject.sign(jwsSigner);
