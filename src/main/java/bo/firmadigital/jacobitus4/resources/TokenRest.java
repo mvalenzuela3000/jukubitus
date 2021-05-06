@@ -382,6 +382,7 @@ public class TokenRest {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
             }
+            token.salir();
         } catch (JSONException ex) {
             Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -409,6 +410,7 @@ public class TokenRest {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
             }
+            token.salir();
         } catch (JSONException ex) {
             Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
         }

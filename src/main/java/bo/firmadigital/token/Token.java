@@ -256,6 +256,10 @@ public class Token {
     public void cargarCertificado(X509Certificate certificado, String clavesId) throws CertificateNotYetValidException, CertificateExpiredException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         certificado.checkValidity();
 
+        if (!this.keystore.getCertificate(clavesId).getPublicKey().equals(certificado.getPublicKey())) {
+            throw new UnrecoverableKeyException("El certificado no corresponde a la clave privada seleccionada.");
+        }
+
         Certificate[] chain = new Certificate[]{certificado};
         PrivateKey p = (PrivateKey)this.keystore.getKey(clavesId, null);
         this.keystore.setKeyEntry(clavesId, p, null, chain);
