@@ -7,7 +7,6 @@ import com.itextpdf.text.pdf.PdfIndirectReference;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfNumber;
 import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -107,7 +106,7 @@ public class ValidarPdf extends Validar {
 
         List<CertDate> certs = new ArrayList<>();
         InputStream is = new FileInputStream(file);
-        PdfReader pdf = new PdfReader(is);
+        ContentsChecker pdf = new ContentsChecker(is);
         AcroFields acroFields = pdf.getAcroFields();
         List<String> firmas = acroFields.getSignatureNames();
 
@@ -122,6 +121,7 @@ public class ValidarPdf extends Validar {
                 certDate = new CertDate(pkcs7.getSigningCertificate(), pkcs7.getSignDate(), null, bloqueaDocumento(referenceArray));
             }
             certDate.setValid(pkcs7.verify());
+            certDate.setValidAdd(pdf.checkWhetherSignatureCoversWholeDocument(acroFields.getFieldItem(nombre).getWidget(0).getAsDict(PdfName.V)));
             certDate.setPKI(verificarPKI(certDate.getCertificate()));
             certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
             certs.add(certDate);

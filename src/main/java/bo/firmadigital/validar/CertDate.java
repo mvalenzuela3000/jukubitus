@@ -1,5 +1,6 @@
 package bo.firmadigital.validar;
 
+import bo.firmadigital.validar.ContentsChecker.Estado;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -15,6 +16,7 @@ public class CertDate {
     private DatosCertificado datos;
 
     private boolean valid = false;
+    private Estado validAdd = Estado.sin_cambios;
     private boolean pki = false;
     private Validar.OCSPState ocsp = Validar.OCSPState.UNKNOWN;
 
@@ -62,6 +64,25 @@ public class CertDate {
         return valid;
     }
 
+    public boolean isValidAlerted() {
+        switch (validAdd) {
+            case sin_cambios:
+                return false;
+            case widget_firma_agregado:
+                return isBloquea();
+            default:
+                return true;
+        }
+    }
+
+    public void setValidAdd(Estado validAdd) {
+        this.validAdd = validAdd;
+    }
+
+    public Estado getValidAdd() {
+        return validAdd;
+    }
+
     public void setPKI(boolean pki) {
         this.pki = pki;
     }
@@ -95,7 +116,7 @@ public class CertDate {
     }
 
     public boolean isAlerted() {
-        return isActiveAlerted() || isOCSPAlerted();
+        return isValidAlerted() || isActiveAlerted() || isOCSPAlerted();
     }
 
     public boolean isActiveAlerted() {

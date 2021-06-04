@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.ExternalSignatureLocal;
@@ -165,6 +166,11 @@ public class App extends Application {
         limpiarItem.setOnAction((ActionEvent e) -> {
             tableFile.getItems().clear();
         });
+        MenuItem opcionesItem = new MenuItem("Opciones");
+        opcionesItem.setOnAction((ActionEvent e) -> {
+            Config config = new Config();
+            config.configuracion();
+        });
         MenuItem closeItem = new MenuItem("Cerrar");
         closeItem.setOnAction((ActionEvent e) -> {
             if (servicio && !taskBar) {
@@ -179,7 +185,7 @@ public class App extends Application {
                 stage.close();
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirPKCS7Item, abrirOtroItem, limpiarItem, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirPKCS7Item, abrirOtroItem, limpiarItem,opcionesItem, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");

@@ -225,7 +225,7 @@ public class TokenRest {
             JSONObject req = new JSONObject(body);
             if (req.has("slot") && req.has("pin")) {
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot slot = gestorSlot.obtenerSlot((Integer)req.get("slot"));
+                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
                 Token token = slot.getToken();
                 json.put("datos", new JSONObject());
                 try {

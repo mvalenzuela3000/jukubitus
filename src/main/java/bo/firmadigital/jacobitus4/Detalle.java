@@ -53,8 +53,23 @@ public class Detalle extends Stage {
             }
             TreeItem<String> intItem, intItemDet;
             if (cert.isValid()) {
-                intItem = new TreeItem<>("Documento auténtico", new ImageView(okSmallIcon));
-                intItemDet = new TreeItem<>("El documento no ha sido modificado después de la firma");
+                if (cert.isValidAlerted()) {
+                    intItem = new TreeItem<>("Documento modificado", new ImageView(alertSmallIcon));
+                    switch (cert.getValidAdd()) {
+                        case widget_firma_agregado:
+                            intItemDet = new TreeItem<>("Se agregaron firmas posteriormente a esta firma");
+                            break;
+                        case widget_otro_agregado:
+                            intItemDet = new TreeItem<>("Se agregaron widgets posteriormente a esta firma");
+                            break;
+                        default:
+                            intItemDet = new TreeItem<>("Se modificó el contenido de widgets posteriormente a esta firma");
+                            break;
+                    }
+                } else {
+                    intItem = new TreeItem<>("Documento auténtico", new ImageView(okSmallIcon));
+                    intItemDet = new TreeItem<>("El documento no ha sido modificado después de la firma");
+                }
             } else {
                 intItem = new TreeItem<>("Documento modificado", new ImageView(errorSmallIcon));
                 intItemDet = new TreeItem<>("El documento ha sido modificado después de la firma");
