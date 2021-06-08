@@ -121,7 +121,7 @@ public class ValidarPdf extends Validar {
                 certDate = new CertDate(pkcs7.getSigningCertificate(), pkcs7.getSignDate(), null, bloqueaDocumento(referenceArray));
             }
             certDate.setValid(pkcs7.verify());
-            certDate.setValidAdd(pdf.checkWhetherSignatureCoversWholeDocument(acroFields.getFieldItem(nombre).getWidget(0).getAsDict(PdfName.V)));
+            certDate.setValidAdd(pdf.checkElementAdded(acroFields.getFieldItem(nombre).getWidget(0).getAsDict(PdfName.V)));
             certDate.setPKI(verificarPKI(certDate.getCertificate()));
             certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
             certs.add(certDate);

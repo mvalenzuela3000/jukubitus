@@ -10,13 +10,14 @@ import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author ADSIB
  */
 public class ContentsChecker extends PdfReader {
-    public ContentsChecker(byte[] is) throws IOException {
+    public ContentsChecker(InputStream is) throws IOException {
         super(is);
     }
 
