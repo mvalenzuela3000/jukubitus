@@ -35,10 +35,7 @@ public class ContentsChecker extends PdfReader {
                 while (tokens.nextToken()) {
                     if (tokens.getTokenType() == TokenType.START_DIC) {
                         PdfDictionary dict = readDictionary();
-                        System.out.println(dict);
                         if (dict.contains(PdfName.TYPE) && dict.contains(PdfName.SUBTYPE)) {
-                            System.out.println(dict.getAsName(PdfName.TYPE));
-                            System.out.println(dict.getAsName(PdfName.SUBTYPE));
                             if (dict.getAsName(PdfName.TYPE).equals(PdfName.ANNOT) && dict.getAsName(PdfName.SUBTYPE).equals(PdfName.WIDGET)) {
                                 widgets++;
                                 if (dict.contains(PdfName.V) && dict.contains(PdfName.FT)) {

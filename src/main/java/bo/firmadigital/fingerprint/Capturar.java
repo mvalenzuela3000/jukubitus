@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.fingerprint;
 
+import bo.firmadigital.jacobitus4.App;
 import com.digitalpersona.onetouch.DPFPGlobal;
 import com.digitalpersona.onetouch.capture.DPFPCapture;
 import com.digitalpersona.onetouch.capture.DPFPCapturePriority;
@@ -21,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.jnbis.Bitmap;
 import org.jnbis.WSQEncoder;
@@ -70,7 +73,7 @@ public class Capturar {
                     try {
                         p.waitFor();
                     } catch (InterruptedException ex) {
-                        System.out.println(ex.getMessage());
+                        Logger.getLogger(Capturar.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     InputStream is = new FileInputStream(file);
                     long length = file.length();

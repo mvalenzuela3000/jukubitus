@@ -5,13 +5,19 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Separator;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -21,17 +27,33 @@ import javafx.stage.Stage;
  */
 public class Contrasena extends Stage {
     private String pass;
+    private boolean bloquea = false;
 
-    public Contrasena(Stage parent) {
+    public Contrasena(Stage parent, boolean pdf) {
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
         BorderPane root = new BorderPane();
         Label label = new Label("Introduzca su pin:");
         root.setTop(label);
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(4));
+        vBox.setSpacing(4);
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
-        root.setCenter(passwordField);
+        vBox.getChildren().add(passwordField);
+        vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
+        if (pdf) {
+            CheckBox checkBox = new CheckBox("Bloquear documento.");
+            vBox.getChildren().add(checkBox);
+            checkBox.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                bloquea = newValue;
+            });
+        } else {
+            vBox.getChildren().add(new Label("PKCS#7"));
+        }
+        vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
+        root.setCenter(vBox);
         Button buttonAceptar = new Button("Aceptar");
         buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
             pass = passwordField.getText();
@@ -42,13 +64,19 @@ public class Contrasena extends Stage {
             close();
         });
         HBox hBox = new HBox();
+        hBox.setPadding(new Insets(4));
+        hBox.setSpacing(4);
         hBox.getChildren().addAll(buttonAceptar, buttonCancelar);
         root.setBottom(hBox);
-        Scene scene = new Scene(root, 300, 80);
+        Scene scene = new Scene(root, 300, 120);
         setScene(scene);
     }
 
     public String getPass() {
         return pass;
+    }
+
+    public boolean isBloquea() {
+        return bloquea;
     }
 }

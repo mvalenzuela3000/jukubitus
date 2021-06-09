@@ -1,7 +1,10 @@
 package bo.firmadigital.token;
 
+import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -25,6 +28,7 @@ import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -67,6 +71,9 @@ public class TokenPKCS12 implements Token {
 
     public TokenPKCS12(Slot slot) {
         this.slot = slot;
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 
     @Override
@@ -77,6 +84,19 @@ public class TokenPKCS12 implements Token {
             this.keystore = KeyStore.getInstance("PKCS12", "BC");
             this.keystore.load(new FileInputStream(slot.getConfiguracion()), pin.toCharArray());
         } catch (NoSuchProviderException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    public void crear(String pin) throws IOException {
+        this.PIN = pin;
+        
+        try {
+            this.keystore = KeyStore.getInstance("PKCS12", "BC");
+            keystore.load(null, pin.toCharArray());
+            generarClaves("ADSIB", pin, 0);
+            this.keystore.store(new FileOutputStream(slot.getConfiguracion()), pin.toCharArray());
+        } catch (NoSuchProviderException | InvalidAlgorithmParameterException | UnsupportedEncodingException | KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
             throw new IOException(ex);
         }
     }
@@ -342,5 +362,45 @@ public class TokenPKCS12 implements Token {
     public PublicKey obtenerClavePublica(String clavesId) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {
         PublicKey publicKey = ((PrivateKeyEntry) this.keystore.getEntry(clavesId, null)).getCertificate().getPublicKey();
         return publicKey;
+    }
+
+    public static CK_TOKEN_INFO getTokenInfo(String path) {
+        return new CK_TOKEN_INFO(-1, new SoftInfo(path));
+    }
+
+    public static class SoftInfo {
+        public char[] label;
+        public char[] manufacturerID;
+        public char[] model;
+        public char[] serialNumber;
+        public long flags;
+        public long ulMaxSessionCount;
+        public long ulSessionCount;
+        public long ulMaxRwSessionCount;
+        public long ulRwSessionCount;
+        public long ulMaxPinLen;
+        public long ulMinPinLen;
+        public long ulTotalPublicMemory;
+        public long ulFreePublicMemory;
+        public long ulTotalPrivateMemory;
+        public long ulFreePrivateMemory;
+        public Version hardwareVersion; 
+        public Version firmwareVersion;
+        public char[] utcTime;
+
+        public SoftInfo(String path) {
+            label = new File(path).getName().toCharArray();
+            manufacturerID = "ADSIB".toCharArray();
+            model = "1.0".toCharArray();
+            serialNumber = "ADSIB".toCharArray();
+            hardwareVersion = new Version();
+            firmwareVersion = new Version();
+            utcTime = "".toCharArray();
+        }
+
+        public class Version {
+            public byte major;
+            public byte minor;
+        }
     }
 }

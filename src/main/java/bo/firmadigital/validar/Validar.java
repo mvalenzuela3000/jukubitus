@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.validar;
 
+import bo.firmadigital.jacobitus4.util.Config;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Security;
@@ -127,7 +130,14 @@ public abstract class Validar implements Iterable<CertDate> {
             if (urls.length == 0) {
                 return OCSPState.UNKNOWN_SERVER;
             }
-            HttpURLConnection connection = (HttpURLConnection) urls[0].openConnection();
+            Config config = new Config();
+            HttpURLConnection connection;
+            if (config.isProxyEnabled()) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyIP(), Integer.parseInt(config.getProxyPort())));
+                connection = (HttpURLConnection) urls[0].openConnection(proxy);
+            } else {
+                connection = (HttpURLConnection) urls[0].openConnection();
+            }
             InputStream responseStream;
             if (connection.getResponseCode() >= HttpURLConnection.HTTP_OK &&
                     connection.getResponseCode() <= HttpURLConnection.HTTP_PARTIAL) {

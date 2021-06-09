@@ -1,5 +1,6 @@
 package bo.firmadigital.token;
 
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.pkcs11.PKCS11;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
@@ -118,7 +119,8 @@ public class GestorSlot {
         slots.clear();
         try {
             List<JSONObject> tokens = SmartCard.cards();
-            if (tokens.isEmpty() && libreria == null) {
+            Config config = new Config();
+            if (tokens.isEmpty() && libreria == null && config.getToken() == null) {
                 throw new RuntimeException("No se encontro ningun token conectado.");
             }
             if (tokens.size() > 1) {
@@ -127,12 +129,17 @@ public class GestorSlot {
             if (!tokens.isEmpty()) {
                 libreria = getLib(tokens.get(0).getString("id"));
             }
-            sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null));
-            Security.addProvider(sunPKCS11);
-            PKCS11 p11 = new PKCS11(sunPKCS11);
-            long[] lista = p11.C_GetSlotList(true);
-            for (long id : lista) {
-                slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id)));
+            if (libreria != null) {
+                sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null));
+                Security.addProvider(sunPKCS11);
+                PKCS11 p11 = new PKCS11(sunPKCS11);
+                long[] lista = p11.C_GetSlotList(true);
+                for (long id : lista) {
+                    slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id)));
+                }
+            }
+            if (config.getToken() != null) {
+                slots.put(-1l, new Slot(config.getToken().getPath()));
             }
         } catch (JSONException | IOException ex) {
             Logger.getLogger(GestorSlot.class.getName()).log(Level.SEVERE, null, ex);

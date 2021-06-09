@@ -51,7 +51,12 @@ public class ExternalSignatureLocal implements ExternalSignatureContainer {
             }
             String signMode = DigestAlgorithms.getDigest(DigestAlgorithms.getAllowedDigests("SHA256"));
             signMode += "with" + privateKey.getAlgorithm();
-            Signature signature = Signature.getInstance(signMode, token.getProviderName());
+            Signature signature;
+            if (token.getProviderName().equals("PKCS12")) {
+                signature = Signature.getInstance(signMode);
+            } else {
+                signature = Signature.getInstance(signMode, token.getProviderName());
+            }
             signature.initSign(privateKey);
             String hashAlgorithm = "SHA256";
             BouncyCastleDigest digest = new BouncyCastleDigest();

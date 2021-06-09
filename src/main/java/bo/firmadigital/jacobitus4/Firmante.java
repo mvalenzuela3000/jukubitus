@@ -39,8 +39,9 @@ public class Firmante extends Stage {
     private final long slot;
     private String label;
     private String pass;
+    private boolean bloquea;
 
-    public Firmante(Stage parent, long slot) {
+    public Firmante(Stage parent, long slot, boolean pdf) {
         this.slot = slot;
         this.label = null;
         setTitle("Seleccione el certificado a utilizar para la firma");
@@ -69,12 +70,13 @@ public class Firmante extends Stage {
         });
 
         setOnShown((WindowEvent t) -> {
-            Contrasena contrasena = new Contrasena(Firmante.this);
+            Contrasena contrasena = new Contrasena(Firmante.this, pdf);
             contrasena.showAndWait();
             if (contrasena.getPass() == null) {
                 close();
             } else {
                 pass = contrasena.getPass();
+                bloquea = contrasena.isBloquea();
                 new Thread(listarCertificados(contrasena.getPass())).start();
             }
         });
@@ -86,6 +88,10 @@ public class Firmante extends Stage {
 
     public String getPass() {
         return pass;
+    }
+
+    public boolean isBloquea() {
+        return bloquea;
     }
 
     public Task listarCertificados(String pass) {

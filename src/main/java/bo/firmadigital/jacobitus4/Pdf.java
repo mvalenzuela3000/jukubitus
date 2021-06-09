@@ -287,7 +287,6 @@ public class Pdf extends Stage {
                 try {
                     document.newPage();
                     FileInputStream imgFile = new FileInputStream(file.getAbsolutePath());
-                    System.out.println(imgFile);
                     javafx.scene.image.Image img = new javafx.scene.image.Image(imgFile, WIDTH * 1.5, HEIGHT * 1.5, false, true);
                     Image image;
                     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {

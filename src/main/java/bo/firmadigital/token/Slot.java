@@ -83,7 +83,7 @@ public class Slot {
      */
     public CK_TOKEN_INFO detalleToken() {
         if (slotID < 0) {
-            return null;
+            return TokenPKCS12.getTokenInfo(configuracion);
         } else {
             return this.p11.C_GetTokenInfo(this.slotID);
         }

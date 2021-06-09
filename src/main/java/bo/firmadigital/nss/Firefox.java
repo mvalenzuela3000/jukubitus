@@ -128,7 +128,11 @@ public class Firefox {
         if (OS.contains("win")) {
             return registrarCertificadoWindows();
         } else {
-            return registrarCertificadoLinux();
+            if (OS.contains("nux")) {
+                return registrarCertificadoLinux();
+            } else {
+                return false;
+            }
         }
     }
 }

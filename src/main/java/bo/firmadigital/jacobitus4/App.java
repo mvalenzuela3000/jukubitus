@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.ExternalSignatureLocal;
@@ -168,8 +168,8 @@ public class App extends Application {
         });
         MenuItem opcionesItem = new MenuItem("Opciones");
         opcionesItem.setOnAction((ActionEvent e) -> {
-            Config config = new Config();
-            config.configuracion();
+            Configuracion configuracion = new Configuracion(stage);
+            configuracion.showAndWait();
         });
         MenuItem closeItem = new MenuItem("Cerrar");
         closeItem.setOnAction((ActionEvent e) -> {
@@ -214,10 +214,10 @@ public class App extends Application {
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
-                        Firmante firmante = new Firmante(stage, item.getSlot());
+                        Firmante firmante = new Firmante(stage, item.getSlot(), true);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
-                            new Thread(firmar(false, item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                            new Thread(firmar(firmante.isBloquea(), item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
                         }
                     }
                 }
@@ -244,7 +244,7 @@ public class App extends Application {
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
-                        Firmante firmante = new Firmante(stage, item.getSlot());
+                        Firmante firmante = new Firmante(stage, item.getSlot(), false);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
                             new Thread(firmarPKCS7(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
@@ -272,6 +272,7 @@ public class App extends Application {
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
             Firefox.registrarCertificado();
+            Chromium.registrarCertificado();
             HostServices hostServices = getHostServices();
             hostServices.showDocument("https://localhost:9000");
         });
@@ -381,6 +382,7 @@ public class App extends Application {
             @Override
             protected Object call() throws Exception {
                 Firefox.registrarCertificado();
+                Chromium.registrarCertificado();
                 return true;
             }
         };
