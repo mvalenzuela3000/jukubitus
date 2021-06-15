@@ -106,7 +106,10 @@ public class Firmante extends Stage {
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();
                     for (String label : labels) {
-                        certificados.add(new DatosCertificado(label, token.obtenerCertificado(label)));
+                        DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
+                        if (entry.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                            certificados.add(entry);
+                        }
                     }
                     token.salir();
                     table.setItems(FXCollections.observableList(certificados));

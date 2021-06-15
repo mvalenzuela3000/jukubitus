@@ -257,6 +257,11 @@ public class TokenPKCS12 implements Token {
         Certificate[] chain = new Certificate[]{certificado};
         PrivateKey p = (PrivateKey)this.keystore.getKey(clavesId, null);
         this.keystore.setKeyEntry(clavesId, p, null, chain);
+        try {
+            this.keystore.store(new FileOutputStream(slot.getConfiguracion()), PIN.toCharArray());
+        } catch (IOException | CertificateException ex) {
+            throw new KeyStoreException(ex.getMessage());
+        }
     }
 
     @Override
