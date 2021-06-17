@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
 import bo.firmadigital.validar.CertDate;
 import bo.firmadigital.validar.Validar;
@@ -21,8 +22,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -146,13 +145,10 @@ public class Detalle extends Stage {
                         } else {
                             setTextFill(Color.BLACK);
                         }
-                        WebView  web = new WebView();
-                        web.setPrefSize(400, 580);
-                        WebEngine webEngine = web.getEngine();
-                        webEngine.loadContent(certDate.getDatosHtml());
+                        CertInformation pane = new CertInformation(certDate);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-                        tooltip.setGraphic(web);
+                        tooltip.setGraphic(pane);
                         setTooltip(tooltip);
                         setOnMouseClicked(event -> {
                             if (event.getClickCount() == 2) {
