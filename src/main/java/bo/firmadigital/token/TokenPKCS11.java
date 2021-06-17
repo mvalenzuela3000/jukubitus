@@ -3,13 +3,10 @@ package bo.firmadigital.token;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.CertificateFactory;
@@ -75,13 +72,10 @@ public class TokenPKCS11 implements Token {
      * contenga las llaves y certificado x509.
      *
      * @param pin Clave del token.
-     * @throws KeyStoreException
-     * @throws CertificateException
-     * @throws NoSuchAlgorithmException
-     * @throws IOException
+     * @throws GeneralSecurityException
      */
     @Override
-    public void iniciar(String pin) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+    public void iniciar(String pin) throws GeneralSecurityException {
         this.PIN = pin;
         sunPKCS11 = Security.getProvider("SunPKCS11");
         sunPKCS11 = sunPKCS11.configure(slot.getConfiguracion());
@@ -92,15 +86,15 @@ public class TokenPKCS11 implements Token {
         } catch (IOException ex) {
             if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
                 if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                    throw new IOException("Por favor verifique el pin.");
+                    throw new GeneralSecurityException("Por favor verifique el pin.");
                 }
             }
             if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
                 if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                    throw new IOException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
+                    throw new GeneralSecurityException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
                 }
             }
-            throw ex;
+            throw new GeneralSecurityException(ex.getMessage());
         }
         Security.addProvider(sunPKCS11);
     }
@@ -164,9 +158,10 @@ public class TokenPKCS11 implements Token {
      * @param slotNumber Numero de slot
      * @return Retorna verdadero si el par de claves se ha generado falso en
      * caso contrario.
+     * @throws GeneralSecurityException
      */
     @Override
-    public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, UnsupportedEncodingException, KeyStoreException {
+    public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws GeneralSecurityException {
         if (existeCertificadoClaves(clavesId)) {
             return null;
         }
@@ -198,7 +193,7 @@ public class TokenPKCS11 implements Token {
     }
 
     @Override
-    public String generarCSR(String alias, JSONArray subject) {
+    public String generarCSR(String alias, JSONArray subject) throws GeneralSecurityException {
         try {
             PrivateKey privateKey = obtenerClavePrivada(alias);
             X509Certificate x509Certificate = obtenerCertificado(alias);
@@ -232,6 +227,7 @@ public class TokenPKCS11 implements Token {
      * Esta funci&oacute;n eliminar el un par de claves.
      *
      * @param clavesId Identificador de las claves a eliminar.
+     * @throws KeyStoreException
      */
     @Override
     public void eliminarClaves(String clavesId) throws KeyStoreException {
@@ -261,7 +257,7 @@ public class TokenPKCS11 implements Token {
      * a3:f0:14:3d:77:29:2e:6b:cd:b1:4d:20:e4:a8:7a:2d:78:3b:95:b0).
      */
     @Override
-    public void cargarCertificado(X509Certificate certificado, String clavesId) throws CertificateNotYetValidException, CertificateExpiredException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+    public void cargarCertificado(X509Certificate certificado, String clavesId) throws GeneralSecurityException {
         certificado.checkValidity();
 
         if (!this.keystore.getCertificate(clavesId).getPublicKey().equals(certificado.getPublicKey())) {
@@ -274,7 +270,7 @@ public class TokenPKCS11 implements Token {
     }
 
     @Override
-    public void cargarCertificado(String pem, String clavesId) throws CertificateNotYetValidException, CertificateExpiredException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+    public void cargarCertificado(String pem, String clavesId) throws GeneralSecurityException {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(pem.getBytes()));
@@ -288,6 +284,7 @@ public class TokenPKCS11 implements Token {
      * Esta funci&oacute;n elimina un certificado de un token.
      *
      * @param clavesId Identificador del certificado a eliminar.
+     * @throws KeyStoreException
      */
     @Override
     public void eliminarCertificado(String clavesId) throws KeyStoreException {
@@ -313,7 +310,7 @@ public class TokenPKCS11 implements Token {
     }
 
     @Override
-    public List<Certificate> listarCertificados() throws Exception {
+    public List<Certificate> listarCertificados() throws GeneralSecurityException {
         List<Certificate> certificados = new ArrayList<>();
         for(String id: listarIdentificadorClaves()) {
             certificados.add(obtenerCertificado(id));
@@ -353,12 +350,10 @@ public class TokenPKCS11 implements Token {
      *
      * @param clavesId Identificador de la clave.
      * @return Retorna una clave privada.
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableKeyException
+     * @throws GeneralSecurityException
      */
     @Override
-    public PrivateKey obtenerClavePrivada(String clavesId) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
+    public PrivateKey obtenerClavePrivada(String clavesId) throws GeneralSecurityException {
         PrivateKey privateKey = (PrivateKey) this.keystore.getKey(clavesId, null);
         return privateKey;
     }
@@ -368,13 +363,16 @@ public class TokenPKCS11 implements Token {
      *
      * @param clavesId Identificador de la clave.
      * @return Retorna una clave p&uacute;blica.
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableEntryException
-     * @throws KeyStoreException
+     * @throws GeneralSecurityException
      */
     @Override
-    public PublicKey obtenerClavePublica(String clavesId) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {
+    public PublicKey obtenerClavePublica(String clavesId) throws GeneralSecurityException {
         PublicKey publicKey = ((PrivateKeyEntry) this.keystore.getEntry(clavesId, null)).getCertificate().getPublicKey();
         return publicKey;
+    }
+
+    @Override
+    public Certificate[] getCertificateChain(String clavesId) throws KeyStoreException {
+        return this.keystore.getCertificateChain(clavesId);
     }
 }

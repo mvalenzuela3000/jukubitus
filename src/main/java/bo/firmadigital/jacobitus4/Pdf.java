@@ -5,19 +5,21 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.exceptions.UnsupportedPdfException;
-import com.itextpdf.text.pdf.BadPdfFormatException;
-import com.itextpdf.text.pdf.PRStream;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.property.AreaBreakType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,6 +68,7 @@ public class Pdf extends Stage {
     private static int WIDTH = 800;
     private static int HEIGHT = 1035;
     private ProgressBar progressBar;
+    private static PdfDocument pdfDocument;
     private static Document document;
     private static PdfWriter writer;
     private static File out;
@@ -92,33 +95,30 @@ public class Pdf extends Stage {
                 try {
                     document.close();
                     String file = out.getAbsolutePath();
-                    document = new Document();
-                    document.setPageSize(new Rectangle(WIDTH, HEIGHT));
+                    //document.setPageSize(new Rectangle(WIDTH, HEIGHT));
                     document.setMargins(0, 0, 0, 0);
                     int c = 1;
                     do {
                         out = new File(System.getProperty("java.io.tmpdir"), "documento" + c + ".pdf");
                         c++;
                     } while (out.exists());
-                    writer = PdfWriter.getInstance(document, new FileOutputStream(out));
-                    document.open();
+                    writer = new PdfWriter(new FileOutputStream(out));
+                    pdfDocument = new PdfDocument(writer);
+                    document = new Document(pdfDocument, new PageSize(WIDTH, HEIGHT));
+                    //document.open();
                     ObservableList<String> list = FXCollections.observableArrayList();
                     PdfReader reader = new PdfReader(file);
-                    for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                    PdfDocument pdf = new PdfDocument(reader);
+                    for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
                         if (!getItem().equals("Página " + i)) {
-                            document.newPage();
-                            Image image = Image.getInstance(writer.getImportedPage(reader, i));
-                            image.scaleAbsolute(new Rectangle(WIDTH, HEIGHT));
-                            document.add(image);
+                            pdf.copyPagesTo(i, i, pdfDocument);
                             list.add("Página " + (list.size() + 1));
                         }
                     }
                     //reader.close();
                     getListView().setItems(list);
                     new File(file).delete();
-                } catch (BadPdfFormatException | IOException | BadElementException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DocumentException ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
@@ -211,13 +211,12 @@ public class Pdf extends Stage {
             out = new File(System.getProperty("java.io.tmpdir"), "documento" + c + ".pdf");
             c++;
         }
-        document = new Document();
-        document.setPageSize(new Rectangle(WIDTH, HEIGHT));
-        document.setMargins(0, 0, 0, 0);
         try {
-            writer = PdfWriter.getInstance(document, new FileOutputStream(out));
-            document.open();
-        } catch (DocumentException | FileNotFoundException ex) {
+            writer = new PdfWriter(out);
+            pdfDocument = new PdfDocument(writer);
+            document = new Document(pdfDocument, new PageSize(WIDTH, HEIGHT));
+            document.setMargins(0, 0, 0, 0);
+        } catch (FileNotFoundException ex) {
             Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -229,20 +228,20 @@ public class Pdf extends Stage {
             protected Object call() throws Exception {
                 try {
                     PdfReader reader = new PdfReader(file.getAbsolutePath());
-                    for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-                        document.newPage();
-                        PdfDictionary dict = reader.getPageResources(i);
-                        PdfArray set = dict.getAsArray(PdfName.PROCSET);
-                        PdfDictionary xobjects = dict.getAsDict(PdfName.XOBJECT);
+                    PdfDocument pdf = new PdfDocument(reader);
+                    for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
+                        PdfDictionary dict = pdf.getPage(i).getResources().getPdfObject();
+                        PdfArray set = dict.getAsArray(PdfName.ProcSet);
+                        PdfDictionary xobjects = dict.getAsDictionary(PdfName.XObject);
                         Image image;
-                        if (xobjects != null && xobjects.getKeys().size() == 1 && (set.contains(PdfName.IMAGE) || set.contains(PdfName.IMAGEB) || set.contains(PdfName.IMAGEC) || set.contains(PdfName.IMAGEI))) {
-                            PdfName imgName = xobjects.getKeys().iterator().next();
-                            PRStream imgStream = (PRStream)xobjects.getDirectObject(imgName);
+                        if (xobjects != null && xobjects.keySet().size() == 1 && (set.contains(PdfName.Image) || set.contains(PdfName.ImageMask))) {
+                            PdfName imgName = xobjects.keySet().iterator().next();
+                            PdfStream imgStream = xobjects.getAsStream(imgName);
                             byte[] b;
                             try {
-                                b = PdfReader.getStreamBytes(imgStream);
-                            } catch(UnsupportedPdfException ignore) {
-                                b = PdfReader.getStreamBytesRaw(imgStream);
+                                b = imgStream.getBytes();
+                            } catch(PdfException ignore) {
+                                b = imgStream.getBytes(false);
                             }
                             try (FileOutputStream fos = new FileOutputStream("/tmp/image.jpg")) {
                                 fos.write(b);
@@ -251,25 +250,25 @@ public class Pdf extends Stage {
                             if (img.getException() == null) {
                                 try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                                     ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
-                                    image = Image.getInstance(baos.toByteArray(), true);
+                                    ImageData imageData = ImageDataFactory.create(baos.toByteArray());
+                                    image = new Image(imageData);
+                                    image.scaleAbsolute(WIDTH, HEIGHT);
+                                    document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                                    document.add(image);
                                 }
                             } else {
-                                image = Image.getInstance(writer.getImportedPage(reader, i));
+                                pdf.copyPagesTo(i, i, pdfDocument);
                             }
                         } else {
-                            image = Image.getInstance(writer.getImportedPage(reader, i));
+                            pdf.copyPagesTo(i, i, pdfDocument);
                         }
                         /*float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()) / image.getWidth()) * 100;
                         image.scalePercent(scaler);*/
-                        image.scaleAbsolute(new Rectangle(WIDTH, HEIGHT));
-                        document.add(image);
-                        updateProgress(i + 1, reader.getNumberOfPages());
+                        updateProgress(i + 1, pdfDocument.getNumberOfPages());
                         lv.getItems().add("Página " + (lv.getItems().size() + 1));
                     }
                     //reader.close();
-                } catch (BadPdfFormatException | IOException | BadElementException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DocumentException ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return true;
@@ -285,24 +284,23 @@ public class Pdf extends Stage {
             @Override
             protected Object call() throws Exception {
                 try {
-                    document.newPage();
+                    document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                     FileInputStream imgFile = new FileInputStream(file.getAbsolutePath());
                     javafx.scene.image.Image img = new javafx.scene.image.Image(imgFile, WIDTH * 1.5, HEIGHT * 1.5, false, true);
                     Image image;
                     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         ImageIO.write(SwingFXUtils.fromFXImage(img, null), "jpg", baos);
-                        image = Image.getInstance(baos.toByteArray(), true);
+                        ImageData imageData = ImageDataFactory.create(baos.toByteArray());
+                        image = new Image(imageData);
                     }
                     //Image image = Image.getInstance(file.getAbsolutePath(), true);
                     /*float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()) / image.getWidth()) * 100;
                     image.scalePercent(scaler);*/
-                    image.scaleAbsolute(new Rectangle(WIDTH, HEIGHT));
+                    image.scaleAbsolute(WIDTH, HEIGHT);
                     document.add(image);
                     updateProgress(1, 1);
                     lv.getItems().add("Página " + (lv.getItems().size() + 1));
-                } catch (BadElementException | IOException | BadPdfFormatException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DocumentException ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return true;
@@ -338,7 +336,7 @@ public class Pdf extends Stage {
         });
         alert.getDialogPane().setContent(content);
         alert.showAndWait();
-        document.setPageSize(new Rectangle(WIDTH, HEIGHT));
+        pdfDocument.setDefaultPageSize(new PageSize(WIDTH, HEIGHT));
     }
 
     public String getPath() {

@@ -16,21 +16,15 @@ import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.AcroFields;
-import com.itextpdf.text.pdf.PdfAnnotation;
-import com.itextpdf.text.pdf.PdfFormField;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSigLockDictionary;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.security.ExternalBlankSignatureContainer;
-import com.itextpdf.text.pdf.security.ExternalSignatureContainer;
-import com.itextpdf.text.pdf.security.MakeSignature;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import com.itextpdf.forms.PdfSigFieldLock;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.BouncyCastleDigest;
+import com.itextpdf.signatures.IExternalDigest;
+import com.itextpdf.signatures.IExternalSignature;
+import com.itextpdf.signatures.PdfSignatureAppearance;
+import com.itextpdf.signatures.PdfSigner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +33,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -288,7 +281,7 @@ public class App extends Application {
         contextMenu = new ContextMenu();
         MenuItem detalleItem = new MenuItem("Detalle Validación");
         detalleItem.setOnAction((ActionEvent e) -> {
-            Detalle detalle = new Detalle(stage, validar);
+            Detalle detalle = new Detalle(stage, validar, getHostServices());
             detalle.showAndWait();
         });
         exportarItem = new MenuItem("Exportar contenido");
@@ -465,38 +458,6 @@ public class App extends Application {
                         InputStream is = new FileInputStream(files.get(i).getAbsolutePath());
                         try {
                             PdfReader reader = new PdfReader(is);
-                            ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-                            if (bloquear) {
-                                PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
-                                PdfFormField field = PdfFormField.createSignature(stp.getWriter());
-                                field.setFieldName("Signature " + (signatures.size() + 1));
-                                PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
-                                field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
-                                field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
-                                field.setFlags(PdfAnnotation.FLAGS_PRINT);
-                                stp.addAnnotation(field, 1);
-                                stp.close();
-                                reader.close();
-                                reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                                baos = new ByteArrayOutputStream();
-                            }
-                            PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
-                            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
-                            if (bloquear) {
-                                appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
-                                AcroFields form = stamper.getAcroFields();
-                                form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
-                            } else {
-                                appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
-                            }
-                            ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-                            MakeSignature.signExternalContainer(appearance, external, 8192);
-                            stamper.flush();
-                            stamper.close();
-                            reader.close();
-
                             String name = new File(files.get(i).getAbsolutePath()).getName();
                             if (!name.endsWith(".pdf")) {
                                 name += ".firmado.pdf";
@@ -504,18 +465,25 @@ public class App extends Application {
                                 name = name.replace(".pdf", ".firmado.pdf");
                             }
                             File out = new File(destino, name);
-                            PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                            FileOutputStream os2 = new FileOutputStream(out);
-                            ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, label, pass);
-                            MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
-                            os2.close();
-                            if (files.get(i).isRemoto()) {
-                                Request req = new Request();
-                                req.enviar(out, files.get(i).getPost(), files.get(i).getToken());
+                            PdfSigner signer = new PdfSigner(reader, new FileOutputStream(out), new StampingProperties());
+
+                            if (bloquear) {
+                                PdfSigFieldLock fieldLock = new PdfSigFieldLock();
+                                fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);
+                                fieldLock.setFieldLock(PdfSigFieldLock.LockAction.EXCLUDE, new String[]{});
+                                signer.setFieldLockDict(fieldLock);
                             }
+                            Rectangle rect = new Rectangle(0, 0, 0, 0);
+                            PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+                            appearance.setPageRect(rect);
+
+                            IExternalDigest digest = new BouncyCastleDigest();
+                            IExternalSignature signature = ExternalSignatureLocal.getInstance(slot, label, pass);
+
+                            signer.signDetached(digest, signature, ((ExternalSignatureLocal)signature).getChain(), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidarPdf(out));
-                        } catch (DocumentException | IOException | GeneralSecurityException ex) {
+                        } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
                             errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
                         }

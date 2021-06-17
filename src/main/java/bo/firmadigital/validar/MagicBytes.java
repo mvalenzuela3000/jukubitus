@@ -17,7 +17,7 @@ import java.io.InputStream;
 public enum MagicBytes {
     PNG(0x89, 0x50),
     JPG(0xFF, 0xD8),
-    P7S(0x4D, 0x5A),
+    P7S(0x30, 0x80),
     PDF(0x25, 0x50);
 
     private final int[] magicBytes;
@@ -29,9 +29,10 @@ public enum MagicBytes {
     public boolean is(byte[] bytes) {
         if (bytes.length != magicBytes.length)
             throw new RuntimeException("I need the first " + magicBytes.length + " bytes of an input stream.");
-        for (int i=0; i<bytes.length; i++)
+        for (int i = 0; i < bytes.length; i++) {
             if (Byte.toUnsignedInt(bytes[i]) != magicBytes[i])
                 return false;
+        }
         return true;
     }
 

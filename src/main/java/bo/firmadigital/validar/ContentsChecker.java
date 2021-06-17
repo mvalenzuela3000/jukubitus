@@ -5,10 +5,10 @@
  */
 package bo.firmadigital.validar;
 
-import com.itextpdf.text.pdf.PRTokeniser.TokenType;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.io.source.PdfTokenizer.TokenType;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfReader;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -23,36 +23,36 @@ public class ContentsChecker extends PdfReader {
 
     /**
      * Verifica si la firma cubre todo el documento.
-     * @param V Dictionary que da acceso a la firma.
+     * @param sign Dictionary que da acceso a la firma.
      * @return 
      */
-    public Estado checkElementAdded(PdfDictionary V) {
-        long[] byteRange = V.getAsArray(PdfName.BYTERANGE).asLongArray();
+    public Estado checkElementAdded(PdfDictionary sign) {
+        long[] byteRange = sign.getAsArray(PdfName.ByteRange).toLongArray();
         try {
             if (4 != byteRange.length || 0 != byteRange[0] || tokens.getSafeFile().length() != byteRange[2] + byteRange[3]) {
                 tokens.seek(byteRange[2] + byteRange[3]);
                 int widgets = 0, signatures = 0, highlihght = 0, forms = 0, signaturesContent = 0;
                 while (tokens.nextToken()) {
-                    if (tokens.getTokenType() == TokenType.START_DIC) {
-                        PdfDictionary dict = readDictionary();
-                        if (dict.contains(PdfName.TYPE) && dict.contains(PdfName.SUBTYPE)) {
-                            if (dict.getAsName(PdfName.TYPE).equals(PdfName.ANNOT) && dict.getAsName(PdfName.SUBTYPE).equals(PdfName.WIDGET)) {
+                    if (tokens.getTokenType() == TokenType.StartDic) {
+                        PdfDictionary dict = readDictionary(true);
+                        if (dict.containsKey(PdfName.Type) && dict.containsKey(PdfName.Subtype)) {
+                            if (dict.getAsName(PdfName.Type).equals(PdfName.Annot) && dict.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
                                 widgets++;
-                                if (dict.contains(PdfName.V) && dict.contains(PdfName.FT)) {
-                                    if (dict.getAsName(PdfName.FT).equals(PdfName.SIG)) {
+                                if (dict.containsKey(PdfName.V) && dict.containsKey(PdfName.FT)) {
+                                    if (dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
                                         signatures++;
                                     }
                                 } else {
-                                    if (dict.contains(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.SIG)) {
+                                    if (dict.containsKey(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
                                         widgets--;
                                     }
                                 }
-                            } else if (dict.getAsName(PdfName.TYPE).equals(PdfName.XOBJECT) && dict.getAsName(PdfName.SUBTYPE).equals(PdfName.FORM)) {
+                            } else if (dict.getAsName(PdfName.Type).equals(PdfName.XObject) && dict.getAsName(PdfName.Subtype).equals(PdfName.Form)) {
                                 forms++;
-                            } else if (dict.getAsName(PdfName.TYPE).equals(PdfName.ANNOT) && dict.getAsName(PdfName.SUBTYPE).equals(PdfName.HIGHLIGHT)) {
+                            } else if (dict.getAsName(PdfName.Type).equals(PdfName.Annot) && dict.getAsName(PdfName.Subtype).equals(PdfName.Highlight)) {
                                 highlihght++;
                             }
-                        } else if (dict.contains(PdfName.TYPE) && dict.getAsName(PdfName.TYPE).equals(PdfName.SIG)) {
+                        } else if (dict.containsKey(PdfName.Type) && dict.getAsName(PdfName.Type).equals(PdfName.Sig)) {
                             signaturesContent++;
                         }
                     }
@@ -70,7 +70,7 @@ public class ContentsChecker extends PdfReader {
                 }
                 return Estado.desconocido_agregado;
             }
-        } catch (IOException ex) {
+        } catch (Exception ignore) {
             // That's not expected because if the signature is invalid, it should have already failed
             return Estado.desconocido_agregado;
         }

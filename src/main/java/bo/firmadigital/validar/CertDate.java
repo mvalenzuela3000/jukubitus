@@ -4,10 +4,13 @@ import bo.firmadigital.validar.ContentsChecker.Estado;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class CertDate {
+    private final String name;
     private final Certificate certificate;
     private final Calendar signDate;
     private final Calendar timeStamp;
@@ -20,7 +23,8 @@ public class CertDate {
     private boolean pki = false;
     private Validar.OCSPState ocsp = Validar.OCSPState.UNKNOWN;
 
-    public CertDate(Certificate certificate, Calendar signDate, Calendar timeStamp, boolean bloquea) {
+    public CertDate(String name, Certificate certificate, Calendar signDate, Calendar timeStamp, boolean bloquea) {
+        this.name = name;
         this.certificate = certificate;
         this.signDate = signDate;
         this.timeStamp = timeStamp;
@@ -32,12 +36,42 @@ public class CertDate {
         }
     }
 
+    public String getName() {
+        return name;
+    }
+
     public Certificate getCertificate() {
         return certificate;
     }
 
     public DatosCertificado getDatos() {
         return datos;
+    }
+
+    public String getDatosHtml() {
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        String res = "<table border=1>" +
+            "<tr><th colspan=2>INFORMACIÓN DEL CERTIFICADO</th></tr>" +
+            "<tr><th colspan=2>Titular</th></tr>" +
+            "<tr><td>Nombre</td><td>" + datos.getNombreComunSubject() + "</td></tr>" +
+            "<tr><td>Organización</td><td>" + datos.getOrganizacionSubject() + "</td></tr>" +
+            "<tr><td>Unidad</td><td>" + datos.getUnidadOrganizacionalSubject() + "</td></tr>" +
+            "<tr><td>Cargo</td><td>" + datos.getCargoSubject() + "</td></tr>" +
+            "<tr><td>Correo</td><td>" + datos.getCorreoSubject() + "</td></tr>" +
+            "<tr><th colspan=2>Emisor</th></tr>" +
+            "<tr><td>Nombre</td><td>" + datos.getNombreComunIssuer() + "</td></tr>" +
+            "<tr><td>Organización</td><td>" + datos.getOrganizacionIssuer() + "</td></tr>" +
+            "<tr><th colspan=2>Periodo de validez</th></tr>" +
+            "<tr><td>Inicio</td><td>" + df.format(datos.getInicioValidez()) + "</td></tr>" +
+            "<tr><td>Fin</td><td>" + df.format(datos.getFinValidez()) + "</td></tr>" +
+            "<tr><th colspan=2>Revocado</th></tr>" +
+            "<tr><td>Detalle</td><td>" + (ocsp == Validar.OCSPState.REVOKED ? "Revocado" : ocsp == Validar.OCSPState.UNKNOWN_SERVER ? "No se pudo consultar" : "No revocado") + "</td></tr>" +
+            "<tr><th colspan=2>Usos</th></tr>" +
+            "<tr><td colspan=2>" + datos.getPersona() + "</td></tr>" +
+            "<tr><td colspan=2>" + datos.getAlmacenamiento() + "</td></tr>" +
+            "<tr><td colspan=2>" + datos.getTipoFirma() + "</td></tr>" +
+            "</table>";
+        return res;
     }
 
     public Date getSignDate() {

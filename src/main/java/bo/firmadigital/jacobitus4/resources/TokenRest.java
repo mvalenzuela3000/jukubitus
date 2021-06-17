@@ -10,15 +10,11 @@ import bo.firmadigital.token.SmartCard;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -306,11 +302,9 @@ public class TokenRest {
                         }
                     }
                     data_token.put("private_keys", llaves.size());
-                } catch (CertificateException | IOException ex) {
+                } catch (GeneralSecurityException ex) {
                     json.put("finalizado", false);
                     json.put("mensaje", ex.getMessage());
-                } catch (KeyStoreException | NoSuchAlgorithmException ex) {
-                    Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 token.salir();
             } else {
@@ -354,7 +348,7 @@ public class TokenRest {
             json.put("finalizado", true);
             json.put("mensaje", "Se genero el par de claves correctamente.");
             token.salir();
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | InvalidAlgorithmParameterException | JSONException ex) {
+        } catch (GeneralSecurityException | JSONException ex) {
             Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
         }
         return json.toString();
@@ -378,7 +372,7 @@ public class TokenRest {
                 datos.put("csr", token.generarCSR(req.getString("alias_certificado"), req.getJSONArray("subject")));
                 json.put("finalizado", true);
                 json.put("mensaje", "Se genero el CSR correctamente");
-            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
+            } catch (GeneralSecurityException ex) {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
             }
@@ -406,7 +400,7 @@ public class TokenRest {
                 token.cargarCertificado(new String(Base64.getDecoder().decode(req.getString("pem")), "UTF-8"), req.getString("id"));
                 json.put("finalizado", true);
                 json.put("mensaje", "El certificado fue adicionado correctamente");
-            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | UnrecoverableKeyException ex) {
+            } catch (GeneralSecurityException | UnsupportedEncodingException ex) {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
             }

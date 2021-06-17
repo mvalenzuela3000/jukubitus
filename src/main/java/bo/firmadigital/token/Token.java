@@ -1,12 +1,8 @@
 package bo.firmadigital.token;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import org.codehaus.jettison.json.JSONArray;
@@ -19,12 +15,9 @@ public interface Token {
     /**
      * Inicia session
      * @param pin Clave de acceso para iniciar sessión
-     * @throws KeyStoreException
-     * @throws CertificateException
-     * @throws NoSuchAlgorithmException
-     * @throws IOException 
+     * @throws GeneralSecurityException
      */
-    public void iniciar(String pin) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException;
+    public void iniciar(String pin) throws GeneralSecurityException;
 
     /**
      * Cierra la session.
@@ -43,20 +36,18 @@ public interface Token {
      * @param pin Clave de acceso
      * @param slotNumber Slot al cual se encuentra conectado el token
      * @return Clave publica
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidAlgorithmParameterException
-     * @throws UnsupportedEncodingException
-     * @throws KeyStoreException 
+     * @throws GeneralSecurityException
      */
-    public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, UnsupportedEncodingException, KeyStoreException;
+    public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws GeneralSecurityException;
 
     /**
      * Genera un CSR 
      * @param alias Label para identificar el par de claves
      * @param subject Datos del sujeto
      * @return CSR en formato PEM
+     * @throws GeneralSecurityException
      */
-    public String generarCSR(String alias, JSONArray subject);
+    public String generarCSR(String alias, JSONArray subject) throws GeneralSecurityException;
 
     /**
      * Elimina par de claves
@@ -77,25 +68,17 @@ public interface Token {
      * Carga el certificado correspondiente a la clave privada
      * @param certificado Certificado asociado a la clave privada
      * @param clavesId Label para identificar el par de claves
-     * @throws CertificateNotYetValidException
-     * @throws CertificateExpiredException
-     * @throws UnrecoverableKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException 
+     * @throws GeneralSecurityException
      */
-    public void cargarCertificado(X509Certificate certificado, String clavesId) throws CertificateNotYetValidException, CertificateExpiredException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException;
+    public void cargarCertificado(X509Certificate certificado, String clavesId) throws GeneralSecurityException;
 
     /**
      * Carga el certificado correspondiente a la clave privada en formato PEM
      * @param pem Certificado asociado a la clave privada en formato PEM
      * @param clavesId Label para identificar el par de claves
-     * @throws CertificateNotYetValidException
-     * @throws CertificateExpiredException
-     * @throws UnrecoverableKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException 
+     * @throws GeneralSecurityException
      */
-    public void cargarCertificado(String pem, String clavesId) throws CertificateNotYetValidException, CertificateExpiredException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException;
+    public void cargarCertificado(String pem, String clavesId) throws GeneralSecurityException;
 
     /**
      * Elimina el certificado
@@ -114,9 +97,9 @@ public interface Token {
     /**
      * Lista los certiifcados almacenados en el token
      * @return Lista de certificados
-     * @throws Exception 
+     * @throws GeneralSecurityException 
      */
-    public List<Certificate> listarCertificados() throws Exception;
+    public List<Certificate> listarCertificados() throws GeneralSecurityException;
 
     /**
      * Verifica la existencia de un certificado o clave con el label especificado
@@ -125,8 +108,6 @@ public interface Token {
      * @throws KeyStoreException 
      */
     public boolean existeCertificadoClaves(String clavesId) throws KeyStoreException;
-    
-    
 
     /**
      * Recupera el certificado a partir del label asociado
@@ -140,19 +121,17 @@ public interface Token {
      * Recupera la clave privada (O el acceso a la misma en el token)
      * @param clavesId Label para identificar el par de claves
      * @return Clave privada
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableEntryException 
+     * @throws GeneralSecurityException
      */
-    public PrivateKey obtenerClavePrivada(String clavesId) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException;
+    public PrivateKey obtenerClavePrivada(String clavesId) throws GeneralSecurityException;
 
     /**
      * Recupera la calve publica
      * @param clavesId Label para identificar el par de claves
      * @return Clave publica
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableEntryException
-     * @throws KeyStoreException 
+     * @throws GeneralSecurityException
      */
-    public PublicKey obtenerClavePublica(String clavesId) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException;
+    public PublicKey obtenerClavePublica(String clavesId) throws GeneralSecurityException;
+
+    public Certificate[] getCertificateChain(String clavesId) throws KeyStoreException;
 }

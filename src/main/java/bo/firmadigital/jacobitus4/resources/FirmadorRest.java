@@ -12,19 +12,15 @@ import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.AcroFields;
-import com.itextpdf.text.pdf.PdfAnnotation;
-import com.itextpdf.text.pdf.PdfFormField;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSigLockDictionary;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.security.ExternalBlankSignatureContainer;
-import com.itextpdf.text.pdf.security.ExternalSignatureContainer;
-import com.itextpdf.text.pdf.security.MakeSignature;
+import com.itextpdf.forms.PdfSigFieldLock;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.BouncyCastleDigest;
+import com.itextpdf.signatures.IExternalDigest;
+import com.itextpdf.signatures.IExternalSignature;
+import com.itextpdf.signatures.PdfSignatureAppearance;
+import com.itextpdf.signatures.PdfSigner;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -42,14 +38,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -176,7 +167,7 @@ public class FirmadorRest {
             json.put("finalizado", true);
             json.put("mensaje", "Se firmo la solicitud correctamente!");
             json.put("datos", jsonResult);
-        } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException ex) {
+        } catch (JSONException | GeneralSecurityException | IOException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
@@ -270,51 +261,30 @@ public class FirmadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
                 PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
-                ArrayList<String> signatures = reader.getAcroFields().getSignatureNames();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                PdfSigner signer = new PdfSigner(reader, out, new StampingProperties());
                 if (bloquear) {
-                    PdfStamper stp = new PdfStamper(reader, baos, '\0', true);
-                    PdfFormField field = PdfFormField.createSignature(stp.getWriter());
-                    field.setFieldName("Signature " + (signatures.size() + 1));
-                    PdfSigLockDictionary lock = new PdfSigLockDictionary(PdfSigLockDictionary.LockPermissions.NO_CHANGES_ALLOWED);
-                    field.put(PdfName.LOCK, stp.getWriter().addToBody(lock).getIndirectReference());
-                    field.setWidget(new Rectangle(0, 0, 0, 0), PdfAnnotation.HIGHLIGHT_NONE);
-                    field.setFlags(PdfAnnotation.FLAGS_PRINT);
-                    stp.addAnnotation(field, 1);
-                    stp.close();
-                    reader.close();
-                    reader = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                    baos = new ByteArrayOutputStream();
+                    PdfSigFieldLock fieldLock = new PdfSigFieldLock();
+                    fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);
+                    fieldLock.setFieldLock(PdfSigFieldLock.LockAction.EXCLUDE, new String[]{});
+                    signer.setFieldLockDict(fieldLock);
                 }
-                PdfStamper stamper = PdfStamper.createSignature(reader, baos, '\0', null, true);
-                PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
-                if (bloquear) {
-                    appearance.setVisibleSignature("Signature " + (signatures.size() + 1));
-                    AcroFields form = stamper.getAcroFields();
-                    form.setFieldProperty("Signature " + (signatures.size() + 1), "setfflags", PdfFormField.FF_READ_ONLY, null);
-                } else {
-                    appearance.setVisibleSignature(new Rectangle(0, 0, 0, 0), 1, "Signature " + (signatures.size() + 1));
-                }
-                ExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-                MakeSignature.signExternalContainer(appearance, external, 8192);
-                stamper.flush();
-                stamper.close();
-                reader.close();
+                Rectangle rect = new Rectangle(0, 0, 0, 0);
+                PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+                appearance.setPageRect(rect);
 
-                ByteArrayOutputStream os2 = new ByteArrayOutputStream();
-                PdfReader reader2 = new PdfReader(new ByteArrayInputStream(baos.toByteArray()));
-                ExternalSignatureContainer external2 = ExternalSignatureLocal.getInstance(slot, alias, pin);
-                MakeSignature.signDeferred(reader2, "Signature " + (signatures.size() + 1), os2, external2);
+                IExternalDigest digest = new BouncyCastleDigest();
+                IExternalSignature signature = ExternalSignatureLocal.getInstance(slot, alias, pin);
+                signer.signDetached(digest, signature, ((ExternalSignatureLocal)signature).getChain(), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
 
-                datos.put("pdf_firmado", Base64.getEncoder().encodeToString(os2.toByteArray()));
+                datos.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
                 json.put("finalizado", true);
                 json.put("mensaje", "Se firmo el pdf correctamente!");
             } else {
                 json.put("finalizado", false);
                 json.put("mensaje", "Datos requeridos slot, pin, alias y pdf.");
             }
-        } catch (JSONException | IOException | DocumentException | GeneralSecurityException | OutOfMemoryError ex) {
+        } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
@@ -368,7 +338,7 @@ public class FirmadorRest {
             json.put("datos", datos);
             json.put("finalizado", true);
             json.put("mensaje", "Se firmo las solicitudes correctamente!");
-        } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | URISyntaxException | JOSEException ex) {
+        } catch (JSONException | GeneralSecurityException | URISyntaxException | JOSEException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());
@@ -429,7 +399,7 @@ public class FirmadorRest {
             json.put("datos", datos);
             json.put("finalizado", true);
             json.put("mensaje", "Firma realizada correctamente.");
-        } catch (IOException | RuntimeException | CertificateException | JSONException | KeyStoreException | NoSuchAlgorithmException | InvalidKeyException | UnrecoverableEntryException | SignatureException ex) {
+        } catch (GeneralSecurityException | JSONException ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());

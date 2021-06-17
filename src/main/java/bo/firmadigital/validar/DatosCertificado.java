@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
+import org.bouncycastle.asn1.x509.PolicyInformation;
 
 public class DatosCertificado {
     private final Map<String, String> subject, issuer;
@@ -46,6 +48,8 @@ public class DatosCertificado {
 
     //Otros datos
     private X509Certificate cert = null;
+
+    private String policyCert;
 
     public DatosCertificado() {
         subject = new TreeMap<>();
@@ -70,14 +74,33 @@ public class DatosCertificado {
             issuer.put(rdn.getFirst().getType().getId(), IETFUtils.valueToString(rdn.getFirst().getValue()));
         }
         this.cert = cert;
+
+        byte[] policyBytes = cert.getExtensionValue("2.5.29.32");
+        if (policyBytes == null) {
+            this.policyCert = null;
+        } else {
+            try {
+                CertificatePolicies policies = CertificatePolicies.getInstance(X509ExtensionUtil.fromExtensionValue(policyBytes));
+                PolicyInformation[] policyInformation = policies.getPolicyInformation();
+                for (PolicyInformation pInfo : policyInformation) {
+                    if (pInfo.getPolicyIdentifier().toString().length() == 34) {
+                        this.policyCert = pInfo.getPolicyIdentifier().toString();
+                        break;
+                    }
+                }
+            } catch (IOException ex) {
+                this.policyCert = null;
+                //this.tipoFirma = null;
+            }
+        }
     }
 
     /**
      * Constructor con identificador
      * 
      * @param label Etiqueta que identifica al certificado
-     * @param cert Certificado
-     * @return 
+     * @param cert Certificado 
+     * @throws CertificateEncodingException En caso de que el certificado sea inválido.
      */
     public DatosCertificado(String label, X509Certificate cert) throws CertificateEncodingException {
         this(cert);
@@ -247,6 +270,46 @@ public class DatosCertificado {
 
     public Date getFinValidez() {
         return cert.getNotAfter();
+    }
+
+    public String getPersona() {
+        if (policyCert != null && policyCert.length() == 34) {
+            switch (policyCert.charAt(31)) {
+                case '0':
+                    return "Certificado de Persona Jurídica";
+                case '1':
+                    return "Certificado de Persona Natural";
+                default:
+                    return null;
+            }
+        }
+        return null;
+    }
+
+    public String getAlmacenamiento() {
+        if (policyCert != null && policyCert.length() == 34) {
+            switch (policyCert.charAt(29)) {
+                case '0':
+                    return "Nivel de Seguridad Normal (Emitido por Software)";
+                case '1':
+                    return "Nivel de Seguridad Alto (Emitido por Hardware)";
+                default:
+                    return null;
+            }
+        }
+        return null;
+    }
+
+    public String getTipoFirma() {
+        if (policyCert != null && policyCert.length() == 34) {
+            switch (policyCert.charAt(33)) {
+                case '0':
+                    return "Firma Simple";
+                case '1':
+                    return "Firma Automática";
+            }
+        }
+        return null;
     }
 
     public X509Certificate getCert() {

@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +28,7 @@ import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Store;
 
 /**
@@ -37,6 +39,9 @@ public class ValidarPKCS7 extends Validar {
     public ValidarPKCS7(File file) {
         try {
             super.file = file;
+            if (Security.getProvider("BC") == null) {
+                Security.addProvider(new BouncyCastleProvider());
+            }
             certificados = listarCertificados(file);
         } catch (Exception ignore) {
         }
@@ -83,6 +88,7 @@ public class ValidarPKCS7 extends Validar {
 
             Collection<SignerInformation> firmas = signedData.getSignerInfos().getSigners();
 
+            Integer firma = 1;
             for (SignerInformation signerInfo : firmas) {
                 Attribute attribute = signerInfo.getSignedAttributes().get(pkcs_9_at_signingTime);
                 Calendar fecha = Calendar.getInstance();
@@ -99,11 +105,12 @@ public class ValidarPKCS7 extends Validar {
                         break;
                     }
                 }
-                CertDate certDate = new CertDate(cert, fecha, null, false);
+                CertDate certDate = new CertDate(firma.toString(), cert, fecha, null, false);
                 certDate.setValid(integrity);
                 certDate.setPKI(verificarPKI(certDate.getCertificate()));
                 certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
                 certs.add(certDate);
+                firma++;
             }
         } catch (CMSException ignore) { }
         return certs;

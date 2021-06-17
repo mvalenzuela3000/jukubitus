@@ -10,7 +10,10 @@ import bo.firmadigital.validar.CertDate;
 import bo.firmadigital.validar.Validar;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import javafx.application.HostServices;
 import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
@@ -18,6 +21,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -34,7 +39,7 @@ public class Detalle extends Stage {
     private final Image alertSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("alert.png"));
     private final Image errorSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("error.png"));
 
-    public Detalle(Stage parent, Validar validar) {
+    public Detalle(Stage parent, Validar validar, HostServices hostServices) {
         setTitle("Detalle de firmas");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
@@ -134,10 +139,28 @@ public class Detalle extends Stage {
                 if (!empty) {
                     setText(item);
                     if (getTreeItem() instanceof TreeItemBlocked) {
-                        if (((TreeItemBlocked)getTreeItem()).getCertDate().isBloquea()) {
+                        CertDate certDate = ((TreeItemBlocked)getTreeItem()).getCertDate();
+                        if (certDate.isBloquea()) {
                             setTextFill(Color.BLUE);
                             //setStyle("-fx-text-fill: blue;");
+                        } else {
+                            setTextFill(Color.BLACK);
                         }
+                        WebView  web = new WebView();
+                        web.setPrefSize(400, 580);
+                        WebEngine webEngine = web.getEngine();
+                        webEngine.loadContent(certDate.getDatosHtml());
+                        Tooltip tooltip = new Tooltip();
+                        tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                        tooltip.setGraphic(web);
+                        setTooltip(tooltip);
+                        setOnMouseClicked(event -> {
+                            if (event.getClickCount() == 2) {
+                                hostServices.showDocument(validar.getRevisionPath(certDate.getName()));
+                            }
+                        });
+                    } else {
+                        setTextFill(Color.BLACK);
                     }
                     setGraphic(getTreeItem().getGraphic());
                 }

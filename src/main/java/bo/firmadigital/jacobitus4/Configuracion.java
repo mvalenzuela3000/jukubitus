@@ -8,7 +8,7 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.TokenPKCS12;
-import java.io.IOException;
+import java.security.GeneralSecurityException;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -114,7 +114,7 @@ public class Configuracion extends Stage {
                 try {
                     token.crear(contrasena.getPass());
                     textFieldToken.setText(config.getToken().getName());
-                } catch (IOException ex) {
+                } catch (GeneralSecurityException ex) {
                     Alert alert = new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();

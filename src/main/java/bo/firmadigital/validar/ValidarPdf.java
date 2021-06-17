@@ -1,26 +1,33 @@
 package bo.firmadigital.validar;
 
-import com.itextpdf.text.pdf.AcroFields;
-import com.itextpdf.text.pdf.PdfArray;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfIndirectReference;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfNumber;
-import com.itextpdf.text.pdf.PdfObject;
-import com.itextpdf.text.pdf.security.PdfPKCS7;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNumber;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.signatures.PdfPKCS7;
+import com.itextpdf.signatures.SignatureUtil;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class ValidarPdf extends Validar {
     protected String urlPost = null;
@@ -29,6 +36,9 @@ public class ValidarPdf extends Validar {
     public ValidarPdf(File file) {
         try {
             super.file = file;
+            if (Security.getProvider("BC") == null) {
+                Security.addProvider(new BouncyCastleProvider());
+            }
             certificados = listarCertificados(file);
         } catch (Exception ignore) {
         }
@@ -55,13 +65,38 @@ public class ValidarPdf extends Validar {
         return token;
     }
 
+    @Override
+    public String getRevisionPath(String revision) {
+        try {
+            File out = new File(System.getProperty("java.io.tmpdir"), "documento.pdf");
+            int c = 1;
+            while (out.exists()) {
+                out = new File(System.getProperty("java.io.tmpdir"), "documento" + c + ".pdf");
+                c++;
+            }
+            PdfReader pdf = new PdfReader(file);
+            PdfDocument pdfDocument = new PdfDocument(pdf);
+            SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
+            try (InputStream is = signatureUtil.extractRevision(revision);OutputStream os = new FileOutputStream(out)) {
+                byte[] buffer = new byte[8 * 1024];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+            }
+            return out.getAbsolutePath();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
     private boolean bloqueaDocumento(PdfArray referenceArray) {
         if (referenceArray == null || referenceArray.size() == 0) {
             return false;
         }
         for (PdfObject referenceObject : referenceArray) {
             if (referenceObject.isIndirect())
-                referenceObject = ((PdfIndirectReference)referenceObject).getIndRef();
+                referenceObject = ((PdfIndirectReference)referenceObject).getIndirectReference();
             if (referenceObject.isIndirect()) {
                 continue;
             }
@@ -70,18 +105,18 @@ public class ValidarPdf extends Validar {
             }
             PdfDictionary reference = (PdfDictionary) referenceObject;
 
-            PdfName method = reference.getAsName(PdfName.TRANSFORMMETHOD);
+            PdfName method = reference.getAsName(PdfName.TransformMethod);
             if (method == null) {
                 continue;
             }
             if (new PdfName("UR").equals(method)) {
                 continue;
             }
-            if (!PdfName.DOCMDP.equals(method) && !PdfName.FIELDMDP.equals(method)) {
+            if (!PdfName.DocMDP.equals(method) && !PdfName.FieldMDP.equals(method)) {
                 continue;
             }
 
-            PdfDictionary transformParams = reference.getAsDict(PdfName.TRANSFORMPARAMS);
+            PdfDictionary transformParams = reference.getAsDictionary(PdfName.TransformParams);
             if (transformParams == null) {
                 continue;
             }
@@ -107,21 +142,23 @@ public class ValidarPdf extends Validar {
         List<CertDate> certs = new ArrayList<>();
         InputStream is = new FileInputStream(file);
         ContentsChecker pdf = new ContentsChecker(is);
-        AcroFields acroFields = pdf.getAcroFields();
-        List<String> firmas = acroFields.getSignatureNames();
+        PdfDocument pdfDocument = new PdfDocument(pdf);
+        SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
+        List<String> firmas = signatureUtil.getSignatureNames();
 
         for (String nombre : firmas) {
-            PdfArray referenceArray = acroFields.getFieldItem(nombre).getWidget(0).getAsDict(PdfName.V).getAsArray(PdfName.REFERENCE);
-            PdfPKCS7 pkcs7 = acroFields.verifySignature(nombre);
+            PdfDictionary dict = signatureUtil.getSignatureDictionary(nombre);
+            PdfArray referenceArray = dict.getAsArray(PdfName.Reference);
+            PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(nombre);
 
             CertDate certDate;
             if (pkcs7.getTimeStampToken() != null && pkcs7.getTimeStampToken().isSignatureValid(new JcaSimpleSignerInfoVerifierBuilder().build(certificateTSA.getPublicKey()))) {
-                certDate = new CertDate(pkcs7.getSigningCertificate(), pkcs7.getSignDate(), pkcs7.getTimeStampDate(), bloqueaDocumento(referenceArray));
+                certDate = new CertDate(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate(), pkcs7.getTimeStampDate(), bloqueaDocumento(referenceArray));
             } else {
-                certDate = new CertDate(pkcs7.getSigningCertificate(), pkcs7.getSignDate(), null, bloqueaDocumento(referenceArray));
+                certDate = new CertDate(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate(), null, bloqueaDocumento(referenceArray));
             }
-            certDate.setValid(pkcs7.verify());
-            certDate.setValidAdd(pdf.checkElementAdded(acroFields.getFieldItem(nombre).getWidget(0).getAsDict(PdfName.V)));
+            certDate.setValid(pkcs7.verifySignatureIntegrityAndAuthenticity());
+            certDate.setValidAdd(pdf.checkElementAdded(dict));
             certDate.setPKI(verificarPKI(certDate.getCertificate()));
             certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
             certs.add(certDate);

@@ -88,6 +88,10 @@ public abstract class Validar implements Iterable<CertDate> {
         return file.getAbsolutePath();
     }
 
+    public String getRevisionPath(String revision) {
+        throw new RuntimeException("No implementado.");
+    }
+
     public void export(File f) {
         throw new RuntimeException("No implementado.");
     }

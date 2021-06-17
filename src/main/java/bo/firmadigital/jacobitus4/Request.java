@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import com.itextpdf.text.pdf.security.ExternalSignature;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -66,7 +65,7 @@ public class Request {
             };
             HttpsURLConnection.setDefaultHostnameVerifier(hv);
         } catch (GeneralSecurityException ex) {
-            Logger.getLogger(ExternalSignature.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
