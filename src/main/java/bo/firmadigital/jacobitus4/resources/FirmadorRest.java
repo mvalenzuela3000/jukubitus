@@ -31,6 +31,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -262,7 +263,9 @@ public class FirmadorRest {
                 json.put("datos", datos);
                 PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                PdfSigner signer = new PdfSigner(reader, out, new StampingProperties());
+                StampingProperties stamp = new StampingProperties();
+                stamp.useAppendMode();
+                PdfSigner signer = new PdfSigner(reader, out, stamp);
                 if (bloquear) {
                     PdfSigFieldLock fieldLock = new PdfSigFieldLock();
                     fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);

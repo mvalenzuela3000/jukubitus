@@ -465,7 +465,9 @@ public class App extends Application {
                                 name = name.replace(".pdf", ".firmado.pdf");
                             }
                             File out = new File(destino, name);
-                            PdfSigner signer = new PdfSigner(reader, new FileOutputStream(out), new StampingProperties());
+                            StampingProperties stamp = new StampingProperties();
+                            stamp.useAppendMode();
+                            PdfSigner signer = new PdfSigner(reader, new FileOutputStream(out), stamp);
 
                             if (bloquear) {
                                 PdfSigFieldLock fieldLock = new PdfSigFieldLock();

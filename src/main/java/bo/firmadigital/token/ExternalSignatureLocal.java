@@ -37,7 +37,7 @@ public class ExternalSignatureLocal implements IExternalSignature {
     }
 
     @Override
-    public String getEncryptionAlgorithm() {
+    public synchronized String getEncryptionAlgorithm() {
         try {
             Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
             token.iniciar(pass);
@@ -48,7 +48,7 @@ public class ExternalSignatureLocal implements IExternalSignature {
         }
     }
 
-    public Certificate[] getChain() {
+    public synchronized Certificate[] getChain() {
         try {
             Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
             return token.getCertificateChain(label);
