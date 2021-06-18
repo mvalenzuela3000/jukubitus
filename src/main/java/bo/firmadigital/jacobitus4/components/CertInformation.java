@@ -31,6 +31,16 @@ public class CertInformation extends GridPane {
         GridPane.setHalignment(subTitle1, HPos.CENTER);
         this.add(subTitle1, 0, 1, 2, 1);
 
+        Label label0 = new Label("CI");
+        this.add(label0, 0, 2, 1, 1);
+        Label data0;
+        if (datos.getComplementoSubject() != null && !datos.getComplementoSubject().equals("")) {
+            data0 = new Label(datos.getNumeroDocumentoSubject() + datos.getComplementoSubject());
+        } else {
+            data0 = new Label(datos.getNumeroDocumentoSubject() + datos.getComplementoSubject());
+        }
+        this.add(data0, 1, 2, 1, 1);
+
         Label label1 = new Label("Nombre");
         this.add(label1, 0, 3, 1, 1);
         Label data1 = new Label(datos.getNombreComunSubject());
