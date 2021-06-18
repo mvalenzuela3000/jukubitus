@@ -35,9 +35,9 @@ public class CertInformation extends GridPane {
         this.add(label0, 0, 2, 1, 1);
         Label data0;
         if (datos.getComplementoSubject() != null && !datos.getComplementoSubject().equals("")) {
-            data0 = new Label(datos.getNumeroDocumentoSubject() + datos.getComplementoSubject());
+            data0 = new Label(datos.getNumeroDocumentoSubject() + "-" + datos.getComplementoSubject());
         } else {
-            data0 = new Label(datos.getNumeroDocumentoSubject() + datos.getComplementoSubject());
+            data0 = new Label(datos.getNumeroDocumentoSubject());
         }
         this.add(data0, 1, 2, 1, 1);
 
