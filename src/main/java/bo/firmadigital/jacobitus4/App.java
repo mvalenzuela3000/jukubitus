@@ -5,26 +5,18 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.firmar.Firmar;
+import bo.firmadigital.firmar.FirmarPKCS7;
+import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
-import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
-import com.itextpdf.forms.PdfSigFieldLock;
-import com.itextpdf.kernel.geom.Rectangle;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.pdf.StampingProperties;
-import com.itextpdf.signatures.BouncyCastleDigest;
-import com.itextpdf.signatures.IExternalDigest;
-import com.itextpdf.signatures.IExternalSignature;
-import com.itextpdf.signatures.PdfSignatureAppearance;
-import com.itextpdf.signatures.PdfSigner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,11 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -74,17 +61,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.bouncycastle.cert.jcajce.JcaCertStore;
-import org.bouncycastle.cms.CMSProcessableFile;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSTypedData;
-import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.util.Store;
 
 /**
  *
@@ -457,7 +433,7 @@ public class App extends Application {
                     for (int i = 0; i < files.size(); i++) {
                         InputStream is = new FileInputStream(files.get(i).getAbsolutePath());
                         try {
-                            PdfReader reader = new PdfReader(is);
+                            Firmar firmar = FirmarPdf.getInstance(slot, label, pass);
                             String name = new File(files.get(i).getAbsolutePath()).getName();
                             if (!name.endsWith(".pdf")) {
                                 name += ".firmado.pdf";
@@ -465,24 +441,7 @@ public class App extends Application {
                                 name = name.replace(".pdf", ".firmado.pdf");
                             }
                             File out = new File(destino, name);
-                            StampingProperties stamp = new StampingProperties();
-                            stamp.useAppendMode();
-                            PdfSigner signer = new PdfSigner(reader, new FileOutputStream(out), stamp);
-
-                            if (bloquear) {
-                                PdfSigFieldLock fieldLock = new PdfSigFieldLock();
-                                fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);
-                                fieldLock.setFieldLock(PdfSigFieldLock.LockAction.EXCLUDE, new String[]{});
-                                signer.setFieldLockDict(fieldLock);
-                            }
-                            Rectangle rect = new Rectangle(0, 0, 0, 0);
-                            PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-                            appearance.setPageRect(rect);
-
-                            IExternalDigest digest = new BouncyCastleDigest();
-                            IExternalSignature signature = ExternalSignatureLocal.getInstance(slot, label, pass);
-
-                            signer.signDetached(digest, signature, ((ExternalSignatureLocal)signature).getChain(), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
+                            firmar.firmar(is, new FileOutputStream(out), bloquear);
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidarPdf(out));
                         } catch (IOException ex) {
@@ -538,46 +497,20 @@ public class App extends Application {
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    if (Security.getProvider("BC") == null) {
-                        Security.addProvider(new BouncyCastleProvider());
-                    }
-                    Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
-                    token.iniciar(pass);
-                    PrivateKey privateKey = token.obtenerClavePrivada(label);
-                    if (privateKey == null) {
-                        token.salir();
-                        throw new RuntimeException("No se encontró la clave con alias: " + label);
-                    }
-                    X509Certificate x509Certificate = token.obtenerCertificado(label);
+                    Firmar firmar = FirmarPKCS7.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
-                        List<Certificate> certlist = new ArrayList<>();
-                        certlist.add(x509Certificate);
-                        Store certstore = new JcaCertStore(certlist);
-                        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(privateKey);
-                        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
-                        generator.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().setProvider("BC").
-                                build()).build(signer, (X509Certificate) x509Certificate));
-                        generator.addCertificates(certstore);
-
-                        CMSTypedData cmsdata;
+                        FileInputStream is = new FileInputStream(files.get(i).getFile());
+                        File out;
                         if (files.get(i).getFile().getAbsolutePath().endsWith(".p7s")) {
-                            try (InputStream is = new FileInputStream(files.get(i).getFile())) {
-                                CMSSignedData signedData = new CMSSignedData(is);
-                                cmsdata = signedData.getSignedContent();
-                                generator.addSigners(signedData.getSignerInfos());
-                            }
+                            out = new File(destino, files.get(i).getFile().getName());
                         } else {
-                            cmsdata = new CMSProcessableFile(files.get(i).getFile());
+                            out = new File(destino, files.get(i).getFile().getName() + ".p7s");
                         }
-                        CMSSignedData signeddata = generator.generate(cmsdata, true);
-                        String name = new File(files.get(i).getAbsolutePath()).getName();
-                        File out = new File(destino, name + ".p7s");
-                        new FileOutputStream(out).write(signeddata.getEncoded());
-
+                        FileOutputStream os = new FileOutputStream(out);
+                        firmar.firmar(is, os, MagicBytes.P7S.is(files.get(i).getFile()));
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidarPKCS7(out));
                     }
-                    token.salir();
                 }
                 return true;
             }

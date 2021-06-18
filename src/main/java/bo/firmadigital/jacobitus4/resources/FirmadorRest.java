@@ -5,22 +5,14 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
+import bo.firmadigital.firmar.Firmar;
+import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
 import bo.firmadigital.jacobitus4.util.Base64StreamParser;
-import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
-import com.itextpdf.forms.PdfSigFieldLock;
-import com.itextpdf.kernel.geom.Rectangle;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.pdf.StampingProperties;
-import com.itextpdf.signatures.BouncyCastleDigest;
-import com.itextpdf.signatures.IExternalDigest;
-import com.itextpdf.signatures.IExternalSignature;
-import com.itextpdf.signatures.PdfSignatureAppearance;
-import com.itextpdf.signatures.PdfSigner;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -31,7 +23,6 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -261,24 +252,10 @@ public class FirmadorRest {
             if (slot != null && pin != null && alias != null && file != null) {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
-                PdfReader reader = new PdfReader(new ByteArrayInputStream(file));
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                StampingProperties stamp = new StampingProperties();
-                stamp.useAppendMode();
-                PdfSigner signer = new PdfSigner(reader, out, stamp);
-                if (bloquear) {
-                    PdfSigFieldLock fieldLock = new PdfSigFieldLock();
-                    fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);
-                    fieldLock.setFieldLock(PdfSigFieldLock.LockAction.EXCLUDE, new String[]{});
-                    signer.setFieldLockDict(fieldLock);
-                }
-                Rectangle rect = new Rectangle(0, 0, 0, 0);
-                PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-                appearance.setPageRect(rect);
 
-                IExternalDigest digest = new BouncyCastleDigest();
-                IExternalSignature signature = ExternalSignatureLocal.getInstance(slot, alias, pin);
-                signer.signDetached(digest, signature, ((ExternalSignatureLocal)signature).getChain(), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                Firmar firmar = FirmarPdf.getInstance(slot, alias, pin);
+                firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
 
                 datos.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
                 json.put("finalizado", true);
