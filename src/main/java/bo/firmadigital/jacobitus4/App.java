@@ -500,14 +500,9 @@ public class App extends Application {
                     Firmar firmar = FirmarPKCS7.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
                         FileInputStream is = new FileInputStream(files.get(i).getFile());
-                        File out;
-                        if (files.get(i).getFile().getAbsolutePath().endsWith(".p7s")) {
-                            out = new File(destino, files.get(i).getFile().getName());
-                        } else {
-                            out = new File(destino, files.get(i).getFile().getName() + ".p7s");
-                        }
+                        File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
                         FileOutputStream os = new FileOutputStream(out);
-                        firmar.firmar(is, os, MagicBytes.P7S.is(files.get(i).getFile()));
+                        firmar.firmar(is, os, files.get(i).getFile().getAbsolutePath().endsWith(".p7s"));
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidarPKCS7(out));
                     }
