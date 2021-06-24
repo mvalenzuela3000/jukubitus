@@ -7,7 +7,6 @@ package bo.firmadigital.firmar;
 
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
-import bo.firmadigital.validar.MagicBytes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -88,6 +87,8 @@ public class FirmarPKCS7 implements Firmar {
             if (p7s) {
                 CMSSignedData signedData = new CMSSignedData(is);
                 cmsdata = signedData.getSignedContent();
+                Store current = signedData.getCertificates();
+                generator.addCertificates(current);
                 generator.addSigners(signedData.getSignerInfos());
             } else {
                 byte[] data = is.readAllBytes();

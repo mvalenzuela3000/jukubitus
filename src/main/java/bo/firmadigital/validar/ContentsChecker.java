@@ -77,11 +77,40 @@ public class ContentsChecker extends PdfReader {
                 }
                 if (widgets > 0) {
                     if (widgets == signatures && signatures == (map.containsKey(PdfName.Sig) ? map.get(PdfName.Sig).size() : 0)) {
-                        if ((map.containsKey(PdfName.Highlight) ? map.get(PdfName.Highlight).size() : 0) > 0) {
-                            return Estado.highlight_agregado;
-                        } else {
-                            return Estado.widget_firma_agregado;
+                        if (map.containsKey(PdfName.Annot)) {
+                            for (PdfDictionary annot : map.get(PdfName.Annot)) {
+                                if (annot.containsKey(PdfName.Subtype)) {
+                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Text) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Link) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.FreeText)){
+                                        return Estado.text_agregado;
+                                    }
+                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Line) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Square) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Circle) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Polygon) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.PolyLine)) {
+                                        return Estado.graph_agregado;
+                                    }
+                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Highlight) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Underline) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Squiggly) ||
+                                            annot.getAsName(PdfName.Subtype).equals(PdfName.StrikeOut)) {
+                                        return Estado.highlight_agregado;
+                                    }
+                                    if (!annot.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
+                                        return Estado.desconocido_agregado;
+                                    }
+                                }
+                            }
                         }
+                        if (map.containsKey(PdfName.FreeText)) {
+                            return Estado.text_agregado;
+                        }
+                        if (map.containsKey(PdfName.Highlight)) {
+                            return Estado.highlight_agregado;
+                        }
+                        return Estado.widget_firma_agregado;
                     } else {
                         return Estado.widget_otro_agregado;
                     }
@@ -105,6 +134,8 @@ public class ContentsChecker extends PdfReader {
     public enum Estado {
         widget_firma_agregado,
         widget_otro_agregado,
+        text_agregado,
+        graph_agregado,
         highlight_agregado,
         desconocido_agregado,
         sin_cambios

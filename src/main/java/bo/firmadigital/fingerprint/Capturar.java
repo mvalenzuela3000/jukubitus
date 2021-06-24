@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.fingerprint;
 
-import bo.firmadigital.jacobitus4.App;
 import com.digitalpersona.onetouch.DPFPGlobal;
 import com.digitalpersona.onetouch.capture.DPFPCapture;
 import com.digitalpersona.onetouch.capture.DPFPCapturePriority;

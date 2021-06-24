@@ -165,6 +165,7 @@ public class Main {
  
         // Configuring the connector
         ServerConnector sslConnector = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+        sslConnector.setHost("127.0.0.1");
         sslConnector.setPort(9000);
  
         // Setting HTTP and HTTPS connectors

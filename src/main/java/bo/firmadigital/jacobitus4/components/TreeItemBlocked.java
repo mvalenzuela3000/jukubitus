@@ -12,6 +12,7 @@ import javafx.scene.control.TreeItem;
 /**
  *
  * @author ADSIB
+ * @param <T>
  */
 public class TreeItemBlocked<T extends Object> extends TreeItem {
     protected CertDate cert;

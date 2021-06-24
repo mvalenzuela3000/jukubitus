@@ -109,7 +109,7 @@ public class Functions {
      */
     public static String toFullHexString(long value) {
         long currentValue = value;
-        StringBuffer stringBuffer = new StringBuffer(16);
+        StringBuilder stringBuffer = new StringBuilder(16);
         for(int j = 0; j < 16; j++) {
             int currentDigit = (int) currentValue & 0xf;
             stringBuffer.append(HEX_DIGITS[currentDigit]);
@@ -128,7 +128,7 @@ public class Functions {
      */
     public static String toFullHexString(int value) {
         int currentValue = value;
-        StringBuffer stringBuffer = new StringBuffer(8);
+        StringBuilder stringBuffer = new StringBuilder(8);
         for(int i = 0; i < 8; i++) {
             int currentDigit = currentValue & 0xf;
             stringBuffer.append(HEX_DIGITS[currentDigit]);
@@ -161,7 +161,7 @@ public class Functions {
             return null;
         }
 
-        StringBuffer buffer = new StringBuffer(2 * value.length);
+        StringBuilder buffer = new StringBuilder(2 * value.length);
         int          single;
 
         for (int i = 0; i < value.length; i++) {
@@ -396,7 +396,7 @@ public class Functions {
     private static String getName(Map<Integer,String> nameMap, long id) {
         String name = null;
         if ((id >>> 32) == 0) {
-            name = nameMap.get(Integer.valueOf((int)id));
+            name = nameMap.get((int)id);
         }
         if (name == null) {
             name = "Unknown 0x" + toFullHexString(id);
@@ -409,7 +409,7 @@ public class Functions {
         if (mech == null) {
             throw new IllegalArgumentException("Unknown name " + name);
         }
-        return mech.intValue() & 0xffffffffL;
+        return mech & 0xffffffffL;
     }
 
     public static String getMechanismName(long id) {
@@ -489,7 +489,7 @@ public class Functions {
      * @postconditions
      */
     public static boolean equals(CK_DATE date1, CK_DATE date2) {
-        boolean equal = false;
+        boolean equal;
 
         if (date1 == date2) {
             equal = true;
@@ -580,7 +580,7 @@ public class Functions {
         if ((id >>> 32) != 0) {
             throw new AssertionError("Id has high bits set: " + id + ", " + name);
         }
-        Integer intId = Integer.valueOf((int)id);
+        Integer intId = (int)id;
         if (nameMap.put(intId, name) != null) {
             throw new AssertionError("Duplicate id: " + id + ", " + name);
         }

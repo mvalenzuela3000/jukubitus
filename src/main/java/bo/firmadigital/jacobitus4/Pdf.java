@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -95,7 +96,6 @@ public class Pdf extends Stage {
                 try {
                     document.close();
                     String file = out.getAbsolutePath();
-                    //document.setPageSize(new Rectangle(WIDTH, HEIGHT));
                     document.setMargins(0, 0, 0, 0);
                     int c = 1;
                     do {
@@ -105,7 +105,6 @@ public class Pdf extends Stage {
                     writer = new PdfWriter(new FileOutputStream(out));
                     pdfDocument = new PdfDocument(writer);
                     document = new Document(pdfDocument, new PageSize(WIDTH, HEIGHT));
-                    //document.open();
                     ObservableList<String> list = FXCollections.observableArrayList();
                     PdfReader reader = new PdfReader(file);
                     PdfDocument pdf = new PdfDocument(reader);
@@ -115,7 +114,6 @@ public class Pdf extends Stage {
                             list.add("Página " + (list.size() + 1));
                         }
                     }
-                    //reader.close();
                     getListView().setItems(list);
                     new File(file).delete();
                 } catch (IOException ex) {
@@ -262,12 +260,11 @@ public class Pdf extends Stage {
                         } else {
                             pdf.copyPagesTo(i, i, pdfDocument);
                         }
-                        /*float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()) / image.getWidth()) * 100;
-                        image.scalePercent(scaler);*/
                         updateProgress(i + 1, pdfDocument.getNumberOfPages());
-                        lv.getItems().add("Página " + (lv.getItems().size() + 1));
+                        Platform.runLater(() -> {
+                            lv.getItems().add("Página " + (lv.getItems().size() + 1));
+                        });
                     }
-                    //reader.close();
                 } catch (IOException ex) {
                     Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -284,7 +281,10 @@ public class Pdf extends Stage {
             @Override
             protected Object call() throws Exception {
                 try {
-                    document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                    if (lv.getItems().size() > 0) {
+                        document.add(new AreaBreak(AreaBreakType.LAST_PAGE));
+                        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                    }
                     FileInputStream imgFile = new FileInputStream(file.getAbsolutePath());
                     javafx.scene.image.Image img = new javafx.scene.image.Image(imgFile, WIDTH * 1.5, HEIGHT * 1.5, false, true);
                     Image image;
@@ -293,13 +293,12 @@ public class Pdf extends Stage {
                         ImageData imageData = ImageDataFactory.create(baos.toByteArray());
                         image = new Image(imageData);
                     }
-                    //Image image = Image.getInstance(file.getAbsolutePath(), true);
-                    /*float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()) / image.getWidth()) * 100;
-                    image.scalePercent(scaler);*/
                     image.scaleAbsolute(WIDTH, HEIGHT);
                     document.add(image);
                     updateProgress(1, 1);
-                    lv.getItems().add("Página " + (lv.getItems().size() + 1));
+                    Platform.runLater(() -> {
+                        lv.getItems().add("Página " + (lv.getItems().size() + 1));
+                    });
                 } catch (IOException ex) {
                     Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
                 }

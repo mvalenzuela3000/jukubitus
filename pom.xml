@@ -48,14 +48,13 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15to18</artifactId>
+            <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.68</version>
         </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>itext7-core</artifactId>
+            <artifactId>sign</artifactId>
             <version>7.1.15</version>
-            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>

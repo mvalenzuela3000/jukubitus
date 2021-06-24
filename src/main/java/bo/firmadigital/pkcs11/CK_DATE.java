@@ -99,8 +99,10 @@ public class CK_DATE implements Cloneable {
      * Create a (deep) clone of this object.
      *
      * @return A clone of this object.
+     * @throws java.lang.CloneNotSupportedException
      */
-    public Object clone() {
+    @Override
+    public Object clone() throws CloneNotSupportedException {
         CK_DATE copy = null;
         try {
             copy = (CK_DATE) super.clone();
@@ -121,8 +123,9 @@ public class CK_DATE implements Cloneable {
      *
      * @return the string representation of CK_DATE
      */
+    @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         buffer.append(new String(day));
         buffer.append('.');
