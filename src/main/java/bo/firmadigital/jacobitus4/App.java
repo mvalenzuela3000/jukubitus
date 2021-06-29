@@ -68,12 +68,14 @@ import javafx.stage.WindowEvent;
  */
 public class App extends Application {
     private ProgressBar progressBar;
+    private ContextMenu contextMenuToken;
     private ContextMenu contextMenu;
     private MenuItem exportarItem;
     private TableView table;
     private TableView tableFile;
     private File destino;
     private Validar validar;
+    private CK_TOKEN_INFO tokenInfo;
     private static boolean servicio;
     private static boolean taskBar;
     private static String url = null, token, urlPost;
@@ -254,6 +256,14 @@ public class App extends Application {
         menuBar.getMenus().add(helpMenu);
         root.setTop(menuBar);
 
+        contextMenuToken = new ContextMenu();
+        MenuItem contenidoItem = new MenuItem("Información");
+        contenidoItem.setOnAction((ActionEvent e) -> {
+            TokenInfo info = new TokenInfo(stage, tokenInfo.getSlot());
+            info.showAndWait();
+        });
+        contextMenuToken.getItems().addAll(contenidoItem);
+
         contextMenu = new ContextMenu();
         MenuItem detalleItem = new MenuItem("Detalle Validación");
         detalleItem.setOnAction((ActionEvent e) -> {
@@ -278,6 +288,16 @@ public class App extends Application {
         table.getColumns().setAll(tokenCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setMaxHeight(76);
+        table.setRowFactory(tv -> {
+            TableRow<CK_TOKEN_INFO> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    tokenInfo = row.getItem();
+                    contextMenuToken.show(table, event.getScreenX(), event.getScreenY());
+                }
+            });
+            return row;
+        });
 
         tableFile = new TableView();
         TableColumn fileCol = new TableColumn("Archivo");
@@ -298,7 +318,7 @@ public class App extends Application {
                     } catch (IOException ignore) {
                         exportarItem.setVisible(false);
                     }
-                    contextMenu.show(table, event.getScreenX(), event.getScreenY());
+                    contextMenu.show(tableFile, event.getScreenX(), event.getScreenY());
                 }
             });
             return row;

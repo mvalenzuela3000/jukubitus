@@ -6,6 +6,7 @@
 package bo.firmadigital.validar;
 
 import com.itextpdf.io.source.PdfTokenizer.TokenType;
+import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
@@ -24,6 +25,33 @@ import java.util.TreeMap;
 public class ContentsChecker extends PdfReader {
     public ContentsChecker(InputStream is) throws IOException {
         super(is);
+    }
+
+    protected Estado estadoFromAnnot(PdfDictionary annot) {
+        if (annot.containsKey(PdfName.Subtype)) {
+            if (annot.getAsName(PdfName.Subtype).equals(PdfName.Text) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Link) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.FreeText)){
+                return Estado.text_agregado;
+            }
+            if (annot.getAsName(PdfName.Subtype).equals(PdfName.Line) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Square) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Circle) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Polygon) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.PolyLine)) {
+                return Estado.graph_agregado;
+            }
+            if (annot.getAsName(PdfName.Subtype).equals(PdfName.Highlight) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Underline) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.Squiggly) ||
+                    annot.getAsName(PdfName.Subtype).equals(PdfName.StrikeOut)) {
+                return Estado.highlight_agregado;
+            }
+            if (!annot.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
+                return Estado.desconocido_agregado;
+            }
+        }
+        return null;
     }
 
     /**
@@ -57,13 +85,36 @@ public class ContentsChecker extends PdfReader {
                                 if (dict.containsKey(PdfName.Type) && dict.containsKey(PdfName.Subtype)) {
                                     if (dict.getAsName(PdfName.Type).equals(PdfName.Annot) && dict.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
                                         widgets++;
-                                        if (dict.containsKey(PdfName.V) && dict.containsKey(PdfName.FT)) {
+                                        if (dict.containsKey(PdfName.V) && dict.containsKey(PdfName.FT) && dict.containsKey(PdfName.Contents)) {
                                             if (dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
                                                 signatures++;
                                             }
                                         } else {
                                             if (dict.containsKey(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
                                                 widgets--;
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (dict.getAsName(PdfName.Type).equals(PdfName.Page) && dict.containsKey(PdfName.Annots)) {
+                                        PdfArray array = dict.getAsArray(PdfName.Annots);
+                                        for (PdfObject object : array) {
+                                            if (object.isDictionary()) {
+                                                if (object.getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                    PdfDictionary dict2 = (PdfDictionary)object;
+                                                    if (dict2.containsKey(PdfName.Subtype) && dict2.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
+                                                        widgets++;
+                                                        if (dict2.containsKey(PdfName.V) && dict2.containsKey(PdfName.FT) && dict.containsKey(PdfName.Contents)) {
+                                                            if (dict2.getAsName(PdfName.FT).equals(PdfName.Sig)) {
+                                                                signatures++;
+                                                            }
+                                                        } else {
+                                                            if (dict.containsKey(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
+                                                                widgets--;
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -79,36 +130,51 @@ public class ContentsChecker extends PdfReader {
                     if (widgets == signatures && signatures == (map.containsKey(PdfName.Sig) ? map.get(PdfName.Sig).size() : 0)) {
                         if (map.containsKey(PdfName.Annot)) {
                             for (PdfDictionary annot : map.get(PdfName.Annot)) {
-                                if (annot.containsKey(PdfName.Subtype)) {
-                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Text) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Link) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.FreeText)){
-                                        return Estado.text_agregado;
-                                    }
-                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Line) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Square) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Circle) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Polygon) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.PolyLine)) {
-                                        return Estado.graph_agregado;
-                                    }
-                                    if (annot.getAsName(PdfName.Subtype).equals(PdfName.Highlight) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Underline) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.Squiggly) ||
-                                            annot.getAsName(PdfName.Subtype).equals(PdfName.StrikeOut)) {
-                                        return Estado.highlight_agregado;
-                                    }
-                                    if (!annot.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
-                                        return Estado.desconocido_agregado;
-                                    }
+                                Estado estado = estadoFromAnnot(annot);
+                                if (estado != null) {
+                                    return estado;
                                 }
                             }
                         }
-                        if (map.containsKey(PdfName.FreeText)) {
-                            return Estado.text_agregado;
-                        }
-                        if (map.containsKey(PdfName.Highlight)) {
-                            return Estado.highlight_agregado;
+                        if (map.containsKey(PdfName.Page)) {
+                            for (PdfDictionary page : map.get(PdfName.Page)) {
+                                if (page.containsKey(PdfName.Annots)) {
+                                    PdfArray array = page.getAsArray(PdfName.Annots);
+                                    for (PdfObject object : array) {
+                                        if (object.isDictionary()) {
+                                            Estado estado = estadoFromAnnot((PdfDictionary)object);
+                                            if (estado != null) {
+                                                return estado;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (page.containsKey(PdfName.Parent)) {
+                                    PdfDictionary parent = page.getAsDictionary(PdfName.Parent);
+                                    if (parent.containsKey(PdfName.Kids)) {
+                                        PdfArray array = parent.getAsArray(PdfName.Kids);
+                                        for (PdfObject obj : array) {
+                                            if (obj.isDictionary()) {
+                                                PdfDictionary dict = (PdfDictionary)obj;
+                                                if (dict.containsKey(PdfName.Contents)) {
+                                                    if (dict.get(PdfName.Contents).isArray()) {
+                                                        PdfArray contents = dict.getAsArray(PdfName.Contents);
+                                                        for (PdfObject cont : contents) {
+                                                            if (cont.getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                                return Estado.desconocido_agregado;
+                                                            }
+                                                        }
+                                                    } else {
+                                                        if (dict.get(PdfName.Contents).getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                            return Estado.desconocido_agregado;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                         return Estado.widget_firma_agregado;
                     } else {
@@ -117,6 +183,38 @@ public class ContentsChecker extends PdfReader {
                 } else {
                     if (map.containsKey(PdfName.Annot) || map.containsKey(PdfName.Annots) || map.containsKey(PdfName.Highlight)) {
                         return Estado.desconocido_agregado;
+                    }
+                    if (map.containsKey(PdfName.Page)) {
+                        for (PdfDictionary page : map.get(PdfName.Page)) {
+                            if (page.containsKey(PdfName.Parent)) {
+                                PdfDictionary parent = page.getAsDictionary(PdfName.Parent);
+                                if (parent.containsKey(PdfName.Kids)) {
+                                    PdfArray array = parent.getAsArray(PdfName.Kids);
+                                    for (PdfObject obj : array) {
+                                        if (obj.isDictionary()) {
+                                            PdfDictionary dict = (PdfDictionary)obj;
+                                            if (dict.containsKey(PdfName.Contents)) {
+                                                if (dict.get(PdfName.Contents).isArray()) {
+                                                    PdfArray contents = dict.getAsArray(PdfName.Contents);
+                                                    for (PdfObject cont : contents) {
+                                                        if (cont.getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                            return Estado.desconocido_agregado;
+                                                        }
+                                                    }
+                                                } else {
+                                                    if (dict.get(PdfName.Contents).getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                        return Estado.desconocido_agregado;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (page.containsKey(PdfName.Annot) || page.containsKey(PdfName.Annots)) {
+                                return Estado.desconocido_agregado;
+                            }
+                        }
                     }
                     if (map.containsKey(PdfName.Sig)) {
                         return Estado.widget_firma_agregado;

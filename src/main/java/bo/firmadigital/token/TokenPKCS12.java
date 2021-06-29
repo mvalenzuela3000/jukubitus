@@ -13,6 +13,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Date;
@@ -161,7 +162,7 @@ public class TokenPKCS12 implements Token {
 
         // Generando nombres
         X500NameBuilder subjectBuilder = new X500NameBuilder();
-        subjectBuilder.addRDN(BCStyle.CN, "Certificado Auto Firmado");
+        subjectBuilder.addRDN(BCStyle.CN, "Sin Certificado");
         
         // Generando certificado autofirmado
         X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(subjectBuilder.build(), new BigInteger("111111"), new Date(), new Date(), subjectBuilder.build(), SubjectPublicKeyInfo.getInstance(pair.getPublic().getEncoded()));
@@ -246,7 +247,11 @@ public class TokenPKCS12 implements Token {
      */
     @Override
     public void cargarCertificado(X509Certificate certificado, String clavesId) throws GeneralSecurityException {
-        certificado.checkValidity();
+        try {
+            certificado.checkValidity();
+        } catch (CertificateExpiredException ex) {
+            throw new GeneralSecurityException("El certificado se encuentra expirado.");
+        }
 
         if (!this.keystore.getCertificate(clavesId).getPublicKey().equals(certificado.getPublicKey())) {
             throw new UnrecoverableKeyException("El certificado no corresponde a la clave privada seleccionada.");

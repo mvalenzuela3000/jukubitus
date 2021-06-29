@@ -132,7 +132,14 @@ public class Firmante extends Stage {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
-            close();
+            Contrasena contrasena = new Contrasena(Firmante.this, false);
+            contrasena.showAndWait();
+            if (contrasena.getPass() == null) {
+                close();
+            } else {
+                this.pass = contrasena.getPass();
+                new Thread(listarCertificados(this.pass)).start();
+            }
         });
         return task;
     }
