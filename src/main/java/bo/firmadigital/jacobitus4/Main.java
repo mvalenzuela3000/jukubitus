@@ -93,7 +93,17 @@ public class Main {
                     popup.add(exitItem);
                     trayIcon.setPopupMenu(popup);
                     tray.add(trayIcon);
-                    App.run(true, true);
+                    if (args.length == 1) {
+                        String[] parts = args[0].split("\\?");
+                        if (parts.length == 2) {
+                            JSONObject body = Request.splitQuery(parts[1]);
+                            App.run(true, true, body.getString("url"), body.getString("token"), body.getString("urlpost"));
+                        } else {
+                            App.run(true, true, args[0]);
+                        }
+                    } else {
+                        App.run(true, true);
+                    }
                 } else {
                     if (args.length == 1) {
                         String[] parts = args[0].split("\\?");

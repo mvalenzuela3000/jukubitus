@@ -373,7 +373,9 @@ public class App extends Application {
         stage.show();
         if (taskBar) {
             Platform.setImplicitExit(false);
-            stage.hide();
+            if (url == null && param == null) {
+                stage.hide();
+            }
         }
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (servicio && !taskBar) {

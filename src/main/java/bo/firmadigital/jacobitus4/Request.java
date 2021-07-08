@@ -176,7 +176,7 @@ public class Request {
                 request("https://localhost:9000/api/app/show", "POST", "{\"error\":\"Error al procesar la URL.\"}", null);
             }
         } else {
-            request("https://localhost:9000/api/app/show", "POST", "{\"file\":\"" + url + "\"}", null);
+            request("https://localhost:9000/api/app/show", "POST", "{\"file\":\"" + url.replace("\\", "\\\\") + "\"}", null);
         }
     }
 }
