@@ -96,21 +96,30 @@ public class ContentsChecker extends PdfReader {
                                         }
                                     }
                                 } else {
-                                    if (dict.getAsName(PdfName.Type).equals(PdfName.Page) && dict.containsKey(PdfName.Annots)) {
-                                        PdfArray array = dict.getAsArray(PdfName.Annots);
-                                        for (PdfObject object : array) {
-                                            if (object.isDictionary()) {
-                                                if (object.getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
-                                                    PdfDictionary dict2 = (PdfDictionary)object;
-                                                    if (dict2.containsKey(PdfName.Subtype) && dict2.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
-                                                        widgets++;
-                                                        if (dict2.containsKey(PdfName.V) && dict2.containsKey(PdfName.FT) && dict.containsKey(PdfName.Contents)) {
-                                                            if (dict2.getAsName(PdfName.FT).equals(PdfName.Sig)) {
-                                                                signatures++;
-                                                            }
-                                                        } else {
-                                                            if (dict.containsKey(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
-                                                                widgets--;
+                                    if (dict.getAsName(PdfName.Type).equals(PdfName.Page) && dict.containsKey(PdfName.Parent)) {
+                                        PdfDictionary parent = dict.getAsDictionary(PdfName.Parent);
+                                        if (parent.containsKey(PdfName.Kids)) {
+                                            PdfArray array = parent.getAsArray(PdfName.Kids);
+                                            for (PdfObject object : array) {
+                                                if (object.isDictionary()) {
+                                                    PdfDictionary dictKids = (PdfDictionary)object;
+                                                    if (dictKids.containsKey(PdfName.Annots)) {
+                                                        PdfArray array2 = dictKids.getAsArray(PdfName.Annots);
+                                                        for (PdfObject object2 : array2) {
+                                                            if (object2.getIndirectReference().getOffset() > byteRange[2] + byteRange[3]) {
+                                                                PdfDictionary dict2 = (PdfDictionary)object2;
+                                                                if (dict2.containsKey(PdfName.Subtype) && dict2.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
+                                                                    widgets++;
+                                                                    if (dict2.containsKey(PdfName.V) && dict2.containsKey(PdfName.FT) && dict.containsKey(PdfName.Contents)) {
+                                                                        if (dict2.getAsName(PdfName.FT).equals(PdfName.Sig)) {
+                                                                            signatures++;
+                                                                        }
+                                                                    } else {
+                                                                        if (dict.containsKey(PdfName.FT) && dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
+                                                                            widgets--;
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -127,7 +136,7 @@ public class ContentsChecker extends PdfReader {
                     }
                 }
                 if (widgets > 0) {
-                    if (widgets == signatures && signatures == (map.containsKey(PdfName.Sig) ? map.get(PdfName.Sig).size() : 0)) {
+                    if (widgets == signatures) {
                         if (map.containsKey(PdfName.Annot)) {
                             for (PdfDictionary annot : map.get(PdfName.Annot)) {
                                 Estado estado = estadoFromAnnot(annot);

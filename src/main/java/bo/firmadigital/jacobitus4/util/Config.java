@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Properties;
 import javax.swing.filechooser.FileSystemView;
 
@@ -105,5 +108,25 @@ public class Config {
         } catch (IOException ex) {
             throw new RuntimeException(ex.getMessage());
         }
+    }
+
+    public File getConversorFile() {
+        return new File(user, "ConversorPdf.jar");
+    }
+
+    public URLClassLoader getConversor() {
+        File jar = new File(user, "ConversorPdf.jar");
+        if (jar.exists()) {
+            try {
+                URLClassLoader child = new URLClassLoader(
+                        new URL[] {jar.toURI().toURL()},
+                        this.getClass().getClassLoader()
+                );
+                return child;
+            } catch (MalformedURLException ex) {
+                return null;
+            }
+        }
+        return null;
     }
 }

@@ -8,8 +8,15 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.TokenPKCS12;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -18,6 +25,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -36,6 +44,8 @@ public class Configuracion extends Stage {
     private TextField textFieldIP;
     private TextField textFieldPort;
     private TextField textFieldToken;
+    private final ProgressBar progressBar;
+    private final Button buttonDescargar;
 
     public Configuracion(Stage parent) {
         setTitle("Panel de configuración");
@@ -121,5 +131,58 @@ public class Configuracion extends Stage {
                 }
             }
         });
+        Label titleC = new Label("Conversor ODT y DOCX");
+        titleC.setStyle("-fx-font-weight: bold");
+        vbox2.getChildren().add(titleC);
+        progressBar = new ProgressBar();
+        progressBar.prefWidthProperty().bind(vbox2.widthProperty());
+        vbox2.getChildren().add(progressBar);
+        buttonDescargar = new Button("Descargar");
+        vbox2.getChildren().add(buttonDescargar);
+        buttonDescargar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            buttonDescargar.setDisable(true);
+            new Thread(descargar()).start();
+        });
+    }
+
+    public Task descargar() {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                try {
+                    URL url = new URL("https://firmadigital.bo/jacobitus4/descargas/ConversorPdf.jar");
+                    HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+                    httpConnection.setRequestMethod("HEAD");
+                    int fileSize = httpConnection.getContentLength();
+                    httpConnection.disconnect();
+                    try (BufferedInputStream is = new BufferedInputStream(url.openStream())) {
+                        try (FileOutputStream out = new FileOutputStream(config.getConversorFile())) {
+                            byte[] buffer = new byte[4096];
+                            int descargado = 0, count;
+                            while ((count = is.read(buffer)) != -1) {
+                                out.write(buffer, 0, count);
+                                descargado += count;
+                                updateProgress(descargado, fileSize);
+                            }
+                        }
+                    }
+                    buttonDescargar.setDisable(false);
+                    return true;
+                } catch (IOException ex) {
+                    updateProgress(100, 100);
+                    throw ex;
+                }
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.setHeaderText("No se pudo acceder");
+            alert.showAndWait();
+            buttonDescargar.setDisable(false);
+        });
+        return task;
     }
 }

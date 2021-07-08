@@ -8,6 +8,7 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
+import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
@@ -54,7 +55,11 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
@@ -108,6 +113,8 @@ public class App extends Application {
             fileChooser.setTitle("Abrir PDF");
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
             fileChooser.getExtensionFilters().add(extFilter);
+            FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Documentos", "*.odt", "*.docx");
+            fileChooser.getExtensionFilters().add(extFilterDocs);
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
             if (files != null && files.size() > 0) {
                 new Thread(validar(files)).start();
@@ -249,7 +256,12 @@ public class App extends Application {
         });
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(AlertType.NONE, "Jacobitus Total " + VERSION + ", JavaFX " + javafxVersion + ", con Java " + javaVersion + ".", ButtonType.OK);
+            ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Acerca de ...");
+            alert.setHeaderText("Jacobitus Total " + VERSION + "\nJavaFX " + javafxVersion + "\nJava " + javaVersion);
+            alert.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
+            alert.setGraphic(adsib);
             alert.showAndWait();
         });
         helpMenu.getItems().addAll(servicioItem, aboutItem);
@@ -322,6 +334,24 @@ public class App extends Application {
                 }
             });
             return row;
+        });
+        tableFile.setOnDragOver((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY);
+            } else {
+                event.consume();
+            }
+        });
+        tableFile.setOnDragDropped((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                success = true;
+                new Thread(validar(db.getFiles())).start();
+            }
+            event.setDropCompleted(success);
+            event.consume();
         });
 
         BorderPane tables = new BorderPane(tableFile);
@@ -429,7 +459,13 @@ public class App extends Application {
             protected Object call() throws Exception {
                 List<Validar> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
-                    certs.add(new ValidarPdf(files.get(i)));
+                    if (files.get(i).getName().endsWith(".odt")) {
+                        certs.add(new ValidarPdf(Converter.odtToPdf(files.get(i))));
+                    } else if (files.get(i).getName().endsWith(".docx")) {
+                        certs.add(new ValidarPdf(Converter.docxToPdf(files.get(i))));
+                    } else {
+                        certs.add(new ValidarPdf(files.get(i)));
+                    }
                     updateProgress(i + 1, files.size());
                 }
                 tableFile.setItems(FXCollections.observableList(certs));
@@ -437,6 +473,11 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 

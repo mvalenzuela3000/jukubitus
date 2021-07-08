@@ -79,7 +79,7 @@ public class TokenPKCS12 implements Token {
         this.PIN = pin;
         
         try {
-            this.keystore = KeyStore.getInstance("PKCS12", "BC");
+            this.keystore = KeyStore.getInstance("PKCS12-3DES-3DES", "BC");
             this.keystore.load(new FileInputStream(slot.getConfiguracion()), pin.toCharArray());
         } catch (IOException ex) {
             throw new GeneralSecurityException(ex);
@@ -90,7 +90,7 @@ public class TokenPKCS12 implements Token {
         this.PIN = pin;
         
         try {
-            this.keystore = KeyStore.getInstance("PKCS12", "BC");
+            this.keystore = KeyStore.getInstance("PKCS12-3DES-3DES", "BC");
             keystore.load(null, pin.toCharArray());
             generarClaves("ADSIB", pin, 0);
             this.keystore.store(new FileOutputStream(slot.getConfiguracion()), pin.toCharArray());
@@ -174,7 +174,7 @@ public class TokenPKCS12 implements Token {
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
             X509Certificate certificate = (X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(certBytes));
 
-            keystore.setKeyEntry(clavesId, pair.getPrivate(), null,new Certificate[]{certificate});
+            keystore.setKeyEntry(clavesId, pair.getPrivate(), null, new Certificate[]{certificate});
 
             return pair.getPublic();
         } catch (OperatorCreationException | IOException | CertificateException ex) {
