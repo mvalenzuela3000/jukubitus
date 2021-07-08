@@ -163,16 +163,20 @@ public class Request {
     }
 
     public void show(String url) {
-        try {
-            String[] parts = url.split("\\?");
-            if (parts.length == 2) {
-                String body = splitQuery(parts[1]).toString();
-                request("https://localhost:9000/api/app/show", "POST", body, null);
-            } else {
+        if (url.startsWith("app")) {
+            try {
+                String[] parts = url.split("\\?");
+                if (parts.length == 2) {
+                    String body = splitQuery(parts[1]).toString();
+                    request("https://localhost:9000/api/app/show", "POST", body, null);
+                } else {
+                    request("https://localhost:9000/api/app/show", "POST", "{\"error\":\"Error al procesar la URL.\"}", null);
+                }
+            } catch (UnsupportedEncodingException | JSONException ex) {
                 request("https://localhost:9000/api/app/show", "POST", "{\"error\":\"Error al procesar la URL.\"}", null);
             }
-        } catch (UnsupportedEncodingException | JSONException ex) {
-            request("https://localhost:9000/api/app/show", "POST", "{\"error\":\"Error al procesar la URL.\"}", null);
+        } else {
+            request("https://localhost:9000/api/app/show", "POST", "{\"file\":\"" + url + "\"}", null);
         }
     }
 }

@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4.resources;
 
 import bo.firmadigital.jacobitus4.App;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
@@ -39,7 +40,10 @@ public class AppRest {
                 }
                 App.show(url, token, urlpost);
             } else {
-                if (json.has("error")) {
+                if (json.has("file")) {
+                    File file = new File(json.getString("file"));
+                    App.show(file);
+                } else if (json.has("error")) {
                     App.show(json.getString("error"));
                 } else {
                     App.show();

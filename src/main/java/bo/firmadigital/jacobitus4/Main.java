@@ -101,7 +101,7 @@ public class Main {
                             JSONObject body = Request.splitQuery(parts[1]);
                             App.run(true, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
                         } else {
-                            App.run(true, false);
+                            App.run(true, false, args[0]);
                         }
                     } else {
                         App.run(true, false);

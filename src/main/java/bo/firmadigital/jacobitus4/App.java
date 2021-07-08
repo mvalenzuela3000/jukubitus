@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -84,6 +85,7 @@ public class App extends Application {
     private static boolean servicio;
     private static boolean taskBar;
     private static String url = null, token, urlPost;
+    private static String param = null;
     private static Stage stage;
     private static App app;
     public static final String VERSION = "1.0.0";
@@ -386,8 +388,13 @@ public class App extends Application {
 
         new Thread(registrarCertificado()).start();
         if (url == null) {
-            if (!taskBar) {
-                new Thread(listarTokens()).start();
+            if (param == null) {
+                if (!taskBar) {
+                    new Thread(listarTokens()).start();
+                }
+            } else {
+                File file = new File(param);
+                new Thread(validar(Arrays.asList(file))).start();
             }
         } else {
             new Thread(download(url, token, urlPost)).start();
@@ -639,9 +646,27 @@ public class App extends Application {
     }
 
     public static void show(String error) {
-        Alert alert = new Alert(AlertType.ERROR, error, ButtonType.OK);
-        alert.setTitle("Jacobitus");
-        alert.showAndWait();
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.ERROR, error, ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
+    }
+
+    public static void show(File file) {
+        Platform.runLater(() -> {
+            if (stage.isShowing()) {
+                stage.setAlwaysOnTop(true);
+                stage.setAlwaysOnTop(false);
+            } else {
+                if (taskBar) {
+                    stage.show();
+                } else {
+                    stage.setIconified(false);
+                }
+            }
+            new Thread(app.validar(Arrays.asList(file))).start();
+        });
     }
 
     public static void show(String url, String token, String urlPost) {
@@ -663,6 +688,13 @@ public class App extends Application {
     public static void run(boolean servicio, boolean taskBar) {
         App.servicio = servicio;
         App.taskBar = taskBar;
+        launch();
+    }
+
+    public static void run(boolean servicio, boolean taskBar, String file) {
+        App.servicio = servicio;
+        App.taskBar = taskBar;
+        App.param = file;
         launch();
     }
 
