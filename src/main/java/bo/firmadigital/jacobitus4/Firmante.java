@@ -35,7 +35,7 @@ public class Firmante extends Stage {
     private final TableView table;
     private final long slot;
     private String label;
-    private String pass;
+    private String pass = null;
     private boolean bloquea;
 
     public Firmante(Stage parent, long slot, boolean pdf) {

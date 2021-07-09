@@ -55,6 +55,9 @@ public class FirmarPdf implements Firmar {
         StampingProperties stamp = new StampingProperties();
         stamp.useAppendMode();
         PdfSigner signer = new PdfSigner(reader, os, stamp);
+        if (reader.isEncrypted()) {
+            throw new IOException("El documento se encuentra encriptado.");
+        }
         if (bloquear) {
             PdfSigFieldLock fieldLock = new PdfSigFieldLock();
             fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);

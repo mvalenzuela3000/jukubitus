@@ -54,7 +54,7 @@ public class TokenInfo extends Stage {
     private final ContextMenu contextMenu;
     private final Button buttonClave;
     private final long slot;
-    private String pass;
+    private String pass = null;
     private String label;
 
     public TokenInfo(Stage parent, long slot) {
