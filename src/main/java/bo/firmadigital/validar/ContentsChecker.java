@@ -85,7 +85,7 @@ public class ContentsChecker extends PdfReader {
                                 if (dict.containsKey(PdfName.Type) && dict.containsKey(PdfName.Subtype)) {
                                     if (dict.getAsName(PdfName.Type).equals(PdfName.Annot) && dict.getAsName(PdfName.Subtype).equals(PdfName.Widget)) {
                                         widgets++;
-                                        if (dict.containsKey(PdfName.V) && dict.containsKey(PdfName.FT) && dict.containsKey(PdfName.Contents)) {
+                                        if (dict.containsKey(PdfName.V) && dict.containsKey(PdfName.FT)) {
                                             if (dict.getAsName(PdfName.FT).equals(PdfName.Sig)) {
                                                 signatures++;
                                             }
