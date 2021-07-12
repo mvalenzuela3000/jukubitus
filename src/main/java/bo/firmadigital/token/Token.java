@@ -132,5 +132,5 @@ public interface Token {
      */
     public PublicKey obtenerClavePublica(String clavesId) throws GeneralSecurityException;
 
-    public Certificate[] getCertificateChain(String clavesId) throws KeyStoreException;
+    public Certificate[] getCertificateChain(String clavesId) throws GeneralSecurityException;
 }

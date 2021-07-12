@@ -34,12 +34,14 @@ public class Firmante extends Stage {
     private final ProgressBar progressBar;
     private final TableView table;
     private final long slot;
+    private final boolean pdf;
     private String label;
     private String pass = null;
     private boolean bloquea;
 
     public Firmante(Stage parent, long slot, boolean pdf) {
         this.slot = slot;
+        this.pdf = pdf;
         this.label = null;
         setTitle("Seleccione el certificado a utilizar para la firma");
         initOwner(parent);
@@ -132,7 +134,7 @@ public class Firmante extends Stage {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
-            Contrasena contrasena = new Contrasena(Firmante.this, false);
+            Contrasena contrasena = new Contrasena(Firmante.this, pdf);
             contrasena.showAndWait();
             if (contrasena.getPass() == null) {
                 close();

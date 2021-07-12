@@ -50,10 +50,6 @@ public class Slot {
         return slotID;
     }
 
-    public PKCS11 getP11() {
-        return p11;
-    }
-
     public String getConfiguracion() {
         return configuracion;
     }

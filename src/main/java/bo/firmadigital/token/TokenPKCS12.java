@@ -369,7 +369,8 @@ public class TokenPKCS12 implements Token {
     }
 
     @Override
-    public Certificate[] getCertificateChain(String clavesId) throws KeyStoreException {
+    public Certificate[] getCertificateChain(String clavesId) throws GeneralSecurityException {
+        obtenerCertificado(clavesId).checkValidity();
         return this.keystore.getCertificateChain(clavesId);
     }
 

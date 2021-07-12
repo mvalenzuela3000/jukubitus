@@ -1,5 +1,6 @@
 package bo.firmadigital.token;
 
+import bo.firmadigital.pkcs11.PKCS11;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -106,7 +107,8 @@ public class TokenPKCS11 implements Token {
     @Override
     public void salir() {
         if (this.sunPKCS11 != null) {
-            this.slot.getP11().logout();
+            PKCS11 p11 = new PKCS11(this.sunPKCS11);
+            p11.logout();
             Security.removeProvider(this.sunPKCS11.getName());
 
             this.PIN = null;
@@ -377,7 +379,8 @@ public class TokenPKCS11 implements Token {
     }
 
     @Override
-    public Certificate[] getCertificateChain(String clavesId) throws KeyStoreException {
+    public Certificate[] getCertificateChain(String clavesId) throws GeneralSecurityException {
+        obtenerCertificado(clavesId).checkValidity();
         return this.keystore.getCertificateChain(clavesId);
     }
 }
