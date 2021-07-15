@@ -30,6 +30,14 @@ public interface Token {
     public String getProviderName();
 
     /**
+     * Esta funci&oacute;n modifica la clave (PIN) del token.
+     *
+     * @param oldPin Anterior clave del token.
+     * @param newPin Nueva clave del token.
+     */
+    public void modificarPin(String oldPin, String newPin);
+
+    /**
      * Genera para de claves
      * @param clavesId Label para identificar el par de claves
      * @param pin Clave de acceso

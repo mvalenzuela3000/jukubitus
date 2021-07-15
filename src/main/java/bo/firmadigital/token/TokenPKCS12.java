@@ -122,11 +122,26 @@ public class TokenPKCS12 implements Token {
     /**
      * Esta funci&oacute;n modifica la clave (PIN) del token.
      *
-     * @param sopin Clave de seguridad del token.
-     * @param pin Nueva clave del token.
+     * @param oldPin Anterior clave del token.
+     * @param newPin Nueva clave del token.
      */
-    public void modificarPin(String sopin, String pin) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public void modificarPin(String oldPin, String newPin) {
+        try {
+            iniciar(oldPin);
+            KeyStore ks = KeyStore.getInstance("PKCS12-3DES-3DES", "BC");
+            ks.load(null, newPin.toCharArray());
+            Enumeration<String> enumeration = keystore.aliases();
+            while (enumeration.hasMoreElements()) {
+                String alias = enumeration.nextElement();
+                PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, null);
+                Certificate certificate = keystore.getCertificate(alias);
+                ks.setKeyEntry(alias, privateKey, null, new Certificate[]{certificate});
+            }
+            ks.store(new FileOutputStream(slot.getConfiguracion()), newPin.toCharArray());
+        } catch (GeneralSecurityException | IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     /**
@@ -176,6 +191,12 @@ public class TokenPKCS12 implements Token {
 
             keystore.setKeyEntry(clavesId, pair.getPrivate(), null, new Certificate[]{certificate});
 
+            try {
+                keystore.store(new FileOutputStream(slot.getConfiguracion()), PIN.toCharArray());
+            } catch (IOException | CertificateException ex) {
+                throw new KeyStoreException(ex.getMessage());
+            }
+
             return pair.getPublic();
         } catch (OperatorCreationException | IOException | CertificateException ex) {
             throw new KeyStoreException(ex.getMessage());
@@ -221,6 +242,11 @@ public class TokenPKCS12 implements Token {
     @Override
     public void eliminarClaves(String clavesId) throws KeyStoreException {
         keystore.deleteEntry(clavesId);
+        try {
+            keystore.store(new FileOutputStream(slot.getConfiguracion()), PIN.toCharArray());
+        } catch (IOException | CertificateException | NoSuchAlgorithmException ex) {
+            throw new KeyStoreException(ex.getMessage());
+        }
     }
 
     /**

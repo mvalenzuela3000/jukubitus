@@ -3,12 +3,12 @@
 FILES=$HOME/.mozilla/firefox/*
 
 for f in $FILES; do
-  if [[ -f $f/cert9.db ]]; then
+  if [ -f "$f/cert9.db" ]; then
     mozilla=$f
   fi
 done
 
-if [[ -d $mozilla ]]; then
+if [ -d "$mozilla" ]; then
   if [ -z "$1" ]; then
     certutil -L -d $mozilla
   else

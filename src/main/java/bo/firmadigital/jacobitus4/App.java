@@ -276,7 +276,12 @@ public class App extends Application {
             TokenInfo info = new TokenInfo(stage, tokenInfo.getSlot());
             info.showAndWait();
         });
-        contextMenuToken.getItems().addAll(contenidoItem);
+        MenuItem pinItem = new MenuItem("Cambiar pin");
+        pinItem.setOnAction((ActionEvent e) -> {
+            CambiarContrasena cambiarContrasena = new CambiarContrasena(stage, tokenInfo.getSlot());
+            cambiarContrasena.showAndWait();
+        });
+        contextMenuToken.getItems().addAll(contenidoItem, pinItem);
 
         contextMenu = new ContextMenu();
         MenuItem detalleItem = new MenuItem("Detalle Validación");

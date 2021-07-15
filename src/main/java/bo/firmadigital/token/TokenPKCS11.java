@@ -2,6 +2,7 @@ package bo.firmadigital.token;
 
 import bo.firmadigital.pkcs11.PKCS11;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -135,11 +136,34 @@ public class TokenPKCS11 implements Token {
     /**
      * Esta funci&oacute;n modifica la clave (PIN) del token.
      *
-     * @param sopin Clave de seguridad del token.
-     * @param pin Nueva clave del token.
+     * @param oldPin Anterior clave del token.
+     * @param newPin Nueva clave del token.
      */
-    public void modificarPin(String sopin, String pin) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public void modificarPin(String oldPin, String newPin) {
+        String lib = null;
+        try {
+            String[] conf;
+            try (FileInputStream fis = new FileInputStream(slot.getConfiguracion())) {
+                conf = new String(fis.readAllBytes()).split("\n");
+            }
+            for (String line : conf) {
+                if (line.trim().startsWith("library")) {
+                    lib = line.split("=")[1].trim();
+                    break;
+                }
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        if (lib == null) {
+            throw new RuntimeException("No se pudo identificar el controlador.");
+        } else {
+            String res = new ChangePinJNI().changePin(lib, (int)slot.getSlotID(), oldPin, newPin);
+            if (!res.equals("Ok")) {
+                throw new RuntimeException(res);
+            }
+        }
     }
 
     /**
