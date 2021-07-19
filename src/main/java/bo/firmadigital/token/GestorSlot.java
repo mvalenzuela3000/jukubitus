@@ -193,4 +193,15 @@ public class GestorSlot {
             throw new RuntimeException(ex.getMessage());
         }
     }
+
+    /**
+     * Esta funci&oacute;n retorna una configuraci&oacute;n para conectar a un
+     * dispositivo PKCS #11.
+     * @param id Identificador del modelo de token.
+     * @return Retorna el archivo de configuración del token.
+     */
+    public String obtenerConfiguracion(String id) {
+        libreria = getLib(id);
+        return obtenerConfiguracion("token", null);
+    }
 }

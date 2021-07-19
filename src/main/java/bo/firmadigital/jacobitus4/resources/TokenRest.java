@@ -410,4 +410,29 @@ public class TokenRest {
         }
         return json.toString();
     }
+
+    @POST
+    @Path("/cambiar_pin")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String cambiar_pin(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Token token = slot.getToken();
+            try {
+                token.modificarPin(req.getString("old_pin"), req.getString("new_pin"));
+                json.put("finalizado", true);
+                json.put("mensaje", "El pin se cambió correctamente");
+            } catch (RuntimeException ex) {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return json.toString();
+    }
 }

@@ -5,7 +5,11 @@
  */
 package bo.firmadigital.token;
 
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -21,6 +25,8 @@ import org.codehaus.jettison.json.JSONObject;
  * @author ADSIB
  */
 public class SmartCard {
+    private static JSONObject token = null;
+
     public static List<JSONObject> cards() {
         LinkedList<JSONObject> res = new LinkedList();
         try {
@@ -28,7 +34,7 @@ public class SmartCard {
             List<CardTerminal> terminals = factory.terminals().list();
             for (CardTerminal terminal : terminals) {
                 Card card = terminal.connect("*");
-                JSONObject token = new JSONObject();
+                token = new JSONObject();
                 token.put("name", obtenerNombreToken(terminal.getName()));
                 token.put("id", hex(card.getATR().getBytes()));
                 if (!res.contains(token)) {
@@ -36,7 +42,19 @@ public class SmartCard {
                 }
             }
         } catch (NoSuchAlgorithmException | CardException | JSONException ex) {
-            if (!ex.getMessage().equals("list() failed") && !ex.getMessage().equals("connect() failed")) {
+            if (ex.getMessage().equals("list() failed") || ex.getMessage().equals("connect() failed")) {
+                if (res.isEmpty() && token != null) {
+                    try {
+                        GestorSlot gs = GestorSlot.getInstance();
+                        Provider sunPKCS11 = Security.getProvider("SunPKCS11");
+                        sunPKCS11 = sunPKCS11.configure(gs.obtenerConfiguracion(token.getString("id")));
+                        KeyStore.getInstance("PKCS11", sunPKCS11);
+                        res.add(token);
+                    } catch (JSONException ex2) {
+                        throw new RuntimeException(ex2.getMessage());
+                    } catch (KeyStoreException ignore) {}
+                }
+            } else {
                 throw new RuntimeException(ex.getMessage());
             }
         }
