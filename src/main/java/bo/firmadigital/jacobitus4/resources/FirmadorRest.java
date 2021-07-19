@@ -243,7 +243,7 @@ public class FirmadorRest {
                             }
                             break;
                         default:
-                            throw new IOException("No se esperaba la etiqueta: " + label);
+                            Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, label);
                     }
                 }
             } finally {
