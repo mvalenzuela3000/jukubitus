@@ -38,16 +38,22 @@ public enum MagicBytes {
 
     // Extracts head bytes from any stream
     public static byte[] extract(InputStream is, int length) throws IOException {
-        try (is) {  // automatically close stream on return
-            byte[] buffer = new byte[length];
-            is.read(buffer, 0, length);
-            return buffer;
+        is.mark(0);
+        byte[] buffer = new byte[length];
+        is.read(buffer, 0, length);
+        if (is.markSupported()) {
+            is.reset();
         }
+        return buffer;
     }
 
     /* Convenience methods */
     public boolean is(File file) throws IOException {
-        return is(new FileInputStream(file));
+        boolean res;
+        try (FileInputStream fis = new FileInputStream(file)) {
+            res = is(new FileInputStream(file));
+        }
+        return res;
     }
 
     public boolean is(InputStream is) throws IOException {

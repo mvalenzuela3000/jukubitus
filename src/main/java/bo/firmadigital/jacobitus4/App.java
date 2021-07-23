@@ -18,6 +18,7 @@ import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -477,8 +478,10 @@ public class App extends Application {
                         certs.add(new ValidarPdf(Converter.odtToPdf(files.get(i))));
                     } else if (files.get(i).getName().endsWith(".docx")) {
                         certs.add(new ValidarPdf(Converter.docxToPdf(files.get(i))));
-                    } else {
+                    } else if (files.get(i).getName().endsWith(".pdf")) {
                         certs.add(new ValidarPdf(files.get(i)));
+                    } else {
+                        certs.add(new ValidarPKCS7(files.get(i)));
                     }
                     updateProgress(i + 1, files.size());
                 }
@@ -506,7 +509,6 @@ public class App extends Application {
                     updateProgress(100, 100);
                 } else {
                     for (int i = 0; i < files.size(); i++) {
-                        InputStream is = new FileInputStream(files.get(i).getAbsolutePath());
                         try {
                             Firmar firmar = FirmarPdf.getInstance(slot, label, pass);
                             String name = new File(files.get(i).getAbsolutePath()).getName();
@@ -516,7 +518,9 @@ public class App extends Application {
                                 name = name.replace(".pdf", ".firmado.pdf");
                             }
                             File out = new File(destino, name);
-                            firmar.firmar(is, new FileOutputStream(out), bloquear);
+                            try (InputStream is = new FileInputStream(files.get(i).getAbsolutePath()); OutputStream os = new FileOutputStream(out)) {
+                                firmar.firmar(is, os, bloquear);
+                            }
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidarPdf(out));
                         } catch (IOException ex) {
@@ -574,10 +578,10 @@ public class App extends Application {
                 } else {
                     Firmar firmar = FirmarPKCS7.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
-                        FileInputStream is = new FileInputStream(files.get(i).getFile());
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
-                        FileOutputStream os = new FileOutputStream(out);
-                        firmar.firmar(is, os, files.get(i).getFile().getAbsolutePath().endsWith(".p7s"));
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                            firmar.firmar(is, os);
+                        }
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidarPKCS7(out));
                     }

@@ -73,7 +73,7 @@ public abstract class Validar implements Iterable<CertDate> {
             if (cert.isOk()) {
                 res.append("\n\t✔ ");
             } else {
-                if (cert.getOCSP() == OCSPState.CONNECTION) {
+                if (cert.getOCSP().getState() == OCSPState.CONNECTION) {
                     res.append("\n\t✘? ");
                 } else {
                     res.append("\n\t✘ ");
@@ -127,12 +127,12 @@ public abstract class Validar implements Iterable<CertDate> {
         }
     }
 
-    public OCSPState verificarOcsp(X509Certificate cert, Date signDate) {
+    public OCSPData verificarOcsp(X509Certificate cert, Date signDate) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             URL[] urls = getCrlURLs(cert);
             if (urls.length == 0) {
-                return OCSPState.UNKNOWN_SERVER;
+                return new OCSPData(OCSPState.UNKNOWN_SERVER, null);
             }
             Config config = new Config();
             HttpURLConnection connection;
@@ -161,19 +161,19 @@ public abstract class Validar implements Iterable<CertDate> {
             connection.disconnect();
             X509CRL crl = (X509CRL) cf.generateCRL(new ByteArrayInputStream(stringBuilder.toString().getBytes()));
             if (crl == null) {
-                return OCSPState.UNKNOWN;
+                return new OCSPData(OCSPState.UNKNOWN, null);
             }
             X509CRLEntry entry = crl.getRevokedCertificate(cert.getSerialNumber());
             if (entry == null) {
-                return OCSPState.OK;
+                return new OCSPData(OCSPState.OK, null);
             }
             if (entry.getRevocationDate().compareTo(signDate) > 0) {
-                return OCSPState.ALERT;
+                return new OCSPData(OCSPState.ALERT, entry.getRevocationDate());
             } else {
-                return OCSPState.REVOKED;
+                return new OCSPData(OCSPState.REVOKED, entry.getRevocationDate());
             }
         } catch (CertificateException | IOException | CRLException ex) {
-            return OCSPState.CONNECTION;
+            return new OCSPData(OCSPState.CONNECTION, null);
         }
     }
 

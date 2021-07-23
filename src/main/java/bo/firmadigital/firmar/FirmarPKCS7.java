@@ -7,6 +7,7 @@ package bo.firmadigital.firmar;
 
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
+import bo.firmadigital.validar.MagicBytes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,7 +65,7 @@ public class FirmarPKCS7 implements Firmar {
     }
 
     @Override
-    public synchronized void firmar(InputStream is, OutputStream os, boolean p7s) throws IOException, GeneralSecurityException {
+    public synchronized void firmar(InputStream is, OutputStream os, boolean detached) throws IOException, GeneralSecurityException {
         try {
             Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
             token.iniciar(pass);
@@ -84,7 +85,10 @@ public class FirmarPKCS7 implements Firmar {
             generator.addCertificates(certstore);
             
             CMSTypedData cmsdata;
-            if (p7s) {
+            if (MagicBytes.P7S.is(is)) {
+                if (detached) {
+                    throw new RuntimeException("No puede realizar múltiples firmas con la opción detached.");
+                }
                 CMSSignedData signedData = new CMSSignedData(is);
                 cmsdata = signedData.getSignedContent();
                 Store current = signedData.getCertificates();
@@ -94,7 +98,7 @@ public class FirmarPKCS7 implements Firmar {
                 byte[] data = is.readAllBytes();
                 cmsdata = new CMSProcessableByteArray(data);
             }
-            CMSSignedData signeddata = generator.generate(cmsdata, true);
+            CMSSignedData signeddata = generator.generate(cmsdata, !detached);
             os.write(signeddata.getEncoded());
             token.salir();
         } catch (OperatorCreationException | CMSException ex) {
@@ -104,6 +108,6 @@ public class FirmarPKCS7 implements Firmar {
 
     @Override
     public void firmar(InputStream is, OutputStream os) throws IOException, GeneralSecurityException {
-        throw new UnsupportedOperationException("Not supported.");
+        firmar(is, os, false);
     }
 }

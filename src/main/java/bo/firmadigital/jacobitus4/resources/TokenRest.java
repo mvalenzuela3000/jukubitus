@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
@@ -214,7 +215,7 @@ public class TokenRest {
     public String data(String body) {
         JSONObject json = new JSONObject();
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             CertificateFactory fact = CertificateFactory.getInstance("X.509");
             InputStream is = getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
             List<X509Certificate> intermediates = (List<X509Certificate>) fact.generateCertificates(is);

@@ -111,6 +111,11 @@ public class Config {
     }
 
     public File getConversorFile() {
+        if (!user.exists()) {
+            if (!user.mkdir()) {
+                throw new RuntimeException("No se pudo crear el directorio " + user);
+            }
+        }
         return new File(user, "ConversorPdf.jar");
     }
 

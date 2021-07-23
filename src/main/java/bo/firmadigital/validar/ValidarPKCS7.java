@@ -42,7 +42,17 @@ public class ValidarPKCS7 extends Validar {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
             }
-            certificados = listarCertificados(file);
+            certificados = listarCertificados(new FileInputStream(file));
+        } catch (Exception ignore) {
+        }
+    }
+
+    public ValidarPKCS7(InputStream is) {
+        try {
+            if (Security.getProvider("BC") == null) {
+                Security.addProvider(new BouncyCastleProvider());
+            }
+            certificados = listarCertificados(is);
         } catch (Exception ignore) {
         }
     }
@@ -80,10 +90,9 @@ public class ValidarPKCS7 extends Validar {
         }
     }
 
-    public List<CertDate> listarCertificados(File file) throws Exception {
+    public List<CertDate> listarCertificados(InputStream is) throws Exception {
         List<CertDate> certs = new ArrayList<>();
         try {
-            InputStream is = new FileInputStream(file);
             CMSSignedData signedData = new CMSSignedData(is);
 
             Collection<SignerInformation> firmas = signedData.getSignerInfos().getSigners();

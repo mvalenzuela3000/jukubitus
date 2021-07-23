@@ -60,7 +60,7 @@ public final class Base64StreamParser {
         byte[] res;
         byte[] buff = new byte[length];
         System.arraycopy(content, 0, buff, 0, length);
-        String[] last = new String(buff).split(",");
+        String[] last = new String(buff).replace("\n", "").split(",");
         if (last.length > 1) {
             buff = new byte[last[0].length() - 1];
             System.arraycopy(last[0].getBytes(), 0, buff, 0, buff.length);
@@ -69,7 +69,7 @@ public final class Base64StreamParser {
             lastJson[0] = '{';
             res = lastJson;
         } else {
-            buff = new byte[last[0].length() - 2];
+            buff = new byte[last[0].replace("\"", "").replace("}", "").trim().length()];
             System.arraycopy(last[0].getBytes(), 0, buff, 0, buff.length);
             res = "{}".getBytes();
         }

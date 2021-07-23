@@ -118,7 +118,7 @@ public class Detalle extends Stage {
                 }
             } else {
                 ocspItem = new TreeItem<>("Firmado con certificado revocado", new ImageView(errorSmallIcon));
-                if (cert.getOCSP() == Validar.OCSPState.CONNECTION) {
+                if (cert.getOCSP().getState() == Validar.OCSPState.CONNECTION) {
                     ocspItemDet = new TreeItem<>("No se pudo acceder al servicio para verificar el estado del certificado.");
                     ocspItem.setExpanded(true);
                 } else {

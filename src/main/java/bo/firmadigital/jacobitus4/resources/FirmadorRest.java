@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4.resources;
 
 import bo.firmadigital.firmar.Firmar;
+import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
@@ -20,6 +21,7 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -243,7 +245,7 @@ public class FirmadorRest {
                             }
                             break;
                         default:
-                            Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, label);
+                            Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
                     }
                 }
             } finally {
@@ -380,6 +382,113 @@ public class FirmadorRest {
             json.put("finalizado", true);
             json.put("mensaje", "Firma realizada correctamente.");
         } catch (GeneralSecurityException | JSONException ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
+
+    /**
+     * @api {post} https://localhost:9000/api/token/firmar_pkcs7 Firma un archivo.
+     * @apiGroup Firmador
+     * @apiVersion 1.0.0
+     *
+     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
+     * @apiParam {Boolean} [detached] Bandera que en caso de estar presente con valor true, firma sin el contenido del documento.
+     * @apiParam {String} file Archivo en base64 que se desea firmar.
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678",
+     *     "alias": "355409121073",
+     *     "file": "MII...truncated...=="
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "pkcs7": "MII...truncated...=="
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Se firmo el archivo correctamente."
+     * }
+     */
+    @POST
+    @Path("/firmar_pkcs7")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarPKCS7(InputStream body) {
+        JSONObject json = new JSONObject();
+        try {
+            String pin = null, alias = null;
+            Long slot = null;
+            boolean detached = false;
+            byte[] file = null;
+            JsonFactory factory = new ObjectMapper().getJsonFactory();
+            JsonParser jsonReader = factory.createJsonParser(body);
+            try {
+                jsonReader.nextToken();
+                while (jsonReader.nextToken() == JsonToken.FIELD_NAME) {
+                    String label = jsonReader.getText();
+                    jsonReader.nextToken();
+                    switch (label) {
+                        case "slot":
+                            slot = Long.parseLong(jsonReader.readValueAs(String.class));
+                            break;
+                        case "pin":
+                            pin = jsonReader.readValueAs(String.class);
+                            break;
+                        case "alias":
+                            alias = jsonReader.readValueAs(String.class);
+                            break;
+                        case "detached":
+                            detached = Boolean.parseBoolean(jsonReader.readValueAs(String.class));
+                            break;
+                        case "file":
+                            try (InputStream is = (InputStream)jsonReader.getInputSource()) {
+                                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                                    jsonReader.releaseBuffered(os);
+                                    byte[] buff = os.toByteArray();
+                                    Base64StreamParser parser = new Base64StreamParser(is, buff);
+                                    file = parser.getFile();
+                                    jsonReader.close();
+                                    jsonReader = factory.createJsonParser(parser.getRemanent());
+                                    jsonReader.nextToken();
+                                }
+                            }
+                            break;
+                        default:
+                            Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
+                    }
+                }
+            } finally {
+                jsonReader.close();
+            }
+            if (slot != null && pin != null && alias != null && file != null) {
+                JSONObject datos = new JSONObject();
+                json.put("datos", datos);
+
+                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    FirmarPKCS7 firmar = FirmarPKCS7.getInstance(slot, alias, pin);
+                    try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
+                        firmar.firmar(is, out, detached);
+                    }
+                    datos.put("pkcs7", Base64.getEncoder().encodeToString(out.toByteArray()));
+                }
+                json.put("finalizado", true);
+                json.put("mensaje", "Se firmo el archivo correctamente!");
+            } else {
+                json.put("finalizado", false);
+                json.put("mensaje", "Datos requeridos slot, pin, alias y file.");
+            }
+        } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
                 json.put("finalizado", false);
                 json.put("mensaje", ex.getMessage());

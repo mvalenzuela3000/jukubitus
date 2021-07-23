@@ -39,7 +39,9 @@ public class ValidarPdf extends Validar {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
             }
-            certificados = listarCertificados(file);
+            try (InputStream is = new FileInputStream(file)) {
+                certificados = listarCertificados(is);
+            }
         } catch (Exception ignore) {
         }
     }
@@ -48,6 +50,16 @@ public class ValidarPdf extends Validar {
         this(file);
         this.urlPost = urlPost;
         this.token = token;
+    }
+    
+    public ValidarPdf(InputStream is) {
+        try {
+            if (Security.getProvider("BC") == null) {
+                Security.addProvider(new BouncyCastleProvider());
+            }
+            certificados = listarCertificados(is);
+        } catch (Exception ignore) {
+        }
     }
 
     @Override
@@ -129,7 +141,7 @@ public class ValidarPdf extends Validar {
         return false;
     }
 
-    public List<CertDate> listarCertificados(File file) throws Exception {
+    public List<CertDate> listarCertificados(InputStream is) throws Exception {
         Certificate certificateTSA;
         try (InputStreamReader isr = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("timestamp.crt"))) {
             PemReader reader = new PemReader(isr);
@@ -140,7 +152,6 @@ public class ValidarPdf extends Validar {
         }
 
         List<CertDate> certs = new ArrayList<>();
-        InputStream is = new FileInputStream(file);
         ContentsChecker pdf = new ContentsChecker(is);
         PdfDocument pdfDocument = new PdfDocument(pdf);
         SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
