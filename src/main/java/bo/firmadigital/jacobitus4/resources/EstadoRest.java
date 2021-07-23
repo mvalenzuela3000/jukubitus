@@ -22,7 +22,7 @@ import org.codehaus.jettison.json.JSONObject;
 @Path("/status")
 public class EstadoRest {
     /**
-     * @api {get} https://localhost:9000/api/status Verifica el estado del servicio.
+     * @api {get} /api/status Verifica el estado del servicio.
      * @apiGroup Estado
      * @apiVersion 1.0.0
      *

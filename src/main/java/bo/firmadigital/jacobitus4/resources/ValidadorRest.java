@@ -37,7 +37,7 @@ import org.codehaus.jettison.json.JSONObject;
 @Path("/")
 public class ValidadorRest {
     /**
-     * @api {post} https://localhost:9000/api/validar_pdf Validar firma de un documento pdf.
+     * @api {post} /api/validar_pdf Validar firma de un documento pdf.
      * @apiGroup Validador
      * @apiVersion 1.0.0
      *
@@ -169,7 +169,7 @@ public class ValidadorRest {
     }
 
     /**
-     * @api {post} https://localhost:9000/api/validar_pkcs7 Validar firma de un documento p7s.
+     * @api {post} /api/validar_pkcs7 Validar firma de un documento p7s.
      * @apiGroup Validador
      * @apiVersion 1.0.0
      *

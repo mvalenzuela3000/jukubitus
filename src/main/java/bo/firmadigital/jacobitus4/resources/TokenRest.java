@@ -21,7 +21,6 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
@@ -46,7 +45,7 @@ import org.codehaus.jettison.json.JSONObject;
 @Path("/token")
 public class TokenRest {
     /**
-     * @api {get} https://localhost:9000/api/token/status Verifica el estado de la consola SmartCard.
+     * @api {get} /api/token/status Verifica el estado de la consola SmartCard.
      * @apiGroup Token
      * @apiVersion 1.0.0
      *
@@ -92,7 +91,7 @@ public class TokenRest {
     }
 
     /**
-     * @api {get} https://localhost:9000/api/token/connected Obtiene información de los tokens conectados.
+     * @api {get} /api/token/connected Obtiene información de los tokens conectados.
      * @apiGroup Token
      * @apiVersion 1.0.0
      *
@@ -150,7 +149,7 @@ public class TokenRest {
     }
 
     /**
-     * @api {post} https://localhost:9000/api/token/data Obtiene información de los certificados en el token conectado al slot.
+     * @api {post} /api/token/data Obtiene información de los certificados en el token conectado al slot.
      * @apiGroup Token
      * @apiVersion 1.0.0
      * 

@@ -1,8 +1,6 @@
 # Jacobitus Total
 Es una aplicación desarrollada con JavaFX para firma y validación de firma digital en diferentes documentos.
 
-
-
 # Compilar el proyecto
 Clonar el proyecto
 ```
@@ -16,6 +14,11 @@ $ mvn package
 Resultado
 ```
 BUILD SUCCESS
+```
+
+# Generar documentación de los servicios REST
+```
+$ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/resources/web/apidoc
 ```
 
 # Instalador

@@ -173,7 +173,7 @@ public class FirmadorRest {
     }
 
     /**
-     * @api {post} https://localhost:9000/api/token/firmar_pdf Firma un documento pdf.
+     * @api {post} /api/token/firmar_pdf Firma un documento pdf.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
@@ -332,7 +332,7 @@ public class FirmadorRest {
     }
 
     /**
-     * @api {post} https://localhost:9000/api/token/firmar_hash Obtiene la firma encriptando el hash.
+     * @api {post} /api/token/firmar_hash Obtiene la firma encriptando el hash.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
@@ -393,7 +393,7 @@ public class FirmadorRest {
     }
 
     /**
-     * @api {post} https://localhost:9000/api/token/firmar_pkcs7 Firma un archivo.
+     * @api {post} /api/token/firmar_pkcs7 Firma un archivo.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
