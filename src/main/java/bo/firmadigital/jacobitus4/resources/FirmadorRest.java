@@ -335,6 +335,11 @@ public class FirmadorRest {
      * @api {post} /api/token/firmar_hash Obtiene la firma encriptando el hash.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
+     * 
+     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
+     * @apiParam {String} hash Suma de verificación calculada usando sha2 a 256bits.
      *
      * @apiParamExample {json} Request-Example:
      * {
