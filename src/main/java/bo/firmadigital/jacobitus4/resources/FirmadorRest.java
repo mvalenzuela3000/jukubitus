@@ -177,7 +177,7 @@ public class FirmadorRest {
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
-     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {Boolean} [bloquear] Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.
@@ -250,6 +250,13 @@ public class FirmadorRest {
                 }
             } finally {
                 jsonReader.close();
+            }
+            if (slot == null) {
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    slot = slots[0].getSlotID();
+                }
             }
             if (slot != null && pin != null && alias != null && file != null) {
                 JSONObject datos = new JSONObject();
@@ -336,7 +343,7 @@ public class FirmadorRest {
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      * 
-     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {String} hash Suma de verificación calculada usando sha2 a 256bits.
@@ -367,25 +374,33 @@ public class FirmadorRest {
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.listarSlots();
-            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
-            Token token = slot.getToken();
-            token.iniciar(req.getString("pin"));
-            JSONObject datos = new JSONObject();
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            PrivateKey pk = token.obtenerClavePrivada(req.getString("alias"));
-            if (pk == null) {
-                token.salir();
-                throw new KeyStoreException("No se encontró la clave con alias: " + req.getString("alias"));
+            Slot[] slots = gestorSlot.listarSlots();
+            if (!req.has("slot") && slots.length == 1) {
+                req.put("slot", slots[0].getSlotID());
             }
-            signature.initSign(pk);
-            signature.update(Base64.getDecoder().decode(req.getString("hash")));
-            byte[] signed = signature.sign();
-            token.salir();
-            datos.put("firma", Base64.getEncoder().encodeToString(signed));
-            json.put("datos", datos);
-            json.put("finalizado", true);
-            json.put("mensaje", "Firma realizada correctamente.");
+            if (req.has("slot") && req.has("pin") && req.has("alias") && req.has("hash")) {
+                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+                Token token = slot.getToken();
+                token.iniciar(req.getString("pin"));
+                JSONObject datos = new JSONObject();
+                Signature signature = Signature.getInstance("SHA256withRSA");
+                PrivateKey pk = token.obtenerClavePrivada(req.getString("alias"));
+                if (pk == null) {
+                    token.salir();
+                    throw new KeyStoreException("No se encontró la clave con alias: " + req.getString("alias"));
+                }
+                signature.initSign(pk);
+                signature.update(Base64.getDecoder().decode(req.getString("hash")));
+                byte[] signed = signature.sign();
+                token.salir();
+                datos.put("firma", Base64.getEncoder().encodeToString(signed));
+                json.put("datos", datos);
+                json.put("finalizado", true);
+                json.put("mensaje", "Firma realizada correctamente.");
+            } else {
+                json.put("finalizado", false);
+                json.put("mensaje", "Datos requeridos slot, pin, alias y hash.");
+            }
         } catch (GeneralSecurityException | JSONException ex) {
             try {
                 json.put("finalizado", false);
@@ -402,7 +417,7 @@ public class FirmadorRest {
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
-     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {Boolean} [detached] Bandera que en caso de estar presente con valor true, firma sin el contenido del documento.
@@ -475,6 +490,13 @@ public class FirmadorRest {
                 }
             } finally {
                 jsonReader.close();
+            }
+            if (slot == null) {
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    slot = slots[0].getSlotID();
+                }
             }
             if (slot != null && pin != null && alias != null && file != null) {
                 JSONObject datos = new JSONObject();

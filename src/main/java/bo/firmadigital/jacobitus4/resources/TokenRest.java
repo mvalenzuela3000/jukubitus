@@ -101,9 +101,10 @@ public class TokenRest {
      *         "connected": true,
      *         "tokens": [
      *             {
+     *                 "slot": 1,
      *                 "serial": "203531650003002A",
      *                 "name": "Feitian Technologies Co., Ltd",
-     *                 "slot": 1
+     *                 "model": "ePass2003"
      *             }
      *         ]
      *     },
@@ -127,9 +128,10 @@ public class TokenRest {
                 for (Slot slot : slots) {
                     CK_TOKEN_INFO info = slot.detalleToken();
                     JSONObject token = new JSONObject();
+                    token.put("slot", slot.getSlotID());
                     token.put("serial", new String(info.serialNumber).trim());
                     token.put("name", new String(info.manufacturerID).trim());
-                    token.put("slot", slot.getSlotID());
+                    token.put("model", new String(info.model).trim());
                     ((JSONArray)((JSONObject)json.get("datos")).get("tokens")).put(token);
                 }
                 json.put("finalizado", true);
@@ -153,7 +155,7 @@ public class TokenRest {
      * @apiGroup Token
      * @apiVersion 1.0.0
      * 
-     * @apiParam {Long} slot Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
      *
      * @apiParamExample {json} Request-Example:
@@ -219,8 +221,12 @@ public class TokenRest {
             InputStream is = getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
             List<X509Certificate> intermediates = (List<X509Certificate>) fact.generateCertificates(is);
             JSONObject req = new JSONObject(body);
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            Slot[] slots = gestorSlot.listarSlots();
+            if (slots.length == 1 && !req.has("slot")) {
+                req.put("slot", slots[0].getSlotID());
+            }
             if (req.has("slot") && req.has("pin")) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
                 Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
                 Token token = slot.getToken();
                 json.put("datos", new JSONObject());

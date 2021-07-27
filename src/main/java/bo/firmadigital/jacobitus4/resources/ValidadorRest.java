@@ -146,7 +146,9 @@ public class ValidadorRest {
                     certificado.put("descripcionECA", cert.getDatos().getDescripcionSubject());
                     certificado.put("inicioValidez", dateFormat.format(cert.getDatos().getInicioValidez()));
                     certificado.put("finValidez", dateFormat.format(cert.getDatos().getFinValidez()));
-                    certificado.put("revocado", dateFormat.format(cert.getOCSP().getDate()));
+                    if (cert.getOCSP().getDate() != null) {
+                        certificado.put("revocado", dateFormat.format(cert.getOCSP().getDate()));
+                    }
                     firma.put("certificado", certificado);
                     firmas.put(firma);
                 }
@@ -277,7 +279,9 @@ public class ValidadorRest {
                     certificado.put("descripcionECA", cert.getDatos().getDescripcionSubject());
                     certificado.put("inicioValidez", dateFormat.format(cert.getDatos().getInicioValidez()));
                     certificado.put("finValidez", dateFormat.format(cert.getDatos().getFinValidez()));
-                    certificado.put("revocado", dateFormat.format(cert.getOCSP().getDate()));
+                    if (cert.getOCSP().getDate() != null) {
+                        certificado.put("revocado", dateFormat.format(cert.getOCSP().getDate()));
+                    }
                     firma.put("certificado", certificado);
                     firmas.put(firma);
                 }
