@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.DatosCertificado;
@@ -17,9 +18,12 @@ import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -59,6 +63,25 @@ public class Firmante extends Stage {
         descCol.setCellValueFactory(new PropertyValueFactory("descripcionSubject"));
         table.getColumns().setAll(tokenCol, nombreCol, descCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setRowFactory(tv -> {
+            TableRow<DatosCertificado> row = new TableRow<DatosCertificado>() {
+                @Override
+                public void updateItem(DatosCertificado datos, boolean empty) {
+                    super.updateItem(datos, empty);
+                    if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                        CertInformation pane = new CertInformation(datos);
+                        Tooltip tooltip = new Tooltip();
+                        tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                        tooltip.setGraphic(pane);
+                        setTooltip(tooltip);
+                        setTooltip(tooltip);
+                    } else {
+                        setTooltip(null);
+                    }
+                }
+            };
+            return row;
+        });
         root.setCenter(table);
         Scene scene = new Scene(root, 560, 260);
         setScene(scene);

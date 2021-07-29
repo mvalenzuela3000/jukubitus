@@ -13,6 +13,7 @@ import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -178,6 +179,9 @@ public class Pdf extends Stage {
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
             fileChooser.getExtensionFilters().add(extFilter);
             File file = fileChooser.showSaveDialog(this);
+            if (!file.getName().endsWith(".pdf")) {
+                file = new File(file.getPath() + ".pdf");
+            }
             try {
                 Files.copy(Paths.get(out.getPath()), Paths.get(file.getPath()), StandardCopyOption.REPLACE_EXISTING);
                 path = file.getPath();
@@ -228,11 +232,16 @@ public class Pdf extends Stage {
                     PdfReader reader = new PdfReader(file.getAbsolutePath());
                     PdfDocument pdf = new PdfDocument(reader);
                     for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
-                        PdfDictionary dict = pdf.getPage(i).getResources().getPdfObject();
+                        PdfDictionary dict = pdf.getPage(i).getPdfObject().getAsDictionary(PdfName.Resources);
                         PdfArray set = dict.getAsArray(PdfName.ProcSet);
                         PdfDictionary xobjects = dict.getAsDictionary(PdfName.XObject);
                         Image image;
-                        if (xobjects != null && xobjects.keySet().size() == 1 && (set.contains(PdfName.Image) || set.contains(PdfName.ImageMask))) {
+                        if (xobjects != null && xobjects.keySet().size() == 1 &&
+                                (dict.containsKey(PdfName.ExtGState) ||
+                                (set != null && (set.contains(PdfName.Image) ||
+                                set.contains(new PdfName("ImageA")) ||
+                                set.contains(new PdfName("ImageB")) ||
+                                set.contains(PdfName.ImageMask))))) {
                             PdfName imgName = xobjects.keySet().iterator().next();
                             PdfStream imgStream = xobjects.getAsStream(imgName);
                             byte[] b;
