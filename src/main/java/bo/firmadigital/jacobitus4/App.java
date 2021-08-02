@@ -253,7 +253,17 @@ public class App extends Application {
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
             Firefox.registrarCertificado();
-            Chromium.registrarCertificado();
+            if (!Chromium.registrarCertificado() && System.getProperty("os.name").toLowerCase().contains("mac")) {
+                ContrasenaMac contrasena = new ContrasenaMac(stage);
+                contrasena.showAndWait();
+                if (contrasena.getPass() == null) {
+                    return;
+                } else {
+                    if (!Chromium.registrarCertificado(contrasena.getPass())) {
+                        return;
+                    }
+                }
+            }
             HostServices hostServices = getHostServices();
             hostServices.showDocument("https://localhost:9000");
         });

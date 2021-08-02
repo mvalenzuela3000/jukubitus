@@ -78,9 +78,51 @@ public class Chromium {
         return null;
     }
 
+    public static boolean registrarCertificatoMacOS() {
+        try {
+            Process p = Runtime.getRuntime().exec("/opt/jacobitus/check");
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                if (in.readLine() != null) {
+                    return true;
+                }
+            }
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+                if (in.readLine() != null) {
+                    return false;
+                }
+            }
+        } catch (IOException ex) { }
+        return false;
+    }
+
+    public static boolean registrarCertificatoMacOS(String pass) {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[] { "/opt/jacobitus/install", pass });
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                if (in.readLine() != null) {
+                    return true;
+                }
+            }
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+                return in.readLine().equals("Password:");
+            }
+        } catch (IOException ex) { }
+        return false;
+    }
+
     public static boolean registrarCertificado() {
         if (OS.contains("nux")) {
             return registrarCertificadoLinux();
+        } else if (OS.contains("mac")) {
+            return registrarCertificatoMacOS();
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean registrarCertificado(String pass) {
+        if (OS.contains("mac")) {
+            return registrarCertificatoMacOS(pass);
         } else {
             return false;
         }
