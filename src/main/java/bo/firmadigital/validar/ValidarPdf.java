@@ -107,9 +107,9 @@ public class ValidarPdf extends Validar {
             return false;
         }
         for (PdfObject referenceObject : referenceArray) {
-            if (referenceObject.isIndirect())
-                referenceObject = ((PdfIndirectReference)referenceObject).getIndirectReference();
-            if (referenceObject.isIndirect()) {
+            if (referenceObject.isIndirectReference())
+                referenceObject = ((PdfIndirectReference)referenceObject).getRefersTo(true);
+            if (referenceObject.isIndirectReference()) {
                 continue;
             }
             if (!referenceObject.isDictionary()) {

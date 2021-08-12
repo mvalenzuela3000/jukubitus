@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.firmar.TokenSelected;
 import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
@@ -68,6 +69,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.codehaus.jettison.json.JSONArray;
 
 /**
  *
@@ -89,7 +91,8 @@ public class App extends Application {
     private static String param = null;
     private static Stage stage;
     private static App app;
-    public static final String VERSION = "1.0.1";
+    private static final TokenSelected tokenSelected = new TokenSelected();
+    public static final String VERSION = "1.0.2";
 
     @Override
     public void start(Stage stage) {
@@ -726,5 +729,20 @@ public class App extends Application {
         App.token = token;
         App.urlPost = urlPost;
         launch();
+    }
+
+    public static TokenSelected service(Slot slot, String ci, JSONArray files) {
+        Platform.runLater(() -> {
+            tokenSelected.setSlot(slot);
+            tokenSelected.setCI(ci);
+            tokenSelected.setFiles(files);
+            Service service = new Service(stage, tokenSelected);
+            service.showAndWait();
+            synchronized(tokenSelected) {
+                tokenSelected.notify();
+            }
+        });
+        tokenSelected.showAndWait();
+        return tokenSelected;
     }
 }

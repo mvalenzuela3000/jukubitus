@@ -13,6 +13,8 @@ import java.security.Security;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
@@ -55,7 +57,7 @@ public class SmartCard {
                     } catch (KeyStoreException ignore) {}
                 }
             } else {
-                throw new RuntimeException(ex.getMessage());
+                Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return res;

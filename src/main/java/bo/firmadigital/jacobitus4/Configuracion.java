@@ -79,6 +79,19 @@ public class Configuracion extends Stage {
         vbox1.getChildren().add(textFieldPort);
         Button buttonGuardar = new Button("Guardar Proxy");
         vbox1.getChildren().add(buttonGuardar);
+        Label titleS = new Label("Puerto secundario");
+        titleS.setStyle("-fx-font-weight: bold");
+        vbox1.getChildren().add(titleS);
+        CheckBox checkBoxPort = new CheckBox("Habilitar puerto 4637");
+        checkBoxPort.setSelected(config.isSecondaryPortEnabled());
+        checkBoxPort.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            config.setSecondaryPortEnabled(newValue);
+            config.save();
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
+        vbox1.getChildren().add(checkBoxPort);
         root.getChildren().add(vbox1);
         Separator separator = new Separator(Orientation.VERTICAL);
         root.getChildren().add(separator);
@@ -96,7 +109,7 @@ public class Configuracion extends Stage {
         Button buttonCrear = new Button("Crear Token");
         vbox2.getChildren().add(buttonCrear);
         root.getChildren().add(vbox2);
-        Scene scene = new Scene(root, 440, 215);
+        Scene scene = new Scene(root, 440, 260);
         setScene(scene);
         checkBox.setSelected(true);
         checkBox.setSelected(config.isProxyEnabled());

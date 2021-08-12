@@ -260,7 +260,6 @@ public class Pdf extends Stage {
                                     ImageData imageData = ImageDataFactory.create(baos.toByteArray());
                                     image = new Image(imageData);
                                     image.scaleAbsolute(WIDTH, HEIGHT);
-                                    document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                                     document.add(image);
                                 }
                             } else {

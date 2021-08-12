@@ -83,6 +83,19 @@ public class Config {
         options.setProperty("proxyPort", port);
     }
 
+    public boolean isSecondaryPortEnabled() {
+        String proxy = options.getProperty("secondaryPort");
+        return proxy != null && proxy.equals("true");
+    }
+
+    public void setSecondaryPortEnabled(boolean secondaryPort) {
+        if (secondaryPort) {
+            options.setProperty("secondaryPort", "true");
+        } else {
+            options.setProperty("secondaryPort", "false");
+        }
+    }
+
     public File getToken() {
         return token;
     }

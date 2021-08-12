@@ -371,4 +371,13 @@ public class DatosCertificado {
             super(message);
         }
     }
+
+    @Override
+    public String toString() {
+        if (getCargoSubject().equals("")) {
+            return getNombreComunSubject();
+        } else {
+            return getNombreComunSubject() + "\n" + getCargoSubject();
+        }
+    }
 }

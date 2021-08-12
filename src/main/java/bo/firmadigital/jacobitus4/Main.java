@@ -5,8 +5,9 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.jacobitus4.util.Config;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -21,7 +22,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
@@ -58,16 +59,21 @@ public class Main {
             filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
             servletContextHandler.addFilter(filterHolder, "/*", null);
             // Aplicar
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
-            resourceHandler.setResourceBase(jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
+            ServletHolder staticResource = new ServletHolder("default", DefaultServlet.class);
+            staticResource.setInitParameter("resourceBase", jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
+            staticResource.setInitParameter("dirAllowed", "false");
+            servletContextHandler.addServlet(staticResource, "/");
 
             HandlerList handlers = new HandlerList();
-            handlers.setHandlers(new Handler[] { resourceHandler, servletContextHandler });
+            handlers.setHandlers(new Handler[] { servletContextHandler });
             jettyServer.setHandler(handlers);
             ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
             servletHolder.setInitOrder(0);
             servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");
+
+            ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/sign/*");
+            servletHolderSign.setInitOrder(1);
+            servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources2");
             try {
                 createServerConnectorHTTPS();
                 jettyServer.start();
@@ -130,55 +136,37 @@ public class Main {
         }
     }
 
-    /**
-     * cargo la lista de librerias para que el token trabaje con el sistema.
-     *
-     * @param conf
-     * @return retorna la lista de librerias para que el token trabaje con el
-     * sistema.
-     * @throws IOException
-     */
-    /*private static String[] proveedores() throws FileNotFoundException, IOException {
-        ArrayList<String> librerias = new ArrayList<>();
-        File folder = new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath() + File.separator + "FidoProfiles");
-        File[] files = folder.listFiles((File file) -> file.isFile() && file.getName().contains(".profile"));
-        for (File file : files) {
-            try (InputStream input = new FileInputStream(file)) {
-                Properties prop = new Properties();
-                prop.load(input);
-                librerias.add(prop.getProperty("driverPath"));
-            }
-        }
-        return librerias.toArray(new String[librerias.size()]);
-    }*/
-
     private static void createServerConnectorHTTPS() throws Exception {
-	// HTTP Configuration
-        HttpConfiguration http = new HttpConfiguration();
-        http.addCustomizer(new SecureRequestCustomizer());
- 
-        // Configuration for HTTPS redirect
-        http.setSecurePort(9000);
-        http.setSecureScheme("https");
- 
-        // HTTPS configuration
+	// HTTPS configuration
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
  
         // Configuring SSL
-        SslContextFactory sslContextFactory = new SslContextFactory();
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
  
         // Defining keystore path and passwords
         sslContextFactory.setKeyStorePath(jettyServer.getClass().getClassLoader().getResource("server.jks").toExternalForm());
         sslContextFactory.setKeyStorePassword("12345678");
         sslContextFactory.setKeyManagerPassword("12345678");
+
+        ArrayList<ServerConnector> connectors = new ArrayList();
  
         // Configuring the connector
         ServerConnector sslConnector = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
         sslConnector.setHost("127.0.0.1");
         sslConnector.setPort(9000);
+        connectors.add(sslConnector);
+
+        // Configuring the connector
+        Config config = new Config();
+        if (config.isSecondaryPortEnabled()) {
+            ServerConnector sslConnector2 = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+            sslConnector2.setHost("127.0.0.1");
+            sslConnector2.setPort(4637);
+            connectors.add(sslConnector2);
+        }
  
         // Setting HTTP and HTTPS connectors
-        jettyServer.setConnectors(new Connector[]{sslConnector});
+        jettyServer.setConnectors(connectors.toArray(new Connector[0]));
     }
 }
