@@ -6,17 +6,10 @@
 package bo.firmadigital.jacobitus4.resources2;
 
 import bo.firmadigital.firmar.TokenSelected;
-import bo.firmadigital.firmar.Firmar;
-import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.resources.FirmadorRest;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
@@ -25,7 +18,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -44,6 +36,7 @@ public class SignRest {
      * @apiParam {String} archivo.base64 El documento PDF en Base64
      * @apiParam {String} archivo.name El identificado único para la solicitud
      * @apiParam {String} ci El número de documento de identidad.
+     * @apiParam {Boolean} [software] Bandera para incluir (true) o excluir (false) los tokens por software.
      * 
      * @apiParamExample {json} Request-Example: 
      * {
@@ -64,8 +57,12 @@ public class SignRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
+            boolean software = false;
+            if (req.has("software")) {
+                software = req.getBoolean("software");
+            }
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots();
+            Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");
             }

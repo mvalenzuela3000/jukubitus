@@ -113,9 +113,10 @@ public class GestorSlot {
     /**
      * Esta funci&oacute;n lista los Slots de los token disponibles.
      *
+     * @param software Bandera para incluir (true) o excluir (false) los tokens por software.
      * @return Retorna la lista de Slot de todos los token disponibles.
      */
-    public synchronized Slot[] listarSlots() {
+    public synchronized Slot[] listarSlots(boolean software) {
         slots.clear();
         try {
             List<JSONObject> tokens = SmartCard.cards();
@@ -138,7 +139,7 @@ public class GestorSlot {
                     slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id)));
                 }
             }
-            if (config.getToken() != null) {
+            if (software && config.getToken() != null) {
                 slots.put(-1l, new Slot(config.getToken().getPath()));
             }
         } catch (JSONException | IOException ex) {
@@ -146,6 +147,15 @@ public class GestorSlot {
         }
 
         return slots.values().toArray(new Slot[0]);
+    }
+
+    /**
+     * Esta funci&oacute;n lista los Slots de los token disponibles.
+     *
+     * @return Retorna la lista de Slot de todos los token disponibles.
+     */
+    public synchronized Slot[] listarSlots() {
+        return listarSlots(true);
     }
 
     /**
