@@ -19,6 +19,14 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -28,6 +36,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -37,25 +46,57 @@ import org.codehaus.jettison.json.JSONObject;
  * @author ADSIB
  */
 public class Request {
-    protected TrustManager[] trustAllCerts = new TrustManager[] {
+    X509TrustManager trustManager;
+    X509Certificate server;
+
+    protected TrustManager[] trustCerts = new TrustManager[] {
         new X509TrustManager() {
             @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
+            public X509Certificate[] getAcceptedIssuers() {
+                return trustManager.getAcceptedIssuers();
             }
             @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+            public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                trustManager.checkClientTrusted(certs, authType);
             }
             @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+            public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                try {
+                    trustManager.checkServerTrusted(certs, authType);
+                } catch (CertificateException ex) {
+                    try {
+                        certs[0].verify(server.getPublicKey());
+                    } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException ex1) {
+                        throw new CertificateException(ex1.getMessage());
+                    }
+                }
             }
         }
     };
 
     public Request() {
         try {
-            SSLContext sc = SSLContext.getInstance("SSL"); 
-            sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init((KeyStore) null);
+            trustManager = null;
+            for (TrustManager tm : trustManagerFactory.getTrustManagers()) {
+                if (tm instanceof X509TrustManager) {
+                    trustManager = (X509TrustManager) tm;
+                    break;
+                }
+            }
+        }  catch (NoSuchAlgorithmException | KeyStoreException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            server = (X509Certificate)certFactory.generateCertificate(this.getClass().getClassLoader().getResourceAsStream("server.crt"));
+        } catch (CertificateException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            SSLContext sc = SSLContext.getInstance("TLSv1.2");
+            sc.init(null, trustCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HostnameVerifier hv = (String urlHostName, SSLSession session) -> {
                 if (!urlHostName.equalsIgnoreCase(session.getPeerHost())) {
