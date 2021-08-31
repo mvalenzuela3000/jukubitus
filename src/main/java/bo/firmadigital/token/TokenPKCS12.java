@@ -127,6 +127,24 @@ public class TokenPKCS12 implements Token {
      */
     @Override
     public void modificarPin(String oldPin, String newPin) {
+        if (newPin.length() < 8) {
+            throw new RuntimeException("La contraseña es muy corta.");
+        } else {
+            int num = 0, may = 0, minu = 0;
+            char[] password = newPin.toCharArray();
+            for (int i = 0; i < newPin.length(); i++) {
+                if (password[i] >= '0' && password[i] <= '9') {
+                    num++;
+                } else if (password[i] >= 'A' && password[i] <= 'Z') {
+                    may++;
+                } else if (password[i] >= 'a' && password[i] <= 'z') {
+                    minu++;
+                }
+            }
+            if (num < 1 || may < 1 || minu < 1) {
+                throw new RuntimeException("La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.");
+            }
+        }
         try {
             iniciar(oldPin);
             KeyStore ks = KeyStore.getInstance("PKCS12-3DES-3DES", "BC");

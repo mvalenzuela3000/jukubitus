@@ -141,6 +141,21 @@ public class TokenPKCS11 implements Token {
      */
     @Override
     public void modificarPin(String oldPin, String newPin) {
+        if (newPin.length() < 8) {
+            throw new RuntimeException("El pin es muy corto.");
+        } else {
+            boolean patron = true;
+            for (int i = 0; i < newPin.length() - 1; i++) {
+                if (newPin.charAt(i) != newPin.charAt(i + 1) &&
+                        newPin.charAt(i) + 1 != newPin.charAt(i + 1) &&
+                        newPin.charAt(i) - 1 != newPin.charAt(i + 1)) {
+                    patron = false;
+                }
+            }
+            if (patron) {
+                throw new RuntimeException("El pin sigue un patrón inseguro.");
+            }
+        }
         String lib = null;
         try {
             String[] conf;

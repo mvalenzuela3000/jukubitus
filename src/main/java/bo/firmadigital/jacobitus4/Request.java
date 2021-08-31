@@ -67,7 +67,7 @@ public class Request {
                     try {
                         certs[0].verify(server.getPublicKey());
                     } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException ex1) {
-                        throw new CertificateException(ex1.getMessage());
+                        throw ex;
                     }
                 }
             }
@@ -100,7 +100,7 @@ public class Request {
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HostnameVerifier hv = (String urlHostName, SSLSession session) -> {
                 if (!urlHostName.equalsIgnoreCase(session.getPeerHost())) {
-                    System.out.println("Warning: URL host '" + urlHostName + "' is different to SSLSession host '" + session.getPeerHost() + "'.");
+                    Logger.getLogger(Request.class.getName()).log(Level.WARNING, "URL host '" + urlHostName + "' is different to SSLSession host '" + session.getPeerHost() + "'.");
                 }
                 return true;
             };
