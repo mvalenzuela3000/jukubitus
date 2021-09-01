@@ -58,6 +58,8 @@ public class Service extends Stage {
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
+        tokenSelected.setAlias(null);
+        tokenSelected.setPin(null);
         this.tokenSelected = tokenSelected;
         GridPane root = new GridPane();
         root.setHgap(5);
@@ -173,6 +175,8 @@ public class Service extends Stage {
         };
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((Event evt) -> {
+            tokenSelected.setAlias(null);
+            tokenSelected.setPin(null);
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
