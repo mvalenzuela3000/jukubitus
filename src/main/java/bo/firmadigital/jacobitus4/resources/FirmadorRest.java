@@ -525,4 +525,99 @@ public class FirmadorRest {
         }
         return json.toString();
     }
+
+    /**
+     * @api {post} /api/token/firmar_lote_pdfs Firma un lote de documentos pdf.
+     * @apiGroup Firmador
+     * @apiVersion 1.0.0
+     *
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
+     * @apiParam {Object[]} pdfs Array de objectos con pdfs para firmar.
+     * @apiParam {Boolean} [pdfs.bloquear] Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.
+     * @apiParam {String} pdfs.id El identificador único para la solicitud.
+     * @apiParam {String} pdfs.pdf Archivo pdf en base64 que se desea firmar.
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678",
+     *     "alias": "355409121073",
+     *     "pdfs": [
+     *         {
+     *             "id": "documento0.pdf",
+     *             "pdf": "MII...truncated...=="
+     *         }, {
+     *             "id": "documento1.pdf",
+     *             "pdf": "MII...truncated...=="
+     *         }
+     *     ]
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "pdfs_firmados": [
+     *             {
+     *                 "id": "documento0.pdf",
+     *                 "pdf_firmado": "MII...truncated...=="
+     *             }, {
+     *                 "id": "documento1.pdf",
+     *                 "pdf_firmado": "MII...truncated...=="
+     *             }
+     *         ]
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Se firmaron los pdfs correctamente."
+     * }
+     */
+    @POST
+    @Path("/firmar_lote_pdfs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarLotePdf(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            if (!req.has("slot")) {
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    req.put("slot", slots[0].getSlotID());
+                }
+            }
+            if (req.has("slot") && req.has("pin") && req.has("alias") && req.has("pdfs")) {
+                JSONObject datos = new JSONObject();
+                json.put("datos", datos);
+
+                Firmar firmar = FirmarPdf.getInstance(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
+                JSONArray pdfs = req.getJSONArray("pdfs");
+                JSONArray pdfsFirmados = new JSONArray();
+                for (int i = 0; i < pdfs.length(); i++) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    firmar.firmar(new ByteArrayInputStream(Base64.getDecoder().decode(pdfs.getJSONObject(i).getString("pdf"))), out, pdfs.getJSONObject(i).has("bloquear") && pdfs.getJSONObject(i).getBoolean("bloquear"));
+                    JSONObject pdf = new JSONObject();
+                    pdf.put("id", pdfs.getJSONObject(i).getString("id"));
+                    pdf.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
+                    pdfsFirmados.put(pdf);
+                }
+
+                datos.put("pdfs_firmados", pdfsFirmados);
+                json.put("finalizado", true);
+                json.put("mensaje", "Se firmaron los pdfs correctamente!");
+            } else {
+                json.put("finalizado", false);
+                json.put("mensaje", "Datos requeridos slot, pin, alias y pdfs.");
+            }
+        } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
 }

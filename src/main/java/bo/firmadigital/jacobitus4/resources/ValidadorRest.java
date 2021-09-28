@@ -122,7 +122,7 @@ public class ValidadorRest {
 
                 Validar validar = new ValidarPdf(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
-                datos.append("firmas", firmas);
+                datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
                     JSONObject firma = new JSONObject();
                     firma.put("noModificado", cert.isValid());
