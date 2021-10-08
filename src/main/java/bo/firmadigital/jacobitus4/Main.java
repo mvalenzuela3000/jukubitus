@@ -71,9 +71,18 @@ public class Main {
             servletHolder.setInitOrder(0);
             servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");
 
-            ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/sign/*");
-            servletHolderSign.setInitOrder(1);
-            servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources2");
+            Config config = new Config();
+            if (config.isSecondaryPortEnabled()) {
+                ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/sign/*");
+                servletHolderSign.setInitOrder(1);
+                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources2");
+            }
+
+            if (config.isTertiaryPortEnabled()) {
+                ServletHolder servletHolderDF = servletContextHandler.addServlet(ServletContainer.class, "/*");
+                servletHolderDF.setInitOrder(1);
+                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources3");
+            }
             try {
                 createServerConnectorHTTPS();
                 jettyServer.start();
@@ -164,6 +173,14 @@ public class Main {
             sslConnector2.setHost("127.0.0.1");
             sslConnector2.setPort(4637);
             connectors.add(sslConnector2);
+        }
+
+        // Configuring the connector
+        if (config.isTertiaryPortEnabled()) {
+            ServerConnector sslConnector3 = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+            sslConnector3.setHost("127.0.0.1");
+            sslConnector3.setPort(3200);
+            connectors.add(sslConnector3);
         }
  
         // Setting HTTP and HTTPS connectors

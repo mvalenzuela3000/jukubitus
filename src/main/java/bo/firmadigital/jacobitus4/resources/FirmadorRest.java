@@ -591,21 +591,31 @@ public class FirmadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Firmar firmar = FirmarPdf.getInstance(req.getLong("slot"), req.getString("alias"), req.getString("pin"));
-                JSONArray pdfs = req.getJSONArray("pdfs");
-                JSONArray pdfsFirmados = new JSONArray();
-                for (int i = 0; i < pdfs.length(); i++) {
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    firmar.firmar(new ByteArrayInputStream(Base64.getDecoder().decode(pdfs.getJSONObject(i).getString("pdf"))), out, pdfs.getJSONObject(i).has("bloquear") && pdfs.getJSONObject(i).getBoolean("bloquear"));
-                    JSONObject pdf = new JSONObject();
-                    pdf.put("id", pdfs.getJSONObject(i).getString("id"));
-                    pdf.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
-                    pdfsFirmados.put(pdf);
-                }
+                Token token = GestorSlot.getInstance().obtenerSlot(req.getLong("slot")).getToken();
+                token.iniciar(req.getString("pin"));
+                try {
+                    if (token.obtenerCertificado(req.getString("alias")) == null) {
+                        throw new RuntimeException("No se encontró un certificado con el alias proporcionado.");
+                    }
+                    JSONArray pdfs = req.getJSONArray("pdfs");
+                    JSONArray pdfsFirmados = new JSONArray();
+                    for (int i = 0; i < pdfs.length(); i++) {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        FirmarPdf.firmar(new ByteArrayInputStream(Base64.getDecoder().decode(pdfs.getJSONObject(i).getString("pdf"))), out, pdfs.getJSONObject(i).has("bloquear") && pdfs.getJSONObject(i).getBoolean("bloquear"), token, req.getString("alias"));
+                        JSONObject pdf = new JSONObject();
+                        pdf.put("id", pdfs.getJSONObject(i).getString("id"));
+                        pdf.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
+                        pdfsFirmados.put(pdf);
+                    }
 
-                datos.put("pdfs_firmados", pdfsFirmados);
-                json.put("finalizado", true);
-                json.put("mensaje", "Se firmaron los pdfs correctamente!");
+                    datos.put("pdfs_firmados", pdfsFirmados);
+                    json.put("finalizado", true);
+                    json.put("mensaje", "Se firmaron los pdfs correctamente!");
+                } catch (RuntimeException ex) {
+                    json.put("finalizado", false);
+                    json.put("mensaje", ex.getMessage());
+                }
+                token.salir();
             } else {
                 json.put("finalizado", false);
                 json.put("mensaje", "Datos requeridos slot, pin, alias y pdfs.");

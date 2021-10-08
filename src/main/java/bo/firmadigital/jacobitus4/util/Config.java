@@ -96,6 +96,19 @@ public class Config {
         }
     }
 
+    public boolean isTertiaryPortEnabled() {
+        String proxy = options.getProperty("tertiaryPort");
+        return proxy != null && proxy.equals("true");
+    }
+
+    public void setTertiaryPortEnabled(boolean tertiaryPort) {
+        if (tertiaryPort) {
+            options.setProperty("tertiaryPort", "true");
+        } else {
+            options.setProperty("tertiaryPort", "false");
+        }
+    }
+
     public File getToken() {
         return token;
     }

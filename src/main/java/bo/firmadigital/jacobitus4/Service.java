@@ -5,9 +5,9 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.TokenSelected;
+import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.DatosCertificado;
 import java.io.ByteArrayInputStream;
@@ -150,13 +150,14 @@ public class Service extends Stage {
                 if (files.length() == 0) {
                     updateProgress(100, 100);
                 } else {
-                    Firmar firmar = FirmarPdf.getInstance(tokenSelected.getSlot().getSlotID(), tokenSelected.getAlias(), tokenSelected.getPin());
+                    Token token = GestorSlot.getInstance().obtenerSlot(tokenSelected.getSlot().getSlotID()).getToken();
+                    token.iniciar(tokenSelected.getPin());
                     JSONArray arr = new JSONArray();
                     for (int i = 0; i < files.length(); i++) {
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                             String[] base64 = files.getJSONObject(i).getString("base64").split("base64,");
                             byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
-                            firmar.firmar(new ByteArrayInputStream(file), out, false);
+                            FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                             JSONObject obj = new JSONObject();
                             obj.put("name", files.getJSONObject(i).getString("name"));
                             obj.put("base64", Base64.getEncoder().encodeToString(out.toByteArray()));
@@ -166,9 +167,13 @@ public class Service extends Stage {
                                 estado.setText("Archivos: " + a + " de " + files.length());
                             });
                             updateProgress(a, files.length());
+                        } catch (RuntimeException ex) {
+                            token.salir();
+                            throw new CustomException(ex.getMessage());
                         }
                     }
                     tokenSelected.setFiles(arr);
+                    token.salir();
                 }
                 return true;
             }
@@ -180,10 +185,19 @@ public class Service extends Stage {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            if (task.getException() instanceof CustomException) {
+                close();
+            }
         });
         task.setOnSucceeded((Event evt) -> {
             close();
         });
         return task;
+    }
+
+    private class CustomException extends RuntimeException {
+        public CustomException(String message) {
+            super(message);
+        }
     }
 }

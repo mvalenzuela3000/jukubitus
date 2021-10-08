@@ -41,6 +41,9 @@ import javafx.stage.Stage;
 public class Configuracion extends Stage {
     private Config config;
     private CheckBox checkBox;
+    private final CheckBox checkBoxPort2;
+    private final CheckBox checkBoxPort3;
+    private boolean checkBoxEvent = true;
     private TextField textFieldIP;
     private TextField textFieldPort;
     private TextField textFieldToken;
@@ -82,16 +85,40 @@ public class Configuracion extends Stage {
         Label titleS = new Label("Puerto secundario");
         titleS.setStyle("-fx-font-weight: bold");
         vbox1.getChildren().add(titleS);
-        CheckBox checkBoxPort = new CheckBox("Habilitar puerto 4637");
-        checkBoxPort.setSelected(config.isSecondaryPortEnabled());
-        checkBoxPort.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+        checkBoxPort2 = new CheckBox("Habilitar puerto 4637");
+        checkBoxPort2.setSelected(config.isSecondaryPortEnabled());
+        vbox1.getChildren().add(checkBoxPort2);
+        checkBoxPort3 = new CheckBox("Habilitar puerto 3200");
+        checkBoxPort3.setSelected(config.isTertiaryPortEnabled());
+        checkBoxPort2.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             config.setSecondaryPortEnabled(newValue);
             config.save();
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
-            alert.setTitle("Jacobitus");
-            alert.showAndWait();
+            if (checkBoxEvent) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
+                alert.setTitle("Jacobitus");
+                alert.showAndWait();
+            }
+            checkBoxEvent = true;
+            if (newValue && checkBoxPort3.isSelected()) {
+                checkBoxEvent = false;
+                checkBoxPort3.setSelected(false);
+            }
         });
-        vbox1.getChildren().add(checkBoxPort);
+        checkBoxPort3.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            config.setTertiaryPortEnabled(newValue);
+            config.save();
+            if (checkBoxEvent) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
+                alert.setTitle("Jacobitus");
+                alert.showAndWait();
+            }
+            checkBoxEvent = true;
+            if (newValue && checkBoxPort2.isSelected()) {
+                checkBoxEvent = false;
+                checkBoxPort2.setSelected(false);
+            }
+        });
+        vbox1.getChildren().add(checkBoxPort3);
         root.getChildren().add(vbox1);
         Separator separator = new Separator(Orientation.VERTICAL);
         root.getChildren().add(separator);
@@ -109,7 +136,7 @@ public class Configuracion extends Stage {
         Button buttonCrear = new Button("Crear Token");
         vbox2.getChildren().add(buttonCrear);
         root.getChildren().add(vbox2);
-        Scene scene = new Scene(root, 440, 260);
+        Scene scene = new Scene(root, 440, 288);
         setScene(scene);
         checkBox.setSelected(true);
         checkBox.setSelected(config.isProxyEnabled());

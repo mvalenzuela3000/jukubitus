@@ -81,5 +81,27 @@ public class FirmarPdf implements Firmar {
     public synchronized void firmar(InputStream is, OutputStream os) throws IOException, GeneralSecurityException {
         firmar(is, os, false);
     }
-    
+
+    public static synchronized void firmar(InputStream is, OutputStream os, boolean bloquear, Token token, String label) throws IOException, GeneralSecurityException {
+        PdfReader reader = new PdfReader(is);
+        StampingProperties stamp = new StampingProperties();
+        stamp.useAppendMode();
+        PdfSigner signer = new PdfSigner(reader, os, stamp);
+        if (reader.isEncrypted()) {
+            throw new IOException("El documento se encuentra encriptado.");
+        }
+        if (bloquear) {
+            PdfSigFieldLock fieldLock = new PdfSigFieldLock();
+            fieldLock.setDocumentPermissions(PdfSigFieldLock.LockPermissions.NO_CHANGES_ALLOWED);
+            fieldLock.setFieldLock(PdfSigFieldLock.LockAction.EXCLUDE, new String[]{});
+            signer.setFieldLockDict(fieldLock);
+        }
+        Rectangle rect = new Rectangle(0, 0, 0, 0);
+        PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+        appearance.setPageRect(rect);
+
+        IExternalDigest digest = new BouncyCastleDigest();
+        IExternalSignature signature = new ExternalSignatureLocal(token.obtenerClavePrivada(label), token.getProviderName());
+        signer.signDetached(digest, signature, token.getCertificateChain(label), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
+    }
 }

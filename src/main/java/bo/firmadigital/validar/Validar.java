@@ -100,10 +100,10 @@ public abstract class Validar implements Iterable<CertDate> {
         return file;
     }
 
-    public boolean verificarPKI(Certificate cert) {
+    public static boolean verificarPKI(Certificate cert) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            InputStream is = getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
+            InputStream is = Validar.class.getClassLoader().getResourceAsStream("firmadigital_bo.crt");
             PemReader pemReader = new PemReader(new InputStreamReader(is));
             List<X509Certificate> intermediates = new LinkedList<>();
             PemObject x509Data;
@@ -127,7 +127,7 @@ public abstract class Validar implements Iterable<CertDate> {
         }
     }
 
-    public OCSPData verificarOcsp(X509Certificate cert, Date signDate) {
+    public static OCSPData verificarOcsp(X509Certificate cert, Date signDate) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             URL[] urls = getCrlURLs(cert);
