@@ -208,14 +208,26 @@ public class TokenPKCS11 implements Token {
             return null;
         }
 
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", sunPKCS11);
+        String cfg = GestorSlot.getInstance().obtenerConfiguracionPK(slot.getSlotID(), clavesId);
+        Provider pkcs11 = Security.getProvider("SunPKCS11");
+        pkcs11 = pkcs11.configure(cfg);
+        
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", pkcs11);
         kpg.initialize(2048);
         KeyPair pair = kpg.generateKeyPair();
+
+        KeyStore ks = KeyStore.getInstance(PKCS11_NOMBRE, pkcs11);
+        try {
+            ks.load(null, pin.toCharArray());
+        } catch (IOException ex) {
+            Logger.getLogger(TokenPKCS11.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Security.addProvider(pkcs11);
 
         // Generando nombres
         X500NameBuilder subjectBuilder = new X500NameBuilder();
         subjectBuilder.addRDN(BCStyle.CN, "Sin Certificado");
-        
+
         // Generando certificado autofirmado
         X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(subjectBuilder.build(), new BigInteger("111111"), new Date(), new Date(), subjectBuilder.build(), SubjectPublicKeyInfo.getInstance(pair.getPublic().getEncoded()));
         JcaContentSignerBuilder builder = new JcaContentSignerBuilder("SHA256withRSA");
@@ -226,8 +238,10 @@ public class TokenPKCS11 implements Token {
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
             X509Certificate certificate = (X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(certBytes));
 
-            keystore.setKeyEntry(clavesId, pair.getPrivate(), null,new Certificate[]{certificate});
+            ks.setKeyEntry(clavesId, pair.getPrivate(), pin.toCharArray(), new Certificate[]{certificate});
 
+            pkcs11.clear();
+            Security.removeProvider(pkcs11.getName());
             return pair.getPublic();
         } catch (OperatorCreationException | IOException | CertificateException ex) {
             throw new KeyStoreException(ex.getMessage());

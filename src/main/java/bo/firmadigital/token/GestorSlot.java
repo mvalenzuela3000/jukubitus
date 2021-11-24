@@ -3,6 +3,7 @@ package bo.firmadigital.token;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.pkcs11.PKCS11;
 import java.io.*;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
@@ -131,12 +132,12 @@ public class GestorSlot {
                 libreria = getLib(tokens.get(0).getString("id"));
             }
             if (libreria != null) {
-                sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null));
+                sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null, null));
                 Security.addProvider(sunPKCS11);
                 PKCS11 p11 = new PKCS11(sunPKCS11);
                 long[] lista = p11.C_GetSlotList(true);
                 for (long id : lista) {
-                    slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id)));
+                    slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id, null)));
                 }
             }
             if (software && config.getToken() != null) {
@@ -181,7 +182,7 @@ public class GestorSlot {
      * conectado el token.
      * @return Retorna la configuraci&oacute;n de token.
      */
-    private String obtenerConfiguracion(String nombre, Long slotID) {
+    private String obtenerConfiguracion(String nombre, Long slotID, String label) {
         if (libreria == null) {
             throw new RuntimeException("No se encontro ningún token conectado.");
         }
@@ -190,7 +191,12 @@ public class GestorSlot {
                 + "\nlibrary = " + libreria;
             if (slotID != null) {
                 configString += "\nslot = " + slotID;
-                configString += "\nattributes(*,*,*) = {\nCKA_TOKEN = true\n}";
+                if (label == null) {
+                    configString += "\nattributes(*,*,*) = {\nCKA_TOKEN = true\n}";
+                } else {
+                    BigInteger etiqueta = new BigInteger(1, label.getBytes("UTF-8"));
+                    configString += "\nattributes(*,*,*) = {\nCKA_TOKEN = true\nCKA_LABEL = " + String.format("0h%040x", etiqueta) + "\n}";
+                }
                 configString += "\ndisabledMechanisms = {\nCKM_SHA1_RSA_PKCS\n}";
             }
             File filePkcs11Config = File.createTempFile("fido_pkcs11_", ".cfg");
@@ -212,6 +218,17 @@ public class GestorSlot {
      */
     public String obtenerConfiguracion(String id) {
         libreria = getLib(id);
-        return obtenerConfiguracion("token", null);
+        return obtenerConfiguracion("token", null, null);
+    }
+
+    /**
+     * Esta funci&oacute;n retorna una configuraci&oacute;n para conectar a un
+     * dispositivo PKCS #11.
+     * @param id Identificador del modelo de token.
+     * @param label Etiqueta con la cual se creara la clave privada.
+     * @return Retorna el archivo de configuración del token.
+     */
+    public String obtenerConfiguracionPK(Long id, String label) {
+        return obtenerConfiguracion("tokenpk", id, label);
     }
 }

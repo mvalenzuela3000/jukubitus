@@ -184,7 +184,6 @@ public class TokenRest {
 
     @POST
     @Path("/sign")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String sign(String body) {
         JSONObject json = new JSONObject();
