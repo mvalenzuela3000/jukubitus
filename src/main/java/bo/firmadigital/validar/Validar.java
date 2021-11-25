@@ -96,6 +96,10 @@ public abstract class Validar implements Iterable<CertDate> {
         throw new RuntimeException("No implementado.");
     }
 
+    public String exportB64(InputStream is) {
+        throw new RuntimeException("No implementado.");
+    }
+
     public File getFile() {
         return file;
     }

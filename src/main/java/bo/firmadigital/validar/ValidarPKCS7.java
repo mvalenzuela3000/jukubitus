@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.validar;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -86,6 +88,22 @@ public class ValidarPKCS7 extends Validar {
                 sc.write(os);
             }
         } catch (CMSException | IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public String exportB64(InputStream is) {
+        try {
+            CMSSignedData signedData = new CMSSignedData(is);
+            CMSProcessable sc = signedData.getSignedContent();
+            String b64;
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                sc.write(os);
+                b64 = Base64.getEncoder().encodeToString(os.toByteArray());
+            }
+            return b64;
+        }   catch (CMSException | IOException ex) {
             throw new RuntimeException(ex.getMessage());
         }
     }

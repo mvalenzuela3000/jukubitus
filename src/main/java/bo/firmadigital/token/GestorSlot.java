@@ -120,16 +120,20 @@ public class GestorSlot {
     public synchronized Slot[] listarSlots(boolean software) {
         slots.clear();
         try {
-            List<JSONObject> tokens = SmartCard.cards();
             Config config = new Config();
-            if (tokens.isEmpty() && libreria == null && config.getToken() == null) {
-                throw new RuntimeException("No se encontro ningun token conectado.");
-            }
-            if (tokens.size() > 1) {
-                throw new RuntimeException("Tokens de diferentes marcas conectados.");
-            }
-            if (!tokens.isEmpty()) {
-                libreria = getLib(tokens.get(0).getString("id"));
+            if (config.getDriver() == null) {
+                List<JSONObject> tokens = SmartCard.cards();
+                if (tokens.isEmpty() && libreria == null && config.getToken() == null) {
+                    throw new RuntimeException("No se encontro ningun token conectado.");
+                }
+                if (tokens.size() > 1) {
+                    throw new RuntimeException("Tokens de diferentes marcas conectados.");
+                }
+                if (!tokens.isEmpty()) {
+                    libreria = getLib(tokens.get(0).getString("id"));
+                }
+            } else {
+                libreria = config.getDriver().getPath();
             }
             if (libreria != null) {
                 sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null, null));

@@ -9,6 +9,7 @@ import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.TokenPKCS12;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -31,6 +32,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -39,6 +41,7 @@ import javafx.stage.Stage;
  * @author ADSIB
  */
 public class Configuracion extends Stage {
+    private static final String OS = System.getProperty("os.name").toLowerCase();
     private Config config;
     private CheckBox checkBox;
     private final CheckBox checkBoxPort2;
@@ -49,6 +52,7 @@ public class Configuracion extends Stage {
     private TextField textFieldToken;
     private final ProgressBar progressBar;
     private final Button buttonDescargar;
+    private final Button buttonControlador;
 
     public Configuracion(Stage parent) {
         setTitle("Panel de configuración");
@@ -182,6 +186,48 @@ public class Configuracion extends Stage {
         buttonDescargar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
             buttonDescargar.setDisable(true);
             new Thread(descargar()).start();
+        });
+        Label titleD = new Label("Controlador");
+        titleD.setStyle("-fx-font-weight: bold");
+        vbox2.getChildren().add(titleD);
+        final Label labelDriver = new Label("Nombre: " + (config.getDriver() == null ? "Ninguno" : config.getDriver().getName()));
+        vbox2.getChildren().add(labelDriver);
+        if (config.getDriver() == null) {
+            buttonControlador = new Button("Seleccionar");
+        } else {
+            buttonControlador = new Button("Remover");
+        }
+        vbox2.getChildren().add(buttonControlador);
+        buttonControlador.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            buttonControlador.setDisable(true);
+            if (config.getDriver() == null) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Abrir Controlador");
+                if (OS.contains("win")) {
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dll)", "*.dll");
+                    fileChooser.getExtensionFilters().add(extFilter);
+                } else if (OS.contains("nux")) {
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.so)", "*.so");
+                    fileChooser.getExtensionFilters().add(extFilter);
+                    FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Todos", "*.*", "*.*");
+                    fileChooser.getExtensionFilters().add(extFilterDocs);
+                } else {
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dmg)", "*.dmg");
+                    fileChooser.getExtensionFilters().add(extFilter);
+                }
+                File file = fileChooser.showOpenDialog(parent);
+                if (file != null) {
+                    config.setDriver(file);
+                    config.save();
+                    buttonControlador.setText("Remover");
+                }
+            } else {
+                config.setDriver(null);
+                config.save();
+                buttonControlador.setText("Seleccionar");
+            }
+            labelDriver.setText("Nombre: " + (config.getDriver() == null ? "Ninguno" : config.getDriver().getName()));
+            buttonControlador.setDisable(false);
         });
     }
 

@@ -207,7 +207,8 @@ public class ValidadorRest {
      *                     "revocado": "2018-06-01T12:30:02.000Z"
      *                 }
      *             }
-     *         ]
+     *         ],
+     *         "file": "MII...truncated...=="
      *     },
      *     "finalizado": true,
      *     "mensaje": "Se validó las firmas correctamente!"
@@ -256,7 +257,7 @@ public class ValidadorRest {
 
                 Validar validar = new ValidarPKCS7(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
-                datos.append("firmas", firmas);
+                datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
                     JSONObject firma = new JSONObject();
                     firma.put("noModificado", cert.isValid());
@@ -285,6 +286,7 @@ public class ValidadorRest {
                     firma.put("certificado", certificado);
                     firmas.put(firma);
                 }
+                datos.put("file", validar.exportB64(new ByteArrayInputStream(file)));
 
                 json.put("finalizado", true);
                 json.put("mensaje", "Se validó las firmas correctamente!");

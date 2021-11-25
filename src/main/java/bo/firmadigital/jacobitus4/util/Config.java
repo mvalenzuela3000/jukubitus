@@ -123,6 +123,25 @@ public class Config {
         return token.getPath();
     }
 
+    public File getDriver() {
+        String driver = options.getProperty("driver");
+        if (driver != null) {
+            File file = new File(driver);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    public void setDriver(File file) {
+        if (file == null) {
+            options.remove("driver");
+        } else {
+            options.setProperty("driver", file.getPath());
+        }
+    }
+
     public void save() {
         try {
             if (!user.exists()) {
