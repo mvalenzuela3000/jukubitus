@@ -212,7 +212,7 @@ public class Configuracion extends Stage {
                     FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Todos", "*.*", "*.*");
                     fileChooser.getExtensionFilters().add(extFilterDocs);
                 } else {
-                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dmg)", "*.dmg");
+                    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dylib)", "*.dylib");
                     fileChooser.getExtensionFilters().add(extFilter);
                 }
                 File file = fileChooser.showOpenDialog(parent);
