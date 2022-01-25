@@ -5,11 +5,14 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
+import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.SmartCard;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
+import bo.firmadigital.token.TokenPKCS12;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -283,6 +286,7 @@ public class TokenRest {
                                         break;
                                     case "2.5.4.3":
                                         ((JSONObject)x509.get("titular")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
+                                        x509.put("common_name", IETFUtils.valueToString(rdn.getFirst().getValue()));
                                         break;
                                     case "2.5.4.10":
                                         ((JSONObject)x509.get("titular")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
@@ -318,6 +322,50 @@ public class TokenRest {
                 json.put("mensaje", "Datos requeridos slot y pin.");
             }
         } catch (JSONException | CertificateException ex) {
+            Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return json.toString();
+    }
+
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String create(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("finalizado", false);
+            JSONObject req = new JSONObject(body);
+            if (req.getString("pin").length() < 8) {
+                json.put("mensaje", "El pin es muy corto.");
+            } else {
+                int num = 0, may = 0, minu = 0;
+                char[] password = req.getString("pin").toCharArray();
+                for (int i = 0; i < req.getString("pin").length(); i++) {
+                    if (password[i] >= '0' && password[i] <= '9') {
+                        num++;
+                    } else if (password[i] >= 'A' && password[i] <= 'Z') {
+                        may++;
+                    } else if (password[i] >= 'a' && password[i] <= 'z') {
+                        minu++;
+                    }
+                }
+                if (num < 1 || may < 1 || minu < 1) {
+                    json.put("mensaje", "El pin debe contener al menos un número, una letra mayúscula y una letra minúscula.");
+                } else {
+                    Config config  = new Config();
+                    Slot slot = new Slot(config.getTokenToCreate());
+                    TokenPKCS12 token = new TokenPKCS12(slot);
+                    try {
+                        token.crear(req.getString("pin"));
+                        json.put("finalizado", true);
+                        json.put("mensaje", "Token generado correctamente.");
+                    } catch (GeneralSecurityException ex) {
+                        json.put("mensaje", ex.getMessage());
+                    }
+                }
+            }
+        } catch (JSONException ex) {
             Logger.getLogger(TokenRest.class.getName()).log(Level.SEVERE, null, ex);
         }
         return json.toString();
