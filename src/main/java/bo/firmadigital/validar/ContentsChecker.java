@@ -190,6 +190,18 @@ public class ContentsChecker extends PdfReader {
                         return Estado.widget_otro_agregado;
                     }
                 } else {
+                    for (PdfName key : map.keySet()) {
+                        for (PdfDictionary dict : map.get(key)) {
+                            if (dict.containsKey(PdfName.BBox) && dict.containsKey(PdfName.Resources)) {
+                                PdfObject res = dict.get(PdfName.Resources);
+                                if (res.isDictionary()) {
+                                    if (((PdfDictionary)res).size() > 0) {
+                                        return Estado.desconocido_agregado;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (map.containsKey(PdfName.Annot) || map.containsKey(PdfName.Annots) || map.containsKey(PdfName.Highlight)) {
                         return Estado.desconocido_agregado;
                     }
