@@ -177,6 +177,8 @@ public class FirmadorRest {
      * @apiGroup Firmador
      * @apiVersion 1.0.0
      *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
+     *
      * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
@@ -342,6 +344,8 @@ public class FirmadorRest {
      * @api {post} /api/token/firmar_hash Obtiene la firma encriptando el hash.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      * 
      * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
@@ -416,6 +420,8 @@ public class FirmadorRest {
      * @api {post} /api/token/firmar_pkcs7 Firma un archivo.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      *
      * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
@@ -530,6 +536,8 @@ public class FirmadorRest {
      * @api {post} /api/token/firmar_lote_pdfs Firma un lote de documentos pdf.
      * @apiGroup Firmador
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      *
      * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.

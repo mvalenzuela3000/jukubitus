@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.SmartCard;
@@ -52,6 +51,8 @@ public class TokenRest {
      * @apiGroup Token
      * @apiVersion 1.0.0
      *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
+     *
      * @apiSuccessExample {json} Success-Response:
      * {
      *     "datos": {
@@ -97,6 +98,8 @@ public class TokenRest {
      * @api {get} /api/token/connected Obtiene información de los tokens conectados.
      * @apiGroup Token
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      *
      * @apiSuccessExample {json} Success-Response:
      * {
@@ -157,6 +160,8 @@ public class TokenRest {
      * @api {post} /api/token/data Obtiene información de los certificados en el token conectado al slot.
      * @apiGroup Token
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      * 
      * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
      * @apiParam {String} pin Clave de seguridad requerida para acceder al token.

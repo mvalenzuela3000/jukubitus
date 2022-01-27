@@ -26,6 +26,8 @@ public class EstadoRest {
      * @apiGroup Estado
      * @apiVersion 1.0.0
      *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
+     *
      * @apiSuccessExample {json} Success-Response:
      * {
      *     "datos": {

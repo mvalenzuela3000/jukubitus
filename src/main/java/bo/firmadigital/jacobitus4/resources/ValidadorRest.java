@@ -41,6 +41,8 @@ public class ValidadorRest {
      * @apiGroup Validador
      * @apiVersion 1.0.0
      *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
+     *
      * @apiParam {String} pdf Archivo pdf en base64 que se desea firmar.
      *
      * @apiParamExample {json} Request-Example:
@@ -174,6 +176,8 @@ public class ValidadorRest {
      * @api {post} /api/validar_pkcs7 Validar firma de un documento p7s.
      * @apiGroup Validador
      * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
      *
      * @apiParam {String} file Archivo p7s en base64 que se desea firmar.
      *
