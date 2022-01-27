@@ -5,6 +5,8 @@
  */
 package bo.firmadigital.token;
 
+import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +45,31 @@ public class SmartCard {
                     res.add(token);
                 }
             }
-        } catch (NoSuchAlgorithmException | CardException | JSONException ex) {
+        } catch (NoSuchAlgorithmException ex) {
+            Config config = new Config();
+            if (config.getDriver() != null) {
+                try {
+                    GestorSlot gs = GestorSlot.getInstance();
+                    Slot[] slots = gs.listarSlots();
+                    for (Slot slot : slots) {
+                        CK_TOKEN_INFO info = slot.detalleToken();
+                        System.out.println(info.getLabel());
+                        token = new JSONObject();
+                        String name = new String(info.model).trim();
+                        if (name.equals("ePass2003")) {
+                            name = "FT ePass2003Auto";
+                        }
+                        token.put("name", name);
+                        if (!res.contains(token)) {
+                            res.add(token);
+                        }
+                    }
+                } catch (JSONException ex2) {
+                    Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex2);
+                }
+            }
+            Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CardException | JSONException ex) {
             if (ex.getMessage().equals("list() failed") || ex.getMessage().equals("connect() failed")) {
                 if (res.isEmpty() && token != null) {
                     try {
