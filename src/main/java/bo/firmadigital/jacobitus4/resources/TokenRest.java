@@ -12,6 +12,7 @@ import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.token.TokenPKCS12;
+import bo.firmadigital.validar.DatosCertificado;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -32,10 +33,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.bouncycastle.asn1.x500.RDN;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.IETFUtils;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -254,6 +251,7 @@ public class TokenRest {
                         key.put("alias", llaves.get(i));
                         key.put("id", llaves.get(i));
                         X509Certificate cert = token.obtenerCertificado(llaves.get(i));
+                        DatosCertificado datos = new DatosCertificado(cert);
                         key.put("tiene_certificado", cert != null);
                         ((JSONArray)data_token.get("data")).put(key);
                         if (key.getBoolean("tiene_certificado")) {
@@ -277,42 +275,22 @@ public class TokenRest {
                             pem += "\n-----END CERTIFICATE-----";
                             x509.put("pem", pem);
                             x509.put("validez", new JSONObject());
-                            ((JSONObject)x509.get("validez")).put("desde", dateFormat.format(cert.getNotBefore()));
-                            ((JSONObject)x509.get("validez")).put("hasta", dateFormat.format(cert.getNotAfter()));
-                            X500Name x500Name = new JcaX509CertificateHolder(cert).getSubject();
+                            ((JSONObject)x509.get("validez")).put("desde", dateFormat.format(datos.getInicioValidez()));
+                            ((JSONObject)x509.get("validez")).put("hasta", dateFormat.format(datos.getFinValidez()));
                             x509.put("titular", new JSONObject());
-                            for(RDN rdn : x500Name.getRDNs()) {
-                                switch (rdn.getFirst().getType().getId()) {
-                                    case "2.5.4.46":
-                                        ((JSONObject)x509.get("titular")).put("dnQualifier", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                    case "1.3.6.1.1.1.1.0":
-                                        ((JSONObject)x509.get("titular")).put("uidNumber", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                    case "2.5.4.3":
-                                        ((JSONObject)x509.get("titular")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        x509.put("common_name", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                    case "2.5.4.10":
-                                        ((JSONObject)x509.get("titular")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                    case "2.5.4.11":
-                                        ((JSONObject)x509.get("titular")).put("OU", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                }
-                            }
-                            X500Name x500IssuerName = new JcaX509CertificateHolder(cert).getSubject();
+                            ((JSONObject)x509.get("titular")).put("dnQualifier", datos.getTipoDocumentoSubject());
+                            ((JSONObject)x509.get("titular")).put("uidNumber", datos.getNumeroDocumentoSubject());
+                            ((JSONObject)x509.get("titular")).put("UID", datos.getComplementoSubject());
+                            ((JSONObject)x509.get("titular")).put("CN", datos.getNombreComunSubject());
+                            ((JSONObject)x509.get("titular")).put("T", datos.getCargoSubject());
+                            ((JSONObject)x509.get("titular")).put("O", datos.getOrganizacionSubject());
+                            ((JSONObject)x509.get("titular")).put("OU", datos.getUnidadOrganizacionalSubject());
+                            ((JSONObject)x509.get("titular")).put("EmailAddress", datos.getCorreoSubject());
+                            ((JSONObject)x509.get("titular")).put("description", datos.getDescripcionSubject());
+                            x509.put("common_name", datos.getNombreComunSubject());
                             x509.put("emisor", new JSONObject());
-                            for(RDN rdn : x500IssuerName.getRDNs()) {
-                                switch (rdn.getFirst().getType().getId()) {
-                                    case "2.5.4.3":
-                                        ((JSONObject)x509.get("emisor")).put("CN", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                    case "2.5.4.10":
-                                        ((JSONObject)x509.get("emisor")).put("O", IETFUtils.valueToString(rdn.getFirst().getValue()));
-                                        break;
-                                }
-                            }
+                            ((JSONObject)x509.get("emisor")).put("CN", datos.getNombreComunIssuer());
+                            ((JSONObject)x509.get("emisor")).put("O", datos.getOrganizacionIssuer());
                             ((JSONArray)data_token.get("data")).put(x509);
                         }
                     }

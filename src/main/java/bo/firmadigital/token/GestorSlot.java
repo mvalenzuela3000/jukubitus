@@ -123,7 +123,7 @@ public class GestorSlot {
             Config config = new Config();
             if (config.getDriver() == null) {
                 List<JSONObject> tokens = SmartCard.cards();
-                if (tokens.isEmpty() && libreria == null && config.getToken() == null) {
+                if (tokens.isEmpty() && libreria == null && config.getToken() == null && config.getHsmJWT() == null) {
                     throw new RuntimeException("No se encontro ningun token conectado.");
                 }
                 if (tokens.size() > 1) {
@@ -146,6 +146,9 @@ public class GestorSlot {
             }
             if (software && config.getToken() != null) {
                 slots.put(-1l, new Slot(config.getToken().getPath()));
+            }
+            if (config.getHsmJWT() != null) {
+                slots.put(-1001l, new Slot(-1001));
             }
         } catch (JSONException | IOException ex) {
             Logger.getLogger(GestorSlot.class.getName()).log(Level.SEVERE, null, ex);

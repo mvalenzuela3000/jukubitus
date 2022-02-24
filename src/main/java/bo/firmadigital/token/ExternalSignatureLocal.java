@@ -1,5 +1,6 @@
 package bo.firmadigital.token;
 
+import bo.firmadigital.token.TokenHsmCloud.HsmPrivateKey;
 import com.itextpdf.signatures.DigestAlgorithms;
 import com.itextpdf.signatures.IExternalSignature;
 import java.security.GeneralSecurityException;
@@ -27,16 +28,20 @@ public class ExternalSignatureLocal implements IExternalSignature {
 
     @Override
     public synchronized byte[] sign(byte[] sh) throws GeneralSecurityException {
-        String signMode = getHashAlgorithm();
-        signMode += "with" + privateKey.getAlgorithm();
-        Signature signature;
-        if (provider.equals("PKCS12")) {
-            signature = Signature.getInstance(signMode);
+        if (provider.equals("HsmCloud")) {
+            return ((HsmPrivateKey)privateKey).sign(sh);
         } else {
-            signature = Signature.getInstance(signMode, provider);
+            String signMode = getHashAlgorithm();
+            signMode += "with" + privateKey.getAlgorithm();
+            Signature signature;
+            if (provider.equals("PKCS12")) {
+                signature = Signature.getInstance(signMode);
+            } else {
+                signature = Signature.getInstance(signMode, provider);
+            }
+            signature.initSign(privateKey);
+            signature.update(sh);
+            return signature.sign();
         }
-        signature.initSign(privateKey);
-        signature.update(sh);
-        return signature.sign();
     }
 }

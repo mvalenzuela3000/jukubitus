@@ -41,6 +41,12 @@ public class Slot {
         this.configuracion = configuracion;
     }
 
+    public Slot(long slotID) {
+        this.slotID = slotID;
+        this.p11 = null;
+        this.configuracion = null;
+    }
+
     /**
      * Esta funci&oacute;n retorna el id de Slot a la que representa esta clase.
      *
@@ -62,7 +68,11 @@ public class Slot {
     public synchronized Token getToken() {
         if (token == null) {
             if (slotID < 0) {
-                token = new TokenPKCS12(this);
+                if (slotID < -1000) {
+                    token = new TokenHsmCloud();
+                } else {
+                    token = new TokenPKCS12(this);
+                }
             } else {
                 token = new TokenPKCS11(this);
             }
@@ -79,7 +89,11 @@ public class Slot {
      */
     public CK_TOKEN_INFO detalleToken() {
         if (slotID < 0) {
-            return TokenPKCS12.getTokenInfo(configuracion);
+            if (slotID < -1000) {
+                return TokenHsmCloud.getTokenInfo();
+            } else {
+                return TokenPKCS12.getTokenInfo(configuracion);
+            }
         } else {
             return this.p11.C_GetTokenInfo(this.slotID);
         }

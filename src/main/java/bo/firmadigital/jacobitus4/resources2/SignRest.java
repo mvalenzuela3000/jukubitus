@@ -66,7 +66,12 @@ public class SignRest {
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");
             }
-            TokenSelected dt = App.service(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
+            TokenSelected dt;
+            if (req.has("ci")) {
+                dt = App.service(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
+            } else {
+                dt = App.service(slots[0], null, req.getJSONArray("archivo"));
+            }
             if (dt.getAlias() != null && dt.getPin() != null) {
                 json.put("files", dt.getFiles());
                 return Response.ok(json.toString()).build();

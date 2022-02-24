@@ -106,7 +106,7 @@ public class Service extends Stage {
                     if (!cert.getComplementoSubject().equals("")) {
                         doc += "-" + cert.getComplementoSubject();
                     }
-                    if (tokenSelected.getCI().equals(doc)) {
+                    if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
                         certificates.add(cert);
                     }
                 }

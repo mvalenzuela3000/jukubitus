@@ -53,6 +53,8 @@ public class Configuracion extends Stage {
     private final ProgressBar progressBar;
     private final Button buttonDescargar;
     private final Button buttonControlador;
+    private final TextField textFieldHsmCloud;
+    private final TextField textFieldHsmJWT;
 
     public Configuracion(Stage parent) {
         setTitle("Panel de configuración");
@@ -140,7 +142,7 @@ public class Configuracion extends Stage {
         Button buttonCrear = new Button("Crear Token");
         vbox2.getChildren().add(buttonCrear);
         root.getChildren().add(vbox2);
-        Scene scene = new Scene(root, 440, 288);
+        Scene scene = new Scene(root, 640, 288);
         setScene(scene);
         checkBox.setSelected(true);
         checkBox.setSelected(config.isProxyEnabled());
@@ -228,6 +230,33 @@ public class Configuracion extends Stage {
             }
             labelDriver.setText("Nombre: " + (config.getDriver() == null ? "Ninguno" : config.getDriver().getName()));
             buttonControlador.setDisable(false);
+        });
+        Separator separator2 = new Separator(Orientation.VERTICAL);
+        root.getChildren().add(separator2);
+        VBox vbox3 = new VBox();
+        vbox3.setPadding(new Insets(10));
+        vbox3.setSpacing(8);
+        Label titleHsm = new Label("Opciones HSM ADSIB");
+        titleHsm.setStyle("-fx-font-weight: bold");
+        vbox3.getChildren().add(titleHsm);
+        root.getChildren().add(vbox3);
+        Label labelHsmUrl = new Label("URL:");
+        vbox3.getChildren().add(labelHsmUrl);
+        textFieldHsmCloud = new TextField();
+        textFieldHsmCloud.setText(config.getHsmCloud());
+        vbox3.getChildren().add(textFieldHsmCloud);
+        Label labelHsmJWT = new Label("Json Web Token:");
+        vbox3.getChildren().add(labelHsmJWT);
+        textFieldHsmJWT = new TextField();
+        textFieldHsmJWT.setText(config.getHsmJWT());
+        vbox3.getChildren().add(textFieldHsmJWT);
+        Button buttonGuardarHsm = new Button("Guardar HSM");
+        vbox3.getChildren().add(buttonGuardarHsm);
+        buttonGuardarHsm.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            config.setHsmCloud(textFieldHsmCloud.getText());
+            config.setHsmJWT(textFieldHsmJWT.getText());
+            config.save();
+            close();
         });
     }
 

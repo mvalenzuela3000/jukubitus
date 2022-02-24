@@ -142,6 +142,54 @@ public class Config {
         }
     }
 
+    public String getHsmCloud() {
+        if (options.containsKey("hsmCloud")) {
+            return options.getProperty("hsmCloud");
+        } else {
+            return "https://desarrollo.adsib.gob.bo/cloud_hsm/services/api/v1/hsm";
+        }
+    }
+
+    public void setHsmCloud(String url) {
+        if (url == null) {
+            options.remove("hsmCloud");
+        } else {
+            options.setProperty("hsmCloud", url);
+        }
+    }
+
+    public String getHsmJWT() {
+        if (options.containsKey("hsmJWT")) {
+            return options.getProperty("hsmJWT");
+        } else {
+            return null;
+        }
+    }
+
+    public void setHsmJWT(String jwt) {
+        if (jwt == null || jwt.trim().equals("")) {
+            options.remove("hsmJWT");
+        } else {
+            options.setProperty("hsmJWT", jwt);
+        }
+    }
+
+    public String getHsmType() {
+        if (options.containsKey("hsmType")) {
+            return options.getProperty("hsmType");
+        } else {
+            return "HSM";
+        }
+    }
+
+    public void setHsmType(String type) {
+        if (type == null) {
+            options.remove("hsmType");
+        } else {
+            options.setProperty("hsmType", type);
+        }
+    }
+
     public void save() {
         try {
             if (!user.exists()) {
