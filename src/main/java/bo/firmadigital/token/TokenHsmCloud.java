@@ -64,6 +64,11 @@ public class TokenHsmCloud implements Token {
     }
 
     @Override
+    public void unlockPin(String osPin, String newPin) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws GeneralSecurityException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

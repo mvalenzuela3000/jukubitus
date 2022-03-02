@@ -182,6 +182,42 @@ public class TokenPKCS11 implements Token {
     }
 
     /**
+     * Esta funci&oacute;n desbloquea la clave (PIN) del token.
+     *
+     * @param osPin Clave del SO del token.
+     * @param newPin Nueva clave del token.
+     */
+    @Override
+    public void unlockPin(String osPin, String newPin) {
+        if (newPin.length() < 8) {
+            throw new RuntimeException("El pin es muy corto.");
+        }
+        String lib = null;
+        try {
+            String[] conf;
+            try (FileInputStream fis = new FileInputStream(slot.getConfiguracion())) {
+                conf = new String(fis.readAllBytes()).split("\n");
+            }
+            for (String line : conf) {
+                if (line.trim().startsWith("library")) {
+                    lib = line.split("=")[1].trim();
+                    break;
+                }
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        if (lib == null) {
+            throw new RuntimeException("No se pudo identificar el controlador.");
+        } else {
+            String res = new ChangePinJNI().unlock(lib, (int)slot.getSlotID(), osPin, newPin);
+            if (!res.equals("Ok")) {
+                throw new RuntimeException(res);
+            }
+        }
+    }
+
+    /**
      * Esta funci&oacute;n modifica el identificador de un par de claves en el
      * token.
      *
@@ -390,8 +426,6 @@ public class TokenPKCS11 implements Token {
     public boolean existeCertificadoClaves(String clavesId) throws KeyStoreException {
         return this.keystore.containsAlias(clavesId) && this.keystore.isKeyEntry(clavesId);
     }
-    
-    
 
     /**
      * Esta funci&oacute;n retorna un certificado de un token.

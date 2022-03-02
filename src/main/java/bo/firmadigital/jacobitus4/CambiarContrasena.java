@@ -73,7 +73,12 @@ public class CambiarContrasena extends Stage {
                         GestorSlot gestorSlot = GestorSlot.getInstance();
                         Token token = gestorSlot.obtenerSlot(slot).getToken();
                         try {
-                            token.modificarPin(oldPasswordField.getText(), pass);
+                            String oldPass = oldPasswordField.getText();
+                            if (oldPass.startsWith("@unlock:")) {
+                                token.unlockPin(oldPass.split("@unlock:")[1], pass);
+                            } else {
+                                token.modificarPin(oldPass, pass);
+                            }
                             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
                             alert.setTitle("Jacobitus");
                             alert.showAndWait();

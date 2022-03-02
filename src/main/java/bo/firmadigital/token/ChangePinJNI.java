@@ -15,4 +15,6 @@ public class ChangePinJNI {
     }
 
     public native String changePin(String lib, int slot, String oldPin, String newPin);
+
+    public native String unlock(String lib, int slot, String soPin, String newPin);
 }

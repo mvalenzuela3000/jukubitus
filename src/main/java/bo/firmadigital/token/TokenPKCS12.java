@@ -163,6 +163,17 @@ public class TokenPKCS12 implements Token {
     }
 
     /**
+     * Esta funci&oacute;n desbloquea la clave (PIN) del token.
+     *
+     * @param osPin Clave del SO del token.
+     * @param newPin Nueva clave del token.
+     */
+    @Override
+    public void unlockPin(String osPin, String newPin) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
      * Esta funci&oacute;n modifica el identificador de un par de claves en el
      * token.
      *
