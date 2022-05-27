@@ -1,5 +1,5 @@
 # Jacobitus Total
-Es una aplicación desarrollada con JavaFX para firma y validación de firma digital en diferentes documentos.
+Es una aplicaciï¿½n desarrollada con JavaFX para firma y validaciï¿½n de firma digital en diferentes documentos.
 
 # Compilar el proyecto
 Clonar el proyecto
@@ -16,7 +16,7 @@ Resultado
 BUILD SUCCESS
 ```
 
-# Generar documentación de los servicios REST
+# Generar documentaciï¿½n de los servicios REST
 ```
 $ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/resources/web/apidoc
 ```
@@ -24,15 +24,15 @@ $ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/reso
 # Instalador
 ## Windows
 ```
-jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type msi --icon iconos/icon.ico --win-menu
+jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type msi --icon iconos/icon.ico -d dist --win-menu
 ```
 
 ## Linux
 ```
-jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type deb --icon iconos/icon.png
+jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type deb --icon iconos/icon.png -d dist
 ```
 
 ## MacOS
 ```
-/Library/Java/JavaVirtualMachines/jdk-14.0.2.jdk/Contents/Home/bin/jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type pkg --icon iconos/icon.icns
+/Library/Java/JavaVirtualMachines/jdk-14.0.2.jdk/Contents/Home/bin/jpackage --input target --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type pkg --icon iconos/icon.icns -d dist
 ```
