@@ -30,6 +30,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -65,7 +67,7 @@ public class Service extends Stage {
         root.setHgap(5);
         root.setVgap(5);
         root.setPadding(new Insets(5, 5, 5, 5));
-        Scene scene = new Scene(root, 280, 165);
+        Scene scene = new Scene(root, 300, 160);
         setScene(scene);
         passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
@@ -81,6 +83,7 @@ public class Service extends Stage {
         certificates = FXCollections.observableArrayList();
         aliasChoiceBox = new ChoiceBox(certificates);
         aliasChoiceBox.prefWidthProperty().bind(root.widthProperty());
+        aliasChoiceBox.setPrefHeight(80);
         root.add(aliasChoiceBox, 0, 1, 2, 1);
         estado = new Label("Archivos: 0 de " + tokenSelected.getFiles().length());
         root.add(estado, 0, 2, 2, 1);
@@ -93,41 +96,22 @@ public class Service extends Stage {
         root.add(buttonFirmar, 0, 4, 2, 1);
         message = new Label("");
         root.add(message, 0, 5, 2, 1);
+
+        passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                this.mostrarCertificados();
+            }
+        });
         button.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            message.setText("");
-            Token token = tokenSelected.getSlot().getToken();
-            try {
-                token.iniciar(passwordField.getText());
-                List<String> list = token.listarIdentificadorClaves();
-                certificates.clear();
-                for (String clave : list) {
-                    DatosCertificado cert = new DatosCertificado(clave, token.obtenerCertificado(clave));
-                    String doc = cert.getNumeroDocumentoSubject();
-                    if (!cert.getComplementoSubject().equals("")) {
-                        doc += "-" + cert.getComplementoSubject();
-                    }
-                    if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
-                        certificates.add(cert);
-                    }
-                }
-                token.salir();
-                if (certificates.size() > 0) {
-                    aliasChoiceBox.getSelectionModel().selectFirst();
-                    buttonFirmar.setDisable(false);
-                } else {
-                    message.setText("No se encontró ningún certificado para el ci: " + tokenSelected.getCI());
-                    buttonFirmar.setDisable(true);
-                }
-            } catch (GeneralSecurityException ex) {
-                message.setText(ex.getMessage());
+            this.mostrarCertificados();
+        });
+        buttonFirmar.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                this.aplicarFirma();
             }
         });
         buttonFirmar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            if (aliasChoiceBox.getValue() instanceof DatosCertificado) {
-                tokenSelected.setPin(passwordField.getText());
-                tokenSelected.setAlias(((DatosCertificado)aliasChoiceBox.getValue()).getLabel());
-                new Thread(firmar()).start();
-            }
+            this.aplicarFirma();
         });
         Service window = this;
         this.setOnShown((WindowEvent t) -> {
@@ -193,6 +177,45 @@ public class Service extends Stage {
             close();
         });
         return task;
+    }
+    
+    private void mostrarCertificados() {
+        message.setText("");
+        Token token = tokenSelected.getSlot().getToken();
+        try {
+            token.iniciar(passwordField.getText());
+            List<String> list = token.listarIdentificadorClaves();
+            certificates.clear();
+            for (String clave : list) {
+                DatosCertificado cert = new DatosCertificado(clave, token.obtenerCertificado(clave));
+                String doc = cert.getNumeroDocumentoSubject();
+                if (!cert.getComplementoSubject().equals("")) {
+                    doc += "-" + cert.getComplementoSubject();
+                }
+                if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
+                    certificates.add(cert);
+                }
+            }
+            token.salir();
+            if (certificates.size() > 0) {
+                aliasChoiceBox.getSelectionModel().selectFirst();
+                buttonFirmar.setDisable(false);
+                buttonFirmar.requestFocus();
+            } else {
+                message.setText("No se encontró ningún certificado para el ci: " + tokenSelected.getCI());
+                buttonFirmar.setDisable(true);
+            }
+        } catch (GeneralSecurityException ex) {
+            message.setText(ex.getMessage());
+        }
+    }
+    
+    private void aplicarFirma() {
+        if (aliasChoiceBox.getValue() instanceof DatosCertificado) {
+            tokenSelected.setPin(passwordField.getText());
+            tokenSelected.setAlias(((DatosCertificado)aliasChoiceBox.getValue()).getLabel());
+            new Thread(firmar()).start();
+        }
     }
 
     private class CustomException extends RuntimeException {
