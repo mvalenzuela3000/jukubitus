@@ -65,6 +65,7 @@ public class Configuracion extends Stage {
         VBox vbox1 = new VBox();
         vbox1.setPadding(new Insets(10));
         vbox1.setSpacing(8);
+        vbox1.setMinWidth(210);
         Label titleP = new Label("Opciones de proxy");
         titleP.setStyle("-fx-font-weight: bold");
         vbox1.getChildren().add(titleP);
@@ -131,6 +132,7 @@ public class Configuracion extends Stage {
         VBox vbox2 = new VBox();
         vbox2.setPadding(new Insets(10));
         vbox2.setSpacing(8);
+        vbox2.setMinWidth(210);
         Label titleT = new Label("Opciones softoken");
         titleT.setStyle("-fx-font-weight: bold");
         vbox2.getChildren().add(titleT);
@@ -236,6 +238,7 @@ public class Configuracion extends Stage {
         VBox vbox3 = new VBox();
         vbox3.setPadding(new Insets(10));
         vbox3.setSpacing(8);
+        vbox3.setMinWidth(210);
         Label titleHsm = new Label("Opciones HSM ADSIB");
         titleHsm.setStyle("-fx-font-weight: bold");
         vbox3.getChildren().add(titleHsm);
