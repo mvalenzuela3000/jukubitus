@@ -8,6 +8,7 @@ package bo.firmadigital.jacobitus4.resources;
 import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
+import bo.firmadigital.firmar.FirmarXml;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
 import bo.firmadigital.jacobitus4.util.Base64StreamParser;
@@ -514,6 +515,127 @@ public class FirmadorRest {
                         firmar.firmar(is, out, detached);
                     }
                     datos.put("pkcs7", Base64.getEncoder().encodeToString(out.toByteArray()));
+                }
+                json.put("finalizado", true);
+                json.put("mensaje", "Se firmo el archivo correctamente!");
+            } else {
+                json.put("finalizado", false);
+                json.put("mensaje", "Datos requeridos slot, pin, alias y file.");
+            }
+        } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
+            try {
+                json.put("finalizado", false);
+                json.put("mensaje", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+        return json.toString();
+    }
+
+    /**
+     * @api {post} /api/token/firmar_xml Firma un documento xml.
+     * @apiGroup Firmador
+     * @apiVersion 1.0.0
+     *
+     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
+     *
+     * @apiParam {Long} [slot] Número de slot en el cual se encuentra conectado el token.
+     * @apiParam {String} pin Clave de seguridad requerida para acceder al token.
+     * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
+     * @apiParam {String} file Archivo XML en base64 que se desea firmar.
+     * @apiParam {String} [node] Nodo del XML que se desea firmar.
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "slot": 1,
+     *     "pin": "12345678",
+     *     "alias": "355409121073",
+     *     "file": "MII...truncated...=="
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * {
+     *     "datos": {
+     *         "xml": "MII...truncated...=="
+     *     },
+     *     "finalizado": true,
+     *     "mensaje": "Se firmo el archivo correctamente."
+     * }
+     */
+    @POST
+    @Path("/firmar_xml")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarXml(InputStream body) {
+        JSONObject json = new JSONObject();
+        try {
+            String pin = null, alias = null;
+            Long slot = null;
+            byte[] file = null;
+            String node = null;
+            JsonFactory factory = new ObjectMapper().getJsonFactory();
+            JsonParser jsonReader = factory.createJsonParser(body);
+            try {
+                jsonReader.nextToken();
+                while (jsonReader.nextToken() == JsonToken.FIELD_NAME) {
+                    String label = jsonReader.getText();
+                    jsonReader.nextToken();
+                    switch (label) {
+                        case "slot":
+                            slot = Long.parseLong(jsonReader.readValueAs(String.class));
+                            break;
+                        case "pin":
+                            pin = jsonReader.readValueAs(String.class);
+                            break;
+                        case "alias":
+                            alias = jsonReader.readValueAs(String.class);
+                            break;
+                        case "file":
+                            try (InputStream is = (InputStream)jsonReader.getInputSource()) {
+                                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                                    jsonReader.releaseBuffered(os);
+                                    byte[] buff = os.toByteArray();
+                                    Base64StreamParser parser = new Base64StreamParser(is, buff);
+                                    file = parser.getFile();
+                                    jsonReader.close();
+                                    jsonReader = factory.createJsonParser(parser.getRemanent());
+                                    jsonReader.nextToken();
+                                }
+                            }
+                            break;
+                        case "node":
+                            node = jsonReader.readValueAs(String.class);
+                            break;
+                        default:
+                            Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
+                    }
+                }
+            } finally {
+                jsonReader.close();
+            }
+            if (slot == null) {
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    slot = slots[0].getSlotID();
+                }
+            }
+            if (slot != null && pin != null && alias != null && file != null) {
+                JSONObject datos = new JSONObject();
+                json.put("datos", datos);
+
+                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    FirmarXml firmar;
+                    if (node == null) {
+                        firmar = FirmarXml.getInstance(slot, alias, pin);
+                    } else {
+                        firmar = FirmarXml.getInstance(slot, alias, pin, node);
+                    }
+                    try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
+                        firmar.firmar(is, out);
+                    }
+                    datos.put("xml", Base64.getEncoder().encodeToString(out.toByteArray()));
                 }
                 json.put("finalizado", true);
                 json.put("mensaje", "Se firmo el archivo correctamente!");

@@ -15,6 +15,7 @@ import java.io.InputStream;
  * @author ADSIB
  */
 public enum MagicBytes {
+    XML(0x3C),
     PNG(0x89, 0x50),
     JPG(0xFF, 0xD8),
     P7S(0x30, 0x80),

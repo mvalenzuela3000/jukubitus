@@ -143,6 +143,9 @@ public class GestorSlot {
                 for (long id : lista) {
                     slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id, null)));
                 }
+                p11.logout();
+                Security.removeProvider(sunPKCS11.getName());
+                sunPKCS11.clear();
             }
             if (software && config.getToken() != null) {
                 slots.put(-1l, new Slot(config.getToken().getPath()));

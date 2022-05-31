@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.firmar.Constants;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Token;
@@ -137,7 +138,7 @@ public class TokenInfo extends Stage {
         setScene(scene);
 
         setOnShown((WindowEvent t) -> {
-            Contrasena contrasena = new Contrasena(TokenInfo.this, false);
+            Contrasena contrasena = new Contrasena(TokenInfo.this, Constants.INFO);
             contrasena.showAndWait();
             if (contrasena.getPass() == null) {
                 close();
@@ -187,7 +188,7 @@ public class TokenInfo extends Stage {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
-            Contrasena contrasena = new Contrasena(TokenInfo.this, false);
+            Contrasena contrasena = new Contrasena(TokenInfo.this, Constants.INFO);
             contrasena.showAndWait();
             if (contrasena.getPass() == null) {
                 close();

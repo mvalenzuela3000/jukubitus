@@ -5,10 +5,12 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.firmar.Constants;
 import bo.firmadigital.firmar.TokenSelected;
 import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
+import bo.firmadigital.firmar.FirmarXml;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
@@ -19,6 +21,7 @@ import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
+import bo.firmadigital.validar.ValidarXml;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -126,21 +129,18 @@ public class App extends Application {
                 new Thread(validar(files)).start();
             }
         });
-        MenuItem abrirPKCS7Item = new MenuItem("Abrir PKCS#7");
-        abrirPKCS7Item.setOnAction((ActionEvent e) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Abrir P7S");
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos P7S (*.p7s)", "*.p7s");
-            fileChooser.getExtensionFilters().add(extFilter);
-            List<File> files = fileChooser.showOpenMultipleDialog(stage);
-            if (files != null && files.size() > 0) {
-                new Thread(validarPKCS7(files)).start();
-            }
-        });
         MenuItem abrirOtroItem = new MenuItem("Abrir Otro");
         abrirOtroItem.setOnAction((ActionEvent e) -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Abrir Otro");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos P7S (*.p7s)", "*.p7s");
+            fileChooser.getExtensionFilters().add(extFilter);
+            extFilter = new FileChooser.ExtensionFilter("Archivos XML (*.xml)", "*.xml");
+            fileChooser.getExtensionFilters().add(extFilter);
+            /*extFilter = new FileChooser.ExtensionFilter("Archivos JSON (*.json)", "*.json");
+            fileChooser.getExtensionFilters().add(extFilter);*/
+            extFilter = new FileChooser.ExtensionFilter("Todos los archivos (*)", "*");
+            fileChooser.getExtensionFilters().add(extFilter);
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
             if (files != null && files.size() > 0) {
                 new Thread(validarPKCS7(files)).start();
@@ -169,7 +169,7 @@ public class App extends Application {
                 stage.close();
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirPKCS7Item, abrirOtroItem, limpiarItem,opcionesItem, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, limpiarItem,opcionesItem, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");
@@ -198,7 +198,7 @@ public class App extends Application {
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
-                        Firmante firmante = new Firmante(stage, item.getSlot(), true);
+                        Firmante firmante = new Firmante(stage, item.getSlot(), Constants.PDF);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
                             new Thread(firmar(firmante.isBloquea(), item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
@@ -228,7 +228,7 @@ public class App extends Application {
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
-                        Firmante firmante = new Firmante(stage, item.getSlot(), false);
+                        Firmante firmante = new Firmante(stage, item.getSlot(), Constants.PKCS7);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
                             new Thread(firmarPKCS7(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
@@ -237,7 +237,37 @@ public class App extends Application {
                 }
             }
         });
-        firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item);
+        MenuItem firmarXmlItem = new MenuItem("Firmar XML");
+        firmarXmlItem.setOnAction((ActionEvent e) -> {
+            if (tableFile.getItems().isEmpty()) {
+                Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.setTitle("Jacobitus");
+                alert.showAndWait();
+            } else {
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                if (item == null) {
+                    Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.setTitle("Jacobitus");
+                    alert.showAndWait();
+                } else {
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setTitle("Seleccione directorio de destino");
+                    destino = directoryChooser.showDialog(stage);
+                    if (destino == null) {
+                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.setTitle("Jacobitus");
+                        alert.showAndWait();
+                    } else {
+                        Firmante firmante = new Firmante(stage, item.getSlot(), Constants.DSIG);
+                        firmante.showAndWait();
+                        if (firmante.getLabel() != null) {
+                            new Thread(firmarXml(item.getSlot(), firmante.getLabel(), firmante.getPass(), firmante.getNode())).start();
+                        }
+                    }
+                }
+            }
+        });
+        firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item, firmarXmlItem);
         menuBar.getMenus().add(firmaMenu);
         
         Menu pdfMenu = new Menu("PDF");
@@ -568,7 +598,11 @@ public class App extends Application {
                     if (MagicBytes.PDF.is(files.get(i))) {
                         certs.add(new ValidarPdf(files.get(i)));
                     } else {
-                        certs.add(new ValidarPKCS7(files.get(i)));
+                        if (MagicBytes.XML.is(files.get(i))) {
+                            certs.add(new ValidarXml(files.get(i)));
+                        } else {
+                            certs.add(new ValidarPKCS7(files.get(i)));
+                        }
                     }
                     updateProgress(i + 1, files.size());
                 }
@@ -594,6 +628,38 @@ public class App extends Application {
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
                         try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
                             firmar.firmar(is, os);
+                        }
+                        updateProgress(i + 1, files.size());
+                        tableFile.getItems().set(i, new ValidarPKCS7(out));
+                    }
+                }
+                return true;
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        return task;
+    }
+
+    public Task firmarXml(long slot, String label, String pass, String node) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                List<Validar> files = tableFile.getItems();
+                if (files.isEmpty()) {
+                    updateProgress(100, 100);
+                } else {
+                    Firmar firmar = FirmarXml.getInstance(slot, label, pass, node);
+                    for (int i = 0; i < files.size(); i++) {
+                        String name = new File(files.get(i).getAbsolutePath()).getName();
+                        if (!name.endsWith(".xml")) {
+                            name += ".firmado.xml";
+                        } else {
+                            name = name.replace(".xml", ".firmado.xml");
+                        }
+                        File out = new File(destino, name);
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                            firmar.firmar(is, os, false);
                         }
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidarPKCS7(out));

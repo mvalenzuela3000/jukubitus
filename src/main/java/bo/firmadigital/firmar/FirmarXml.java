@@ -1,0 +1,140 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bo.firmadigital.firmar;
+
+import bo.firmadigital.token.GestorSlot;
+import bo.firmadigital.token.Token;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.apache.xml.security.Init;
+import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.signature.XMLSignature;
+import org.apache.xml.security.signature.XMLSignatureInput;
+import org.apache.xml.security.transforms.Transforms;
+import org.apache.xml.security.utils.Constants;
+import org.apache.xml.security.utils.ElementProxy;
+import org.apache.xml.security.utils.XMLUtils;
+import org.apache.xml.security.utils.resolver.ResourceResolverContext;
+import org.apache.xml.security.utils.resolver.ResourceResolverException;
+import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+/**
+ *
+ * @author ADSIB
+ */
+public class FirmarXml implements Firmar {
+    private static FirmarXml firmarXml;
+    private final long slot;
+    private final String label;
+    private final String pass;
+    private final String node;
+
+    static {
+        Init.init();
+    }
+
+    private FirmarXml(long slot, String label, String pass, String node) {
+        this.slot = slot;
+        this.label = label;
+        this.pass = pass;
+        this.node = node;
+    }
+
+    public static FirmarXml getInstance(long slot, String label, String pass) {
+        return getInstance(slot, label, pass, null);
+    }
+
+    public static FirmarXml getInstance(long slot, String label, String pass, String node) {
+        if (firmarXml == null) {
+            firmarXml = new FirmarXml(slot, label, pass, node);
+        } else {
+            if (firmarXml.slot != slot || !firmarXml.label.equals(label) || !firmarXml.pass.equals(pass)) {
+                firmarXml = new FirmarXml(slot, label, pass, node);
+            } else {
+                if (firmarXml.node == null) {
+                    if (node != null) {
+                        firmarXml = new FirmarXml(slot, label, pass, node);
+                    }
+                } else {
+                    if (!firmarXml.node.equals(node)) {
+                        firmarXml = new FirmarXml(slot, label, pass, node);
+                    }
+                }
+            }
+        }
+        return firmarXml;
+    }
+
+    @Override
+    public void firmar(InputStream is, OutputStream os, boolean param) throws IOException, GeneralSecurityException {
+        try {
+            Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+            token.iniciar(pass);
+            ElementProxy.setDefaultPrefix(Constants.SignatureSpecNS, "");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document xml = builder.parse(is);
+            Element parent;
+            Transforms transforms = new Transforms(xml);
+            transforms.addTransform(Transforms.TRANSFORM_ENVELOPED_SIGNATURE);
+            if (node == null) {
+                parent = (Element) xml.getFirstChild();
+                xml.setXmlStandalone(false);
+                transforms.addTransform(Transforms.TRANSFORM_C14N_WITH_COMMENTS);
+            } else {
+                NodeList nodos = xml.getElementsByTagName(node);
+                if (nodos.getLength() != 1) {
+                    throw new IOException("Error al identificar el nodo: " + node);
+                }
+                parent = (Element)nodos.item(0).getParentNode();
+            }
+            XMLSignature signature = new XMLSignature(xml, null, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
+            parent.appendChild(signature.getElement());
+            signature.addDocument("", transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+            signature.addKeyInfo(token.obtenerCertificado(label));
+            if (node != null) {
+                signature.addResourceResolver(new ResourceResolverSpi() {
+                    @Override
+                    public XMLSignatureInput engineResolveURI(ResourceResolverContext rrc) throws ResourceResolverException {
+                        String nodo = rrc.uriToResolve.replace("#", "");
+                        return new XMLSignatureInput(xml.getElementsByTagName(nodo).item(0).getParentNode());
+                    }
+
+                    @Override
+                    public boolean engineCanResolveURI(ResourceResolverContext rrc) {
+                        String nodo = rrc.uriToResolve.replace("#", "");
+                        return xml.getElementsByTagName(nodo).getLength() == 1;
+                    }
+                });
+                Node value = signature.getElement().getElementsByTagName("Reference").item(0).getAttributes().getNamedItem("URI");
+                value.setNodeValue("#" + node);
+            }
+            signature.sign(token.obtenerClavePrivada(label));
+            XMLUtils.outputDOMc14nWithComments(xml, os);
+            token.salir();
+        } catch (ParserConfigurationException | SAXException | XMLSecurityException ex) {
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void firmar(InputStream is, OutputStream os) throws IOException, GeneralSecurityException {
+        firmar(is, os, false);
+    }
+}
