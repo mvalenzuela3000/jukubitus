@@ -11,12 +11,15 @@ import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.FirmarXml;
+import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
+import bo.firmadigital.validar.Certificate;
+import bo.firmadigital.validar.DatosCertificado;
 import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
@@ -31,6 +34,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +75,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.codehaus.jettison.json.JSONArray;
@@ -155,6 +161,34 @@ public class App extends Application {
             Configuracion configuracion = new Configuracion(stage);
             configuracion.showAndWait();
         });
+        MenuItem abrirCrt = new MenuItem("Ver Certificado");
+        abrirCrt.setOnAction((ActionEvent e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Ver Certificado");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Certificados", "*.crt", "*.pem");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                try {
+                    X509Certificate certificate;
+                    try (FileInputStream is = new FileInputStream(file)) {
+                        byte[] cert = is.readAllBytes();
+                        certificate = Certificate.getCert(cert);
+                    }
+                    DatosCertificado datosCertificado = new DatosCertificado(file.getName(), certificate);
+                    CertInformation information = new CertInformation(datosCertificado, true);
+                    Stage info = new Stage();
+                    info.setTitle("Certificado");
+                    info.initOwner(stage);
+                    info.initModality(Modality.APPLICATION_MODAL);
+                    Scene scene = new Scene(information);
+                    info.setScene(scene);
+                    info.showAndWait();
+                } catch (IOException | CertificateEncodingException ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+        });
         MenuItem closeItem = new MenuItem("Cerrar");
         closeItem.setOnAction((ActionEvent e) -> {
             if (servicio && !taskBar) {
@@ -169,7 +203,7 @@ public class App extends Application {
                 stage.close();
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, limpiarItem,opcionesItem, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, limpiarItem, opcionesItem, abrirCrt, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");
@@ -662,7 +696,7 @@ public class App extends Application {
                             firmar.firmar(is, os, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarPKCS7(out));
+                        tableFile.getItems().set(i, new ValidarXml(out));
                     }
                 }
                 return true;

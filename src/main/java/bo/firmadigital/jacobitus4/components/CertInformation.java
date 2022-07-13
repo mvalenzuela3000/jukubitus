@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4.components;
 
 import bo.firmadigital.validar.CertDate;
+import bo.firmadigital.validar.Certificate;
 import bo.firmadigital.validar.DatosCertificado;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -111,7 +112,7 @@ public class CertInformation extends GridPane {
         this.add(new Label(datos.getTipoFirma()), 0, 19, 2, 1);
     }
 
-    public CertInformation(DatosCertificado datos) {
+    public CertInformation(DatosCertificado datos, boolean ocsp) {
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
         Label title = new Label("INFORMACIÓN DEL CERTIFICADO");
@@ -184,6 +185,17 @@ public class CertInformation extends GridPane {
         this.add(label9, 0, 13, 1, 1);
         Label data9 = new Label(df.format(datos.getFinValidez()));
         this.add(data9, 1, 13, 1, 1);
+
+        if (ocsp) {
+            Label subTitle4 = new Label("Estado revocación");
+            GridPane.setHalignment(subTitle4, HPos.CENTER);
+            this.add(subTitle4, 0, 14, 2, 1);
+
+            Label label10 = new Label("Detalle");
+            this.add(label10, 0, 15, 1, 1);
+            Label data10 = new Label(Certificate.getOCSP(datos.getCert()));
+            this.add(data10, 1, 15, 1, 1);
+        }
 
         Label subTitle5 = new Label("Usos");
         GridPane.setHalignment(subTitle5, HPos.CENTER);

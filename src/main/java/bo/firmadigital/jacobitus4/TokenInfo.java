@@ -108,11 +108,10 @@ public class TokenInfo extends Stage {
                 public void updateItem(DatosCertificado datos, boolean empty) {
                     super.updateItem(datos, empty);
                     if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
-                        CertInformation pane = new CertInformation(datos);
+                        CertInformation pane = new CertInformation(datos, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                         tooltip.setGraphic(pane);
-                        setTooltip(tooltip);
                         setTooltip(tooltip);
                     } else {
                         setTooltip(null);

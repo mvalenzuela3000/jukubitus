@@ -67,7 +67,7 @@ public class Service extends Stage {
         root.setHgap(5);
         root.setVgap(5);
         root.setPadding(new Insets(5, 5, 5, 5));
-        Scene scene = new Scene(root, 300, 160);
+        Scene scene = new Scene(root, 300, 175);
         setScene(scene);
         passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
@@ -83,7 +83,7 @@ public class Service extends Stage {
         certificates = FXCollections.observableArrayList();
         aliasChoiceBox = new ChoiceBox(certificates);
         aliasChoiceBox.prefWidthProperty().bind(root.widthProperty());
-        aliasChoiceBox.setPrefHeight(80);
+        aliasChoiceBox.setPrefHeight(55);
         root.add(aliasChoiceBox, 0, 1, 2, 1);
         estado = new Label("Archivos: 0 de " + tokenSelected.getFiles().length());
         root.add(estado, 0, 2, 2, 1);
