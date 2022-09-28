@@ -51,4 +51,82 @@ public class TestBase64StreamParser {
             Assert.assertTrue(new String(parser.getRemanent()).equals("{\"bloquear\":false}"));
         }
     }
+
+    @Test
+    public void jsonParserCutJsonShortImg() throws Exception {
+        byte[] file = new byte[3060];
+        byte[] image = new byte[50];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}"));
+        }
+    }
+
+    @Test
+    public void jsonParserNonCutShortImg() throws Exception {
+        byte[] file = new byte[3070];
+        byte[] image = new byte[50];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}"));
+        }
+    }
+
+    @Test
+    public void jsonParserCutB64ShortImg() throws Exception {
+        byte[] file = new byte[3200];
+        byte[] image = new byte[50];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}"));
+        }
+    }
+
+    @Test
+    public void jsonParserCutJsonLongImg() throws Exception {
+        byte[] file = new byte[3060];
+        byte[] image = new byte[15000];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"y\":20,\"x\":20}\"}"));
+        }
+    }
+
+    @Test
+    public void jsonParserNonCutLongImg() throws Exception {
+        byte[] file = new byte[3070];
+        byte[] image = new byte[15000];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}"));
+        }
+    }
+
+    @Test
+    public void jsonParserCutB64LongtImg() throws Exception {
+        byte[] file = new byte[3200];
+        byte[] image = new byte[15000];
+        String json = Base64.getEncoder().encodeToString(file) + "\",\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}";
+        try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes())) {
+            byte[] buff = new byte[1024];
+            is.read(buff);
+            Base64StreamParser parser = new Base64StreamParser(is, buff);
+            Assert.assertTrue(new String(parser.getRemanent()).equals("{\"image\":\"" + Base64.getEncoder().encodeToString(image) + "\",\"point\":\"{\"x\":20,\"y\":20}\"}"));
+        }
+    }
 }

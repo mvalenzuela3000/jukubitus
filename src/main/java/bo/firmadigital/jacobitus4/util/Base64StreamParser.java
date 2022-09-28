@@ -35,10 +35,25 @@ public final class Base64StreamParser {
                         pos = len - size + pos;
                     } catch (IllegalArgumentException ignore) {
                         fileContent = last(fileContent, fileContent.length);
-                        remanent = new byte[fileContent.length + len];
+                        if (size - pos > 0) {
+                            remanent = new byte[fileContent.length + len - (size - pos)];
+                        } else {
+                            remanent = new byte[fileContent.length + len];
+                        }
                         System.arraycopy(fileContent, 0, remanent, 0, fileContent.length);
-                        System.arraycopy(buff, 0, remanent, fileContent.length, len);
+                        if (size - pos > 0) {
+                            System.arraycopy(buff, 0, remanent, fileContent.length - (size - pos), len);
+                        } else {
+                            System.arraycopy(buff, 0, remanent, fileContent.length, len);
+                        }
                         pos = 0;
+                        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                            os.write(remanent);
+                            while ((len = is.read(buff)) > 0) {
+                                os.write(buff, 0, len);
+                            }
+                            remanent = os.toByteArray();
+                        }
                         break;
                     }
                 } else {

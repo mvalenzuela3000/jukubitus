@@ -22,6 +22,7 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import java.awt.Point;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -185,6 +186,10 @@ public class FirmadorRest {
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {Boolean} [bloquear] Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.
      * @apiParam {String} pdf Archivo pdf en base64 que se desea firmar.
+     * @apiParam {Object.} [point] Coordenadas para la referencia de firma.
+     * @apiParam {Numeric} [point.x] Coordenada x para la referencia de firma.
+     * @apiParam {Numeric} [point.y] Coordenada y para la referencia de firma.
+     * @apiParam {String} [image] Imagen en base64 a utilizar en la firma.
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -210,8 +215,8 @@ public class FirmadorRest {
     public String firmarPdf(InputStream body) {
         JSONObject json = new JSONObject();
         try {
-            String pin = null, alias = null;
-            Long slot = null;
+            String pin = null, alias = null, image = null;
+            Long slot = null; Integer x = null, y = null;
             boolean bloquear = false;
             byte[] file = null;
             JsonFactory factory = new ObjectMapper().getJsonFactory();
@@ -247,6 +252,14 @@ public class FirmadorRest {
                                 }
                             }
                             break;
+                        case "point":
+                            Point point = jsonReader.readValueAs(Point.class);
+                            x = (int)point.getX();
+                            y = (int)point.getY();
+                            break;
+                        case "image":
+                            image = jsonReader.readValueAs(String.class);
+                            break;
                         default:
                             Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
                     }
@@ -266,7 +279,12 @@ public class FirmadorRest {
                 json.put("datos", datos);
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Firmar firmar = FirmarPdf.getInstance(slot, alias, pin);
+                Firmar firmar;
+                if (x == null) {
+                    firmar = FirmarPdf.getInstance(slot, alias, pin);
+                } else {
+                    firmar = FirmarPdf.getInstance(slot, alias, pin, image, x, y);
+                }
                 firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
 
                 datos.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));

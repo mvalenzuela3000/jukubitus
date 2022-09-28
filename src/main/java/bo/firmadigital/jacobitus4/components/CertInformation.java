@@ -66,50 +66,55 @@ public class CertInformation extends GridPane {
         Label data5 = new Label(datos.getCorreoSubject());
         this.add(data5, 1, 7, 1, 1);
 
+        Label label6 = new Label("Nit");
+        this.add(label6, 0, 8, 1, 1);
+        Label data6 = new Label(datos.getNitSubject());
+        this.add(data6, 1, 8, 1, 1);
+
         Label subTitle2 = new Label("Emisor");
         GridPane.setHalignment(subTitle2, HPos.CENTER);
-        this.add(subTitle2, 0, 8, 2, 1);
+        this.add(subTitle2, 0, 9, 2, 1);
 
-        Label label6 = new Label("Nombre");
-        this.add(label6, 0, 9, 1, 1);
-        Label data6 = new Label(datos.getNombreComunIssuer());
-        this.add(data6, 1, 9, 1, 1);
-
-        Label label7 = new Label("Organización ");
+        Label label7 = new Label("Nombre");
         this.add(label7, 0, 10, 1, 1);
-        Label data7 = new Label(datos.getOrganizacionIssuer());
+        Label data7 = new Label(datos.getNombreComunIssuer());
         this.add(data7, 1, 10, 1, 1);
+
+        Label label8 = new Label("Organización ");
+        this.add(label8, 0, 11, 1, 1);
+        Label data8 = new Label(datos.getOrganizacionIssuer());
+        this.add(data8, 1, 11, 1, 1);
 
         Label subTitle3 = new Label("Periodo de validez");
         GridPane.setHalignment(subTitle3, HPos.CENTER);
-        this.add(subTitle3, 0, 11, 2, 1);
+        this.add(subTitle3, 0, 12, 2, 1);
 
-        Label label8 = new Label("Inicio");
-        this.add(label8, 0, 12, 1, 1);
-        Label data8 = new Label(df.format(datos.getInicioValidez()));
-        this.add(data8, 1, 12, 1, 1);
-
-        Label label9 = new Label("Fin");
+        Label label9 = new Label("Inicio");
         this.add(label9, 0, 13, 1, 1);
-        Label data9 = new Label(df.format(datos.getFinValidez()));
+        Label data9 = new Label(df.format(datos.getInicioValidez()));
         this.add(data9, 1, 13, 1, 1);
+
+        Label label10 = new Label("Fin");
+        this.add(label10, 0, 14, 1, 1);
+        Label data10 = new Label(df.format(datos.getFinValidez()));
+        this.add(data10, 1, 14, 1, 1);
 
         Label subTitle4 = new Label("Revocado");
         GridPane.setHalignment(subTitle4, HPos.CENTER);
-        this.add(subTitle4, 0, 14, 2, 1);
+        this.add(subTitle4, 0, 15, 2, 1);
 
-        Label label10 = new Label("Detalle");
-        this.add(label10, 0, 15, 1, 1);
-        Label data10 = new Label(certDate.getOCSP().getDate() != null ? "Revocado el " + df.format(certDate.getOCSP().getDate()) : certDate.isOCSP() ? "No revocado" : "No se pudo consultar");
-        this.add(data10, 1, 15, 1, 1);
+        Label label11 = new Label("Detalle");
+        this.add(label11, 0, 16, 1, 1);
+        Label data11 = new Label(certDate.getOCSP().getDate() != null ? "Revocado el " + df.format(certDate.getOCSP().getDate()) : certDate.isOCSP() ? "No revocado" : "No se pudo consultar");
+        this.add(data11, 1, 16, 1, 1);
 
         Label subTitle5 = new Label("Usos");
         GridPane.setHalignment(subTitle5, HPos.CENTER);
-        this.add(subTitle5, 0, 16, 2, 1);
+        this.add(subTitle5, 0, 17, 2, 1);
 
-        this.add(new Label(datos.getPersona()), 0, 17, 2, 1);
-        this.add(new Label(datos.getAlmacenamiento()), 0, 18, 2, 1);
-        this.add(new Label(datos.getTipoFirma()), 0, 19, 2, 1);
+        this.add(new Label(datos.getPersona()), 0, 18, 2, 1);
+        this.add(new Label(datos.getAlmacenamiento()), 0, 19, 2, 1);
+        this.add(new Label(datos.getTipoFirma()), 0, 20, 2, 1);
     }
 
     public CertInformation(DatosCertificado datos, boolean ocsp) {
@@ -158,51 +163,56 @@ public class CertInformation extends GridPane {
         Label data5 = new Label(datos.getCorreoSubject());
         this.add(data5, 1, 7, 1, 1);
 
+        Label label6 = new Label("Nit");
+        this.add(label6, 0, 8, 1, 1);
+        Label data6 = new Label(datos.getNitSubject());
+        this.add(data6, 1, 8, 1, 1);
+
         Label subTitle2 = new Label("Emisor");
         GridPane.setHalignment(subTitle2, HPos.CENTER);
-        this.add(subTitle2, 0, 8, 2, 1);
+        this.add(subTitle2, 0, 9, 2, 1);
 
-        Label label6 = new Label("Nombre");
-        this.add(label6, 0, 9, 1, 1);
-        Label data6 = new Label(datos.getNombreComunIssuer());
-        this.add(data6, 1, 9, 1, 1);
-
-        Label label7 = new Label("Organización ");
+        Label label7 = new Label("Nombre");
         this.add(label7, 0, 10, 1, 1);
-        Label data7 = new Label(datos.getOrganizacionIssuer());
+        Label data7 = new Label(datos.getNombreComunIssuer());
         this.add(data7, 1, 10, 1, 1);
+
+        Label label8 = new Label("Organización ");
+        this.add(label8, 0, 11, 1, 1);
+        Label data8 = new Label(datos.getOrganizacionIssuer());
+        this.add(data8, 1, 11, 1, 1);
 
         Label subTitle3 = new Label("Periodo de validez");
         GridPane.setHalignment(subTitle3, HPos.CENTER);
-        this.add(subTitle3, 0, 11, 2, 1);
+        this.add(subTitle3, 0, 12, 2, 1);
 
-        Label label8 = new Label("Inicio");
-        this.add(label8, 0, 12, 1, 1);
-        Label data8 = new Label(df.format(datos.getInicioValidez()));
-        this.add(data8, 1, 12, 1, 1);
-
-        Label label9 = new Label("Fin");
+        Label label9 = new Label("Inicio");
         this.add(label9, 0, 13, 1, 1);
-        Label data9 = new Label(df.format(datos.getFinValidez()));
+        Label data9 = new Label(df.format(datos.getInicioValidez()));
         this.add(data9, 1, 13, 1, 1);
+
+        Label label10 = new Label("Fin");
+        this.add(label10, 0, 14, 1, 1);
+        Label data10 = new Label(df.format(datos.getFinValidez()));
+        this.add(data10, 1, 14, 1, 1);
 
         if (ocsp) {
             Label subTitle4 = new Label("Estado revocación");
             GridPane.setHalignment(subTitle4, HPos.CENTER);
-            this.add(subTitle4, 0, 14, 2, 1);
+            this.add(subTitle4, 0, 15, 2, 1);
 
-            Label label10 = new Label("Detalle");
-            this.add(label10, 0, 15, 1, 1);
-            Label data10 = new Label(Certificate.getOCSP(datos.getCert()));
-            this.add(data10, 1, 15, 1, 1);
+            Label label11 = new Label("Detalle");
+            this.add(label11, 0, 16, 1, 1);
+            Label data11 = new Label(Certificate.getOCSP(datos.getCert()));
+            this.add(data11, 1, 16, 1, 1);
         }
 
         Label subTitle5 = new Label("Usos");
         GridPane.setHalignment(subTitle5, HPos.CENTER);
-        this.add(subTitle5, 0, 16, 2, 1);
+        this.add(subTitle5, 0, 17, 2, 1);
 
-        this.add(new Label(datos.getPersona()), 0, 17, 2, 1);
-        this.add(new Label(datos.getAlmacenamiento()), 0, 18, 2, 1);
-        this.add(new Label(datos.getTipoFirma()), 0, 19, 2, 1);
+        this.add(new Label(datos.getPersona()), 0, 18, 2, 1);
+        this.add(new Label(datos.getAlmacenamiento()), 0, 19, 2, 1);
+        this.add(new Label(datos.getTipoFirma()), 0, 20, 2, 1);
     }
 }

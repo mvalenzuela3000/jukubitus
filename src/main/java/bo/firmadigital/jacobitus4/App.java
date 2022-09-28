@@ -484,6 +484,11 @@ public class App extends Application {
         } else {
             new Thread(download(url, token, urlPost)).start();
         }
+        stage.setOnShown((WindowEvent e) -> {
+            if (taskBar) {
+                new Thread(listarTokens()).start();
+            }
+        });
         App.stage = stage;
         App.app = this;
     }
