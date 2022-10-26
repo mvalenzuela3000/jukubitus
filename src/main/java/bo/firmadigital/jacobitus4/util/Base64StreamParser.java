@@ -21,49 +21,41 @@ public final class Base64StreamParser {
     final int size = 4096;
 
     public Base64StreamParser(InputStream is, byte[] buff) throws IOException {
+        byte surp[] = new byte[size - buff.length];
+        int len = is.read(surp);
         byte fileContent[] = new byte[size];
-        baos = new ByteArrayOutputStream();
+        System.arraycopy(buff, 0, fileContent, 0, buff.length);
+        if (len > 0) {
+            System.arraycopy(surp, 0, fileContent, buff.length, len);
+            len = buff.length + len;
+        } else {
+            len = buff.length;
+        }
         try {
-            int pos = 0;
-            int len = buff.length;
-            while (len > 0) {
-                if (pos + len > size) {
-                    System.arraycopy(buff, 0, fileContent, pos, size - pos);
-                    try {
+            baos = new ByteArrayOutputStream();
+            if (len == size) {
+                try {
+                    baos.write(Base64.getDecoder().decode(fileContent));
+                    while ((len = is.read(fileContent)) > 0) {
+                        if (len < size) {
+                            surp = new byte[len];
+                            System.arraycopy(fileContent, 0, surp, 0, len);
+                            fileContent = surp;
+                        }
                         baos.write(Base64.getDecoder().decode(fileContent));
-                        System.arraycopy(buff, size - pos, fileContent, 0, len - size + pos);
-                        pos = len - size + pos;
-                    } catch (IllegalArgumentException ignore) {
-                        fileContent = last(fileContent, fileContent.length);
-                        if (size - pos > 0) {
-                            remanent = new byte[fileContent.length + len - (size - pos)];
-                        } else {
-                            remanent = new byte[fileContent.length + len];
-                        }
-                        System.arraycopy(fileContent, 0, remanent, 0, fileContent.length);
-                        if (size - pos > 0) {
-                            System.arraycopy(buff, 0, remanent, fileContent.length - (size - pos), len);
-                        } else {
-                            System.arraycopy(buff, 0, remanent, fileContent.length, len);
-                        }
-                        pos = 0;
-                        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                            os.write(remanent);
-                            while ((len = is.read(buff)) > 0) {
-                                os.write(buff, 0, len);
-                            }
-                            remanent = os.toByteArray();
-                        }
-                        break;
                     }
-                } else {
-                    System.arraycopy(buff, 0, fileContent, pos, len);
-                    pos = pos + len;
+                } catch (IllegalArgumentException ignore) {
+                    remanent = last(fileContent, fileContent.length);
                 }
-                len = is.read(buff);
+            } else {
+                remanent = last(fileContent, len);
             }
-            if (pos > 0) {
-                remanent = last(fileContent, pos);
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                os.write(remanent);
+                while ((len = is.read(fileContent)) > 0) {
+                    os.write(fileContent, 0, len);
+                }
+                remanent = os.toByteArray();
             }
             file = baos.toByteArray();
         } finally {
