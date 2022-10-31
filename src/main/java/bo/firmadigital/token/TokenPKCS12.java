@@ -382,8 +382,6 @@ public class TokenPKCS12 implements Token {
     public boolean existeCertificadoClaves(String clavesId) throws KeyStoreException {
         return this.keystore.containsAlias(clavesId) && this.keystore.isKeyEntry(clavesId);
     }
-    
-    
 
     /**
      * Esta funci&oacute;n retorna un certificado de un token.

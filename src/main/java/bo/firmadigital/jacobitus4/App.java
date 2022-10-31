@@ -12,6 +12,7 @@ import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.FirmarXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
@@ -34,6 +35,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -359,7 +362,24 @@ public class App extends Application {
             CambiarContrasena cambiarContrasena = new CambiarContrasena(stage, tokenInfo.getSlot());
             cambiarContrasena.showAndWait();
         });
-        contextMenuToken.getItems().addAll(contenidoItem, pinItem);
+        MenuItem exportarSoftokenItem = new MenuItem("Exportar Softoken");
+        exportarSoftokenItem.setOnAction((ActionEvent e) -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Seleccione directorio de destino");
+            File destino = directoryChooser.showDialog(stage);
+            if (destino != null) {
+                Config config = new Config();
+                try {
+                    Files.copy(config.getToken().toPath(), new File(destino, "softoken.p12").toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+                    Alert alert = new Alert(AlertType.INFORMATION, "El softoken se exportó correctamente.");
+                    alert.showAndWait();
+                } catch (IOException ex) {
+                    Alert alert = new Alert(AlertType.ERROR, ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+        contextMenuToken.getItems().addAll(contenidoItem, pinItem, exportarSoftokenItem);
 
         contextMenu = new ContextMenu();
         MenuItem detalleItem = new MenuItem("Detalle Validación");
@@ -390,6 +410,7 @@ public class App extends Application {
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.SECONDARY) {
                     tokenInfo = row.getItem();
+                    contextMenuToken.getItems().get(2).setVisible(tokenInfo.getSlot() == -1);
                     contextMenuToken.show(table, event.getScreenX(), event.getScreenY());
                 }
             });

@@ -7,6 +7,7 @@ package bo.firmadigital.token;
 
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.token.provider.HsmProvider;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -43,6 +45,9 @@ public class TokenHsmCloud implements Token {
 
     public TokenHsmCloud() {
         config = new Config();
+        if (Security.getProvider("HSM Cloud") == null) {
+            Security.addProvider(new HsmProvider());
+        }
     }
 
     @Override
@@ -164,7 +169,7 @@ public class TokenHsmCloud implements Token {
 
     @Override
     public PrivateKey obtenerClavePrivada(String clavesId) throws GeneralSecurityException {
-        return new HsmPrivateKey(clavesId);
+        return new HsmPrivateKey(config.getHsmCloud(), config.getHsmJWT(), PIN, clavesId);
     }
 
     @Override
@@ -241,9 +246,15 @@ public class TokenHsmCloud implements Token {
     }
 
     public class HsmPrivateKey implements PrivateKey {
+        private final String url;
+        private final String jwt;
+        private final String pin;
         private final String alias;
 
-        public HsmPrivateKey(String alias) {
+        public HsmPrivateKey(String url, String jwt, String pin, String alias) {
+            this.url = url;
+            this.jwt = jwt;
+            this.pin = pin;
             this.alias = alias;
         }
 
@@ -254,7 +265,7 @@ public class TokenHsmCloud implements Token {
 
         @Override
         public String getFormat() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "HSM Cloud";
         }
 
         @Override
@@ -276,6 +287,22 @@ public class TokenHsmCloud implements Token {
             } catch (JSONException ex) {
                 throw new SignatureException(ex.getMessage());
             }
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getJwt() {
+            return jwt;
+        }
+
+        public String getPin() {
+            return pin;
+        }
+
+        public String getAlias() {
+            return alias;
         }
     }
 

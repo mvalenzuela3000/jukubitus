@@ -13,9 +13,12 @@ import bo.firmadigital.validar.Certificate;
 import bo.firmadigital.validar.DatosCertificado;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,10 +43,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 /**
  *
@@ -80,7 +86,32 @@ public class TokenInfo extends Stage {
                 new Thread(cargarCertificado(file)).start();
             }
         });
-        MenuItem deleteItem = new MenuItem("Borrar clave");
+        MenuItem exportarCertItem = new MenuItem("Exportar Certificado");
+        exportarCertItem.setOnAction((ActionEvent e) -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Seleccione directorio de destino");
+            File destino = directoryChooser.showDialog(parent);
+            if (destino != null) {
+                new Thread(exportarCertificado(destino)).start();
+            }
+        });
+        MenuItem exportarClaveItem = new MenuItem("Exportar Clave");
+        exportarClaveItem.setOnAction((ActionEvent e) -> {
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("Advertencia");
+            alert.setHeaderText("Esta acción dejará vulnerable su clave privada.\nHágalo solo si conoce los riesgos.");
+            alert.setContentText("¿Desea continuar?");
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            if (alert.showAndWait().get() == ButtonType.YES) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                directoryChooser.setTitle("Seleccione directorio de destino");
+                File destino = directoryChooser.showDialog(parent);
+                if (destino != null) {
+                    new Thread(exportarClave(destino)).start();
+                }
+            }
+        });
+        MenuItem deleteItem = new MenuItem("Borrar Clave");
         deleteItem.setOnAction((ActionEvent e) -> {
             Alert alert = new Alert(AlertType.WARNING);
             alert.setTitle("Advertencia");
@@ -91,7 +122,11 @@ public class TokenInfo extends Stage {
                 new Thread(borrarClave()).start();
             }
         });
-        contextMenu.getItems().addAll(certItem, deleteItem);
+        if (slot == -1l) {
+            contextMenu.getItems().addAll(certItem, exportarCertItem, exportarClaveItem, deleteItem);
+        } else {
+            contextMenu.getItems().addAll(certItem, exportarCertItem, deleteItem);
+        }
 
         table = new TableView();
         TableColumn tokenCol = new TableColumn("Etiqueta clave");
@@ -262,6 +297,87 @@ public class TokenInfo extends Stage {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnSucceeded((Event evt) -> {
             new Thread(listarCertificados(pass)).start();
+        });
+        task.setOnFailed((Event evt) -> {
+            String err = task.getException().getMessage();
+            Alert alert = new Alert(AlertType.WARNING, err);
+            alert.showAndWait();
+        });
+        return task;
+    }
+
+    public Task exportarCertificado(File destino) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() {
+                try {
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    Token token = gestorSlot.obtenerSlot(slot).getToken();
+                    token.iniciar(pass);
+                    try {
+                        DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
+                        String pem = Certificate.getPem(cert.getCert().getEncoded());
+                        File file = new File(destino, "certificado_" + cert.getNombreComunSubject().replace(" ", "_") + ".pem");
+                        try (FileOutputStream os = new FileOutputStream(file)) {
+                            os.write(pem.getBytes());
+                            os.flush();
+                        }
+                    } catch (GeneralSecurityException ex) {
+                        token.salir();
+                        throw new RuntimeException(ex.getMessage());
+                    }
+                    token.salir();
+                    return true;
+                } catch (IOException | GeneralSecurityException ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnSucceeded((Event evt) -> {
+            Alert alert = new Alert(AlertType.INFORMATION, "El certificado se exportó correctamente.");
+            alert.showAndWait();
+        });
+        task.setOnFailed((Event evt) -> {
+            String err = task.getException().getMessage();
+            Alert alert = new Alert(AlertType.WARNING, err);
+            alert.showAndWait();
+        });
+        return task;
+    }
+
+    public Task exportarClave(File destino) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() {
+                try {
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    Token token = gestorSlot.obtenerSlot(slot).getToken();
+                    token.iniciar(pass);
+                    try {
+                        DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
+                        PrivateKey pk = token.obtenerClavePrivada(label);
+                        File file = new File(destino, "clave_" + cert.getNombreComunSubject().replace(" ", "_") + ".pem");
+                        try (PemWriter pemWriter = new PemWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
+                            pemWriter.writeObject(new PemObject("RSA PRIVATE KEY", pk.getEncoded()));
+                        }
+                    } catch (GeneralSecurityException ex) {
+                        token.salir();
+                        throw new RuntimeException(ex.getMessage());
+                    }
+                    token.salir();
+                    return true;
+                } catch (IOException | GeneralSecurityException ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnSucceeded((Event evt) -> {
+            Alert alert = new Alert(AlertType.INFORMATION, "La clave se exportó correctamente.");
+            alert.showAndWait();
         });
         task.setOnFailed((Event evt) -> {
             String err = task.getException().getMessage();
