@@ -16,14 +16,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -31,6 +34,15 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -65,7 +77,33 @@ public class TokenHsmCloud implements Token {
 
     @Override
     public void modificarPin(String oldPin, String newPin) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (newPin.length() < 8) {
+            throw new RuntimeException("El pin es muy corto.");
+        } else {
+            boolean patron = true;
+            for (int i = 0; i < newPin.length() - 1; i++) {
+                if (newPin.charAt(i) != newPin.charAt(i + 1) &&
+                        newPin.charAt(i) + 1 != newPin.charAt(i + 1) &&
+                        newPin.charAt(i) - 1 != newPin.charAt(i + 1)) {
+                    patron = false;
+                }
+            }
+            if (patron) {
+                throw new RuntimeException("El pin sigue un patrón inseguro.");
+            }
+        }
+        try {
+            JSONObject body = new JSONObject();
+            body.put("tipo_hsm", "HSM");
+            body.put("pin", oldPin);
+            body.put("nuevo_pin", newPin);
+            JSONObject response = request(config.getHsmCloud() + "/cambiar_pin", config.getHsmJWT(), "POST", body.toString());
+            if (response.getInt("code") != 200) {
+                throw new RuntimeException(response.getString("message"));
+            }
+        } catch (JSONException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     @Override
@@ -75,32 +113,93 @@ public class TokenHsmCloud implements Token {
 
     @Override
     public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws GeneralSecurityException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            JSONObject body = new JSONObject();
+            body.put("tipo_hsm", "HSM");
+            body.put("pin", PIN);
+            JSONObject response = request(config.getHsmCloud() + "/generar_claves", config.getHsmJWT(), "POST", body.toString());
+            if (response.getInt("code") == 200) {
+                return obtenerClavePublica(clavesId);
+            } else {
+                throw new KeyStoreException("No se pudo agregar la clave.");
+            }
+        } catch (JSONException ex) {
+            throw new KeyStoreException(ex.getMessage());
+        }
     }
 
     @Override
     public String generarCSR(String alias, JSONArray subject) throws GeneralSecurityException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            PrivateKey privateKey = obtenerClavePrivada(alias);
+            X509Certificate x509Certificate = obtenerCertificado(alias);
+            X500NameBuilder nameBuilder = new X500NameBuilder();
+            for (int i = 0; i < subject.length(); i++) {
+                JSONObject o = subject.getJSONObject(i);
+
+                ASN1ObjectIdentifier objectIdentifier = new ASN1ObjectIdentifier(o.getString("oid"));
+                nameBuilder.addRDN(objectIdentifier, o.getString("value"));
+            }
+
+            PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(nameBuilder.build(), x509Certificate.getPublicKey());
+            JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
+            ContentSigner signer = csBuilder.build(privateKey);
+            PKCS10CertificationRequest csr = p10Builder.build(signer);
+
+            StringWriter w = new StringWriter();
+            JcaPEMWriter p = new JcaPEMWriter(w);
+            p.writeObject(csr);
+            p.close();
+
+            String csrResult = w.toString();
+            csrResult = csrResult.replace("\r", "");
+            return csrResult;
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | JSONException | OperatorCreationException | IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     @Override
     public void eliminarClaves(String clavesId) throws KeyStoreException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            JSONObject body = new JSONObject();
+            body.put("tipo_hsm", "HSM");
+            body.put("pin", PIN);
+            body.put("alias", clavesId);
+            JSONObject response = request(config.getHsmCloud() + "/eliminar_clave", config.getHsmJWT(), "POST", body.toString());
+            if (response.getInt("code") != 200) {
+                throw new KeyStoreException("No se pudo eliminar la clave.");
+            }
+        } catch (JSONException ex) {
+            throw new KeyStoreException(ex.getMessage());
+        }
     }
 
     @Override
     public void cargarClaves(PrivateKey priv, PublicKey pub, String clavesId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void cargarCertificado(X509Certificate certificado, String clavesId) throws GeneralSecurityException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        cargarCertificado(bo.firmadigital.validar.Certificate.getPem(certificado.getEncoded()), clavesId);
     }
 
     @Override
     public void cargarCertificado(String pem, String clavesId) throws GeneralSecurityException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            JSONObject body = new JSONObject();
+            body.put("tipo_hsm", "HSM");
+            body.put("pin", PIN);
+            body.put("alias", clavesId);
+            body.put("pem", Base64.getEncoder().encodeToString(pem.getBytes()));
+            JSONObject response = request(config.getHsmCloud() + "/cargar_pem", config.getHsmJWT(), "POST", body.toString());
+            if (response.getInt("code") != 200) {
+                throw new KeyStoreException(response.getString("message"));
+            }
+        } catch (JSONException ex) {
+            throw new KeyStoreException(ex.getMessage());
+        }
     }
 
     @Override
@@ -116,11 +215,15 @@ public class TokenHsmCloud implements Token {
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
             JSONObject response = request(config.getHsmCloud() + "/listar_claves", config.getHsmJWT(), "POST", body.toString());
-            JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
-            for (int i = 0; i < arr.length(); i++) {
-                claves.add(arr.getJSONObject(i).getString("alias"));
+            if (response.getInt("code") == 200) {
+                JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
+                for (int i = 0; i < arr.length(); i++) {
+                    claves.add(arr.getJSONObject(i).getString("alias"));
+                }
+                return claves;
+            } else {
+                throw new KeyStoreException(response.getString("message"));
             }
-            return claves;
         } catch (JSONException ex) {
             throw new KeyStoreException(ex.getMessage());
         }
@@ -134,13 +237,17 @@ public class TokenHsmCloud implements Token {
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
             JSONObject response = request(config.getHsmCloud() + "/listar_claves", config.getHsmJWT(), "POST", body.toString());
-            JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            for (int i = 0; i < arr.length(); i++) {
-                String pem = arr.getJSONObject(i).getJSONObject("certificado").getString("pem");
-                certificados.add((X509Certificate)cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(pem))));
+            if (response.getInt("code") == 200) {
+                JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                for (int i = 0; i < arr.length(); i++) {
+                    String pem = arr.getJSONObject(i).getJSONObject("certificado").getString("pem");
+                    certificados.add((X509Certificate)cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(pem))));
+                }
+                return certificados;
+            } else {
+                throw new KeyStoreException(response.getString("message"));
             }
-            return certificados;
         } catch (JSONException ex) {
             throw new KeyStoreException(ex.getMessage());
         }
@@ -160,8 +267,12 @@ public class TokenHsmCloud implements Token {
             body.put("pin", PIN);
             body.put("alias", clavesId);
             JSONObject response = request(config.getHsmCloud() + "/certificado", config.getHsmJWT(), "POST", body.toString());
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            return (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(response.getJSONObject("data").getString("certificate"))));
+            if (response.getInt("code") == 200) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(response.getJSONObject("data").getString("certificate"))));
+            } else {
+                throw new KeyStoreException(response.getString("message"));
+            }
         } catch (JSONException | CertificateException ex) {
             throw new KeyStoreException(ex.getMessage());
         }
@@ -225,7 +336,7 @@ public class TokenHsmCloud implements Token {
             if (res.getInt("code") >= HttpURLConnection.HTTP_OK &&
                     res.getInt("code") <= HttpURLConnection.HTTP_PARTIAL) {
                 JSONObject datos = new JSONObject(stringBuilder.toString().replaceAll("\n", "").trim()).getJSONObject("datos");
-                if (datos.has("data")) {
+                if (datos.has("data") && datos.getString("data").startsWith("{")) {
                     res.put("data", datos.getJSONObject("data"));
                 } else {
                     res.put("data", datos);
