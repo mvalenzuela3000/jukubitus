@@ -26,6 +26,7 @@ import bo.firmadigital.validar.Validar;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
 import bo.firmadigital.validar.ValidarXml;
+import com.itextpdf.kernel.PdfException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -368,7 +369,7 @@ public class App extends Application {
             directoryChooser.setTitle("Seleccione directorio de destino");
             File destino = directoryChooser.showDialog(stage);
             if (destino != null) {
-                Config config = new Config();
+                Config config = Config.getInstance();
                 try {
                     Files.copy(config.getToken().toPath(), new File(destino, "softoken.p12").toPath(), StandardCopyOption.COPY_ATTRIBUTES);
                     Alert alert = new Alert(AlertType.INFORMATION, "El softoken se exportó correctamente.");
@@ -629,6 +630,9 @@ public class App extends Application {
                         } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
                             errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
+                        } catch (PdfException ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getCause().getMessage()).append("\n");
                         }
                     }
                 }

@@ -4,6 +4,7 @@ import bo.firmadigital.validar.ContentsChecker.Estado;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -55,6 +56,16 @@ public class CertDate {
             return null;
         } else {
             return timeStamp.getTime();
+        }
+    }
+
+    public String getTimeStampStr() {
+        System.out.println(timeStamp);
+        if (timeStamp == null) {
+            return "";
+        } else {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            return " (" + dateFormat.format(timeStamp.getTime()) + ")";
         }
     }
 

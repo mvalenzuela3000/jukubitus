@@ -56,7 +56,7 @@ public class TokenHsmCloud implements Token {
     private final Config config;
 
     public TokenHsmCloud() {
-        config = new Config();
+        config = Config.getInstance();
         if (Security.getProvider("HSM Cloud") == null) {
             Security.addProvider(new HsmProvider());
         }

@@ -48,12 +48,12 @@ public class Detalle extends Stage {
             TreeItem<String> item;
             if (cert.isOk()) {
                 if (cert.isAlerted()) {
-                    item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject(), new ImageView(alertIcon), cert);
+                    item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject() + cert.getTimeStampStr(), new ImageView(alertIcon), cert);
                 } else {
-                    item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject(), new ImageView(okIcon), cert);
+                    item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject() + cert.getTimeStampStr(), new ImageView(okIcon), cert);
                 }
             } else {
-                item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject(), new ImageView(errorIcon), cert);
+                item = new TreeItemBlocked<>(cert.getDatos().getNombreComunSubject() + cert.getTimeStampStr(), new ImageView(errorIcon), cert);
             }
             TreeItem<String> intItem, intItemDet;
             if (cert.isValid()) {

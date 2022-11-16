@@ -38,9 +38,19 @@ public final class Base64StreamParser {
                     baos.write(Base64.getDecoder().decode(fileContent));
                     while ((len = is.read(fileContent)) > 0) {
                         if (len < size) {
-                            surp = new byte[len];
-                            System.arraycopy(fileContent, 0, surp, 0, len);
-                            fileContent = surp;
+                            do {
+                                surp = new byte[size - len];
+                                int l = is.read(surp);
+                                if (l == -1) {
+                                    surp = new byte[len];
+                                    System.arraycopy(fileContent, 0, surp, 0, len);
+                                    fileContent = surp;
+                                    break;
+                                } else {
+                                    System.arraycopy(surp, 0, fileContent, len, l);
+                                    len += l;
+                                }
+                            } while (len < size);
                         }
                         baos.write(Base64.getDecoder().decode(fileContent));
                     }

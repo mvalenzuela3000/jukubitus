@@ -71,7 +71,7 @@ public class Main {
             servletHolder.setInitOrder(0);
             servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources");
 
-            Config config = new Config();
+            Config config = Config.getInstance();
             if (config.isSecondaryPortEnabled()) {
                 ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/sign/*");
                 servletHolderSign.setInitOrder(1);
@@ -167,7 +167,7 @@ public class Main {
         connectors.add(sslConnector);
 
         // Configuring the connector
-        Config config = new Config();
+        Config config = Config.getInstance();
         if (config.isSecondaryPortEnabled()) {
             ServerConnector sslConnector2 = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
             sslConnector2.setHost("127.0.0.1");

@@ -53,14 +53,18 @@ public class Configuracion extends Stage {
     private final ProgressBar progressBar;
     private final Button buttonDescargar;
     private final Button buttonControlador;
-    private final TextField textFieldHsmCloud;
-    private final TextField textFieldHsmJWT;
+    private final CheckBox checkBoxHsm;
+    private TextField textFieldHsmCloud;
+    private TextField textFieldHsmJWT;
+    private final CheckBox checkBoxTS;
+    private TextField textFieldTS;
+    private TextField textFieldTSJWT;
 
     public Configuracion(Stage parent) {
         setTitle("Panel de configuración");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
-        config = new Config();
+        config = Config.getInstance();
         HBox root = new HBox();
         VBox vbox1 = new VBox();
         vbox1.setPadding(new Insets(10));
@@ -88,6 +92,13 @@ public class Configuracion extends Stage {
         textFieldPort = new TextField("3128");
         vbox1.getChildren().add(textFieldPort);
         Button buttonGuardar = new Button("Guardar Proxy");
+        buttonGuardar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            config.setProxyEnabled(checkBox.isSelected());
+            config.setProxyIP(textFieldIP.getText());
+            config.setProxyPort(textFieldPort.getText());
+            config.save();
+            close();
+        });
         vbox1.getChildren().add(buttonGuardar);
         Label titleS = new Label("Puerto secundario");
         titleS.setStyle("-fx-font-weight: bold");
@@ -126,82 +137,17 @@ public class Configuracion extends Stage {
             }
         });
         vbox1.getChildren().add(checkBoxPort3);
-        root.getChildren().add(vbox1);
-        Separator separator = new Separator(Orientation.VERTICAL);
-        root.getChildren().add(separator);
-        VBox vbox2 = new VBox();
-        vbox2.setPadding(new Insets(10));
-        vbox2.setSpacing(8);
-        vbox2.setMinWidth(210);
-        Label titleT = new Label("Opciones softoken");
-        titleT.setStyle("-fx-font-weight: bold");
-        vbox2.getChildren().add(titleT);
-        Label labelToken = new Label("Archivo para token/software:");
-        vbox2.getChildren().add(labelToken);
-        textFieldToken = new TextField();
-        textFieldToken.setDisable(true);
-        vbox2.getChildren().add(textFieldToken);
-        Button buttonCrear = new Button("Crear Token");
-        vbox2.getChildren().add(buttonCrear);
-        root.getChildren().add(vbox2);
-        Scene scene = new Scene(root, 640, 288);
-        setScene(scene);
-        checkBox.setSelected(true);
-        checkBox.setSelected(config.isProxyEnabled());
-        textFieldIP.setText(config.getProxyIP());
-        textFieldPort.setText(config.getProxyPort());
-        buttonGuardar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            config.setProxyEnabled(checkBox.isSelected());
-            config.setProxyIP(textFieldIP.getText());
-            config.setProxyPort(textFieldPort.getText());
-            config.save();
-            close();
-        });
-        if (config.getToken() == null) {
-            textFieldToken.setText("Ninguno");
-        } else {
-            textFieldToken.setText(config.getToken().getName());
-            buttonCrear.setDisable(true);
-        }
-        buttonCrear.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            ContrasenaNueva contrasena = new ContrasenaNueva(parent);
-            contrasena.showAndWait();
-            if (contrasena.getPass() != null) {
-                Slot slot = new Slot(config.getTokenToCreate());
-                TokenPKCS12 token = new TokenPKCS12(slot);
-                try {
-                    token.crear(contrasena.getPass());
-                    textFieldToken.setText(config.getToken().getName());
-                } catch (GeneralSecurityException ex) {
-                    Alert alert = new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK);
-                    alert.setTitle("Jacobitus");
-                    alert.showAndWait();
-                }
-            }
-        });
-        Label titleC = new Label("Conversor ODT y DOCX");
-        titleC.setStyle("-fx-font-weight: bold");
-        vbox2.getChildren().add(titleC);
-        progressBar = new ProgressBar();
-        progressBar.prefWidthProperty().bind(vbox2.widthProperty());
-        vbox2.getChildren().add(progressBar);
-        buttonDescargar = new Button("Descargar");
-        vbox2.getChildren().add(buttonDescargar);
-        buttonDescargar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            buttonDescargar.setDisable(true);
-            new Thread(descargar()).start();
-        });
         Label titleD = new Label("Controlador");
         titleD.setStyle("-fx-font-weight: bold");
-        vbox2.getChildren().add(titleD);
+        vbox1.getChildren().add(titleD);
         final Label labelDriver = new Label("Nombre: " + (config.getDriver() == null ? "Ninguno" : config.getDriver().getName()));
-        vbox2.getChildren().add(labelDriver);
+        vbox1.getChildren().add(labelDriver);
         if (config.getDriver() == null) {
             buttonControlador = new Button("Seleccionar");
         } else {
             buttonControlador = new Button("Remover");
         }
-        vbox2.getChildren().add(buttonControlador);
+        vbox1.getChildren().add(buttonControlador);
         buttonControlador.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
             buttonControlador.setDisable(true);
             if (config.getDriver() == null) {
@@ -233,34 +179,140 @@ public class Configuracion extends Stage {
             labelDriver.setText("Nombre: " + (config.getDriver() == null ? "Ninguno" : config.getDriver().getName()));
             buttonControlador.setDisable(false);
         });
+        root.getChildren().add(vbox1);
+        Separator separator = new Separator(Orientation.VERTICAL);
+        root.getChildren().add(separator);
+        VBox vbox2 = new VBox();
+        vbox2.setPadding(new Insets(10));
+        vbox2.setSpacing(8);
+        vbox2.setMinWidth(210);
+        Label titleHsm = new Label("Opciones HSM ADSIB");
+        titleHsm.setStyle("-fx-font-weight: bold");
+        vbox2.getChildren().add(titleHsm);
+        checkBoxHsm = new CheckBox("Utilizar HSM");
+        checkBoxHsm.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            textFieldHsmCloud.setDisable(!newValue);
+            textFieldHsmJWT.setDisable(!newValue);
+            if (newValue == false && config.isHsmEnabled() == false) {
+                textFieldHsmCloud.setText(config.getHsmCloud());
+                textFieldHsmJWT.setText(config.getHsmJWT());
+            }
+        });
+        vbox2.getChildren().add(checkBoxHsm);
+        Label labelHsmUrl = new Label("URL:");
+        vbox2.getChildren().add(labelHsmUrl);
+        textFieldHsmCloud = new TextField();
+        textFieldHsmCloud.setText(config.getHsmCloud());
+        vbox2.getChildren().add(textFieldHsmCloud);
+        Label labelHsmJWT = new Label("Json Web Token:");
+        vbox2.getChildren().add(labelHsmJWT);
+        textFieldHsmJWT = new TextField();
+        textFieldHsmJWT.setText(config.getHsmJWT());
+        vbox2.getChildren().add(textFieldHsmJWT);
+        Button buttonGuardarHsm = new Button("Guardar HSM");
+        vbox2.getChildren().add(buttonGuardarHsm);
+        buttonGuardarHsm.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            config.setHsmEnabled(checkBoxHsm.isSelected());
+            config.setHsmCloud(textFieldHsmCloud.getText());
+            config.setHsmJWT(textFieldHsmJWT.getText());
+            config.save();
+            close();
+        });
+        Label titleT = new Label("Opciones softoken");
+        titleT.setStyle("-fx-font-weight: bold");
+        vbox2.getChildren().add(titleT);
+        Label labelToken = new Label("Archivo para token/software:");
+        vbox2.getChildren().add(labelToken);
+        textFieldToken = new TextField();
+        textFieldToken.setDisable(true);
+        vbox2.getChildren().add(textFieldToken);
+        Button buttonCrear = new Button("Crear Token");
+        vbox2.getChildren().add(buttonCrear);
+        buttonCrear.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            ContrasenaNueva contrasena = new ContrasenaNueva(parent);
+            contrasena.showAndWait();
+            if (contrasena.getPass() != null) {
+                Slot slot = new Slot(config.getTokenToCreate());
+                TokenPKCS12 token = new TokenPKCS12(slot);
+                try {
+                    token.crear(contrasena.getPass());
+                    textFieldToken.setText(config.getToken().getName());
+                } catch (GeneralSecurityException ex) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK);
+                    alert.setTitle("Jacobitus");
+                    alert.showAndWait();
+                }
+            }
+        });
+        root.getChildren().add(vbox2);
         Separator separator2 = new Separator(Orientation.VERTICAL);
         root.getChildren().add(separator2);
         VBox vbox3 = new VBox();
         vbox3.setPadding(new Insets(10));
         vbox3.setSpacing(8);
         vbox3.setMinWidth(210);
-        Label titleHsm = new Label("Opciones HSM ADSIB");
-        titleHsm.setStyle("-fx-font-weight: bold");
-        vbox3.getChildren().add(titleHsm);
-        root.getChildren().add(vbox3);
-        Label labelHsmUrl = new Label("URL:");
-        vbox3.getChildren().add(labelHsmUrl);
-        textFieldHsmCloud = new TextField();
-        textFieldHsmCloud.setText(config.getHsmCloud());
-        vbox3.getChildren().add(textFieldHsmCloud);
-        Label labelHsmJWT = new Label("Json Web Token:");
-        vbox3.getChildren().add(labelHsmJWT);
-        textFieldHsmJWT = new TextField();
-        textFieldHsmJWT.setText(config.getHsmJWT());
-        vbox3.getChildren().add(textFieldHsmJWT);
-        Button buttonGuardarHsm = new Button("Guardar HSM");
-        vbox3.getChildren().add(buttonGuardarHsm);
-        buttonGuardarHsm.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            config.setHsmCloud(textFieldHsmCloud.getText());
-            config.setHsmJWT(textFieldHsmJWT.getText());
+        Label titleTS = new Label("Opciones Sellado de Tiempo");
+        titleTS.setStyle("-fx-font-weight: bold");
+        vbox3.getChildren().add(titleTS);
+        checkBoxTS = new CheckBox("Utilizar Sellado");
+        checkBoxTS.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            textFieldTS.setDisable(!newValue);
+            textFieldTSJWT.setDisable(!newValue);
+            if (newValue == false && config.isTSEnabled() == false) {
+                textFieldTS.setText(config.getTS());
+                textFieldTSJWT.setText(config.getTSJWT());
+            }
+        });
+        vbox3.getChildren().add(checkBoxTS);
+        Label labelTSUrl = new Label("URL:");
+        vbox3.getChildren().add(labelTSUrl);
+        textFieldTS = new TextField();
+        textFieldTS.setText(config.getTS());
+        vbox3.getChildren().add(textFieldTS);
+        Label labelTSJWT = new Label("Json Web Token:");
+        vbox3.getChildren().add(labelTSJWT);
+        textFieldTSJWT = new TextField();
+        textFieldTSJWT.setText(config.getTSJWT());
+        vbox3.getChildren().add(textFieldTSJWT);
+        Button buttonGuardarTS = new Button("Guardar Sellado");
+        vbox2.getChildren().add(buttonGuardarTS);
+        buttonGuardarTS.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            config.setTSEnabled(checkBoxTS.isSelected());
+            config.setTS(textFieldTS.getText());
+            config.setTSJWT(textFieldTSJWT.getText());
             config.save();
             close();
         });
+        vbox3.getChildren().add(buttonGuardarTS);
+        Label titleC = new Label("Conversor ODT y DOCX");
+        titleC.setStyle("-fx-font-weight: bold");
+        vbox3.getChildren().add(titleC);
+        progressBar = new ProgressBar();
+        progressBar.prefWidthProperty().bind(vbox3.widthProperty());
+        vbox3.getChildren().add(progressBar);
+        buttonDescargar = new Button("Descargar");
+        vbox3.getChildren().add(buttonDescargar);
+        buttonDescargar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+            buttonDescargar.setDisable(true);
+            new Thread(descargar()).start();
+        });
+        root.getChildren().add(vbox3);
+        checkBox.setSelected(true);
+        checkBox.setSelected(config.isProxyEnabled());
+        textFieldIP.setText(config.getProxyIP());
+        textFieldPort.setText(config.getProxyPort());
+        if (config.getToken() == null) {
+            textFieldToken.setText("Ninguno");
+        } else {
+            textFieldToken.setText(config.getToken().getName());
+            buttonCrear.setDisable(true);
+        }
+        checkBoxHsm.setSelected(true);
+        checkBoxHsm.setSelected(config.isHsmEnabled());
+        checkBoxTS.setSelected(true);
+        checkBoxTS.setSelected(config.isTSEnabled());
+        Scene scene = new Scene(root, 640, 378);
+        setScene(scene);
     }
 
     public Task descargar() {

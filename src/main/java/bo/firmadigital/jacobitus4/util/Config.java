@@ -25,7 +25,9 @@ public class Config {
     protected File fileOptions;
     protected File token;
 
-    public Config() {
+    private static Config ourInstance;
+
+    protected Config() {
         try {
             options = new Properties();
             user = new File(FileSystemView.getFileSystemView().getDefaultDirectory(), "Jacobitus");
@@ -44,6 +46,13 @@ public class Config {
         } catch (IOException ex) {
             throw new RuntimeException("No se pudo obtener las opciones.");
         }
+    }
+
+    public static Config getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new Config();
+        }
+        return ourInstance;
     }
 
     public boolean isProxyEnabled() {
@@ -142,6 +151,19 @@ public class Config {
         }
     }
 
+    public boolean isHsmEnabled() {
+        String hsm = options.getProperty("hsm");
+        return hsm != null && hsm.equals("true");
+    }
+
+    public void setHsmEnabled(boolean hsm) {
+        if (hsm) {
+            options.setProperty("hsm", "true");
+        } else {
+            options.setProperty("hsm", "false");
+        }
+    }
+
     public String getHsmCloud() {
         if (options.containsKey("hsmCloud")) {
             return options.getProperty("hsmCloud");
@@ -171,6 +193,51 @@ public class Config {
             options.remove("hsmJWT");
         } else {
             options.setProperty("hsmJWT", jwt);
+        }
+    }
+
+    public boolean isTSEnabled() {
+        String ts = options.getProperty("ts");
+        return ts != null && ts.equals("true");
+    }
+
+    public void setTSEnabled(boolean ts) {
+        if (ts) {
+            options.setProperty("ts", "true");
+        } else {
+            options.setProperty("ts", "false");
+        }
+    }
+
+    public String getTS() {
+        if (options.containsKey("TS")) {
+            return options.getProperty("TS");
+        } else {
+            return "https://desarrollo.adsib.gob.bo/sellado_tiempo/timestamp/api/v1/sellado";
+        }
+    }
+
+    public void setTS(String url) {
+        if (url == null || url.trim().equals("")) {
+            options.remove("TS");
+        } else {
+            options.setProperty("TS", url);
+        }
+    }
+
+    public String getTSJWT() {
+        if (options.containsKey("TSJWT")) {
+            return options.getProperty("TSJWT");
+        } else {
+            return "";
+        }
+    }
+
+    public void setTSJWT(String user) {
+        if (user == null || user.trim().equals("")) {
+            options.remove("TSJWT");
+        } else {
+            options.setProperty("TSJWT", user);
         }
     }
 

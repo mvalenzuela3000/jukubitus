@@ -138,7 +138,7 @@ public abstract class Validar implements Iterable<CertDate> {
             if (urls.length == 0) {
                 return new OCSPData(OCSPState.UNKNOWN_SERVER, null);
             }
-            Config config = new Config();
+            Config config = Config.getInstance();
             HttpURLConnection connection;
             if (config.isProxyEnabled()) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyIP(), Integer.parseInt(config.getProxyPort())));

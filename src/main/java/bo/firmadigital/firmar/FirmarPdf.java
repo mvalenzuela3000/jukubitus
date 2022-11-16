@@ -5,8 +5,10 @@
  */
 package bo.firmadigital.firmar;
 
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.token.ExternalSignatureLocal;
 import bo.firmadigital.token.GestorSlot;
+import bo.firmadigital.token.TSAClient;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.DatosCertificado;
 import com.itextpdf.forms.PdfSigFieldLock;
@@ -18,6 +20,7 @@ import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.BouncyCastleDigest;
 import com.itextpdf.signatures.IExternalDigest;
 import com.itextpdf.signatures.IExternalSignature;
+import com.itextpdf.signatures.ITSAClient;
 import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
 import java.io.IOException;
@@ -38,17 +41,20 @@ public class FirmarPdf implements Firmar {
     private ImageData imageData;
     private int x = 0;
     private int y = 0;
+    private final Config config;
 
     private FirmarPdf(long slot, String label, String pass) {
         this.slot = slot;
         this.label = label;
         this.pass = pass;
+        config = Config.getInstance();
     }
 
     private FirmarPdf(long slot, String label, String pass, String imageBase64, int x, int y) {
         this.slot = slot;
         this.label = label;
         this.pass = pass;
+        config = Config.getInstance();
         if (imageBase64 != null) {
             byte[] bytes = Base64.getDecoder().decode(imageBase64);
             imageData = ImageDataFactory.create(bytes, false);
@@ -108,10 +114,13 @@ public class FirmarPdf implements Firmar {
             rect = new Rectangle(x, y, 200, 50);
         }
         appearance.setPageRect(rect);
-
+        ITSAClient tsc = null;
+        if (config.isTSEnabled()) {
+            tsc = new TSAClient(config.getTS(), config.getTSJWT());
+        }
         IExternalDigest digest = new BouncyCastleDigest();
         IExternalSignature signature = new ExternalSignatureLocal(token.obtenerClavePrivada(label), token.getProviderName());
-        signer.signDetached(digest, signature, token.getCertificateChain(label), null, null, null, 0, PdfSigner.CryptoStandard.CADES);
+        signer.signDetached(digest, signature, token.getCertificateChain(label), null, null, tsc, 0, PdfSigner.CryptoStandard.CADES);
         token.salir();
         
     }

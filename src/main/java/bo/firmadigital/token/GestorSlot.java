@@ -120,10 +120,10 @@ public class GestorSlot {
     public synchronized Slot[] listarSlots(boolean software) {
         slots.clear();
         try {
-            Config config = new Config();
+            Config config = Config.getInstance();
             if (config.getDriver() == null) {
                 List<JSONObject> tokens = SmartCard.cards();
-                if (tokens.isEmpty() && libreria == null && config.getToken() == null && config.getHsmJWT() == null) {
+                if (tokens.isEmpty() && libreria == null && config.getToken() == null && !config.isHsmEnabled()) {
                     throw new RuntimeException("No se encontro ningun token conectado.");
                 }
                 if (tokens.size() > 1) {
@@ -150,7 +150,7 @@ public class GestorSlot {
             if (software && config.getToken() != null) {
                 slots.put(-1l, new Slot(config.getToken().getPath()));
             }
-            if (config.getHsmJWT() != null) {
+            if (config.isHsmEnabled() && config.getHsmJWT() != null) {
                 slots.put(-1001l, new Slot(-1001));
             }
         } catch (JSONException | IOException ex) {

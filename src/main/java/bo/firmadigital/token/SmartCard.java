@@ -59,15 +59,14 @@ public class SmartCard {
                     res.add(token);
                 }
             }
-        } catch (NoSuchAlgorithmException ex) {
-            Config config = new Config();
+        } catch (NoSuchAlgorithmException | CardException | JSONException ex) {
+            Config config = Config.getInstance();
             if (config.getDriver() != null) {
                 try {
                     GestorSlot gs = GestorSlot.getInstance();
                     Slot[] slots = gs.listarSlots();
                     for (Slot slot : slots) {
                         CK_TOKEN_INFO info = slot.detalleToken();
-                        System.out.println(info.getLabel());
                         token = new JSONObject();
                         String name = new String(info.model).trim();
                         if (name.equals("ePass2003")) {
@@ -81,24 +80,22 @@ public class SmartCard {
                 } catch (JSONException ex2) {
                     Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex2);
                 }
+            } else {
+                if (ex.getMessage().equals("list() failed") || ex.getMessage().equals("connect() failed")) {
+                    if (res.isEmpty() && token != null) {
+                        try {
+                            GestorSlot gs = GestorSlot.getInstance();
+                            Provider sunPKCS11 = Security.getProvider("SunPKCS11");
+                            sunPKCS11 = sunPKCS11.configure(gs.obtenerConfiguracion(token.getString("id")));
+                            KeyStore.getInstance("PKCS11", sunPKCS11);
+                            res.add(token);
+                        } catch (JSONException ex2) {
+                            throw new RuntimeException(ex2.getMessage());
+                        } catch (KeyStoreException ignore) {}
+                    }
+                }
             }
             Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (CardException | JSONException ex) {
-            if (ex.getMessage().equals("list() failed") || ex.getMessage().equals("connect() failed")) {
-                if (res.isEmpty() && token != null) {
-                    try {
-                        GestorSlot gs = GestorSlot.getInstance();
-                        Provider sunPKCS11 = Security.getProvider("SunPKCS11");
-                        sunPKCS11 = sunPKCS11.configure(gs.obtenerConfiguracion(token.getString("id")));
-                        KeyStore.getInstance("PKCS11", sunPKCS11);
-                        res.add(token);
-                    } catch (JSONException ex2) {
-                        throw new RuntimeException(ex2.getMessage());
-                    } catch (KeyStoreException ignore) {}
-                }
-            } else {
-                Logger.getLogger(SmartCard.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
         return res;
     }

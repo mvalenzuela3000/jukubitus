@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -306,6 +307,8 @@ public class TokenPKCS12 implements Token {
             certificado.checkValidity();
         } catch (CertificateExpiredException ex) {
             throw new GeneralSecurityException("El certificado se encuentra expirado.");
+        } catch (CertificateNotYetValidException ex) {
+            throw new GeneralSecurityException("El certificado aún no está vigente.");
         }
 
         if (!this.keystore.getCertificate(clavesId).getPublicKey().equals(certificado.getPublicKey())) {
