@@ -210,6 +210,7 @@ public class GestorSlot {
                 configString += "\ndisabledMechanisms = {\nCKM_SHA1_RSA_PKCS\n}";
             }
             File filePkcs11Config = File.createTempFile("fido_pkcs11_", ".cfg");
+            filePkcs11Config.deleteOnExit();
             try (FileOutputStream fos = new FileOutputStream(filePkcs11Config)) {
                 fos.write(configString.getBytes());
                 fos.flush();

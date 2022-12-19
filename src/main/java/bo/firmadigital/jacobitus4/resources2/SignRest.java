@@ -68,7 +68,11 @@ public class SignRest {
             }
             TokenSelected dt;
             if (req.has("ci")) {
-                dt = App.service(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
+                if (req.getString("format").equals("jws")) {
+                    dt = App.serviceJWS(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
+                } else {
+                    dt = App.service(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
+                }
             } else {
                 dt = App.service(slots[0], null, req.getJSONArray("archivo"));
             }

@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import bo.firmadigital.firmar.FirmarJws;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.TokenSelected;
 import bo.firmadigital.token.GestorSlot;
@@ -48,6 +49,7 @@ import org.codehaus.jettison.json.JSONObject;
 public class Service extends Stage {
     private final ObservableList<DatosCertificado> certificates;
     private final TokenSelected tokenSelected;
+    private final String format;
     private final PasswordField passwordField;
     private final Button button;
     private final ChoiceBox aliasChoiceBox;
@@ -56,13 +58,14 @@ public class Service extends Stage {
     private final Button buttonFirmar;
     private final Label message;
 
-    public Service(Stage parent, TokenSelected tokenSelected) {
+    public Service(Stage parent, TokenSelected tokenSelected, String format) {
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
         tokenSelected.setAlias(null);
         tokenSelected.setPin(null);
         this.tokenSelected = tokenSelected;
+        this.format = format;
         GridPane root = new GridPane();
         root.setHgap(5);
         root.setVgap(5);
@@ -141,7 +144,16 @@ public class Service extends Stage {
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                             String[] base64 = files.getJSONObject(i).getString("base64").split("base64,");
                             byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
-                            FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                            switch (format) {
+                                case "pades":
+                                    FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    break;
+                                case "jws":
+                                    FirmarJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    break;
+                                default:
+                                    throw new Exception(String.format("Formato %s no admitido.", format));
+                            }
                             JSONObject obj = new JSONObject();
                             obj.put("name", files.getJSONObject(i).getString("name"));
                             obj.put("base64", Base64.getEncoder().encodeToString(out.toByteArray()));

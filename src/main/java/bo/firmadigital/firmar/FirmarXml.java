@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -107,7 +108,9 @@ public class FirmarXml implements Firmar {
             XMLSignature signature = new XMLSignature(xml, null, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
             parent.appendChild(signature.getElement());
             signature.addDocument("", transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
-            signature.addKeyInfo(token.obtenerCertificado(label));
+            X509Certificate cert = token.obtenerCertificado(label);
+            cert.checkValidity();
+            signature.addKeyInfo(cert);
             if (node != null) {
                 signature.addResourceResolver(new ResourceResolverSpi() {
                     @Override

@@ -21,6 +21,8 @@ public enum MagicBytes {
     P7S(0x30, 0x80),
     PDF(0x25, 0x50);
 
+    private static final String b64 = "+-./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz\r\n";
+
     private final int[] magicBytes;
 
     private MagicBytes(int...bytes) {
@@ -59,5 +61,19 @@ public enum MagicBytes {
 
     public boolean is(InputStream is) throws IOException {
         return is(extract(is, magicBytes.length));
+    }
+
+    public static boolean isJWS(File file) throws IOException {
+        boolean res = true;
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[1];
+            while (fis.read(buffer, 0, 1) > 0) {
+                if (b64.indexOf((char)buffer[0]) == -1) {
+                    res = false;
+                    break;
+                }
+            }
+        }
+        return res;
     }
 }

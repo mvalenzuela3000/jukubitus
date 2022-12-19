@@ -75,6 +75,7 @@ public class FirmarPKCS7 implements Firmar {
                 throw new RuntimeException("No se encontró la clave con alias: " + label);
             }
             X509Certificate x509Certificate = token.obtenerCertificado(label);
+            x509Certificate.checkValidity();
             List<Certificate> certlist = new ArrayList<>();
             certlist.add(x509Certificate);
             Store certstore = new JcaCertStore(certlist);

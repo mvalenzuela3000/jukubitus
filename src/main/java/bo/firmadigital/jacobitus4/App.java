@@ -8,6 +8,7 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.firmar.Constants;
 import bo.firmadigital.firmar.TokenSelected;
 import bo.firmadigital.firmar.Firmar;
+import bo.firmadigital.firmar.FirmarJws;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.FirmarXml;
@@ -23,6 +24,7 @@ import bo.firmadigital.validar.Certificate;
 import bo.firmadigital.validar.DatosCertificado;
 import bo.firmadigital.validar.MagicBytes;
 import bo.firmadigital.validar.Validar;
+import bo.firmadigital.validar.ValidarJws;
 import bo.firmadigital.validar.ValidarPdf;
 import bo.firmadigital.validar.ValidarPKCS7;
 import bo.firmadigital.validar.ValidarXml;
@@ -105,7 +107,7 @@ public class App extends Application {
     private static Stage stage;
     private static App app;
     private static final TokenSelected tokenSelected = new TokenSelected();
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.1.0";
 
     @Override
     public void start(Stage stage) {
@@ -147,8 +149,10 @@ public class App extends Application {
             fileChooser.getExtensionFilters().add(extFilter);
             extFilter = new FileChooser.ExtensionFilter("Archivos XML (*.xml)", "*.xml");
             fileChooser.getExtensionFilters().add(extFilter);
-            /*extFilter = new FileChooser.ExtensionFilter("Archivos JSON (*.json)", "*.json");
-            fileChooser.getExtensionFilters().add(extFilter);*/
+            extFilter = new FileChooser.ExtensionFilter("Archivos JSON (*.json)", "*.json");
+            fileChooser.getExtensionFilters().add(extFilter);
+            extFilter = new FileChooser.ExtensionFilter("Archivos JWS (*.jws)", "*.jws");
+            fileChooser.getExtensionFilters().add(extFilter);
             extFilter = new FileChooser.ExtensionFilter("Todos los archivos (*)", "*");
             fileChooser.getExtensionFilters().add(extFilter);
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
@@ -305,7 +309,37 @@ public class App extends Application {
                 }
             }
         });
-        firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item, firmarXmlItem);
+        MenuItem firmarJwsItem = new MenuItem("Firmar JSON");
+        firmarJwsItem.setOnAction((ActionEvent e) -> {
+            if (tableFile.getItems().isEmpty()) {
+                Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.setTitle("Jacobitus");
+                alert.showAndWait();
+            } else {
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                if (item == null) {
+                    Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.setTitle("Jacobitus");
+                    alert.showAndWait();
+                } else {
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setTitle("Seleccione directorio de destino");
+                    destino = directoryChooser.showDialog(stage);
+                    if (destino == null) {
+                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.setTitle("Jacobitus");
+                        alert.showAndWait();
+                    } else {
+                        Firmante firmante = new Firmante(stage, item.getSlot(), Constants.JWS);
+                        firmante.showAndWait();
+                        if (firmante.getLabel() != null) {
+                            new Thread(firmarJws(item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                        }
+                    }
+                }
+            }
+        });
+        firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item, firmarXmlItem, firmarJwsItem);
         menuBar.getMenus().add(firmaMenu);
         
         Menu pdfMenu = new Menu("PDF");
@@ -665,7 +699,15 @@ public class App extends Application {
                         if (MagicBytes.XML.is(files.get(i))) {
                             certs.add(new ValidarXml(files.get(i)));
                         } else {
-                            certs.add(new ValidarPKCS7(files.get(i)));
+                            if (MagicBytes.P7S.is(files.get(i))) {
+                                certs.add(new ValidarPKCS7(files.get(i)));
+                            } else {
+                                if (MagicBytes.isJWS(files.get(i))) {
+                                    certs.add(new ValidarJws(files.get(i)));
+                                } else {
+                                    certs.add(new ValidarPKCS7(files.get(i)));
+                                }
+                            }
                         }
                     }
                     updateProgress(i + 1, files.size());
@@ -675,6 +717,11 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 
@@ -701,6 +748,11 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 
@@ -733,6 +785,44 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
+        return task;
+    }
+
+    public Task firmarJws(long slot, String label, String pass) {
+        progressBar.progressProperty().unbind();
+        Task task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                List<Validar> files = tableFile.getItems();
+                if (files.isEmpty()) {
+                    updateProgress(100, 100);
+                } else {
+                    Firmar firmar = FirmarJws.getInstance(slot, label, pass);
+                    for (int i = 0; i < files.size(); i++) {
+                        String name = new File(files.get(i).getAbsolutePath()).getName();
+                        name = name.replace(".json", ".jws");
+                        File out = new File(destino, name);
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                            firmar.firmar(is, os, false);
+                        }
+                        updateProgress(i + 1, files.size());
+                        tableFile.getItems().set(i, new ValidarXml(out));
+                    }
+                }
+                return true;
+            }
+        };
+        progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 
@@ -786,6 +876,11 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((Event evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
         return task;
     }
 
@@ -866,7 +961,22 @@ public class App extends Application {
             tokenSelected.setSlot(slot);
             tokenSelected.setCI(ci);
             tokenSelected.setFiles(files);
-            Service service = new Service(stage, tokenSelected);
+            Service service = new Service(stage, tokenSelected, "pades");
+            service.showAndWait();
+            synchronized(tokenSelected) {
+                tokenSelected.notify();
+            }
+        });
+        tokenSelected.showAndWait();
+        return tokenSelected;
+    }
+
+    public static TokenSelected serviceJWS(Slot slot, String ci, JSONArray files) {
+        Platform.runLater(() -> {
+            tokenSelected.setSlot(slot);
+            tokenSelected.setCI(ci);
+            tokenSelected.setFiles(files);
+            Service service = new Service(stage, tokenSelected, "jws");
             service.showAndWait();
             synchronized(tokenSelected) {
                 tokenSelected.notify();
