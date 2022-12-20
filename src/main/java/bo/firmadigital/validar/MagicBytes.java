@@ -5,10 +5,13 @@
  */
 package bo.firmadigital.validar;
 
+import com.nimbusds.jose.JWSObject;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 
 /**
  *
@@ -66,11 +69,23 @@ public enum MagicBytes {
     public static boolean isJWS(File file) throws IOException {
         boolean res = true;
         try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] buffer = new byte[1];
-            while (fis.read(buffer, 0, 1) > 0) {
-                if (b64.indexOf((char)buffer[0]) == -1) {
+            byte[] buffer = new byte[1024];
+            int l = fis.read(buffer);
+            for (int i = 0; i < l; i++) {
+                if (b64.indexOf((char)buffer[i]) == -1) {
                     res = false;
                     break;
+                }
+            }
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                os.write(buffer, 0, l);
+                while ((l = fis.read(buffer)) > 0) {
+                    os.write(buffer, 0, l);
+                }
+                try {
+                    JWSObject.parse(new String(os.toByteArray()));
+                } catch (ParseException ex) {
+                    res = false;
                 }
             }
         }

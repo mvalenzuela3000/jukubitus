@@ -805,13 +805,17 @@ public class App extends Application {
                     Firmar firmar = FirmarJws.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
-                        name = name.replace(".json", ".jws");
+                        if (name.endsWith(".json")) {
+                            name = name.replace(".json", ".jws");
+                        } else {
+                            name = name + ".jws";
+                        }
                         File out = new File(destino, name);
                         try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
                             firmar.firmar(is, os, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarXml(out));
+                        tableFile.getItems().set(i, new ValidarJws(out));
                     }
                 }
                 return true;
