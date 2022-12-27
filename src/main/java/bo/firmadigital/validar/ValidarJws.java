@@ -13,13 +13,18 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,6 +47,39 @@ public class ValidarJws extends Validar {
         try {
             certificados = listarCertificados(is);
         } catch (Exception ignore) {
+        }
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        if (file.getName().endsWith(".jws")) {
+            try {
+                File f = new File(System.getProperty("java.io.tmpdir"), file.getName().replace(".jws", ".json"));
+                InputStream is = new FileInputStream(file);
+                JWSObject jwsObject = JWSObject.parse(new String(is.readAllBytes()));
+                byte[] payload = jwsObject.getPayload().toBytes();
+                try (FileOutputStream os = new FileOutputStream(f)) {
+                    os.write(payload);
+                }
+                return f.getAbsolutePath();
+            } catch (ParseException | IOException ex) {
+                Logger.getLogger(ValidarJws.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return file.getAbsolutePath();
+    }
+
+    @Override
+    public void export(File f) {
+        try {
+            InputStream is = new FileInputStream(file);
+            JWSObject jwsObject = JWSObject.parse(new String(is.readAllBytes()));
+            byte[] payload = jwsObject.getPayload().toBytes();
+            try (FileOutputStream os = new FileOutputStream(f)) {
+                os.write(payload);
+            }
+        } catch (IOException | ParseException ex) {
+            throw new RuntimeException(ex.getMessage());
         }
     }
 

@@ -74,7 +74,11 @@ public class SignRest {
                     dt = App.service(slots[0], req.getString("ci"), req.getJSONArray("archivo"));
                 }
             } else {
-                dt = App.service(slots[0], null, req.getJSONArray("archivo"));
+                if (req.getString("format").equals("jws")) {
+                    dt = App.serviceJWS(slots[0], null, req.getJSONArray("archivo"));
+                } else {
+                    dt = App.service(slots[0], null, req.getJSONArray("archivo"));
+                }
             }
             if (dt.getAlias() != null && dt.getPin() != null) {
                 json.put("files", dt.getFiles());
