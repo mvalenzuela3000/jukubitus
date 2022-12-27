@@ -558,6 +558,7 @@ public class ValidadorRest {
                     firma.put("certificado", certificado);
                     firmas.put(firma);
                 }
+                datos.put("file", validar.exportB64(new ByteArrayInputStream(file)));
 
                 json.put("finalizado", true);
                 json.put("mensaje", "Se validó las firmas correctamente!");

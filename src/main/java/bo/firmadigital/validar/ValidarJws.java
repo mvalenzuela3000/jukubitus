@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
@@ -79,6 +80,16 @@ public class ValidarJws extends Validar {
                 os.write(payload);
             }
         } catch (IOException | ParseException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public String exportB64(InputStream is) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(new String(is.readAllBytes()));
+            return Base64.getEncoder().encodeToString(jwsObject.getPayload().toBytes());
+        }   catch (IOException | ParseException ex) {
             throw new RuntimeException(ex.getMessage());
         }
     }
