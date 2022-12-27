@@ -38,6 +38,9 @@ import org.bouncycastle.util.Store;
  * @author ADSIB
  */
 public class ValidarPKCS7 extends Validar {
+    protected String urlPost = null;
+    protected String token = null;
+
     public ValidarPKCS7(File file) {
         try {
             super.file = file;
@@ -49,6 +52,12 @@ public class ValidarPKCS7 extends Validar {
         }
     }
 
+    public ValidarPKCS7(File file, String urlPost, String token) {
+        this(file);
+        this.urlPost = urlPost;
+        this.token = token;
+    }
+
     public ValidarPKCS7(InputStream is) {
         try {
             if (Security.getProvider("BC") == null) {
@@ -57,6 +66,21 @@ public class ValidarPKCS7 extends Validar {
             certificados = listarCertificados(is);
         } catch (Exception ignore) {
         }
+    }
+
+    @Override
+    public boolean isRemoto() {
+        return urlPost != null;
+    }
+
+    @Override
+    public String getPost() {
+        return urlPost;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
     }
 
     @Override

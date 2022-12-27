@@ -15,6 +15,7 @@ import bo.firmadigital.firmar.FirmarXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
+import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
@@ -262,9 +263,13 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    DirectoryChooser directoryChooser = new DirectoryChooser();
-                    directoryChooser.setTitle("Seleccione directorio de destino");
-                    destino = directoryChooser.showDialog(stage);
+                    if (((Validar)tableFile.getItems().get(0)).isRemoto()) {
+                        destino = new File(System.getProperty("java.io.tmpdir"));
+                    } else {
+                        DirectoryChooser directoryChooser = new DirectoryChooser();
+                        directoryChooser.setTitle("Seleccione directorio de destino");
+                        destino = directoryChooser.showDialog(stage);
+                    }
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.setTitle("Jacobitus");
@@ -849,10 +854,11 @@ public class App extends Application {
                         size = Integer.parseInt(sLength);
                     }
                 }
+                String fileName = UrlFileName.getFileName(connection);
                 if (connection.getResponseCode() >= HttpURLConnection.HTTP_OK &&
                         connection.getResponseCode() <= HttpURLConnection.HTTP_PARTIAL) {
                     InputStream responseStream = connection.getInputStream();
-                    File f = new File(System.getProperty("java.io.tmpdir"), "prueba.pdf");
+                    File f = new File(System.getProperty("java.io.tmpdir"), fileName);
                     try (OutputStream outStream = new FileOutputStream(f)) {
                         byte[] buffer = new byte[8 * 1024];
                         int t = 0, bytesRead;
@@ -865,17 +871,18 @@ public class App extends Application {
                         }
                     }
                     List<Validar> certs = new LinkedList();
-                    certs.add(new ValidarPdf(f, urlPost, token));
+                    if (MagicBytes.PDF.is(f)) {
+                        certs.add(new ValidarPdf(f, urlPost, token));
+                    } else {
+                        certs.add(new ValidarPKCS7(f, urlPost, token));
+                    }
                     tableFile.setItems(FXCollections.observableList(certs));
                     if (size == 0) {
                         updateProgress(1, 1);
                     }
                     return true;
                 } else {
-                    Alert alert = new Alert(AlertType.ERROR, "No se pudo descargar el archivo.", ButtonType.OK);
-                    alert.setTitle("Jacobitus");
-                    alert.showAndWait();
-                    return false;
+                    throw new RuntimeException("No se pudo descargar el archivo.");
                 }
             }
         };
