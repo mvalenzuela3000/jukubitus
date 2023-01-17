@@ -968,6 +968,9 @@ public class App extends Application {
     }
 
     public static TokenSelected service(Slot slot, String ci, JSONArray files) {
+        if (tokenSelected.isShown()) {
+            throw new RuntimeException("Ya se tiene una solicitud de firma pendiente.");
+        }
         Platform.runLater(() -> {
             tokenSelected.setSlot(slot);
             tokenSelected.setCI(ci);

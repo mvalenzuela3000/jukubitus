@@ -20,6 +20,7 @@ public class TokenSelected {
     private String pin;
     private String ci;
     private JSONArray files;
+    private boolean shown;
 
     public Slot getSlot() {
         return slot;
@@ -61,9 +62,15 @@ public class TokenSelected {
         this.files = files;
     }
 
+    public boolean isShown() {
+        return shown;
+    }
+
     public synchronized void showAndWait() {
         try {
+            shown = true;
             wait();
+            shown = false;
         } catch (InterruptedException ex) {
             Logger.getLogger(TokenSelected.class.getName()).log(Level.SEVERE, null, ex);
         }
