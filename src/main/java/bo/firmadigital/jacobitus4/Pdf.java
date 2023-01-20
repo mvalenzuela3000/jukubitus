@@ -13,10 +13,10 @@ import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Image;
@@ -232,11 +232,13 @@ public class Pdf extends Stage {
                     PdfReader reader = new PdfReader(file.getAbsolutePath());
                     PdfDocument pdf = new PdfDocument(reader);
                     for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
+                        String text = PdfTextExtractor.getTextFromPage(pdf.getPage(i));
                         PdfDictionary dict = pdf.getPage(i).getPdfObject().getAsDictionary(PdfName.Resources);
                         PdfArray set = dict.getAsArray(PdfName.ProcSet);
                         PdfDictionary xobjects = dict.getAsDictionary(PdfName.XObject);
                         Image image;
                         if (xobjects != null && xobjects.keySet().size() == 1 &&
+                                text.equals("") &&
                                 (dict.containsKey(PdfName.ExtGState) ||
                                 (set != null && (set.contains(PdfName.Image) ||
                                 set.contains(new PdfName("ImageA")) ||
@@ -260,6 +262,10 @@ public class Pdf extends Stage {
                                     ImageData imageData = ImageDataFactory.create(baos.toByteArray());
                                     image = new Image(imageData);
                                     image.scaleAbsolute(WIDTH, HEIGHT);
+                                    if (pdfDocument.getNumberOfPages() > 0) {
+                                        document.add(new AreaBreak(AreaBreakType.LAST_PAGE));
+                                        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                                    }
                                     document.add(image);
                                 }
                             } else {
