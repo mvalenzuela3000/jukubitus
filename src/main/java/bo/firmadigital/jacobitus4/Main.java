@@ -112,12 +112,12 @@ public class Main {
                         String[] parts = args[0].split("\\?");
                         if (parts.length == 2) {
                             JSONObject body = Request.splitQuery(parts[1]);
-                            App.run(true, true, OS.isMac(), body.getString("url"), body.getString("token"), body.getString("urlpost"));
+                            App.run(true, true, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
                         } else {
-                            App.run(true, true, OS.isMac(), args[0]);
+                            App.run(true, true, false, args[0]);
                         }
                     } else {
-                        App.run(true, true, OS.isMac());
+                        App.run(true, true, false);
                     }
                 } else {
                     if (args.length == 1) {
