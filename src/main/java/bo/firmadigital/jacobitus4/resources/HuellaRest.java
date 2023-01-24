@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4.resources;
 
 import bo.firmadigital.fingerprint.Capturar;
+import bo.firmadigital.jacobitus4.util.OS;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +26,6 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/huella")
 public class HuellaRest {
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     @GET
     @Path("/capturar")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -34,7 +33,7 @@ public class HuellaRest {
     public void capturar(@Suspended final AsyncResponse response) {
         JSONObject json = new JSONObject();
         try {
-            if (OS.contains("win")) {
+            if (OS.isWindows()) {
                 Capturar.capturar((byte[] image) -> {
                     try {
                         JSONObject datos = new JSONObject();

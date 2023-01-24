@@ -6,6 +6,7 @@
 package bo.firmadigital.token;
 
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.OS;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import java.io.File;
 import java.security.KeyStore;
@@ -33,13 +34,12 @@ public class SmartCard {
     private static JSONObject token = null;
 
     static {
-        String name = System.getProperty("os.name").toLowerCase();
-        if (name.contains("nux")) {
+        if (OS.isUnix()) {
             if (new File("/usr/lib/x86_64-linux-gnu/libpcsclite.so.1").exists()) {
                 System.setProperty("sun.security.smartcardio.library", "/usr/lib/x86_64-linux-gnu/libpcsclite.so.1");
             }
-        } else if (name.contains("mac")) {
-            if (System.getProperty("os.version").equals("10.16")) {
+        } else if (OS.isMac()) {
+            if (OS.version().equals("10.16")) {
                 System.setProperty("sun.security.smartcardio.library", "/System/Library/Frameworks/PCSC.framework/Versions/Current/PCSC");
             }
         }

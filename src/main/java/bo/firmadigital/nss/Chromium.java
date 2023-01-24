@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.nss;
 
+import bo.firmadigital.jacobitus4.util.OS;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +19,6 @@ import java.util.logging.Logger;
  * @author ADSIB
  */
 public class Chromium {
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     public static boolean registrarCertificadoLinux() {
         try {
             File chromium = new File(System.getProperty("user.home") + "/.pki/nssdb");
@@ -111,9 +110,9 @@ public class Chromium {
     }
 
     public static boolean registrarCertificado() {
-        if (OS.contains("nux")) {
+        if (OS.isUnix()) {
             return registrarCertificadoLinux();
-        } else if (OS.contains("mac")) {
+        } else if (OS.isMac()) {
             return registrarCertificatoMacOS();
         } else {
             return false;
@@ -121,7 +120,7 @@ public class Chromium {
     }
 
     public static boolean registrarCertificado(String pass) {
-        if (OS.contains("mac")) {
+        if (OS.isMac()) {
             return registrarCertificatoMacOS(pass);
         } else {
             return false;

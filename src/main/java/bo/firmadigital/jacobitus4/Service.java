@@ -119,7 +119,6 @@ public class Service extends Stage {
         Service window = this;
         this.setOnShown((WindowEvent t) -> {
             window.setAlwaysOnTop(true);
-            window.setAlwaysOnTop(false);
             passwordField.requestFocus();
         });
     }

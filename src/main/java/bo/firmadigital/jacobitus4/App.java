@@ -15,12 +15,14 @@ import bo.firmadigital.firmar.FirmarXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
+import bo.firmadigital.jacobitus4.util.OS;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.nss.Chromium;
 import bo.firmadigital.nss.Firefox;
 import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.GestorSlot;
 import bo.firmadigital.token.Slot;
+import bo.firmadigital.token.SmartCard;
 import bo.firmadigital.validar.Certificate;
 import bo.firmadigital.validar.DatosCertificado;
 import bo.firmadigital.validar.MagicBytes;
@@ -103,6 +105,7 @@ public class App extends Application {
     private CK_TOKEN_INFO tokenInfo;
     private static boolean servicio;
     private static boolean taskBar;
+    private static boolean taskBarEmulated;
     private static String url = null, token, urlPost;
     private static String param = null;
     private static Stage stage;
@@ -200,7 +203,8 @@ public class App extends Application {
         });
         MenuItem closeItem = new MenuItem("Cerrar");
         closeItem.setOnAction((ActionEvent e) -> {
-            if (servicio && !taskBar) {
+            if (servicio && (!taskBar || taskBarEmulated)) {
+                Platform.setImplicitExit(taskBarEmulated);
                 try {
                     Main.jettyServer.stop();
                     Main.jettyServer.destroy();
@@ -363,7 +367,7 @@ public class App extends Application {
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
             Firefox.registrarCertificado();
-            if (!Chromium.registrarCertificado() && System.getProperty("os.name").toLowerCase().contains("mac")) {
+            if (!Chromium.registrarCertificado() && OS.isMac()) {
                 ContrasenaMac contrasena = new ContrasenaMac(stage);
                 contrasena.showAndWait();
                 if (contrasena.getPass() == null) {
@@ -522,7 +526,8 @@ public class App extends Application {
             }
         }
         stage.setOnCloseRequest((WindowEvent e) -> {
-            if (servicio && !taskBar) {
+            if (servicio && (!taskBar || taskBarEmulated)) {
+                Platform.setImplicitExit(taskBarEmulated);
                 try {
                     Main.jettyServer.stop();
                     Main.jettyServer.destroy();
@@ -535,7 +540,9 @@ public class App extends Application {
         new Thread(registrarCertificado()).start();
         if (url == null) {
             if (param == null) {
-                if (!taskBar) {
+                if (taskBar) {
+                    SmartCard.cards();
+                } else {
                     new Thread(listarTokens()).start();
                 }
             } else {
@@ -945,22 +952,25 @@ public class App extends Application {
         });
     }
 
-    public static void run(boolean servicio, boolean taskBar) {
+    public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated) {
         App.servicio = servicio;
         App.taskBar = taskBar;
+        App.taskBarEmulated = taskBarEmulated;
         launch();
     }
 
-    public static void run(boolean servicio, boolean taskBar, String file) {
+    public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String file) {
         App.servicio = servicio;
         App.taskBar = taskBar;
+        App.taskBarEmulated = taskBarEmulated;
         App.param = file;
         launch();
     }
 
-    public static void run(boolean servicio, boolean taskBar, String url, String token, String urlPost) {
+    public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String url, String token, String urlPost) {
         App.servicio = servicio;
         App.taskBar = taskBar;
+        App.taskBarEmulated = taskBarEmulated;
         App.url = url;
         App.token = token;
         App.urlPost = urlPost;

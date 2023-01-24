@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
+import bo.firmadigital.jacobitus4.util.OS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,8 +29,6 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/usbdisk")
 public class FlashUsbRest {
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     @GET
     @Path("/serial")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -37,7 +36,7 @@ public class FlashUsbRest {
     public void capturar(@Suspended final AsyncResponse response) {
         JSONObject json = new JSONObject();
         try {
-            if (OS.contains("nux")) {
+            if (OS.isUnix()) {
                 Process p = Runtime.getRuntime().exec("lsblk --nodeps -o name,serial,type,tran");
                 JSONArray jsonArrayUsb = new JSONArray();
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));

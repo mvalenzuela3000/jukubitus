@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.OS;
 import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.TokenPKCS12;
 import java.io.BufferedInputStream;
@@ -41,7 +42,6 @@ import javafx.stage.Stage;
  * @author ADSIB
  */
 public class Configuracion extends Stage {
-    private static final String OS = System.getProperty("os.name").toLowerCase();
     private Config config;
     private CheckBox checkBox;
     private final CheckBox checkBoxPort2;
@@ -153,10 +153,10 @@ public class Configuracion extends Stage {
             if (config.getDriver() == null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Abrir Controlador");
-                if (OS.contains("win")) {
+                if (OS.isWindows()) {
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dll)", "*.dll");
                     fileChooser.getExtensionFilters().add(extFilter);
-                } else if (OS.contains("nux")) {
+                } else if (OS.isUnix()) {
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.so)", "*.so");
                     fileChooser.getExtensionFilters().add(extFilter);
                     FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Todos", "*.*", "*.*");

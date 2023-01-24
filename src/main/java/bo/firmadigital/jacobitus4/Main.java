@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.OS;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -37,7 +38,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
  */
 public class Main {
     public static Server jettyServer = new Server();
-    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     public static void main(String[] args) {
         Request req = new Request();
@@ -86,7 +86,7 @@ public class Main {
             try {
                 createServerConnectorHTTPS();
                 jettyServer.start();
-                if (java.awt.SystemTray.isSupported() && !(OS.contains("mac") || OS.contains("darwin"))) {
+                if (java.awt.SystemTray.isSupported()) {
                     java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
                     java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
                     java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
@@ -112,24 +112,24 @@ public class Main {
                         String[] parts = args[0].split("\\?");
                         if (parts.length == 2) {
                             JSONObject body = Request.splitQuery(parts[1]);
-                            App.run(true, true, body.getString("url"), body.getString("token"), body.getString("urlpost"));
+                            App.run(true, true, OS.isMac(), body.getString("url"), body.getString("token"), body.getString("urlpost"));
                         } else {
-                            App.run(true, true, args[0]);
+                            App.run(true, true, OS.isMac(), args[0]);
                         }
                     } else {
-                        App.run(true, true);
+                        App.run(true, true, OS.isMac());
                     }
                 } else {
                     if (args.length == 1) {
                         String[] parts = args[0].split("\\?");
                         if (parts.length == 2) {
                             JSONObject body = Request.splitQuery(parts[1]);
-                            App.run(true, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
+                            App.run(true, false, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
                         } else {
-                            App.run(true, false, args[0]);
+                            App.run(true, false, false, args[0]);
                         }
                     } else {
-                        App.run(true, false);
+                        App.run(true, OS.isDebian(), OS.isDebian());
                     }
                 }
             } catch (Exception ex) {
@@ -139,7 +139,7 @@ public class Main {
                 } catch (Exception ex2) {
                     Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex2);
                 }
-                App.run(false, false);
+                App.run(false, false, false);
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

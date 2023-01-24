@@ -1,6 +1,7 @@
 package bo.firmadigital.token;
 
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.OS;
 import bo.firmadigital.pkcs11.PKCS11;
 import java.io.*;
 import java.math.BigInteger;
@@ -27,7 +28,6 @@ public class GestorSlot {
     private Provider sunPKCS11;
     private String libreria;
     private final Map<Long, Slot> slots;
-    private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final String ARCH = System.getProperty("os.arch");
 
     private GestorSlot() {
@@ -50,11 +50,11 @@ public class GestorSlot {
      */
     public String getLib(String id) {
         BufferedReader br;
-        if (OS.contains("win")) {
+        if (OS.isWindows()) {
             br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("tokens.windows")));
-        } else if (OS.contains("nux")) {
+        } else if (OS.isUnix()) {
             br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("tokens.linux")));
-        } else if (OS.contains("mac")) {
+        } else if (OS.isMac()) {
             br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("tokens.macos")));
         } else {
             throw new RuntimeException("Sistema operativo incompatible.");

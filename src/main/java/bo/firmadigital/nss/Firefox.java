@@ -5,6 +5,7 @@
  */
 package bo.firmadigital.nss;
 
+import bo.firmadigital.jacobitus4.util.OS;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +19,6 @@ import java.util.logging.Logger;
  * @author ADSIB
  */
 public class Firefox {
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     public static boolean registrarCertificadoWindows() {
         try {
             File mozilla = new File(System.getenv("APPDATA") + "\\Mozilla\\Firefox\\Profiles");
@@ -125,10 +124,10 @@ public class Firefox {
     }
 
     public static boolean registrarCertificado() {
-        if (OS.contains("win")) {
+        if (OS.isWindows()) {
             return registrarCertificadoWindows();
         } else {
-            if (OS.contains("nux")) {
+            if (OS.isUnix()) {
                 return registrarCertificadoLinux();
             } else {
                 return false;
