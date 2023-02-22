@@ -127,9 +127,22 @@ public class GestorSlot {
                     throw new RuntimeException("No se encontro ningun token conectado.");
                 }
                 if (tokens.size() > 1) {
-                    throw new RuntimeException("Tokens de diferentes marcas conectados.");
+                    Map<String, String> librerias = new TreeMap<>();
+                    for (int i = 0; i < tokens.size(); i++) {
+                        if (tokens.get(i).getString("id").equals(SmartCard.ADSIB)) {
+                            librerias.put(SmartCard.ADSIB, getLib(SmartCard.ADSIB));
+                        }
+                        if (tokens.get(i).getString("id").equals(SmartCard.INDIA)) {
+                            librerias.put(SmartCard.INDIA, getLib(SmartCard.INDIA));
+                        }
+                    }
+                    if (librerias.size() == 1) {
+                        libreria = librerias.get(librerias.keySet().iterator().next());
+                    } else {
+                        throw new RuntimeException("Tokens de diferentes marcas conectados.");
+                    }
                 }
-                if (!tokens.isEmpty()) {
+                if (tokens.size() == 1) {
                     libreria = getLib(tokens.get(0).getString("id"));
                 }
             } else {

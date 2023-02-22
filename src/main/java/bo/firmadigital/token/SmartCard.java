@@ -32,6 +32,8 @@ import org.codehaus.jettison.json.JSONObject;
  */
 public class SmartCard {
     private static JSONObject token = null;
+    public static final String ADSIB = "3b9f958131fe9f006646530501001171df000000000013";
+    public static final String INDIA = "3b9f958131fe9f006646530501001171df000006000015";
 
     static {
         if (OS.isUnix()) {
@@ -52,11 +54,14 @@ public class SmartCard {
             List<CardTerminal> terminals = factory.terminals().list();
             for (CardTerminal terminal : terminals) {
                 Card card = terminal.connect("*");
-                token = new JSONObject();
+                JSONObject token = new JSONObject();
                 token.put("name", obtenerNombreToken(terminal.getName()));
                 token.put("id", hex(card.getATR().getBytes()));
                 if (!res.contains(token)) {
                     res.add(token);
+                    if (SmartCard.token == null && (token.getString("id").equals(ADSIB) || token.getString("id").equals(INDIA))) {
+                        SmartCard.token = token;
+                    }
                 }
             }
         } catch (NoSuchAlgorithmException | CardException | JSONException ex) {
