@@ -23,6 +23,15 @@ public final class Base64StreamParser {
     public Base64StreamParser(InputStream is, byte[] buff) throws IOException {
         byte surp[] = new byte[size - buff.length];
         int len = is.read(surp);
+        while (len > 0 && len < surp.length) {
+            byte fixed[] = new byte[surp.length - len];
+            int l = is.read(fixed);
+            if (l == 0) {
+                break;
+            }
+            System.arraycopy(fixed, 0, surp, len, l);
+            len += l;
+        }
         byte fileContent[] = new byte[size];
         System.arraycopy(buff, 0, fileContent, 0, buff.length);
         if (len > 0) {
