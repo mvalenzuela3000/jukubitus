@@ -107,6 +107,11 @@ public class TokenHsmCloud implements Token {
     }
 
     @Override
+    public void modificarPinSo(String osPin, String newPin) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public void unlockPin(String osPin, String newPin) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

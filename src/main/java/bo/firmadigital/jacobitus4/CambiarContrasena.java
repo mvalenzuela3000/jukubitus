@@ -76,6 +76,8 @@ public class CambiarContrasena extends Stage {
                             String oldPass = oldPasswordField.getText();
                             if (oldPass.startsWith("@unlock:")) {
                                 token.unlockPin(oldPass.split("@unlock:")[1], pass);
+                            } else if (oldPass.startsWith("@so:")) {
+                                token.modificarPinSo(oldPass.split("@so:")[1], pass);
                             } else {
                                 token.modificarPin(oldPass, pass);
                             }

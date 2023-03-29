@@ -38,6 +38,14 @@ public interface Token {
     public void modificarPin(String oldPin, String newPin);
 
     /**
+     * Esta funci&oacute;n modifica la clave (SO PIN) del token.
+     *
+     * @param osPin Clave del SO del token.
+     * @param newPin Nueva clave SO del token.
+     */
+    public void modificarPinSo(String osPin, String newPin);
+
+    /**
      * Esta funci&oacute;n desbloquea la clave (PIN) del token.
      *
      * @param osPin Clave del SO del token.

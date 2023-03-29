@@ -119,6 +119,10 @@ public class Config {
     }
 
     public File getToken() {
+        token = new File(user, "softoken.p12");
+        if (!token.exists()) {
+            token = null;
+        }
         return token;
     }
 
