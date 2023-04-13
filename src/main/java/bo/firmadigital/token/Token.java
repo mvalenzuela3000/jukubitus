@@ -54,6 +54,13 @@ public interface Token {
     public void unlockPin(String osPin, String newPin);
 
     /**
+     * Esta funci&oacute;n verifica la clave del SO del token.
+     *
+     * @param osPin Clave del SO del token.
+     */
+    public void test(String osPin);
+
+    /**
      * Genera para de claves
      * @param clavesId Label para identificar el par de claves
      * @param pin Clave de acceso

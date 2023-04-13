@@ -29,7 +29,6 @@ import org.apache.xml.security.utils.resolver.ResourceResolverException;
 import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -107,7 +106,11 @@ public class FirmarXml implements Firmar {
             }
             XMLSignature signature = new XMLSignature(xml, null, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
             parent.appendChild(signature.getElement());
-            signature.addDocument("", transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+            if (node == null) {
+                signature.addDocument("", transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+            } else {
+                signature.addDocument("#" + node, transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+            }
             X509Certificate cert = token.obtenerCertificado(label);
             cert.checkValidity();
             signature.addKeyInfo(cert);
@@ -125,8 +128,6 @@ public class FirmarXml implements Firmar {
                         return xml.getElementsByTagName(nodo).getLength() == 1;
                     }
                 });
-                Node value = signature.getElement().getElementsByTagName("Reference").item(0).getAttributes().getNamedItem("URI");
-                value.setNodeValue("#" + node);
             }
             signature.sign(token.obtenerClavePrivada(label));
             XMLUtils.outputDOMc14nWithComments(xml, os);

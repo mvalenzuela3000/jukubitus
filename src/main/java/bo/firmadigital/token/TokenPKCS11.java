@@ -254,6 +254,33 @@ public class TokenPKCS11 implements Token {
         }
     }
 
+    @Override
+    public void test(String osPin) {
+        String lib = null;
+        try {
+            String[] conf;
+            try (FileInputStream fis = new FileInputStream(slot.getConfiguracion())) {
+                conf = new String(fis.readAllBytes()).split("\n");
+            }
+            for (String line : conf) {
+                if (line.trim().startsWith("library")) {
+                    lib = line.split("=")[1].trim();
+                    break;
+                }
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        if (lib == null) {
+            throw new RuntimeException("No se pudo identificar el controlador.");
+        } else {
+            String res = new ChangePinJNI().test(lib, (int)slot.getSlotID(), osPin);
+            if (!res.equals("Ok")) {
+                throw new RuntimeException(res);
+            }
+        }
+    }
+
     /**
      * Esta funci&oacute;n modifica el identificador de un par de claves en el
      * token.

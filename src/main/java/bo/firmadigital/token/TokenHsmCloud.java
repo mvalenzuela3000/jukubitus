@@ -117,6 +117,11 @@ public class TokenHsmCloud implements Token {
     }
 
     @Override
+    public void test(String osPin) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public PublicKey generarClaves(String clavesId, String pin, int slotNumber) throws GeneralSecurityException {
         try {
             JSONObject body = new JSONObject();

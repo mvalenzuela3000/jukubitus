@@ -99,7 +99,7 @@ public class Contrasena extends Stage {
         if (nodeField == null){
             return null;
         }
-        if (nodeField.getText().trim().endsWith("")) {
+        if (nodeField.getText().trim().equals("")) {
             return null;
         }
         return nodeField.getText();

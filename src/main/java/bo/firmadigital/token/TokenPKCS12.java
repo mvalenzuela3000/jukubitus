@@ -185,6 +185,11 @@ public class TokenPKCS12 implements Token {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void test(String osPin) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     /**
      * Esta funci&oacute;n modifica el identificador de un par de claves en el
      * token.
