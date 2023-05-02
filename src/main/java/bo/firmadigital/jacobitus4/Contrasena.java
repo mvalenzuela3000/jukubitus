@@ -64,7 +64,12 @@ public class Contrasena extends Stage {
                 nodeField = new TextField();
                 vBox.getChildren().add(nodeField);
                 nodeField.setPromptText("Nodo");
-                height = 130;
+                CheckBox checkBoxEnveloped = new CheckBox("Forzar enveloped.");
+                vBox.getChildren().add(checkBoxEnveloped);
+                checkBoxEnveloped.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    bloquea = newValue;
+                });
+                height = 150;
                 break;
         }
         vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));

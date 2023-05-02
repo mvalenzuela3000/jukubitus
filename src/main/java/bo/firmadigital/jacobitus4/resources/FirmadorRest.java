@@ -563,6 +563,7 @@ public class FirmadorRest {
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {String} file Archivo XML en base64 que se desea firmar.
      * @apiParam {String} [node] Nodo del XML que se desea firmar.
+     * @apiParam {Boolean} [enveloped] Requerir modo enveloped aun con nodo.
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -592,6 +593,7 @@ public class FirmadorRest {
             Long slot = null;
             byte[] file = null;
             String node = null;
+            Boolean enveloped = false;
             JsonFactory factory = new ObjectMapper().getJsonFactory();
             JsonParser jsonReader = factory.createJsonParser(body);
             try {
@@ -625,6 +627,9 @@ public class FirmadorRest {
                         case "node":
                             node = jsonReader.readValueAs(String.class);
                             break;
+                        case "enveloped":
+                            enveloped = jsonReader.readValueAs(Boolean.class);
+                            break;
                         default:
                             Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
                     }
@@ -651,7 +656,7 @@ public class FirmadorRest {
                         firmar = FirmarXml.getInstance(slot, alias, pin, node);
                     }
                     try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
-                        firmar.firmar(is, out);
+                        firmar.firmar(is, out, enveloped);
                     }
                     datos.put("xml", Base64.getEncoder().encodeToString(out.toByteArray()));
                 }

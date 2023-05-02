@@ -32,7 +32,7 @@ public class EstadoRest {
      * {
      *     "datos": {
      *         "compilacion": 3100,
-     *         "api_version": "1.0.2"
+     *         "api_version": "1.1.0"
      *     },
      *     "finalizado": true,
      *     "mensaje": "Servicio ejecutandose correctamente"
@@ -48,7 +48,7 @@ public class EstadoRest {
         try {
             JSONObject datos = new JSONObject();
             datos.put("compilacion", 3100);
-            datos.put("api_version", "1.0.2");
+            datos.put("api_version", "1.1.0");
             json.put("datos", datos);
             json.put("finalizado", true);
             json.put("mensaje", "Servicio ejecutandose correctamente");
