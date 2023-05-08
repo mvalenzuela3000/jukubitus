@@ -110,12 +110,18 @@ public class FirmarXml implements Firmar {
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 Document xml = builder.parse(is);
 
-                DOMSignContext signContext = new DOMSignContext(token.obtenerClavePrivada(label), xml.getDocumentElement());
+                DOMSignContext signContext;
                 XMLSignatureFactory sigFactory = XMLSignatureFactory.getInstance("DOM");
                 Reference ref;
                 if (node == null) {
+                    signContext = new DOMSignContext(token.obtenerClavePrivada(label), xml.getDocumentElement());
                     ref = sigFactory.newReference("", sigFactory.newDigestMethod(DigestMethod.SHA256, null), Collections.singletonList(sigFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)), null, null);
                 } else {
+                    NodeList nodos = xml.getElementsByTagName(node);
+                    if (nodos.getLength() != 1) {
+                        throw new IOException("Error al identificar el nodo: " + node);
+                    }
+                    signContext = new DOMSignContext(token.obtenerClavePrivada(label), nodos.item(0).getParentNode());
                     signContext.setURIDereferencer((URIReference uriReference, XMLCryptoContext context) -> {
                         Node data = xml.getElementsByTagName(uriReference.getURI().replace("#", "")).item(0);
                         return new DOMSubTreeData(data, false);
