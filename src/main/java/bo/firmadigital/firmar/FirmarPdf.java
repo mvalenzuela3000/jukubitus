@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -55,7 +57,14 @@ public class FirmarPdf implements Firmar {
         this.label = label;
         this.pass = pass;
         config = Config.getInstance();
-        if (imageBase64 != null) {
+        if (imageBase64 == null) {
+            try {
+                byte[] bytes = this.getClass().getClassLoader().getResourceAsStream("sign.png").readAllBytes();
+                imageData = ImageDataFactory.create(bytes, false);
+            } catch (IOException ex) {
+                Logger.getLogger(FirmarPdf.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
             byte[] bytes = Base64.getDecoder().decode(imageBase64);
             imageData = ImageDataFactory.create(bytes, false);
         }
@@ -110,8 +119,8 @@ public class FirmarPdf implements Firmar {
                 appearance.setSignatureGraphic(imageData);
             }
             DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
-            appearance.setLayer2Text("Firmado por " + cert.getNombreComunSubject() + "\n" + cert.getCargoSubject());
-            rect = new Rectangle(x, y, 200, 50);
+            appearance.setLayer2Text(cert.getNombreComunSubject() + "\n" + cert.getCargoSubject());
+            rect = new Rectangle(x, y, 250, 20);
         }
         appearance.setPageRect(rect);
         ITSAClient tsc = null;
