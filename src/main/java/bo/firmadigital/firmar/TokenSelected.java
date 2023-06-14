@@ -15,12 +15,22 @@ import org.codehaus.jettison.json.JSONArray;
  * @author ADSIB
  */
 public class TokenSelected {
+    private Slot[] slots;
     private Slot slot;
     private String alias;
     private String pin;
     private String ci;
     private JSONArray files;
+    private JSONArray filesJson;
     private boolean shown;
+
+    public Slot[] getSlots() {
+        return slots;
+    }
+
+    public void setSlots(Slot[] slots) {
+        this.slots = slots;
+    }
 
     public Slot getSlot() {
         return slot;
@@ -60,6 +70,14 @@ public class TokenSelected {
 
     public void setFiles(JSONArray files) {
         this.files = files;
+    }
+
+    public JSONArray getFilesJson() {
+        return filesJson;
+    }
+
+    public void setFilesJson(JSONArray files) {
+        this.filesJson = files;
     }
 
     public boolean isShown() {

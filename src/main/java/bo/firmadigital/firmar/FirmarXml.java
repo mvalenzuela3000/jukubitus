@@ -17,9 +17,7 @@ import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.URIReference;
 import javax.xml.crypto.XMLCryptoContext;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
-import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
-import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.SignedInfo;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -62,6 +60,8 @@ public class FirmarXml implements Firmar {
     private final String label;
     private final String pass;
     private final String node;
+    private String messageDigestAlgorithm = MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256;
+    private String signatureMethodAlgorithm = XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256;
 
     static {
         Init.init();
@@ -96,7 +96,17 @@ public class FirmarXml implements Firmar {
                 }
             }
         }
+        firmarXml.messageDigestAlgorithm = MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256;
+        firmarXml.signatureMethodAlgorithm = XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256;
         return firmarXml;
+    }
+
+    public void setMessageDigestAlgorithm(String messageDigestAlgorithm) {
+        this.messageDigestAlgorithm = messageDigestAlgorithm;
+    }
+
+    public void setSignatureMethodAlgorithm(String signatureMethodAlgorithm) {
+        this.signatureMethodAlgorithm = signatureMethodAlgorithm;
     }
 
     @Override
@@ -115,7 +125,7 @@ public class FirmarXml implements Firmar {
                 Reference ref;
                 if (node == null) {
                     signContext = new DOMSignContext(token.obtenerClavePrivada(label), xml.getDocumentElement());
-                    ref = sigFactory.newReference("", sigFactory.newDigestMethod(DigestMethod.SHA256, null), Collections.singletonList(sigFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)), null, null);
+                    ref = sigFactory.newReference("", sigFactory.newDigestMethod(messageDigestAlgorithm, null), Collections.singletonList(sigFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)), null, null);
                 } else {
                     NodeList nodos = xml.getElementsByTagName(node);
                     if (nodos.getLength() != 1) {
@@ -126,9 +136,9 @@ public class FirmarXml implements Firmar {
                         Node data = xml.getElementsByTagName(uriReference.getURI().replace("#", "")).item(0);
                         return new DOMSubTreeData(data, false);
                     });
-                    ref = sigFactory.newReference("#" + node, sigFactory.newDigestMethod(DigestMethod.SHA256, null), Collections.singletonList(sigFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)), null, null);
+                    ref = sigFactory.newReference("#" + node, sigFactory.newDigestMethod(messageDigestAlgorithm, null), Collections.singletonList(sigFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)), null, null);
                 }
-                SignedInfo signedInfo = sigFactory.newSignedInfo(sigFactory.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE, (C14NMethodParameterSpec) null), sigFactory.newSignatureMethod(SignatureMethod.RSA_SHA256, null), Collections.singletonList(ref));
+                SignedInfo signedInfo = sigFactory.newSignedInfo(sigFactory.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE, (C14NMethodParameterSpec) null), sigFactory.newSignatureMethod(signatureMethodAlgorithm, null), Collections.singletonList(ref));
                 KeyInfoFactory keyInfoFactory = sigFactory.getKeyInfoFactory();
                 X509Data x509Data = keyInfoFactory.newX509Data(Collections.singletonList(token.obtenerCertificado(label)));
                 KeyInfo keyInfo = keyInfoFactory.newKeyInfo(Collections.singletonList(x509Data));
@@ -163,12 +173,12 @@ public class FirmarXml implements Firmar {
                     }
                     parent = (Element)nodos.item(0).getParentNode();
                 }
-                XMLSignature signature = new XMLSignature(xml, null, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
+                XMLSignature signature = new XMLSignature(xml, null, signatureMethodAlgorithm);
                 parent.appendChild(signature.getElement());
                 if (node == null) {
-                    signature.addDocument("", transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+                    signature.addDocument("", transforms, messageDigestAlgorithm);
                 } else {
-                    signature.addDocument("#" + node, transforms, MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+                    signature.addDocument("#" + node, transforms, messageDigestAlgorithm);
                 }
                 X509Certificate cert = token.obtenerCertificado(label);
                 cert.checkValidity();

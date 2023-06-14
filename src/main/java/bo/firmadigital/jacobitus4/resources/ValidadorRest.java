@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -153,6 +154,7 @@ public class ValidadorRest {
                     if (cert.getOCSP().getDate() != null) {
                         certificado.put("revocado", dateFormat.format(cert.getOCSP().getDate()));
                     }
+                    certificado.put("numeroSerie", ((X509Certificate)cert.getCertificate()).getSerialNumber().toString(16));
                     firma.put("certificado", certificado);
                     firmas.put(firma);
                 }

@@ -8,7 +8,9 @@ package bo.firmadigital.jacobitus4;
 import bo.firmadigital.firmar.FirmarJws;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.TokenSelected;
+import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.token.GestorSlot;
+import bo.firmadigital.token.Slot;
 import bo.firmadigital.token.Token;
 import bo.firmadigital.validar.DatosCertificado;
 import java.io.ByteArrayInputStream;
@@ -17,6 +19,7 @@ import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.List;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -70,11 +73,27 @@ public class Service extends Stage {
         root.setHgap(5);
         root.setVgap(5);
         root.setPadding(new Insets(5, 5, 5, 5));
-        Scene scene = new Scene(root, 300, 175);
+        Scene scene = new Scene(root, 300, 175 + (tokenSelected.getSlot() == null ? 27 : 0));
         setScene(scene);
+        int r = 0;
+        if (tokenSelected.getSlot() == null) {
+            ObservableList<DetalleToken> tokens = FXCollections.observableArrayList();
+            for (Slot slot : tokenSelected.getSlots()) {
+                tokens.add(new DetalleToken(slot.detalleToken()));
+            }
+            ChoiceBox tokensChoiceBox = new ChoiceBox(tokens);
+            tokensChoiceBox.prefWidthProperty().bind(root.widthProperty());
+            tokensChoiceBox.setPrefHeight(27);
+            tokensChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> ov, Number t, Number t1) -> {
+                tokenSelected.setSlot(GestorSlot.getInstance().obtenerSlot(tokens.get(ov.getValue().intValue()).getSlot()));
+            });
+            tokensChoiceBox.getSelectionModel().selectFirst();
+            root.add(tokensChoiceBox, 0, 0, 2, 1);
+            r++;
+        }
         passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
-        root.add(passwordField, 0, 0, 1, 1);
+        root.add(passwordField, 0, 0 + r, 1, 1);
         button = new Button("Actualizar");
         AnchorPane anchorPane = new AnchorPane();
         AnchorPane.setTopAnchor(button, 0d);
@@ -82,23 +101,23 @@ public class Service extends Stage {
         AnchorPane.setBottomAnchor(button, 0d);
         AnchorPane.setRightAnchor(button, 0d);
         anchorPane.getChildren().add(button);
-        root.add(anchorPane, 1, 0, 1, 1);
+        root.add(anchorPane, 1, 0 + r, 1, 1);
         certificates = FXCollections.observableArrayList();
         aliasChoiceBox = new ChoiceBox(certificates);
         aliasChoiceBox.prefWidthProperty().bind(root.widthProperty());
         aliasChoiceBox.setPrefHeight(55);
-        root.add(aliasChoiceBox, 0, 1, 2, 1);
-        estado = new Label("Archivos: 0 de " + tokenSelected.getFiles().length());
-        root.add(estado, 0, 2, 2, 1);
+        root.add(aliasChoiceBox, 0, 1 + r, 2, 1);
+        estado = new Label("Archivos: 0 de " + (tokenSelected.getFiles().length() + (tokenSelected.getFilesJson() == null ? 0 : tokenSelected.getFilesJson().length())));
+        root.add(estado, 0, 2 + r, 2, 1);
         progressBar = new ProgressBar();
         progressBar.prefWidthProperty().bind(root.widthProperty());
-        root.add(progressBar, 0, 3, 2, 1);
+        root.add(progressBar, 0, 3 + r, 2, 1);
         buttonFirmar = new Button("Firmar");
         buttonFirmar.setDisable(true);
         buttonFirmar.prefWidthProperty().bind(root.widthProperty());
-        root.add(buttonFirmar, 0, 4, 2, 1);
+        root.add(buttonFirmar, 0, 4 + r, 2, 1);
         message = new Label("");
-        root.add(message, 0, 5, 2, 1);
+        root.add(message, 0, 5 + r, 2, 1);
 
         passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
             if (ev.getCode() == KeyCode.ENTER) {
@@ -133,17 +152,22 @@ public class Service extends Stage {
             @Override
             protected Object call() throws Exception {
                 final JSONArray files = tokenSelected.getFiles();
-                if (files.length() == 0) {
+                final JSONArray filesJson = tokenSelected.getFilesJson() == null ? new JSONArray() : tokenSelected.getFilesJson();
+                if (files.length() + filesJson.length() == 0) {
                     updateProgress(100, 100);
                 } else {
                     Token token = GestorSlot.getInstance().obtenerSlot(tokenSelected.getSlot().getSlotID()).getToken();
                     token.iniciar(tokenSelected.getPin());
                     JSONArray arr = new JSONArray();
-                    for (int i = 0; i < files.length(); i++) {
+                    int i;
+                    for (i = 0; i < files.length(); i++) {
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                             String[] base64 = files.getJSONObject(i).getString("base64").split("base64,");
                             byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
                             switch (format) {
+                                case "both":
+                                    FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    break;
                                 case "pades":
                                     FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                                     break;
@@ -159,15 +183,36 @@ public class Service extends Stage {
                             arr.put(obj);
                             final int a = i + 1;
                             Platform.runLater(() -> {
-                                estado.setText("Archivos: " + a + " de " + files.length());
+                                estado.setText("Archivos: " + a + " de " + (files.length() + filesJson.length()));
                             });
-                            updateProgress(a, files.length());
+                            updateProgress(a, files.length() + filesJson.length());
                         } catch (RuntimeException ex) {
                             token.salir();
                             throw new CustomException(ex.getMessage());
                         }
                     }
                     tokenSelected.setFiles(arr);
+                    JSONArray arrJson = new JSONArray();
+                    for (int j = 0; j < filesJson.length(); j++) {
+                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                            String[] base64 = filesJson.getJSONObject(j).getString("base64").split("base64,");
+                            byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
+                            FirmarJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                            JSONObject obj = new JSONObject();
+                            obj.put("name", filesJson.getJSONObject(j).getString("name"));
+                            obj.put("base64", Base64.getEncoder().encodeToString(out.toByteArray()));
+                            arrJson.put(obj);
+                            final int a = i + j + 1;
+                            Platform.runLater(() -> {
+                                estado.setText("Archivos: " + a + " de " + (files.length() + filesJson.length()));
+                            });
+                            updateProgress(a, files.length() + filesJson.length());
+                        } catch (RuntimeException ex) {
+                            token.salir();
+                            throw new CustomException(ex.getMessage());
+                        }
+                    }
+                    tokenSelected.setFilesJson(arrJson);
                     token.salir();
                 }
                 return true;
@@ -232,6 +277,23 @@ public class Service extends Stage {
     private class CustomException extends RuntimeException {
         public CustomException(String message) {
             super(message);
+        }
+    }
+
+    private class DetalleToken {
+        private final CK_TOKEN_INFO info;
+
+        public DetalleToken(CK_TOKEN_INFO info) {
+            this.info = info;
+        }
+
+        public long getSlot() {
+            return info.getSlot();
+        }
+
+        @Override
+        public String toString() {
+            return info.getLabel();
         }
     }
 }

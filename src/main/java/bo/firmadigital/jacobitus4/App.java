@@ -985,6 +985,7 @@ public class App extends Application {
             tokenSelected.setSlot(slot);
             tokenSelected.setCI(ci);
             tokenSelected.setFiles(files);
+            tokenSelected.setFilesJson(null);
             Service service = new Service(stage, tokenSelected, "pades");
             service.showAndWait();
             synchronized(tokenSelected) {
@@ -1003,7 +1004,28 @@ public class App extends Application {
             tokenSelected.setSlot(slot);
             tokenSelected.setCI(ci);
             tokenSelected.setFiles(files);
+            tokenSelected.setFilesJson(null);
             Service service = new Service(stage, tokenSelected, "jws");
+            service.showAndWait();
+            synchronized(tokenSelected) {
+                tokenSelected.notify();
+            }
+        });
+        tokenSelected.showAndWait();
+        return tokenSelected;
+    }
+
+    public static TokenSelected service(Slot[] slots, String ci, JSONArray pdfs, JSONArray jsons) {
+        if (tokenSelected.isShown()) {
+            throw new RuntimeException("Ya se tiene una solicitud de firma pendiente.");
+        }
+        Platform.runLater(() -> {
+            tokenSelected.setSlot(null);
+            tokenSelected.setSlots(slots);
+            tokenSelected.setCI(ci);
+            tokenSelected.setFiles(pdfs);
+            tokenSelected.setFilesJson(jsons);
+            Service service = new Service(stage, tokenSelected, "both");
             service.showAndWait();
             synchronized(tokenSelected) {
                 tokenSelected.notify();

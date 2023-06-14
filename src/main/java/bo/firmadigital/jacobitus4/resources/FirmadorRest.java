@@ -9,6 +9,8 @@ import bo.firmadigital.firmar.Firmar;
 import bo.firmadigital.firmar.FirmarPKCS7;
 import bo.firmadigital.firmar.FirmarPdf;
 import bo.firmadigital.firmar.FirmarXml;
+import bo.firmadigital.firmar.TokenSelected;
+import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
 import bo.firmadigital.jacobitus4.util.Base64StreamParser;
@@ -52,6 +54,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.apache.xml.security.algorithms.MessageDigestAlgorithm;
+import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
@@ -563,6 +568,8 @@ public class FirmadorRest {
      * @apiParam {String} alias Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.
      * @apiParam {String} file Archivo XML en base64 que se desea firmar.
      * @apiParam {String} [node] Nodo del XML que se desea firmar.
+     * @apiParam {String} [digest] Algoritmo utilizado para el digest por defecto SHA256.
+     * @apiParam {String} [signatureAlgorithm] Algoritmo utilizado para el digest de la firma por RCA por defecto SHA256.
      * @apiParam {Boolean} [enveloped] Requerir modo enveloped aun con nodo.
      *
      * @apiParamExample {json} Request-Example:
@@ -594,6 +601,8 @@ public class FirmadorRest {
             byte[] file = null;
             String node = null;
             Boolean enveloped = false;
+            String digest = null;
+            String signatureAlgorithm = null;
             JsonFactory factory = new ObjectMapper().getJsonFactory();
             JsonParser jsonReader = factory.createJsonParser(body);
             try {
@@ -627,6 +636,12 @@ public class FirmadorRest {
                         case "node":
                             node = jsonReader.readValueAs(String.class);
                             break;
+                        case "digest":
+                            digest = jsonReader.readValueAs(String.class);
+                            break;
+                        case "signatureAlgorithm":
+                            signatureAlgorithm = jsonReader.readValueAs(String.class);
+                            break;
                         case "enveloped":
                             enveloped = jsonReader.readValueAs(Boolean.class);
                             break;
@@ -654,6 +669,36 @@ public class FirmadorRest {
                         firmar = FirmarXml.getInstance(slot, alias, pin);
                     } else {
                         firmar = FirmarXml.getInstance(slot, alias, pin, node);
+                    }
+                    if (digest != null) {
+                        switch (digest.toUpperCase()) {
+                            case "SHA1":
+                                firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA1);
+                                break;
+                            case "SHA256":
+                                firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+                                break;
+                            case "SHA512":
+                                firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA512);
+                                break;
+                            default:
+                                throw new GeneralSecurityException("Algoritmos soportado para el digest SHA1, SHA256 y SHA512");
+                        }
+                    }
+                    if (signatureAlgorithm != null) {
+                        switch (signatureAlgorithm.toUpperCase()) {
+                            case "SHA1":
+                                firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA1);
+                                break;
+                            case "SHA256":
+                                firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
+                                break;
+                            case "SHA512":
+                                firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA512);
+                                break;
+                            default:
+                                throw new GeneralSecurityException("Algoritmos soportado para el digest de la firma SHA1, SHA256 y SHA512");
+                        }
                     }
                     try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
                         firmar.firmar(is, out, enveloped);
@@ -782,5 +827,79 @@ public class FirmadorRest {
             }
         }
         return json.toString();
+    }
+
+    /**
+     * @api {post} /api/token/sign Firma documentos pdf o json en bloque.
+     * @apiGroup Sign
+     * @apiVersion 1.0.0
+     *
+     * @apiParam {Array} [pdf] El array de documentos PDF agrupados por id y pdf
+     * @apiParam {String} pdf.base64 El documento PDF en Base64
+     * @apiParam {String} pdf.name El identificado único para la solicitud
+     * @apiParam {Array} [json] El array de documentos JSON agrupados por id y json
+     * @apiParam {String} json.base64 El documento JSON en Base64
+     * @apiParam {String} json.name El identificado único para la solicitud
+     * @apiParam {String} [ci] El número de documento de identidad
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *     "pdf":[{
+     *         "base64":"data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....",
+     *         "name":"22949.pdf"
+     *     }],
+     *     "json":[{
+     *         "base64":"data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....",
+     *         "name":"22950.pdf"
+     *     }],
+     *     "ci":"6817702"
+     * }
+     */
+    @POST
+    @Path("/sign")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sign(String body) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject req = new JSONObject(body);
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            Slot[] slots = gestorSlot.listarSlots(true);
+            TokenSelected dt;
+            JSONArray pdfs, jsons;
+            if (req.has("pdf")) {
+                pdfs = req.getJSONArray("pdf");
+            } else {
+                pdfs = new JSONArray();
+            }
+            if (req.has("json")) {
+                jsons = req.getJSONArray("json");
+            } else {
+                jsons = new JSONArray();
+            }
+            if (pdfs.length() + jsons.length() == 0) {
+                throw new RuntimeException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
+            }
+            if (req.has("ci")) {
+                dt = App.service(slots, req.getString("ci"), pdfs, jsons);
+            } else {
+                dt = App.service(slots, null, pdfs, jsons);
+            }
+            if (dt.getAlias() != null && dt.getPin() != null) {
+                json.put("files", dt.getFiles());
+                json.put("filesJson", dt.getFilesJson());
+                return Response.ok(json.toString()).build();
+            } else {
+                json.put("message", "Se canceló la firma del documento");
+                return Response.status(400).entity(json.toString()).type(MediaType.APPLICATION_JSON).build();
+            }
+        } catch (JSONException | RuntimeException ex) {
+            try {
+                json.put("message", ex.getMessage());
+            } catch (JSONException e) {
+                Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
+            }
+            return Response.status(500).entity(json.toString()).type(MediaType.APPLICATION_JSON).build();
+        }
     }
 }
