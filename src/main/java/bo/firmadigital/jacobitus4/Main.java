@@ -93,6 +93,10 @@ public class Main {
                     trayIcon.addActionListener((ActionEvent e) -> {
                         App.show();
                     });
+                    java.awt.MenuItem showItem = new java.awt.MenuItem("Abrir");
+                    showItem.addActionListener(event -> {
+                        App.show();
+                    });
                     java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
                     exitItem.addActionListener(event -> {
                         try {
@@ -105,6 +109,7 @@ public class Main {
                         tray.remove(trayIcon);
                     });
                     final java.awt.PopupMenu popup = new java.awt.PopupMenu();
+                    popup.add(showItem);
                     popup.add(exitItem);
                     trayIcon.setPopupMenu(popup);
                     tray.add(trayIcon);
