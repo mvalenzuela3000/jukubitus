@@ -12,10 +12,10 @@ import bo.firmadigital.jacobitus.firmador.FirmarJws;
 import bo.firmadigital.jacobitus.firmador.FirmarPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmarPdf;
 import bo.firmadigital.jacobitus.firmador.FirmarXml;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
-import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.nss.Chromium;
 import bo.firmadigital.utiles.nss.Firefox;
@@ -26,6 +26,7 @@ import bo.firmadigital.jacobitus.comun.token.SmartCard;
 import bo.firmadigital.jacobitus.validador.Certificate;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus.validador.MagicBytes;
+import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
@@ -51,7 +52,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -357,7 +357,12 @@ public class App extends Application {
             Pdf pdf = new Pdf(stage);
             pdf.showAndWait();
             if (pdf.getPath() != null) {
-                tableFile.getItems().add(new ValidadorPdf(new File(pdf.getPath())));
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                tableFile.getItems().add(new ValidadorPdf(new File(pdf.getPath()), opciones));
             }
         });
         pdfMenu.getItems().addAll(nuevoItem);
@@ -622,16 +627,21 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
-                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i))));
+                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i)), opciones));
                     } else if (files.get(i).getName().endsWith(".docx")) {
-                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i))));
+                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i)), opciones));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
-                        certs.add(new ValidadorPdf(files.get(i)));
+                        certs.add(new ValidadorPdf(files.get(i), opciones));
                     } else {
-                        certs.add(new ValidadorPKCS7(files.get(i)));
+                        certs.add(new ValidadorPKCS7(files.get(i), opciones));
                     }
                     updateProgress(i + 1, files.size());
                 }
@@ -653,6 +663,12 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
                 StringBuilder errores = new StringBuilder();
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
@@ -672,7 +688,7 @@ public class App extends Application {
                                 firmar.firmar(is, os, bloquear);
                             }
                             updateProgress(i + 1, files.size());
-                            tableFile.getItems().set(i, new ValidadorPdf(out));
+                            tableFile.getItems().set(i, new ValidadorPdf(out, opciones));
                         } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
                             errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
@@ -703,21 +719,27 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (MagicBytes.PDF.is(files.get(i))) {
-                        certs.add(new ValidadorPdf(files.get(i)));
+                        certs.add(new ValidadorPdf(files.get(i), opciones));
                     } else {
                         if (MagicBytes.XML.is(files.get(i))) {
-                            certs.add(new ValidadorXml(files.get(i)));
+                            certs.add(new ValidadorXml(files.get(i), opciones));
                         } else {
                             if (MagicBytes.P7S.is(files.get(i))) {
-                                certs.add(new ValidadorPKCS7(files.get(i)));
+                                certs.add(new ValidadorPKCS7(files.get(i), opciones));
                             } else {
                                 if (MagicBytes.isJWS(files.get(i))) {
-                                    certs.add(new ValidadorJws(files.get(i)));
+                                    certs.add(new ValidadorJws(files.get(i), opciones));
                                 } else {
-                                    certs.add(new ValidadorPKCS7(files.get(i)));
+                                    certs.add(new ValidadorPKCS7(files.get(i), opciones));
                                 }
                             }
                         }
@@ -746,6 +768,12 @@ public class App extends Application {
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
+                    Config config = Config.getInstance();
+                    Opciones opciones = new Opciones();
+                    opciones.setProxyHabilitado(config.isProxyEnabled());
+                    opciones.setServidorProxy(config.getProxyIP());
+                    opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                    
                     Firmar firmar = FirmarPKCS7.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
@@ -753,7 +781,7 @@ public class App extends Application {
                             firmar.firmar(is, os);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorPKCS7(out));
+                        tableFile.getItems().set(i, new ValidadorPKCS7(out, opciones));
                     }
                 }
                 return true;
@@ -777,6 +805,12 @@ public class App extends Application {
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
+                    Config config = Config.getInstance();
+                    Opciones opciones = new Opciones();
+                    opciones.setProxyHabilitado(config.isProxyEnabled());
+                    opciones.setServidorProxy(config.getProxyIP());
+                    opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
                     Firmar firmar = FirmarXml.getInstance(slot, label, pass, node);
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
@@ -790,7 +824,7 @@ public class App extends Application {
                             firmar.firmar(is, os, enveloped);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorXml(out));
+                        tableFile.getItems().set(i, new ValidadorXml(out, opciones));
                     }
                 }
                 return true;
@@ -814,6 +848,12 @@ public class App extends Application {
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
+                    Config config = Config.getInstance();
+                    Opciones opciones = new Opciones();
+                    opciones.setProxyHabilitado(config.isProxyEnabled());
+                    opciones.setServidorProxy(config.getProxyIP());
+                    opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
                     Firmar firmar = FirmarJws.getInstance(slot, label, pass);
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
@@ -827,7 +867,7 @@ public class App extends Application {
                             firmar.firmar(is, os, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorJws(out));
+                        tableFile.getItems().set(i, new ValidadorJws(out, opciones));
                     }
                 }
                 return true;
@@ -877,11 +917,18 @@ public class App extends Application {
                             }
                         }
                     }
+                    
+                    Config config = Config.getInstance();
+                    Opciones opciones = new Opciones();
+                    opciones.setProxyHabilitado(config.isProxyEnabled());
+                    opciones.setServidorProxy(config.getProxyIP());
+                    opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
                     List<Validador> certs = new LinkedList();
                     if (MagicBytes.PDF.is(f)) {
-                        certs.add(new ValidadorPdf(f, urlPost, token));
+                        certs.add(new ValidadorPdf(f, urlPost, token, opciones));
                     } else {
-                        certs.add(new ValidadorPKCS7(f, urlPost, token));
+                        certs.add(new ValidadorPKCS7(f, urlPost, token, opciones));
                     }
                     tableFile.setItems(FXCollections.observableList(certs));
                     if (size == 0) {

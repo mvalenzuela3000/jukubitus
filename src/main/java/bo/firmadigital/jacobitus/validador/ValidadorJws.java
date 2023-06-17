@@ -30,9 +30,12 @@ import java.util.logging.Logger;
  * @author ADSIB
  */
 public class ValidadorJws extends Validador {
+    protected Opciones opciones = null;
+
     private X509Certificate cert;
 
-    public ValidadorJws(File file) {
+    public ValidadorJws(File file, Opciones opciones) {
+        this.opciones = opciones;
         try {
             super.file = file;
             try (InputStream is = new FileInputStream(file)) {
@@ -42,7 +45,8 @@ public class ValidadorJws extends Validador {
         }
     }
 
-    public ValidadorJws(InputStream is) {
+    public ValidadorJws(InputStream is, Opciones opciones) {
+        this.opciones = opciones;
         try {
             certificados = listarCertificados(is);
         } catch (Exception ignore) {
@@ -102,7 +106,7 @@ public class ValidadorJws extends Validador {
         JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)cert.getPublicKey());
         certDate.setValid(jwsObject.verify(verifier));
         certDate.setPKI(verificarPKI(certDate.getCertificate()));
-        certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
+        certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate(), this.opciones));
         certs.add(certDate);
         return certs;
     }

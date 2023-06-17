@@ -33,7 +33,10 @@ public class ValidadorPdf extends Validador {
     protected String urlPost = null;
     protected String token = null;
 
-    public ValidadorPdf(File file) {
+    protected Opciones opciones = null;
+
+    public ValidadorPdf(File file, Opciones opciones) {
+        this.opciones = opciones;
         try {
             super.file = file;
             if (Security.getProvider("BC") == null) {
@@ -46,13 +49,14 @@ public class ValidadorPdf extends Validador {
         }
     }
 
-    public ValidadorPdf(File file, String urlPost, String token) {
-        this(file);
+    public ValidadorPdf(File file, String urlPost, String token, Opciones opciones) {
+        this(file, opciones);
         this.urlPost = urlPost;
         this.token = token;
     }
     
-    public ValidadorPdf(InputStream is) {
+    public ValidadorPdf(InputStream is, Opciones opciones) {
+        this.opciones = opciones;
         try {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
@@ -171,7 +175,7 @@ public class ValidadorPdf extends Validador {
             certDate.setValid(pkcs7.verifySignatureIntegrityAndAuthenticity());
             certDate.setValidAdd(pdf.checkElementAdded(dict));
             certDate.setPKI(verificarPKI(certDate.getCertificate()));
-            certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
+            certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate(), this.opciones));
             certs.add(certDate);
         }
         return certs;

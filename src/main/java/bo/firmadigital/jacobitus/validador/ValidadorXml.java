@@ -45,11 +45,14 @@ import org.w3c.dom.NodeList;
  * @author ADSIB
  */
 public class ValidadorXml extends Validador {
+    protected Opciones opciones = null;
+
     static {
         Init.init();
     }
 
-    public ValidadorXml(File file) {
+    public ValidadorXml(File file, Opciones opciones) {
+        this.opciones = opciones;
         try {
             super.file = file;
             certificados = listarCertificados(new FileInputStream(file));
@@ -57,7 +60,8 @@ public class ValidadorXml extends Validador {
         }
     }
 
-    public ValidadorXml(InputStream is) {
+    public ValidadorXml(InputStream is, Opciones opciones) {
+        this.opciones = opciones;
         try {
             certificados = listarCertificados(is);
         } catch (Exception ignore) {
@@ -107,7 +111,7 @@ public class ValidadorXml extends Validador {
                 CertDate certDate = new CertDate(firma.toString(), cert, new GregorianCalendar(), null, false);
                 certDate.setValid(integrity);
                 certDate.setPKI(verificarPKI(certDate.getCertificate()));
-                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
+                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate(), this.opciones));
                 certs.add(certDate);
                 firma++;
             }

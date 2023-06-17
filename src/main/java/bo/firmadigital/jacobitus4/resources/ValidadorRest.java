@@ -7,11 +7,14 @@ package bo.firmadigital.jacobitus4.resources;
 
 import bo.firmadigital.jacobitus.utilidades.Base64StreamParser;
 import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
+import bo.firmadigital.jacobitus4.util.Config;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -125,7 +128,13 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validador validar = new ValidadorPdf(new ByteArrayInputStream(file));
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                
+                Validador validar = new ValidadorPdf(new ByteArrayInputStream(file), opciones);
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -262,7 +271,12 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validador validar = new ValidadorPKCS7(new ByteArrayInputStream(file));
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                Validador validar = new ValidadorPKCS7(new ByteArrayInputStream(file), opciones);
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -397,7 +411,13 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validador validar = new ValidadorXml(new ByteArrayInputStream(file));
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
+                Validador validar = new ValidadorXml(new ByteArrayInputStream(file), opciones);
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -530,7 +550,13 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validador validar = new ValidadorJws(new ByteArrayInputStream(file));
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setProxyHabilitado(config.isProxyEnabled());
+                opciones.setServidorProxy(config.getProxyIP());
+                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
+                Validador validar = new ValidadorJws(new ByteArrayInputStream(file), opciones);
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {

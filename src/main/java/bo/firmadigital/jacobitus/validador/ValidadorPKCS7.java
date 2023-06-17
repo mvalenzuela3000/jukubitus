@@ -41,7 +41,10 @@ public class ValidadorPKCS7 extends Validador {
     protected String urlPost = null;
     protected String token = null;
 
-    public ValidadorPKCS7(File file) {
+    protected Opciones opciones = null;
+
+    public ValidadorPKCS7(File file, Opciones opciones) {
+        this.opciones = opciones;
         try {
             super.file = file;
             if (Security.getProvider("BC") == null) {
@@ -52,13 +55,14 @@ public class ValidadorPKCS7 extends Validador {
         }
     }
 
-    public ValidadorPKCS7(File file, String urlPost, String token) {
-        this(file);
+    public ValidadorPKCS7(File file, String urlPost, String token, Opciones opciones) {
+        this(file, opciones);
         this.urlPost = urlPost;
         this.token = token;
     }
 
-    public ValidadorPKCS7(InputStream is) {
+    public ValidadorPKCS7(InputStream is, Opciones opciones) {
+        this.opciones = opciones;
         try {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
@@ -159,7 +163,7 @@ public class ValidadorPKCS7 extends Validador {
                 CertDate certDate = new CertDate(firma.toString(), cert, fecha, null, false);
                 certDate.setValid(integrity);
                 certDate.setPKI(verificarPKI(certDate.getCertificate()));
-                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate()));
+                certDate.setOCSP(verificarOcsp((X509Certificate) certDate.getCertificate(), certDate.getSignDate(), this.opciones));
                 certs.add(certDate);
                 firma++;
             }

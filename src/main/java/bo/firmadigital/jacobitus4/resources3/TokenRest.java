@@ -11,7 +11,10 @@ import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.SmartCard;
 import bo.firmadigital.jacobitus.comun.token.Token;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus4.util.Config;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -132,6 +135,12 @@ public class TokenRest {
                     json.put("mensaje", "Primero debe iniciar sesión.");
                 } else {
                     if (slots.length == 1) {
+                        Config config = Config.getInstance();
+                        Opciones opciones = new Opciones();
+                        opciones.setProxyHabilitado(config.isProxyEnabled());
+                        opciones.setServidorProxy(config.getProxyIP());
+                        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                        
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                         Token token = slots[0].getToken();
                         List<String> labels = token.listarIdentificadorClaves();
@@ -152,7 +161,7 @@ public class TokenRest {
                             cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                             cert.put("alias", label);
                             cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date()).getState();
+                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), opciones).getState();
                             if (state == Validador.OCSPState.OK) {
                                 cert.put("OCSP", "no revocado");
                             } else {
@@ -203,6 +212,12 @@ public class TokenRest {
                                 json.put("finalizado", false);
                                 json.put("mensaje", "No se encontró un certificado con el alias solicitado.");
                             } else {
+                                Config config = Config.getInstance();
+                                Opciones opciones = new Opciones();
+                                opciones.setProxyHabilitado(config.isProxyEnabled());
+                                opciones.setServidorProxy(config.getProxyIP());
+                                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+                                
                                 DatosCertificado entry = new DatosCertificado(req.getString("alias"), certificate);
                                 JSONObject cert = new JSONObject();
                                 cert.put("esFirmaBolivia", Validador.verificarPKI(entry.getCert()));
@@ -217,7 +232,7 @@ public class TokenRest {
                                 cert.put("inicioValidez", dateFormat.format(entry.getInicioValidez()));
                                 cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                                 cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                                Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date()).getState();
+                                Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), opciones).getState();
                                 if (state == Validador.OCSPState.OK) {
                                     cert.put("OCSP", "no revocado");
                                 } else {

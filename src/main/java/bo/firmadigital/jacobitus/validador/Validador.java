@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.jacobitus.validador;
 
-import bo.firmadigital.jacobitus4.util.Config;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -131,17 +130,16 @@ public abstract class Validador implements Iterable<CertDate> {
         }
     }
 
-    public static OCSPData verificarOcsp(X509Certificate cert, Date signDate) {
+    public static OCSPData verificarOcsp(X509Certificate cert, Date signDate, Opciones opciones) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             URL[] urls = getCrlURLs(cert);
             if (urls.length == 0) {
                 return new OCSPData(OCSPState.UNKNOWN_SERVER, null);
             }
-            Config config = Config.getInstance();
             HttpURLConnection connection;
-            if (config.isProxyEnabled()) {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyIP(), Integer.parseInt(config.getProxyPort())));
+            if (opciones != null && opciones.getProxyHablitado()) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(opciones.getServidorProxy(), opciones.getPuertoServidorProxy()));
                 connection = (HttpURLConnection) urls[0].openConnection(proxy);
             } else {
                 connection = (HttpURLConnection) urls[0].openConnection();
