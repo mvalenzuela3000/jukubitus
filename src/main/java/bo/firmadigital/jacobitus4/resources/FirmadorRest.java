@@ -5,18 +5,18 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.firmar.Firmar;
-import bo.firmadigital.firmar.FirmarPKCS7;
-import bo.firmadigital.firmar.FirmarPdf;
-import bo.firmadigital.firmar.FirmarXml;
-import bo.firmadigital.firmar.TokenSelected;
+import bo.firmadigital.jacobitus.firmador.Firmar;
+import bo.firmadigital.jacobitus.firmador.FirmarPKCS7;
+import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.firmador.FirmarXml;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
-import bo.firmadigital.jacobitus4.util.Base64StreamParser;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Slot;
-import bo.firmadigital.token.Token;
+import bo.firmadigital.jacobitus.utilidades.Base64StreamParser;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Slot;
+import bo.firmadigital.jacobitus.comun.token.Token;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;

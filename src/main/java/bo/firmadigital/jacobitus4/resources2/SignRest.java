@@ -5,11 +5,11 @@
  */
 package bo.firmadigital.jacobitus4.resources2;
 
-import bo.firmadigital.firmar.TokenSelected;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.resources.FirmadorRest;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Slot;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Slot;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;

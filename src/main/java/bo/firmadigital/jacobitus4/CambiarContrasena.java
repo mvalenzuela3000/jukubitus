@@ -5,8 +5,8 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Token;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Token;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;

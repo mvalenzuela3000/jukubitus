@@ -5,13 +5,13 @@
  */
 package bo.firmadigital.jacobitus4.resources3;
 
-import bo.firmadigital.firmar.FirmarPdf;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Slot;
-import bo.firmadigital.token.SmartCard;
-import bo.firmadigital.token.Token;
-import bo.firmadigital.validar.DatosCertificado;
-import bo.firmadigital.validar.Validar;
+import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Slot;
+import bo.firmadigital.jacobitus.comun.token.SmartCard;
+import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.Validador;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -139,7 +139,7 @@ public class TokenRest {
                         for (String label : labels) {
                             DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
                             JSONObject cert = new JSONObject();
-                            cert.put("esFirmaBolivia", Validar.verificarPKI(entry.getCert()));
+                            cert.put("esFirmaBolivia", Validador.verificarPKI(entry.getCert()));
                             cert.put("numeroSerie", entry.getCert().getSerialNumber());
                             cert.put("nombreComunIssuer", entry.getNombreComunIssuer());
                             cert.put("organizacionIssuer", entry.getOrganizacionIssuer());
@@ -152,8 +152,8 @@ public class TokenRest {
                             cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                             cert.put("alias", label);
                             cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                            Validar.OCSPState state = Validar.verificarOcsp(entry.getCert(), new Date()).getState();
-                            if (state == Validar.OCSPState.OK) {
+                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date()).getState();
+                            if (state == Validador.OCSPState.OK) {
                                 cert.put("OCSP", "no revocado");
                             } else {
                                 cert.put("OCSP", state.toString());
@@ -205,7 +205,7 @@ public class TokenRest {
                             } else {
                                 DatosCertificado entry = new DatosCertificado(req.getString("alias"), certificate);
                                 JSONObject cert = new JSONObject();
-                                cert.put("esFirmaBolivia", Validar.verificarPKI(entry.getCert()));
+                                cert.put("esFirmaBolivia", Validador.verificarPKI(entry.getCert()));
                                 cert.put("numeroSerie", entry.getCert().getSerialNumber());
                                 cert.put("nombreComunIssuer", entry.getNombreComunIssuer());
                                 cert.put("organizacionIssuer", entry.getOrganizacionIssuer());
@@ -217,8 +217,8 @@ public class TokenRest {
                                 cert.put("inicioValidez", dateFormat.format(entry.getInicioValidez()));
                                 cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                                 cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                                Validar.OCSPState state = Validar.verificarOcsp(entry.getCert(), new Date()).getState();
-                                if (state == Validar.OCSPState.OK) {
+                                Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date()).getState();
+                                if (state == Validador.OCSPState.OK) {
                                     cert.put("OCSP", "no revocado");
                                 } else {
                                     cert.put("OCSP", state.toString());

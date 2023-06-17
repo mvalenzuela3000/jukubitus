@@ -5,14 +5,14 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.firmar.FirmarJws;
-import bo.firmadigital.firmar.FirmarPdf;
-import bo.firmadigital.firmar.TokenSelected;
-import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Slot;
-import bo.firmadigital.token.Token;
-import bo.firmadigital.validar.DatosCertificado;
+import bo.firmadigital.jacobitus.firmador.FirmarJws;
+import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Slot;
+import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;

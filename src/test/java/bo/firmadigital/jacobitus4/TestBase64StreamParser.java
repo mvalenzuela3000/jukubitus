@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus4.util.Base64StreamParser;
+import bo.firmadigital.jacobitus.utilidades.Base64StreamParser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

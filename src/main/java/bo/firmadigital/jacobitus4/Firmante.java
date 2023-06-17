@@ -6,9 +6,9 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Token;
-import bo.firmadigital.validar.DatosCertificado;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import java.util.List;

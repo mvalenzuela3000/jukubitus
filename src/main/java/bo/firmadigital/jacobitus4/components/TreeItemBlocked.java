@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4.components;
 
-import bo.firmadigital.validar.CertDate;
+import bo.firmadigital.jacobitus.validador.CertDate;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 

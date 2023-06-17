@@ -5,9 +5,9 @@
  */
 package bo.firmadigital.jacobitus4.components;
 
-import bo.firmadigital.validar.CertDate;
-import bo.firmadigital.validar.Certificate;
-import bo.firmadigital.validar.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.Certificate;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import javafx.geometry.HPos;

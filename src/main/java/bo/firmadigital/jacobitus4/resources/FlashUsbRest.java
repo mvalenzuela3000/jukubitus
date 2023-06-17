@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.jacobitus4.util.OS;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

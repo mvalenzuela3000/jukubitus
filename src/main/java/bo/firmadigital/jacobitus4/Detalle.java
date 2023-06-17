@@ -7,8 +7,8 @@ package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
-import bo.firmadigital.validar.CertDate;
-import bo.firmadigital.validar.Validar;
+import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.Validador;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import javafx.application.HostServices;
@@ -38,7 +38,7 @@ public class Detalle extends Stage {
     private final Image alertSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("alert.png"));
     private final Image errorSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("error.png"));
 
-    public Detalle(Stage parent, Validar validar, HostServices hostServices) {
+    public Detalle(Stage parent, Validador validar, HostServices hostServices) {
         setTitle("Detalle de firmas");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
@@ -118,7 +118,7 @@ public class Detalle extends Stage {
                 }
             } else {
                 ocspItem = new TreeItem<>("Firmado con certificado revocado", new ImageView(errorSmallIcon));
-                if (cert.getOCSP().getState() == Validar.OCSPState.CONNECTION) {
+                if (cert.getOCSP().getState() == Validador.OCSPState.CONNECTION) {
                     ocspItemDet = new TreeItem<>("No se pudo acceder al servicio para verificar el estado del certificado.");
                     ocspItem.setExpanded(true);
                 } else {

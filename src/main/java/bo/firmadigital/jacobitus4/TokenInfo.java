@@ -5,12 +5,12 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.firmar.Constants;
+import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Token;
-import bo.firmadigital.validar.Certificate;
-import bo.firmadigital.validar.DatosCertificado;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.validador.Certificate;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

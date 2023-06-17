@@ -5,32 +5,32 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.firmar.Constants;
-import bo.firmadigital.firmar.TokenSelected;
-import bo.firmadigital.firmar.Firmar;
-import bo.firmadigital.firmar.FirmarJws;
-import bo.firmadigital.firmar.FirmarPKCS7;
-import bo.firmadigital.firmar.FirmarPdf;
-import bo.firmadigital.firmar.FirmarXml;
+import bo.firmadigital.jacobitus.firmador.Constants;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.firmador.Firmar;
+import bo.firmadigital.jacobitus.firmador.FirmarJws;
+import bo.firmadigital.jacobitus.firmador.FirmarPKCS7;
+import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.firmador.FirmarXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
-import bo.firmadigital.jacobitus4.util.OS;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
-import bo.firmadigital.nss.Chromium;
-import bo.firmadigital.nss.Firefox;
-import bo.firmadigital.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.token.GestorSlot;
-import bo.firmadigital.token.Slot;
-import bo.firmadigital.token.SmartCard;
-import bo.firmadigital.validar.Certificate;
-import bo.firmadigital.validar.DatosCertificado;
-import bo.firmadigital.validar.MagicBytes;
-import bo.firmadigital.validar.Validar;
-import bo.firmadigital.validar.ValidarJws;
-import bo.firmadigital.validar.ValidarPdf;
-import bo.firmadigital.validar.ValidarPKCS7;
-import bo.firmadigital.validar.ValidarXml;
+import bo.firmadigital.utiles.nss.Chromium;
+import bo.firmadigital.utiles.nss.Firefox;
+import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.comun.token.GestorSlot;
+import bo.firmadigital.jacobitus.comun.token.Slot;
+import bo.firmadigital.jacobitus.comun.token.SmartCard;
+import bo.firmadigital.jacobitus.validador.Certificate;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.MagicBytes;
+import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.ValidadorJws;
+import bo.firmadigital.jacobitus.validador.ValidadorPdf;
+import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
+import bo.firmadigital.jacobitus.validador.ValidadorXml;
 import com.itextpdf.kernel.PdfException;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -101,7 +101,7 @@ public class App extends Application {
     private TableView table;
     private TableView tableFile;
     private File destino;
-    private Validar validar;
+    private Validador validar;
     private CK_TOKEN_INFO tokenInfo;
     private static boolean servicio;
     private static boolean taskBar;
@@ -233,7 +233,7 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    if (((Validar)tableFile.getItems().get(0)).isRemoto()) {
+                    if (((Validador)tableFile.getItems().get(0)).isRemoto()) {
                         destino = new File(System.getProperty("java.io.tmpdir"));
                     } else {
                         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -267,7 +267,7 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    if (((Validar)tableFile.getItems().get(0)).isRemoto()) {
+                    if (((Validador)tableFile.getItems().get(0)).isRemoto()) {
                         destino = new File(System.getProperty("java.io.tmpdir"));
                     } else {
                         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -357,7 +357,7 @@ public class App extends Application {
             Pdf pdf = new Pdf(stage);
             pdf.showAndWait();
             if (pdf.getPath() != null) {
-                tableFile.getItems().add(new ValidarPdf(new File(pdf.getPath())));
+                tableFile.getItems().add(new ValidadorPdf(new File(pdf.getPath())));
             }
         });
         pdfMenu.getItems().addAll(nuevoItem);
@@ -467,7 +467,7 @@ public class App extends Application {
         tableFile.getColumns().setAll(fileCol);
         tableFile.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableFile.setRowFactory(tv -> {
-            TableRow<Validar> row = new TableRow<>();
+            TableRow<Validador> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
                     HostServices hostServices = getHostServices();
@@ -622,16 +622,16 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                List<Validar> certs = new LinkedList();
+                List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
-                        certs.add(new ValidarPdf(Converter.odtToPdf(files.get(i))));
+                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i))));
                     } else if (files.get(i).getName().endsWith(".docx")) {
-                        certs.add(new ValidarPdf(Converter.docxToPdf(files.get(i))));
+                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i))));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
-                        certs.add(new ValidarPdf(files.get(i)));
+                        certs.add(new ValidadorPdf(files.get(i)));
                     } else {
-                        certs.add(new ValidarPKCS7(files.get(i)));
+                        certs.add(new ValidadorPKCS7(files.get(i)));
                     }
                     updateProgress(i + 1, files.size());
                 }
@@ -654,7 +654,7 @@ public class App extends Application {
             @Override
             protected Object call() throws Exception {
                 StringBuilder errores = new StringBuilder();
-                List<Validar> files = tableFile.getItems();
+                List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
@@ -672,7 +672,7 @@ public class App extends Application {
                                 firmar.firmar(is, os, bloquear);
                             }
                             updateProgress(i + 1, files.size());
-                            tableFile.getItems().set(i, new ValidarPdf(out));
+                            tableFile.getItems().set(i, new ValidadorPdf(out));
                         } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
                             errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
@@ -703,21 +703,21 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                List<Validar> certs = new LinkedList();
+                List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (MagicBytes.PDF.is(files.get(i))) {
-                        certs.add(new ValidarPdf(files.get(i)));
+                        certs.add(new ValidadorPdf(files.get(i)));
                     } else {
                         if (MagicBytes.XML.is(files.get(i))) {
-                            certs.add(new ValidarXml(files.get(i)));
+                            certs.add(new ValidadorXml(files.get(i)));
                         } else {
                             if (MagicBytes.P7S.is(files.get(i))) {
-                                certs.add(new ValidarPKCS7(files.get(i)));
+                                certs.add(new ValidadorPKCS7(files.get(i)));
                             } else {
                                 if (MagicBytes.isJWS(files.get(i))) {
-                                    certs.add(new ValidarJws(files.get(i)));
+                                    certs.add(new ValidadorJws(files.get(i)));
                                 } else {
-                                    certs.add(new ValidarPKCS7(files.get(i)));
+                                    certs.add(new ValidadorPKCS7(files.get(i)));
                                 }
                             }
                         }
@@ -742,7 +742,7 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                List<Validar> files = tableFile.getItems();
+                List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
@@ -753,7 +753,7 @@ public class App extends Application {
                             firmar.firmar(is, os);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarPKCS7(out));
+                        tableFile.getItems().set(i, new ValidadorPKCS7(out));
                     }
                 }
                 return true;
@@ -773,7 +773,7 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                List<Validar> files = tableFile.getItems();
+                List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
@@ -790,7 +790,7 @@ public class App extends Application {
                             firmar.firmar(is, os, enveloped);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarXml(out));
+                        tableFile.getItems().set(i, new ValidadorXml(out));
                     }
                 }
                 return true;
@@ -810,7 +810,7 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                List<Validar> files = tableFile.getItems();
+                List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
@@ -827,7 +827,7 @@ public class App extends Application {
                             firmar.firmar(is, os, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidarJws(out));
+                        tableFile.getItems().set(i, new ValidadorJws(out));
                     }
                 }
                 return true;
@@ -877,11 +877,11 @@ public class App extends Application {
                             }
                         }
                     }
-                    List<Validar> certs = new LinkedList();
+                    List<Validador> certs = new LinkedList();
                     if (MagicBytes.PDF.is(f)) {
-                        certs.add(new ValidarPdf(f, urlPost, token));
+                        certs.add(new ValidadorPdf(f, urlPost, token));
                     } else {
-                        certs.add(new ValidarPKCS7(f, urlPost, token));
+                        certs.add(new ValidadorPKCS7(f, urlPost, token));
                     }
                     tableFile.setItems(FXCollections.observableList(certs));
                     if (size == 0) {

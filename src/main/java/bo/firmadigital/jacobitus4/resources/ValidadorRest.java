@@ -5,13 +5,13 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.jacobitus4.util.Base64StreamParser;
-import bo.firmadigital.validar.CertDate;
-import bo.firmadigital.validar.Validar;
-import bo.firmadigital.validar.ValidarJws;
-import bo.firmadigital.validar.ValidarPKCS7;
-import bo.firmadigital.validar.ValidarPdf;
-import bo.firmadigital.validar.ValidarXml;
+import bo.firmadigital.jacobitus.utilidades.Base64StreamParser;
+import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.ValidadorJws;
+import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
+import bo.firmadigital.jacobitus.validador.ValidadorPdf;
+import bo.firmadigital.jacobitus.validador.ValidadorXml;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -125,7 +125,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validar validar = new ValidarPdf(new ByteArrayInputStream(file));
+                Validador validar = new ValidadorPdf(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -262,7 +262,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validar validar = new ValidarPKCS7(new ByteArrayInputStream(file));
+                Validador validar = new ValidadorPKCS7(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -397,7 +397,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validar validar = new ValidarXml(new ByteArrayInputStream(file));
+                Validador validar = new ValidadorXml(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -530,7 +530,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Validar validar = new ValidarJws(new ByteArrayInputStream(file));
+                Validador validar = new ValidadorJws(new ByteArrayInputStream(file));
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {

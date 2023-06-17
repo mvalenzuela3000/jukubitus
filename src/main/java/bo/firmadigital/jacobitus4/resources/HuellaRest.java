@@ -5,8 +5,8 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.fingerprint.Capturar;
-import bo.firmadigital.jacobitus4.util.OS;
+import bo.firmadigital.utiles.fingerprint.Capturar;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;

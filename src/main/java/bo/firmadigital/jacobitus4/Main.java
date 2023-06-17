@@ -6,7 +6,7 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.OS;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.logging.Level;
