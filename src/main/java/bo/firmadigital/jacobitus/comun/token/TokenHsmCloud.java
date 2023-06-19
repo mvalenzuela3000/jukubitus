@@ -5,9 +5,10 @@
  */
 package bo.firmadigital.jacobitus.comun.token;
 
-import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.comun.token.hsm.HsmProvider;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -52,11 +53,11 @@ import org.codehaus.jettison.json.JSONObject;
  * @author ADSIB
  */
 public class TokenHsmCloud implements Token {
+    private Opciones opciones = null;
     private String PIN;
-    private final Config config;
 
-    public TokenHsmCloud() {
-        config = Config.getInstance();
+    public TokenHsmCloud(Opciones opciones) {
+        this.opciones = opciones;
         if (Security.getProvider("HSM Cloud") == null) {
             Security.addProvider(new HsmProvider());
         }
@@ -97,7 +98,7 @@ public class TokenHsmCloud implements Token {
             body.put("tipo_hsm", "HSM");
             body.put("pin", oldPin);
             body.put("nuevo_pin", newPin);
-            JSONObject response = request(config.getHsmCloud() + "/cambiar_pin", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/cambiar_pin", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") != 200) {
                 throw new RuntimeException(response.getString("message"));
             }
@@ -127,7 +128,7 @@ public class TokenHsmCloud implements Token {
             JSONObject body = new JSONObject();
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
-            JSONObject response = request(config.getHsmCloud() + "/generar_claves", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/generar_claves", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") == 200) {
                 return obtenerClavePublica(clavesId);
             } else {
@@ -176,7 +177,7 @@ public class TokenHsmCloud implements Token {
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
             body.put("alias", clavesId);
-            JSONObject response = request(config.getHsmCloud() + "/eliminar_clave", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/eliminar_clave", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") != 200) {
                 throw new KeyStoreException("No se pudo eliminar la clave.");
             }
@@ -203,7 +204,7 @@ public class TokenHsmCloud implements Token {
             body.put("pin", PIN);
             body.put("alias", clavesId);
             body.put("pem", Base64.getEncoder().encodeToString(pem.getBytes()));
-            JSONObject response = request(config.getHsmCloud() + "/cargar_pem", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/cargar_pem", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") != 200) {
                 throw new KeyStoreException(response.getString("message"));
             }
@@ -224,7 +225,7 @@ public class TokenHsmCloud implements Token {
             JSONObject body = new JSONObject();
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
-            JSONObject response = request(config.getHsmCloud() + "/listar_claves", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/listar_claves", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") == 200) {
                 JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
                 for (int i = 0; i < arr.length(); i++) {
@@ -246,7 +247,7 @@ public class TokenHsmCloud implements Token {
             JSONObject body = new JSONObject();
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
-            JSONObject response = request(config.getHsmCloud() + "/listar_claves", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/listar_claves", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") == 200) {
                 JSONArray arr = response.getJSONObject("data").getJSONArray("claveprivadas");
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -276,7 +277,7 @@ public class TokenHsmCloud implements Token {
             body.put("tipo_hsm", "HSM");
             body.put("pin", PIN);
             body.put("alias", clavesId);
-            JSONObject response = request(config.getHsmCloud() + "/certificado", config.getHsmJWT(), "POST", body.toString());
+            JSONObject response = request(this.opciones.getApiHsm() + "/certificado", this.opciones.getJwtHsm(), "POST", body.toString());
             if (response.getInt("code") == 200) {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 return (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(response.getJSONObject("data").getString("certificate"))));
@@ -290,7 +291,7 @@ public class TokenHsmCloud implements Token {
 
     @Override
     public PrivateKey obtenerClavePrivada(String clavesId) throws GeneralSecurityException {
-        return new HsmPrivateKey(config.getHsmCloud(), config.getHsmJWT(), PIN, clavesId);
+        return new HsmPrivateKey(this.opciones.getApiHsm(), this.opciones.getJwtHsm(), PIN, clavesId);
     }
 
     @Override
@@ -403,7 +404,7 @@ public class TokenHsmCloud implements Token {
                 JSONObject data = new JSONObject();
                 data.put("hash", Base64.getEncoder().encodeToString(sh).replace("\n", ""));
                 body.put("data", data);
-                JSONObject response = request(config.getHsmCloud() + "/firmar_pkcs7", config.getHsmJWT(), "POST", body.toString());
+                JSONObject response = request(opciones.getApiHsm() + "/firmar_pkcs7", opciones.getJwtHsm(), "POST", body.toString());
                 return Base64.getDecoder().decode(response.getJSONObject("data").getString("signature"));
             } catch (JSONException ex) {
                 throw new SignatureException(ex.getMessage());

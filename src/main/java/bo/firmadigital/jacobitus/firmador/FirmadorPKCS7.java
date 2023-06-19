@@ -38,13 +38,15 @@ import org.bouncycastle.util.Store;
  *
  * @author ADSIB
  */
-public class FirmarPKCS7 implements Firmar {
-    private static FirmarPKCS7 firmarPkcs7;
+public class FirmadorPKCS7 implements IFirmador {
+    private Opciones opciones = null;
+    private static FirmadorPKCS7 firmarPkcs7;
     private final long slot;
     private final String label;
     private final String pass;
 
-    private FirmarPKCS7(long slot, String label, String pass) {
+    private FirmadorPKCS7(long slot, String label, String pass, Opciones opciones) {
+        this.opciones = opciones;
         this.slot = slot;
         this.label = label;
         this.pass = pass;
@@ -53,12 +55,12 @@ public class FirmarPKCS7 implements Firmar {
         }
     }
 
-    public static FirmarPKCS7 getInstance(long slot, String label, String pass) {
+    public static FirmadorPKCS7 getInstance(long slot, String label, String pass, Opciones opciones) {
         if (firmarPkcs7 == null) {
-            firmarPkcs7 = new FirmarPKCS7(slot, label, pass);
+            firmarPkcs7 = new FirmadorPKCS7(slot, label, pass, opciones);
         } else {
             if (firmarPkcs7.slot != slot || !firmarPkcs7.label.equals(label) || !firmarPkcs7.pass.equals(pass)) {
-                firmarPkcs7 = new FirmarPKCS7(slot, label, pass);
+                firmarPkcs7 = new FirmadorPKCS7(slot, label, pass, opciones);
             }
         }
         return firmarPkcs7;
@@ -67,7 +69,7 @@ public class FirmarPKCS7 implements Firmar {
     @Override
     public synchronized void firmar(InputStream is, OutputStream os, boolean detached) throws IOException, GeneralSecurityException {
         try {
-            Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+            Token token = GestorSlot.getInstance().obtenerSlot(slot, this.opciones).getToken();
             token.iniciar(pass);
             PrivateKey privateKey = token.obtenerClavePrivada(label);
             if (privateKey == null) {
@@ -103,7 +105,7 @@ public class FirmarPKCS7 implements Firmar {
             os.write(signeddata.getEncoded());
             token.salir();
         } catch (OperatorCreationException | CMSException ex) {
-            Logger.getLogger(FirmarPKCS7.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FirmadorPKCS7.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

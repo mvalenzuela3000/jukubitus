@@ -14,7 +14,7 @@ import java.security.GeneralSecurityException;
  *
  * @author ADSIB
  */
-public interface Firmar {
+public interface IFirmador {
     public void firmar(InputStream is, OutputStream os, boolean param) throws IOException, GeneralSecurityException;
     public void firmar(InputStream is, OutputStream os) throws IOException, GeneralSecurityException;
 }

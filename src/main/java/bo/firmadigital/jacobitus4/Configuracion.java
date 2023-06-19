@@ -9,6 +9,8 @@ import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.TokenPKCS12;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -232,7 +234,18 @@ public class Configuracion extends Stage {
             ContrasenaNueva contrasena = new ContrasenaNueva(parent);
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
-                Slot slot = new Slot(config.getTokenToCreate());
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setControlador(config.getDriver());
+                opciones.setToken(config.getToken());
+                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+                opciones.setApiSelloTiempo(config.getTS());
+                opciones.setJwtSelloTiempo(config.getTSJWT());
+                opciones.setHsmHabilitado(config.isTSEnabled());
+                opciones.setApiHsm(config.getTS());
+                opciones.setJwtHsm(config.getTSJWT());
+                
+                Slot slot = new Slot(config.getTokenToCreate(), opciones);
                 TokenPKCS12 token = new TokenPKCS12(slot);
                 try {
                     token.crear(contrasena.getPass());

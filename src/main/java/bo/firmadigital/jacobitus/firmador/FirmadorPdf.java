@@ -5,7 +5,6 @@
  */
 package bo.firmadigital.jacobitus.firmador;
 
-import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.comun.token.ExternalSignatureLocal;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.TSAClient;
@@ -35,34 +34,34 @@ import java.util.logging.Logger;
  *
  * @author ADSIB
  */
-public class FirmarPdf implements Firmar {
-    private static FirmarPdf firmarPdf;
+public class FirmadorPdf implements IFirmador {
+    private Opciones opciones = null;
+    private static FirmadorPdf firmarPdf;
     private final long slot;
     private final String label;
     private final String pass;
     private ImageData imageData;
     private int x = 0;
     private int y = 0;
-    private final Config config;
 
-    private FirmarPdf(long slot, String label, String pass) {
+    private FirmadorPdf(long slot, String label, String pass, Opciones opciones) {
+        this.opciones = opciones;
         this.slot = slot;
         this.label = label;
         this.pass = pass;
-        config = Config.getInstance();
     }
 
-    private FirmarPdf(long slot, String label, String pass, String imageBase64, int x, int y) {
+    private FirmadorPdf(long slot, String label, String pass, String imageBase64, int x, int y, Opciones opciones) {
+        this.opciones = opciones;
         this.slot = slot;
         this.label = label;
         this.pass = pass;
-        config = Config.getInstance();
         if (imageBase64 == null) {
             try {
                 byte[] bytes = this.getClass().getClassLoader().getResourceAsStream("sign.png").readAllBytes();
                 imageData = ImageDataFactory.create(bytes, false);
             } catch (IOException ex) {
-                Logger.getLogger(FirmarPdf.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(FirmadorPdf.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             byte[] bytes = Base64.getDecoder().decode(imageBase64);
@@ -72,23 +71,23 @@ public class FirmarPdf implements Firmar {
         this.y = y;
     }
 
-    public static FirmarPdf getInstance(long slot, String label, String pass) {
+    public static FirmadorPdf getInstance(long slot, String label, String pass, Opciones opciones) {
         if (firmarPdf == null) {
-            firmarPdf = new FirmarPdf(slot, label, pass);
+            firmarPdf = new FirmadorPdf(slot, label, pass, opciones);
         } else {
             if (firmarPdf.slot != slot || !firmarPdf.label.equals(label) || !firmarPdf.pass.equals(pass) || firmarPdf.x != 0 || firmarPdf.y != 0) {
-                firmarPdf = new FirmarPdf(slot, label, pass);
+                firmarPdf = new FirmadorPdf(slot, label, pass, opciones);
             }
         }
         return firmarPdf;
     }
 
-    public static FirmarPdf getInstance(long slot, String label, String pass, String image, int x, int y) {
+    public static FirmadorPdf getInstance(long slot, String label, String pass, String image, int x, int y, Opciones opciones) {
         if (firmarPdf == null) {
-            firmarPdf = new FirmarPdf(slot, label, pass, image, x, y);
+            firmarPdf = new FirmadorPdf(slot, label, pass, image, x, y, opciones);
         } else {
             if (firmarPdf.slot != slot || !firmarPdf.label.equals(label) || !firmarPdf.pass.equals(pass) || firmarPdf.x != x || firmarPdf.y != y) {
-                firmarPdf = new FirmarPdf(slot, label, pass, image, x, y);
+                firmarPdf = new FirmadorPdf(slot, label, pass, image, x, y, opciones);
             }
         }
         return firmarPdf;
@@ -111,7 +110,7 @@ public class FirmarPdf implements Firmar {
         }
         Rectangle rect = new Rectangle(0, 0, 0, 0);
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-        Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+        Token token = GestorSlot.getInstance().obtenerSlot(slot, this.opciones).getToken();
         token.iniciar(pass);
         if (x != 0) {
             if (imageData != null) {
@@ -124,14 +123,13 @@ public class FirmarPdf implements Firmar {
         }
         appearance.setPageRect(rect);
         ITSAClient tsc = null;
-        if (config.isTSEnabled()) {
-            tsc = new TSAClient(config.getTS(), config.getTSJWT());
+        if (this.opciones != null && this.opciones.getSelloTiempoHabilitado()) {
+            tsc = new TSAClient(this.opciones.getApiSelloTiempo(), this.opciones.getJwtSelloTiempo());
         }
         IExternalDigest digest = new BouncyCastleDigest();
         IExternalSignature signature = new ExternalSignatureLocal(token.obtenerClavePrivada(label), token.getProviderName());
         signer.signDetached(digest, signature, token.getCertificateChain(label), null, null, tsc, 0, PdfSigner.CryptoStandard.CADES);
         token.salir();
-        
     }
 
     @Override

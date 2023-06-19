@@ -6,8 +6,10 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.security.GeneralSecurityException;
 import java.util.LinkedList;
@@ -126,9 +128,20 @@ public class Firmante extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setControlador(config.getDriver());
+                opciones.setToken(config.getToken());
+                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+                opciones.setApiSelloTiempo(config.getTS());
+                opciones.setJwtSelloTiempo(config.getTSJWT());
+                opciones.setHsmHabilitado(config.isTSEnabled());
+                opciones.setApiHsm(config.getTS());
+                opciones.setJwtHsm(config.getTSJWT());
+
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();

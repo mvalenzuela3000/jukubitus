@@ -2,6 +2,8 @@ package bo.firmadigital.jacobitus.comun.token;
 
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.comun.pkcs11.PKCS11;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+
 import java.io.IOException;
 
 /**
@@ -14,7 +16,7 @@ import java.io.IOException;
  * @author ADSIB
  */
 public class Slot {
-
+    private Opciones opciones = null;
     private final PKCS11 p11;
     private final String configuracion;
     private final long slotID;
@@ -29,19 +31,22 @@ public class Slot {
      * @param configuracion configuraci&oacute;n del token.
      * @throws IOException
      */
-    public Slot(long slotID, PKCS11 p11, String configuracion) throws IOException {
+    public Slot(long slotID, PKCS11 p11, String configuracion, Opciones opciones) throws IOException {
+        this.opciones = opciones;
         this.slotID = slotID;
         this.p11 = p11;
         this.configuracion = configuracion;
     }
 
-    public Slot(String configuracion) {
+    public Slot(String configuracion, Opciones opciones) {
+        this.opciones = opciones;
         this.slotID = -1;
         this.p11 = null;
         this.configuracion = configuracion;
     }
 
-    public Slot(long slotID) {
+    public Slot(long slotID, Opciones opciones) {
+        this.opciones = opciones;
         this.slotID = slotID;
         this.p11 = null;
         this.configuracion = null;
@@ -69,7 +74,7 @@ public class Slot {
         if (token == null) {
             if (slotID < 0) {
                 if (slotID < -1000) {
-                    token = new TokenHsmCloud();
+                    token = new TokenHsmCloud(this.opciones);
                 } else {
                     token = new TokenPKCS12(this);
                 }

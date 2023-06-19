@@ -5,9 +5,10 @@
  */
 package bo.firmadigital.jacobitus.comun.token;
 
-import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+
 import java.io.File;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -47,7 +48,7 @@ public class SmartCard {
         }
     }
 
-    public static List<JSONObject> cards() {
+    public static List<JSONObject> cards(Opciones opciones) {
         LinkedList<JSONObject> res = new LinkedList();
         try {
             TerminalFactory factory = TerminalFactory.getInstance("PC/SC", null);
@@ -65,11 +66,10 @@ public class SmartCard {
                 }
             }
         } catch (NoSuchAlgorithmException | CardException | JSONException ex) {
-            Config config = Config.getInstance();
-            if (config.getDriver() != null) {
+            if (opciones.getControlador() != null) {
                 try {
                     GestorSlot gs = GestorSlot.getInstance();
-                    Slot[] slots = gs.listarSlots();
+                    Slot[] slots = gs.listarSlots(opciones);
                     for (Slot slot : slots) {
                         CK_TOKEN_INFO info = slot.detalleToken();
                         token = new JSONObject();

@@ -5,9 +5,11 @@
  */
 package bo.firmadigital.jacobitus4.resources2;
 
+import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.resources.FirmadorRest;
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import java.util.logging.Level;
@@ -54,6 +56,17 @@ public class SignRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sign(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
@@ -62,7 +75,7 @@ public class SignRest {
                 software = req.getBoolean("software");
             }
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots(software);
+            Slot[] slots = gestorSlot.listarSlots(software, opciones);
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");
             }

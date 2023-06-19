@@ -12,6 +12,7 @@ import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.Token;
 import bo.firmadigital.jacobitus.comun.token.TokenPKCS12;
+import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -67,12 +68,23 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String status() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             try {
                 JSONObject datos = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
-                List<JSONObject> tokens = SmartCard.cards();
+                List<JSONObject> tokens = SmartCard.cards(opciones);
                 for (JSONObject token : tokens) {
                     jsonArray.put(token.get("name"));
                 }
@@ -120,11 +132,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String connected() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+        
         JSONObject json = new JSONObject();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             try {
-                Slot[] slots = gestorSlot.listarSlots();
+                Slot[] slots = gestorSlot.listarSlots(opciones);
                 json.put("datos", new JSONObject());
                 ((JSONObject)json.get("datos")).put("connected", slots.length > 0);
                 ((JSONObject)json.get("datos")).put("tokens", new JSONArray());
@@ -219,6 +242,17 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String data(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -227,12 +261,12 @@ public class TokenRest {
             List<X509Certificate> intermediates = (List<X509Certificate>) fact.generateCertificates(is);
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots();
+            Slot[] slots = gestorSlot.listarSlots(opciones);
             if (slots.length == 1 && !req.has("slot")) {
                 req.put("slot", slots[0].getSlotID());
             }
             if (req.has("slot") && req.has("pin")) {
-                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), opciones);
                 Token token = slot.getToken();
                 json.put("datos", new JSONObject());
                 try {
@@ -315,6 +349,17 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String create(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+        
         JSONObject json = new JSONObject();
         try {
             json.put("finalizado", false);
@@ -336,8 +381,7 @@ public class TokenRest {
                 if (num < 1 || may < 1 || minu < 1) {
                     json.put("mensaje", "El pin debe contener al menos un número, una letra mayúscula y una letra minúscula.");
                 } else {
-                    Config config  = Config.getInstance();
-                    Slot slot = new Slot(config.getTokenToCreate());
+                    Slot slot = new Slot(config.getTokenToCreate(), opciones);
                     TokenPKCS12 token = new TokenPKCS12(slot);
                     try {
                         token.crear(req.getString("pin"));
@@ -359,10 +403,21 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String generate_keypar(@QueryParam("pin") String pin, @QueryParam("slot") Integer slotNumber) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(slotNumber);
+            Slot slot = gestorSlot.obtenerSlot(slotNumber, opciones);
             Token token = slot.getToken();
             token.iniciar(pin);
             BigInteger max = new BigInteger("1000000000000");
@@ -396,11 +451,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String generate_csr(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"), opciones);
             Token token = slot.getToken();
             JSONObject datos = new JSONObject();
             json.put("datos", datos);
@@ -425,11 +491,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String cargar_pem(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"), opciones);
             Token token = slot.getToken();
             json.put("datos", new JSONObject());
             try {
@@ -453,11 +530,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String cambiar_pin(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"), opciones);
             try {
                 Token token = slot.getToken();
                 token.modificarPin(req.getString("old_pin"), req.getString("new_pin"));
@@ -478,11 +566,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String cambiar_pin_so(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"), opciones);
             try {
                 Token token = slot.getToken();
                 token.modificarPinSo(req.getString("old_pin"), req.getString("new_pin"));
@@ -503,11 +602,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String test_pin_so(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
+            Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"), opciones);
             try {
                 Token token = slot.getToken();
                 token.test(req.getString("pin"));

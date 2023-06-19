@@ -1,8 +1,9 @@
 package bo.firmadigital.jacobitus.comun.token;
 
-import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus.comun.pkcs11.PKCS11;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -117,13 +118,12 @@ public class GestorSlot {
      * @param software Bandera para incluir (true) o excluir (false) los tokens por software.
      * @return Retorna la lista de Slot de todos los token disponibles.
      */
-    public synchronized Slot[] listarSlots(boolean software) {
+    public synchronized Slot[] listarSlots(boolean software, Opciones opciones) {
         slots.clear();
         try {
-            Config config = Config.getInstance();
-            if (config.getDriver() == null) {
-                List<JSONObject> tokens = SmartCard.cards();
-                if (tokens.isEmpty() && libreria == null && config.getToken() == null && !config.isHsmEnabled()) {
+            if (opciones.getControlador() == null) {
+                List<JSONObject> tokens = SmartCard.cards(opciones);
+                if (tokens.isEmpty() && libreria == null && opciones.getToken() == null && !opciones.getHsmHabilitado()) {
                     throw new RuntimeException("No se encontro ningun token conectado.");
                 }
                 if (tokens.size() > 1) {
@@ -146,7 +146,7 @@ public class GestorSlot {
                     libreria = getLib(tokens.get(0).getString("id"));
                 }
             } else {
-                libreria = config.getDriver().getPath();
+                libreria = opciones.getControlador().getPath();
             }
             if (libreria != null) {
                 sunPKCS11 = sunPKCS11.configure(obtenerConfiguracion("token", null, null));
@@ -154,17 +154,17 @@ public class GestorSlot {
                 PKCS11 p11 = new PKCS11(sunPKCS11);
                 long[] lista = p11.C_GetSlotList(true);
                 for (long id : lista) {
-                    slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id, null)));
+                    slots.put(id, new Slot(id, p11, obtenerConfiguracion("token", id, null), opciones));
                 }
                 p11.logout();
                 Security.removeProvider(sunPKCS11.getName());
                 sunPKCS11.clear();
             }
-            if (software && config.getToken() != null) {
-                slots.put(-1l, new Slot(config.getToken().getPath()));
+            if (software && opciones.getToken() != null) {
+                slots.put(-1l, new Slot(opciones.getToken().getPath(), opciones));
             }
-            if (config.isHsmEnabled() && config.getHsmJWT() != null) {
-                slots.put(-1001l, new Slot(-1001));
+            if (opciones.getHsmHabilitado() && opciones.getJwtHsm() != null) {
+                slots.put(-1001l, new Slot(-1001, opciones));
             }
         } catch (JSONException | IOException ex) {
             Logger.getLogger(GestorSlot.class.getName()).log(Level.SEVERE, null, ex);
@@ -178,8 +178,8 @@ public class GestorSlot {
      *
      * @return Retorna la lista de Slot de todos los token disponibles.
      */
-    public synchronized Slot[] listarSlots() {
-        return listarSlots(true);
+    public synchronized Slot[] listarSlots(Opciones opciones) {
+        return listarSlots(true, opciones);
     }
 
     /**
@@ -189,9 +189,9 @@ public class GestorSlot {
      * conectado el token.
      * @return Retorna un objeto Slot.
      */
-    public synchronized Slot obtenerSlot(long slotID) {
+    public synchronized Slot obtenerSlot(long slotID, Opciones opciones) {
         if (!slots.containsKey(slotID)) {
-            listarSlots();
+            listarSlots(opciones);
         }
         return slots.get(slotID);
     }

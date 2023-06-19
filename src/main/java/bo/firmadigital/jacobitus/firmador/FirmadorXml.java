@@ -54,8 +54,9 @@ import org.xml.sax.SAXException;
  *
  * @author ADSIB
  */
-public class FirmarXml implements Firmar {
-    private static FirmarXml firmarXml;
+public class FirmadorXml implements IFirmador {
+    private Opciones opciones = null;
+    private static FirmadorXml firmarXml;
     private final long slot;
     private final String label;
     private final String pass;
@@ -67,31 +68,32 @@ public class FirmarXml implements Firmar {
         Init.init();
     }
 
-    private FirmarXml(long slot, String label, String pass, String node) {
+    private FirmadorXml(long slot, String label, String pass, String node, Opciones opciones) {
+        this.opciones = opciones;
         this.slot = slot;
         this.label = label;
         this.pass = pass;
         this.node = node;
     }
 
-    public static FirmarXml getInstance(long slot, String label, String pass) {
-        return getInstance(slot, label, pass, null);
+    public static FirmadorXml getInstance(long slot, String label, String pass, Opciones opciones) {
+        return getInstance(slot, label, pass, opciones);
     }
 
-    public static FirmarXml getInstance(long slot, String label, String pass, String node) {
+    public static FirmadorXml getInstance(long slot, String label, String pass, String node, Opciones opciones) {
         if (firmarXml == null) {
-            firmarXml = new FirmarXml(slot, label, pass, node);
+            firmarXml = new FirmadorXml(slot, label, pass, node, opciones);
         } else {
             if (firmarXml.slot != slot || !firmarXml.label.equals(label) || !firmarXml.pass.equals(pass)) {
-                firmarXml = new FirmarXml(slot, label, pass, node);
+                firmarXml = new FirmadorXml(slot, label, pass, node, opciones);
             } else {
                 if (firmarXml.node == null) {
                     if (node != null) {
-                        firmarXml = new FirmarXml(slot, label, pass, node);
+                        firmarXml = new FirmadorXml(slot, label, pass, node, opciones);
                     }
                 } else {
                     if (!firmarXml.node.equals(node)) {
-                        firmarXml = new FirmarXml(slot, label, pass, node);
+                        firmarXml = new FirmadorXml(slot, label, pass, node, opciones);
                     }
                 }
             }
@@ -113,7 +115,7 @@ public class FirmarXml implements Firmar {
     public void firmar(InputStream is, OutputStream os, boolean param) throws IOException, GeneralSecurityException {
         if (param) {
             try {
-                Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+                Token token = GestorSlot.getInstance().obtenerSlot(slot, this.opciones).getToken();
                 token.iniciar(pass);
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 factory.setNamespaceAware(true);
@@ -151,7 +153,7 @@ public class FirmarXml implements Firmar {
             }
         } else {
             try {
-                Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+                Token token = GestorSlot.getInstance().obtenerSlot(slot, this.opciones).getToken();
                 token.iniciar(pass);
                 ElementProxy.setDefaultPrefix(Constants.SignatureSpecNS, "");
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

@@ -5,14 +5,14 @@
  */
 package bo.firmadigital.jacobitus4.resources;
 
-import bo.firmadigital.jacobitus.firmador.Firmar;
-import bo.firmadigital.jacobitus.firmador.FirmarPKCS7;
-import bo.firmadigital.jacobitus.firmador.FirmarPdf;
-import bo.firmadigital.jacobitus.firmador.FirmarXml;
+import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.FirmadorXml;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.pojo.CompleteSign;
 import bo.firmadigital.jacobitus4.pojo.Signs;
+import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.utilidades.Base64StreamParser;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
@@ -68,6 +68,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import bo.firmadigital.jacobitus.firmador.IFirmador;
+import bo.firmadigital.jacobitus.firmador.Opciones;
 
 /**
  *
@@ -80,13 +82,24 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarJson(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             byte[] dataByte = Base64.getDecoder().decode(req.getString("data"));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.listarSlots();
-            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+            gestorSlot.listarSlots(opciones);
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), opciones);
             Token token = slot.getToken();
             token.iniciar(req.getString("pin"));
             // Crea un firmador RSA256
@@ -272,9 +285,22 @@ public class FirmadorRest {
             } finally {
                 jsonReader.close();
             }
+
+            Config config = Config.getInstance();
+            Opciones opciones = new Opciones();
+            opciones.setControlador(config.getDriver());
+            opciones.setToken(config.getToken());
+            opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+            opciones.setApiSelloTiempo(config.getTS());
+            opciones.setJwtSelloTiempo(config.getTSJWT());
+            opciones.setHsmHabilitado(config.isHsmEnabled());
+            opciones.setTipoHsm(config.getHsmType());
+            opciones.setApiHsm(config.getHsmCloud());
+            opciones.setJwtHsm(config.getHsmJWT());
+            
             if (slot == null) {
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots();
+                Slot[] slots = gestorSlot.listarSlots(opciones);
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -284,11 +310,11 @@ public class FirmadorRest {
                 json.put("datos", datos);
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Firmar firmar;
+                IFirmador firmar;
                 if (x == null) {
-                    firmar = FirmarPdf.getInstance(slot, alias, pin);
+                    firmar = FirmadorPdf.getInstance(slot, alias, pin, opciones);
                 } else {
-                    firmar = FirmarPdf.getInstance(slot, alias, pin, image, x, y);
+                    firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, opciones);
                 }
                 firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
 
@@ -315,12 +341,23 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarSolicitudes(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.listarSlots();
-            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+            gestorSlot.listarSlots(opciones);
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), opciones);
             Token token = slot.getToken();
             token.iniciar(req.getString("pin"));
             JSONArray data = req.getJSONArray("data");
@@ -398,16 +435,27 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarHash(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots();
+            Slot[] slots = gestorSlot.listarSlots(opciones);
             if (!req.has("slot") && slots.length == 1) {
                 req.put("slot", slots[0].getSlotID());
             }
             if (req.has("slot") && req.has("pin") && req.has("alias") && req.has("hash")) {
-                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
+                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), opciones);
                 Token token = slot.getToken();
                 token.iniciar(req.getString("pin"));
                 JSONObject datos = new JSONObject();
@@ -475,6 +523,17 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarPKCS7(InputStream body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             String pin = null, alias = null;
@@ -523,7 +582,7 @@ public class FirmadorRest {
             }
             if (slot == null) {
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots();
+                Slot[] slots = gestorSlot.listarSlots(opciones);
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -533,7 +592,7 @@ public class FirmadorRest {
                 json.put("datos", datos);
 
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    FirmarPKCS7 firmar = FirmarPKCS7.getInstance(slot, alias, pin);
+                    FirmadorPKCS7 firmar = FirmadorPKCS7.getInstance(slot, alias, pin, opciones);
                     try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
                         firmar.firmar(is, out, detached);
                     }
@@ -594,6 +653,17 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarXml(InputStream body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             String pin = null, alias = null;
@@ -654,7 +724,7 @@ public class FirmadorRest {
             }
             if (slot == null) {
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots();
+                Slot[] slots = gestorSlot.listarSlots(opciones);
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -664,11 +734,11 @@ public class FirmadorRest {
                 json.put("datos", datos);
 
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    FirmarXml firmar;
+                    FirmadorXml firmar;
                     if (node == null) {
-                        firmar = FirmarXml.getInstance(slot, alias, pin);
+                        firmar = FirmadorXml.getInstance(slot, alias, pin, opciones);
                     } else {
-                        firmar = FirmarXml.getInstance(slot, alias, pin, node);
+                        firmar = FirmadorXml.getInstance(slot, alias, pin, node, opciones);
                     }
                     if (digest != null) {
                         switch (digest.toUpperCase()) {
@@ -775,12 +845,23 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String firmarLotePdf(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             if (!req.has("slot")) {
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots();
+                Slot[] slots = gestorSlot.listarSlots(opciones);
                 if (slots.length == 1) {
                     req.put("slot", slots[0].getSlotID());
                 }
@@ -789,7 +870,7 @@ public class FirmadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Token token = GestorSlot.getInstance().obtenerSlot(req.getLong("slot")).getToken();
+                Token token = GestorSlot.getInstance().obtenerSlot(req.getLong("slot"), opciones).getToken();
                 token.iniciar(req.getString("pin"));
                 try {
                     if (token.obtenerCertificado(req.getString("alias")) == null) {
@@ -799,7 +880,7 @@ public class FirmadorRest {
                     JSONArray pdfsFirmados = new JSONArray();
                     for (int i = 0; i < pdfs.length(); i++) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        FirmarPdf.firmar(new ByteArrayInputStream(Base64.getDecoder().decode(pdfs.getJSONObject(i).getString("pdf"))), out, pdfs.getJSONObject(i).has("bloquear") && pdfs.getJSONObject(i).getBoolean("bloquear"), token, req.getString("alias"));
+                        FirmadorPdf.firmar(new ByteArrayInputStream(Base64.getDecoder().decode(pdfs.getJSONObject(i).getString("pdf"))), out, pdfs.getJSONObject(i).has("bloquear") && pdfs.getJSONObject(i).getBoolean("bloquear"), token, req.getString("alias"));
                         JSONObject pdf = new JSONObject();
                         pdf.put("id", pdfs.getJSONObject(i).getString("id"));
                         pdf.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
@@ -860,11 +941,22 @@ public class FirmadorRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sign(String body) {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots(true);
+            Slot[] slots = gestorSlot.listarSlots(true, opciones);
             TokenSelected dt;
             JSONArray pdfs, jsons;
             if (req.has("pdf")) {

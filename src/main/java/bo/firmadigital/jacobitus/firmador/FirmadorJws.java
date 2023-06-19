@@ -30,24 +30,26 @@ import java.util.logging.Logger;
  *
  * @author ADSIB
  */
-public class FirmarJws implements Firmar {
-    private static FirmarJws firmarJws;
+public class FirmadorJws implements IFirmador {
+    private Opciones opciones = null;
+    private static FirmadorJws firmarJws;
     private final long slot;
     private final String label;
     private final String pass;
 
-    private FirmarJws(long slot, String label, String pass) {
+    private FirmadorJws(long slot, String label, String pass, Opciones opciones) {
+        this.opciones = opciones;
         this.slot = slot;
         this.label = label;
         this.pass = pass;
     }
 
-    public static FirmarJws getInstance(long slot, String label, String pass) {
+    public static FirmadorJws getInstance(long slot, String label, String pass, Opciones opciones) {
         if (firmarJws == null) {
-            firmarJws = new FirmarJws(slot, label, pass);
+            firmarJws = new FirmadorJws(slot, label, pass, opciones);
         } else {
             if (firmarJws.slot != slot || !firmarJws.label.equals(label) || !firmarJws.pass.equals(pass)) {
-                firmarJws = new FirmarJws(slot, label, pass);
+                firmarJws = new FirmadorJws(slot, label, pass, opciones);
             }
         }
         return firmarJws;
@@ -56,7 +58,7 @@ public class FirmarJws implements Firmar {
     @Override
     public synchronized void firmar(InputStream is, OutputStream os, boolean param) throws IOException, GeneralSecurityException {
         try {
-            Token token = GestorSlot.getInstance().obtenerSlot(slot).getToken();
+            Token token = GestorSlot.getInstance().obtenerSlot(slot, this.opciones).getToken();
             token.iniciar(pass);
             PrivateKey privateKey = token.obtenerClavePrivada(label);
             if (privateKey == null) {
@@ -76,7 +78,7 @@ public class FirmarJws implements Firmar {
             os.write(jwsObject.serialize().getBytes());
             token.salir();
         } catch(JOSEException ex) {
-            Logger.getLogger(FirmarJws.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FirmadorJws.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -103,7 +105,7 @@ public class FirmarJws implements Firmar {
             jwsObject.sign(jwsSigner);
             os.write(jwsObject.serialize().getBytes());
         } catch(JOSEException ex) {
-            Logger.getLogger(FirmarJws.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FirmadorJws.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4.resources3;
 
-import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.SmartCard;
@@ -57,11 +57,22 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String tokens() {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             try {
                 JSONArray datos = new JSONArray();
-                List<JSONObject> tokens = SmartCard.cards();
+                List<JSONObject> tokens = SmartCard.cards(opciones);
                 for (JSONObject token : tokens) {
                     datos.put(token.get("name"));
                 }
@@ -83,6 +94,17 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String start(@QueryParam("pin") String pin) {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isTSEnabled());
+        opciones.setApiHsm(config.getTS());
+        opciones.setJwtHsm(config.getTSJWT());
+
         JSONObject json = new JSONObject();
         try {
             if (pin == null) {
@@ -97,7 +119,7 @@ public class TokenRest {
                         slots = null;
                     }
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    slots = gestorSlot.listarSlots();
+                    slots = gestorSlot.listarSlots(opciones);
                     if (slots.length == 1) {
                         slots[0].getToken().iniciar(pin);
                         json.put("finalizado", true);
@@ -241,7 +263,7 @@ public class TokenRest {
                                 JSONObject datos = new JSONObject();
                                 byte[] pdf = Base64.getDecoder().decode(req.getString("pdf_base64"));
                                 ByteArrayOutputStream os = new ByteArrayOutputStream();
-                                FirmarPdf.firmar(new ByteArrayInputStream(pdf), os, false, token, req.getString("alias"));
+                                FirmadorPdf.firmar(new ByteArrayInputStream(pdf), os, false, token, req.getString("alias"));
                                 datos.put("pdf_base64", Base64.getEncoder().encodeToString(os.toByteArray()));
                                 datos.put("nombre_archivo", req.getString("nombre_archivo"));
                                 datos.put("certificado", cert);

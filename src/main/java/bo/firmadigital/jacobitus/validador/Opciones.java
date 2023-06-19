@@ -1,7 +1,7 @@
 package bo.firmadigital.jacobitus.validador;
 
 public class Opciones {
-    private Boolean proxyHabilitado;
+    private Boolean proxyHabilitado = false;
     private String servidorProxy;
     private Integer puertoServidorProxy;
 

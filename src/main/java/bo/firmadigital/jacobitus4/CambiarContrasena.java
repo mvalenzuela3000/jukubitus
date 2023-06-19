@@ -7,6 +7,8 @@ package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Token;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus4.util.Config;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -70,8 +72,19 @@ public class CambiarContrasena extends Stage {
                     if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
                         error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
                     } else {
+                        Config config = Config.getInstance();
+                        Opciones opciones = new Opciones();
+                        opciones.setControlador(config.getDriver());
+                        opciones.setToken(config.getToken());
+                        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+                        opciones.setApiSelloTiempo(config.getTS());
+                        opciones.setJwtSelloTiempo(config.getTSJWT());
+                        opciones.setHsmHabilitado(config.isTSEnabled());
+                        opciones.setApiHsm(config.getTS());
+                        opciones.setJwtHsm(config.getTSJWT());
+
                         GestorSlot gestorSlot = GestorSlot.getInstance();
-                        Token token = gestorSlot.obtenerSlot(slot).getToken();
+                        Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
                         try {
                             String oldPass = oldPasswordField.getText();
                             if (oldPass.startsWith("@unlock:")) {

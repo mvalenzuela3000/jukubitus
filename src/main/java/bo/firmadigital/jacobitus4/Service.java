@@ -5,14 +5,17 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus.firmador.FirmarJws;
-import bo.firmadigital.jacobitus.firmador.FirmarPdf;
+import bo.firmadigital.jacobitus.firmador.FirmadorJws;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.Token;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus4.util.Config;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
@@ -77,6 +80,17 @@ public class Service extends Stage {
         setScene(scene);
         int r = 0;
         if (tokenSelected.getSlot() == null) {
+            Config config = Config.getInstance();
+            Opciones opciones = new Opciones();
+            opciones.setControlador(config.getDriver());
+            opciones.setToken(config.getToken());
+            opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+            opciones.setApiSelloTiempo(config.getTS());
+            opciones.setJwtSelloTiempo(config.getTSJWT());
+            opciones.setHsmHabilitado(config.isTSEnabled());
+            opciones.setApiHsm(config.getTS());
+            opciones.setJwtHsm(config.getTSJWT());
+
             ObservableList<DetalleToken> tokens = FXCollections.observableArrayList();
             for (Slot slot : tokenSelected.getSlots()) {
                 tokens.add(new DetalleToken(slot.detalleToken()));
@@ -85,7 +99,7 @@ public class Service extends Stage {
             tokensChoiceBox.prefWidthProperty().bind(root.widthProperty());
             tokensChoiceBox.setPrefHeight(27);
             tokensChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> ov, Number t, Number t1) -> {
-                tokenSelected.setSlot(GestorSlot.getInstance().obtenerSlot(tokens.get(ov.getValue().intValue()).getSlot()));
+                tokenSelected.setSlot(GestorSlot.getInstance().obtenerSlot(tokens.get(ov.getValue().intValue()).getSlot(), opciones));
             });
             tokensChoiceBox.getSelectionModel().selectFirst();
             root.add(tokensChoiceBox, 0, 0, 2, 1);
@@ -151,12 +165,23 @@ public class Service extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
+                Config config = Config.getInstance();
+                Opciones opciones = new Opciones();
+                opciones.setControlador(config.getDriver());
+                opciones.setToken(config.getToken());
+                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+                opciones.setApiSelloTiempo(config.getTS());
+                opciones.setJwtSelloTiempo(config.getTSJWT());
+                opciones.setHsmHabilitado(config.isTSEnabled());
+                opciones.setApiHsm(config.getTS());
+                opciones.setJwtHsm(config.getTSJWT());
+
                 final JSONArray files = tokenSelected.getFiles();
                 final JSONArray filesJson = tokenSelected.getFilesJson() == null ? new JSONArray() : tokenSelected.getFilesJson();
                 if (files.length() + filesJson.length() == 0) {
                     updateProgress(100, 100);
                 } else {
-                    Token token = GestorSlot.getInstance().obtenerSlot(tokenSelected.getSlot().getSlotID()).getToken();
+                    Token token = GestorSlot.getInstance().obtenerSlot(tokenSelected.getSlot().getSlotID(), opciones).getToken();
                     token.iniciar(tokenSelected.getPin());
                     JSONArray arr = new JSONArray();
                     int i;
@@ -166,13 +191,13 @@ public class Service extends Stage {
                             byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
                             switch (format) {
                                 case "both":
-                                    FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    FirmadorPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                                     break;
                                 case "pades":
-                                    FirmarPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    FirmadorPdf.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                                     break;
                                 case "jws":
-                                    FirmarJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                                    FirmadorJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                                     break;
                                 default:
                                     throw new Exception(String.format("Formato %s no admitido.", format));
@@ -197,7 +222,7 @@ public class Service extends Stage {
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                             String[] base64 = filesJson.getJSONObject(j).getString("base64").split("base64,");
                             byte[] file = Base64.getDecoder().decode(base64.length == 2 ? base64[1] : base64[0]);
-                            FirmarJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
+                            FirmadorJws.firmar(new ByteArrayInputStream(file), out, false, token, tokenSelected.getAlias());
                             JSONObject obj = new JSONObject();
                             obj.put("name", filesJson.getJSONObject(j).getString("name"));
                             obj.put("base64", Base64.getEncoder().encodeToString(out.toByteArray()));
