@@ -113,6 +113,30 @@ public class App extends Application {
     private static final TokenSelected tokenSelected = new TokenSelected();
     public static final String VERSION = "1.1.0";
 
+    private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+
+    private bo.firmadigital.jacobitus.validador.Opciones getOpcionesValidador() {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.validador.Opciones opciones = new bo.firmadigital.jacobitus.validador.Opciones();
+        opciones.setProxyHabilitado(config.isProxyEnabled());
+        opciones.setServidorProxy(config.getProxyIP());
+        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        return opciones;
+    }
+
     @Override
     public void start(Stage stage) {
         stage.setTitle("ADSIB - Jacobitus Total");
@@ -357,12 +381,7 @@ public class App extends Application {
             Pdf pdf = new Pdf(stage);
             pdf.showAndWait();
             if (pdf.getPath() != null) {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                tableFile.getItems().add(new ValidadorPdf(new File(pdf.getPath()), opciones));
+                tableFile.getItems().add(new ValidadorPdf(new File(pdf.getPath()), this.getOpcionesValidador()));
             }
         });
         pdfMenu.getItems().addAll(nuevoItem);
@@ -546,18 +565,7 @@ public class App extends Application {
         if (url == null) {
             if (param == null) {
                 if (taskBar) {
-                    Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
-                    opciones.setControlador(config.getDriver());
-                    opciones.setToken(config.getToken());
-                    opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                    opciones.setApiSelloTiempo(config.getTS());
-                    opciones.setJwtSelloTiempo(config.getTSJWT());
-                    opciones.setHsmHabilitado(config.isTSEnabled());
-                    opciones.setApiHsm(config.getTS());
-                    opciones.setJwtHsm(config.getTSJWT());
-
-                    SmartCard.cards(opciones);
+                    SmartCard.cards(this.getOpcionesFirmador());
                 } else {
                     new Thread(listarTokens()).start();
                 }
@@ -594,20 +602,10 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                Config config = Config.getInstance();
-                bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-                
+               
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Slot[] slots = gestorSlot.listarSlots(opciones);
+                    Slot[] slots = gestorSlot.listarSlots(getOpcionesFirmador());
                     List<CK_TOKEN_INFO> list = new LinkedList();
                     for (Slot s : slots) {
                         list.add(s.detalleToken());
@@ -649,21 +647,16 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
-                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i)), opciones));
+                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".docx")) {
-                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i)), opciones));
+                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
-                        certs.add(new ValidadorPdf(files.get(i), opciones));
+                        certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
                     } else {
-                        certs.add(new ValidadorPKCS7(files.get(i), opciones));
+                        certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                     }
                     updateProgress(i + 1, files.size());
                 }
@@ -686,17 +679,6 @@ public class App extends Application {
             @Override
             protected Object call() throws Exception {
                 Config config = Config.getInstance();
-                bo.firmadigital.jacobitus.firmador.Opciones opcionesFirmador = new bo.firmadigital.jacobitus.firmador.Opciones();
-                opcionesFirmador.setControlador(config.getDriver());
-                opcionesFirmador.setToken(config.getToken());
-                opcionesFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
-                opcionesFirmador.setApiSelloTiempo(config.getTS());
-                opcionesFirmador.setJwtSelloTiempo(config.getTSJWT());
-                opcionesFirmador.setHsmHabilitado(config.isHsmEnabled());
-                opcionesFirmador.setTipoHsm(config.getHsmType());
-                opcionesFirmador.setApiHsm(config.getHsmCloud());
-                opcionesFirmador.setJwtHsm(config.getHsmJWT());
-
                 bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                 opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
                 opcionesValidador.setServidorProxy(config.getProxyIP());
@@ -709,7 +691,7 @@ public class App extends Application {
                 } else {
                     for (int i = 0; i < files.size(); i++) {
                         try {
-                            IFirmador firmar = FirmadorPdf.getInstance(slot, label, pass, opcionesFirmador);
+                            IFirmador firmar = FirmadorPdf.getInstance(slot, label, pass, getOpcionesFirmador());
                             String name = new File(files.get(i).getAbsolutePath()).getName();
                             if (!name.endsWith(".pdf")) {
                                 name += ".firmado.pdf";
@@ -752,27 +734,21 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (MagicBytes.PDF.is(files.get(i))) {
-                        certs.add(new ValidadorPdf(files.get(i), opciones));
+                        certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
                     } else {
                         if (MagicBytes.XML.is(files.get(i))) {
-                            certs.add(new ValidadorXml(files.get(i), opciones));
+                            certs.add(new ValidadorXml(files.get(i), getOpcionesValidador()));
                         } else {
                             if (MagicBytes.P7S.is(files.get(i))) {
-                                certs.add(new ValidadorPKCS7(files.get(i), opciones));
+                                certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                             } else {
                                 if (MagicBytes.isJWS(files.get(i))) {
-                                    certs.add(new ValidadorJws(files.get(i), opciones));
+                                    certs.add(new ValidadorJws(files.get(i), getOpcionesValidador()));
                                 } else {
-                                    certs.add(new ValidadorPKCS7(files.get(i), opciones));
+                                    certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                                 }
                             }
                         }
@@ -802,22 +778,12 @@ public class App extends Application {
                     updateProgress(100, 100);
                 } else {
                     Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.firmador.Opciones opcionesFirmador = new bo.firmadigital.jacobitus.firmador.Opciones();
-                    opcionesFirmador.setControlador(config.getDriver());
-                    opcionesFirmador.setToken(config.getToken());
-                    opcionesFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiSelloTiempo(config.getTS());
-                    opcionesFirmador.setJwtSelloTiempo(config.getTSJWT());
-                    opcionesFirmador.setHsmHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiHsm(config.getTS());
-                    opcionesFirmador.setJwtHsm(config.getTSJWT());
-                    
                     bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                     opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
                     opcionesValidador.setServidorProxy(config.getProxyIP());
                     opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
                     
-                    IFirmador firmar = FirmadorPKCS7.getInstance(slot, label, pass, opcionesFirmador);
+                    IFirmador firmar = FirmadorPKCS7.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
                         try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
@@ -849,22 +815,12 @@ public class App extends Application {
                     updateProgress(100, 100);
                 } else {
                     Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.firmador.Opciones opcionesFirmador = new bo.firmadigital.jacobitus.firmador.Opciones();
-                    opcionesFirmador.setControlador(config.getDriver());
-                    opcionesFirmador.setToken(config.getToken());
-                    opcionesFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiSelloTiempo(config.getTS());
-                    opcionesFirmador.setJwtSelloTiempo(config.getTSJWT());
-                    opcionesFirmador.setHsmHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiHsm(config.getTS());
-                    opcionesFirmador.setJwtHsm(config.getTSJWT());
-
                     bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                     opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
                     opcionesValidador.setServidorProxy(config.getProxyIP());
                     opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
 
-                    IFirmador firmar = FirmadorXml.getInstance(slot, label, pass, node, opcionesFirmador);
+                    IFirmador firmar = FirmadorXml.getInstance(slot, label, pass, node, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
                         if (!name.endsWith(".xml")) {
@@ -902,22 +858,12 @@ public class App extends Application {
                     updateProgress(100, 100);
                 } else {
                     Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.firmador.Opciones opcionesFirmador = new bo.firmadigital.jacobitus.firmador.Opciones();
-                    opcionesFirmador.setControlador(config.getDriver());
-                    opcionesFirmador.setToken(config.getToken());
-                    opcionesFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiSelloTiempo(config.getTS());
-                    opcionesFirmador.setJwtSelloTiempo(config.getTSJWT());
-                    opcionesFirmador.setHsmHabilitado(config.isTSEnabled());
-                    opcionesFirmador.setApiHsm(config.getTS());
-                    opcionesFirmador.setJwtHsm(config.getTSJWT());
-
                     bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                     opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
                     opcionesValidador.setServidorProxy(config.getProxyIP());
                     opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
 
-                    IFirmador firmar = FirmadorJws.getInstance(slot, label, pass, opcionesFirmador);
+                    IFirmador firmar = FirmadorJws.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
                         if (name.endsWith(".json")) {
@@ -980,18 +926,11 @@ public class App extends Application {
                             }
                         }
                     }
-                    
-                    Config config = Config.getInstance();
-                    Opciones opciones = new Opciones();
-                    opciones.setProxyHabilitado(config.isProxyEnabled());
-                    opciones.setServidorProxy(config.getProxyIP());
-                    opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
                     List<Validador> certs = new LinkedList();
                     if (MagicBytes.PDF.is(f)) {
-                        certs.add(new ValidadorPdf(f, urlPost, token, opciones));
+                        certs.add(new ValidadorPdf(f, urlPost, token, getOpcionesValidador()));
                     } else {
-                        certs.add(new ValidadorPKCS7(f, urlPost, token, opciones));
+                        certs.add(new ValidadorPKCS7(f, urlPost, token, getOpcionesValidador()));
                     }
                     tableFile.setItems(FXCollections.observableList(certs));
                     if (size == 0) {

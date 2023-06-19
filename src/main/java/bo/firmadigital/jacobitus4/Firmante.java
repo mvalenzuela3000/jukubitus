@@ -46,6 +46,21 @@ public class Firmante extends Stage {
     private boolean bloquea;
     private String node;
 
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+
     public Firmante(Stage parent, long slot, int tipo) {
         this.slot = slot;
         this.tipo = tipo;
@@ -128,20 +143,9 @@ public class Firmante extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();

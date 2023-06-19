@@ -45,6 +45,30 @@ import org.codehaus.jettison.json.JSONObject;
 public class TokenRest {
     private static Slot[] slots;
 
+    private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+    
+    private bo.firmadigital.jacobitus.validador.Opciones getOpcionesValidador() {
+        Config config = Config.getInstance();
+        bo.firmadigital.jacobitus.validador.Opciones opciones = new bo.firmadigital.jacobitus.validador.Opciones();
+        opciones.setProxyHabilitado(config.isProxyEnabled());
+        opciones.setServidorProxy(config.getProxyIP());
+        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        return opciones;
+    }
+
     @GET
     @Path("/")
     @Produces(MediaType.TEXT_HTML)
@@ -57,22 +81,11 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String tokens() {
-        Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        opciones.setApiSelloTiempo(config.getTS());
-        opciones.setJwtSelloTiempo(config.getTSJWT());
-        opciones.setHsmHabilitado(config.isTSEnabled());
-        opciones.setApiHsm(config.getTS());
-        opciones.setJwtHsm(config.getTSJWT());
-
         JSONObject json = new JSONObject();
         try {
             try {
                 JSONArray datos = new JSONArray();
-                List<JSONObject> tokens = SmartCard.cards(opciones);
+                List<JSONObject> tokens = SmartCard.cards(this.getOpcionesFirmador());
                 for (JSONObject token : tokens) {
                     datos.put(token.get("name"));
                 }
@@ -94,17 +107,6 @@ public class TokenRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String start(@QueryParam("pin") String pin) {
-        Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        opciones.setApiSelloTiempo(config.getTS());
-        opciones.setJwtSelloTiempo(config.getTSJWT());
-        opciones.setHsmHabilitado(config.isTSEnabled());
-        opciones.setApiHsm(config.getTS());
-        opciones.setJwtHsm(config.getTSJWT());
-
         JSONObject json = new JSONObject();
         try {
             if (pin == null) {
@@ -119,7 +121,7 @@ public class TokenRest {
                         slots = null;
                     }
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    slots = gestorSlot.listarSlots(opciones);
+                    slots = gestorSlot.listarSlots(this.getOpcionesFirmador());
                     if (slots.length == 1) {
                         slots[0].getToken().iniciar(pin);
                         json.put("finalizado", true);
@@ -157,12 +159,6 @@ public class TokenRest {
                     json.put("mensaje", "Primero debe iniciar sesión.");
                 } else {
                     if (slots.length == 1) {
-                        Config config = Config.getInstance();
-                        Opciones opciones = new Opciones();
-                        opciones.setProxyHabilitado(config.isProxyEnabled());
-                        opciones.setServidorProxy(config.getProxyIP());
-                        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                        
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                         Token token = slots[0].getToken();
                         List<String> labels = token.listarIdentificadorClaves();
@@ -183,7 +179,7 @@ public class TokenRest {
                             cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                             cert.put("alias", label);
                             cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), opciones).getState();
+                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), this.getOpcionesValidador()).getState();
                             if (state == Validador.OCSPState.OK) {
                                 cert.put("OCSP", "no revocado");
                             } else {
@@ -234,12 +230,6 @@ public class TokenRest {
                                 json.put("finalizado", false);
                                 json.put("mensaje", "No se encontró un certificado con el alias solicitado.");
                             } else {
-                                Config config = Config.getInstance();
-                                Opciones opciones = new Opciones();
-                                opciones.setProxyHabilitado(config.isProxyEnabled());
-                                opciones.setServidorProxy(config.getProxyIP());
-                                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                                
                                 DatosCertificado entry = new DatosCertificado(req.getString("alias"), certificate);
                                 JSONObject cert = new JSONObject();
                                 cert.put("esFirmaBolivia", Validador.verificarPKI(entry.getCert()));
@@ -254,7 +244,7 @@ public class TokenRest {
                                 cert.put("inicioValidez", dateFormat.format(entry.getInicioValidez()));
                                 cert.put("finValidez", dateFormat.format(entry.getFinValidez()));
                                 cert.put("esValido", entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                                Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), opciones).getState();
+                                Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), this.getOpcionesValidador()).getState();
                                 if (state == Validador.OCSPState.OK) {
                                     cert.put("OCSP", "no revocado");
                                 } else {

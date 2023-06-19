@@ -27,6 +27,21 @@ import javafx.stage.Stage;
  * @author ADSIB
  */
 public class CambiarContrasena extends Stage {
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+
     public CambiarContrasena(Stage parent, long slot) {
         setTitle("Pin del token");
         initOwner(parent);
@@ -72,19 +87,8 @@ public class CambiarContrasena extends Stage {
                     if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
                         error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
                     } else {
-                        Config config = Config.getInstance();
-                        Opciones opciones = new Opciones();
-                        opciones.setControlador(config.getDriver());
-                        opciones.setToken(config.getToken());
-                        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                        opciones.setApiSelloTiempo(config.getTS());
-                        opciones.setJwtSelloTiempo(config.getTSJWT());
-                        opciones.setHsmHabilitado(config.isTSEnabled());
-                        opciones.setApiHsm(config.getTS());
-                        opciones.setJwtHsm(config.getTSJWT());
-
                         GestorSlot gestorSlot = GestorSlot.getInstance();
-                        Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                        Token token = gestorSlot.obtenerSlot(slot, this.getOpciones()).getToken();
                         try {
                             String oldPass = oldPasswordField.getText();
                             if (oldPass.startsWith("@unlock:")) {

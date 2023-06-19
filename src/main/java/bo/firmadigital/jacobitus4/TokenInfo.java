@@ -66,6 +66,21 @@ public class TokenInfo extends Stage {
     private String pass = null;
     private String label;
 
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+    
     public TokenInfo(Stage parent, long slot) {
         this.slot = slot;
         setTitle("Claves contenidas en el Token - " + slot);
@@ -190,20 +205,9 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();
@@ -252,20 +256,9 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     BigInteger max = new BigInteger("1000000000000");
                     BigInteger id = new BigInteger(max.bitLength(), new SecureRandom()).mod(max);
@@ -296,17 +289,6 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     String pem;
                     try (FileInputStream is = new FileInputStream(file)) {
@@ -314,7 +296,7 @@ public class TokenInfo extends Stage {
                         pem = Certificate.getPem(cert);
                     }
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     try {
                         token.cargarCertificado(pem, label);
@@ -346,20 +328,9 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     try {
                         DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
@@ -398,20 +369,9 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     try {
                         DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
@@ -449,20 +409,9 @@ public class TokenInfo extends Stage {
         Task task = new Task() {
             @Override
             protected Object call() {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Token token = gestorSlot.obtenerSlot(slot, opciones).getToken();
+                    Token token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
                     token.iniciar(pass);
                     token.eliminarClaves(label);
                     token.salir();

@@ -42,6 +42,15 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/")
 public class ValidadorRest {
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setProxyHabilitado(config.isProxyEnabled());
+        opciones.setServidorProxy(config.getProxyIP());
+        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        return opciones;
+    }
+
     /**
      * @api {post} /api/validar_pdf Validar firma de un documento pdf.
      * @apiGroup Validador
@@ -128,13 +137,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                
-                Validador validar = new ValidadorPdf(new ByteArrayInputStream(file), opciones);
+                Validador validar = new ValidadorPdf(new ByteArrayInputStream(file), this.getOpciones());
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -271,12 +274,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                Validador validar = new ValidadorPKCS7(new ByteArrayInputStream(file), opciones);
+                Validador validar = new ValidadorPKCS7(new ByteArrayInputStream(file), this.getOpciones());
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -411,13 +409,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
-                Validador validar = new ValidadorXml(new ByteArrayInputStream(file), opciones);
+                Validador validar = new ValidadorXml(new ByteArrayInputStream(file), this.getOpciones());
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {
@@ -550,13 +542,7 @@ public class ValidadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setProxyHabilitado(config.isProxyEnabled());
-                opciones.setServidorProxy(config.getProxyIP());
-                opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
-                Validador validar = new ValidadorJws(new ByteArrayInputStream(file), opciones);
+                Validador validar = new ValidadorJws(new ByteArrayInputStream(file), this.getOpciones());
                 JSONArray firmas = new JSONArray();
                 datos.put("firmas", firmas);
                 for (CertDate cert : validar) {

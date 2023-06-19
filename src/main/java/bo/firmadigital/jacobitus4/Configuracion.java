@@ -62,6 +62,21 @@ public class Configuracion extends Stage {
     private TextField textFieldTS;
     private TextField textFieldTSJWT;
 
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+
     public Configuracion(Stage parent) {
         setTitle("Panel de configuración");
         initOwner(parent);
@@ -234,18 +249,7 @@ public class Configuracion extends Stage {
             ContrasenaNueva contrasena = new ContrasenaNueva(parent);
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
-                Config config = Config.getInstance();
-                Opciones opciones = new Opciones();
-                opciones.setControlador(config.getDriver());
-                opciones.setToken(config.getToken());
-                opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-                opciones.setApiSelloTiempo(config.getTS());
-                opciones.setJwtSelloTiempo(config.getTSJWT());
-                opciones.setHsmHabilitado(config.isTSEnabled());
-                opciones.setApiHsm(config.getTS());
-                opciones.setJwtHsm(config.getTSJWT());
-                
-                Slot slot = new Slot(config.getTokenToCreate(), opciones);
+                Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
                 TokenPKCS12 token = new TokenPKCS12(slot);
                 try {
                     token.crear(contrasena.getPass());

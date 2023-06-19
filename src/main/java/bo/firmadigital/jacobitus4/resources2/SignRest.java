@@ -29,6 +29,21 @@ import org.codehaus.jettison.json.JSONObject;
  */
 @Path("/")
 public class SignRest {
+    private Opciones getOpciones() {
+        Config config = Config.getInstance();
+        Opciones opciones = new Opciones();
+        opciones.setControlador(config.getDriver());
+        opciones.setToken(config.getToken());
+        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
+        opciones.setApiSelloTiempo(config.getTS());
+        opciones.setJwtSelloTiempo(config.getTSJWT());
+        opciones.setHsmHabilitado(config.isHsmEnabled());
+        opciones.setTipoHsm(config.getHsmType());
+        opciones.setApiHsm(config.getHsmCloud());
+        opciones.setJwtHsm(config.getHsmJWT());
+        return opciones;
+    }
+    
     /**
      * @api {post} /sign Firma documentos pdf en bloque.
      * @apiGroup Sign
@@ -56,17 +71,6 @@ public class SignRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sign(String body) {
-        Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        opciones.setApiSelloTiempo(config.getTS());
-        opciones.setJwtSelloTiempo(config.getTSJWT());
-        opciones.setHsmHabilitado(config.isTSEnabled());
-        opciones.setApiHsm(config.getTS());
-        opciones.setJwtHsm(config.getTSJWT());
-
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
@@ -75,7 +79,7 @@ public class SignRest {
                 software = req.getBoolean("software");
             }
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots(software, opciones);
+            Slot[] slots = gestorSlot.listarSlots(software, this.getOpciones());
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");
             }
