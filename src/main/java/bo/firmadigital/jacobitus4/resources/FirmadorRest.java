@@ -866,7 +866,7 @@ public class FirmadorRest {
      *         "name":"22949.pdf"
      *     }],
      *     "json":[{
-     *         "base64":"data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....",
+     *         "base64":"data:application/json;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....",
      *         "name":"22950.pdf"
      *     }],
      *     "ci":"6817702"
