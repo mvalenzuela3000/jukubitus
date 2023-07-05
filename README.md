@@ -68,11 +68,16 @@ Verificamos la instalación.
 $ git --version
 ```
 
+Habilitamos el cache de credenciales para facilitar el manejo de submódulos
+```bash
+$ git config --global credential.helper cache
+```
+
 ## Compilación del proyecto
 
 Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 ```
-$ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus4.git
+$ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus4.git --recursive
 ```
 
 ### Gradle
