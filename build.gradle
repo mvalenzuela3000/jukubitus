@@ -14,6 +14,8 @@ repositories {
 }
 
 dependencies {
+    implementation fileTree(dir: 'lib', include: '*.jar')
+    implementation project(':libreria')
     implementation 'org.openjfx:javafx-controls:15.0.1'
     implementation 'org.openjfx:javafx-swing:15.0.1'
     implementation 'org.eclipse.jetty:jetty-server:9.4.34.v20201102'
@@ -33,7 +35,7 @@ dependencies {
 }
 
 group = 'bo.firmadigital'
-version = '1.0-SNAPSHOT'
+version = '1.1.0-SNAPSHOT'
 description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
 
