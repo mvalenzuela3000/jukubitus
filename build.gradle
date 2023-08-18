@@ -91,40 +91,32 @@ tasks.withType(Javadoc) {
 
 task deb(type: Exec) {
     workingDir './'
-    commandLine(jpackageCommand +
-            [
-             '--type', 'deb',
-             '--icon', './iconos/icon.png'
-            ]
-    )
+    commandLine(jpackageCommand + [
+        '--type', 'deb',
+        '--icon', './iconos/icon.png'
+    ])
 }
 
 task rpm(type: Exec) {
     workingDir './'
-    commandLine(jpackageCommand +
-            [
-             '--type', 'rpm',
-             '--icon', './iconos/icon.png'
-            ]
-    )
+    commandLine(jpackageCommand + [
+        '--type', 'rpm',
+        '--icon', './iconos/icon.png'
+    ])
 }
 
 task msi(type: Exec) {
     workingDir './'
-    commandLine(jpackageCommand +
-            [
-             '--type', 'msi',
-             '--icon', './iconos/icon.png'
-            ]
-    )
+    commandLine(jpackageCommand + [
+        '--type', 'msi',
+        '--icon', './iconos/icon.png'
+    ])
 }
 
 task dmg(type: Exec) {
     workingDir './'
-    commandLine(jpackageCommand +
-            [
-             '--type', 'dmg',
-             '--icon', './iconos/icon.png'
-            ]
-    )
+    commandLine(jpackageCommand + [
+        '--type', 'dmg',
+        '--icon', './iconos/icon.png'
+    ])
 }
