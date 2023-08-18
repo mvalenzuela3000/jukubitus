@@ -51,6 +51,10 @@ $ unzip -d /opt/gradle gradle-7.6.2-bin.zip
 $ ls /opt/gradle/gradle-7.6.2
 ```
 
+```bash
+$ export PATH=$PATH:/opt/gradle/gradle-7.6.2/bin
+```
+
 Verificamos la instalación de Gradle.
 ```bash
 $ gradle --version
@@ -93,17 +97,36 @@ $ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/reso
 
 ## Generar instalador
 
-### Windows
+### Linux
+Para la generación de un archivo deb/rpm es necesario:
+
+- fakeroot para Debian/Ubuntu Linux.
+- rpm-build para Red Hat Linux.
+
+Ejecutamos el siguiente comando:
 ```
-jpackage --input build/libs --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type msi --icon iconos/icon.ico -d dist --win-menu
+$ ./gradlew deb
+```
+```
+$ ./gradlew rpm
 ```
 
-### Linux
+### Windows
+Para la generación de un archivo exe/msi es necesario:
+
+- WiX 3.0 o posterior.
+
+Ejecutamos el siguiente comando:
 ```
-jpackage --input build/libs --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type deb --icon iconos/icon.png -d dist
+$ ./gradlew msi
 ```
 
 ### MacOS
+Para la generación de un archivo pkg (dmg) es necesario:
+
+- Las herramientas de línea de comandos de Xcode cuando se usa la opción --mac-sign para solicitar que se firme el paquete y cuando se usa la opción --icon para personalizar la imagen DMG.
+
+Ejecutamos el siguiente comando:
 ```
-/Library/Java/JavaVirtualMachines/jdk-15.0.2.jdk/Contents/Home/bin/jpackage --input build/libs --name "Jacobitus Total" --main-jar jacobitus4.jar --main-class bo.firmadigital.jacobitus4.Main --type pkg --icon iconos/icon.icns -d dist
+$ ./gradlew dmg
 ```

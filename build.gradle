@@ -38,9 +38,23 @@ dependencies {
 }
 
 group = 'bo.firmadigital'
-version = '1.1.0-SNAPSHOT'
+version = '1.2'
 description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
+
+def appName = 'Jacobitus Total'
+def jpackageCommand = [
+    '/usr/lib/jvm/jdk-15.0.2/bin/jpackage',
+    // '/Library/Java/JavaVirtualMachines/jdk-15.0.2.jdk/Contents/Home/bin/jpackage',
+    '--verbose',
+    '--main-class', "$mainClassName",
+    '--main-jar', "${projectDir}/build/libs/jacobitus4.jar",
+    '--vendor', 'ADSIB',
+    '--input', "${projectDir}/build/libs",
+    '--dest', 'dist',
+    '--name', appName,
+    '--app-version', "${project.version}"
+]
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -73,4 +87,44 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
+}
+
+task deb(type: Exec) {
+    workingDir './'
+    commandLine(jpackageCommand +
+            [
+             '--type', 'deb',
+             '--icon', './iconos/icon.png'
+            ]
+    )
+}
+
+task rpm(type: Exec) {
+    workingDir './'
+    commandLine(jpackageCommand +
+            [
+             '--type', 'rpm',
+             '--icon', './iconos/icon.png'
+            ]
+    )
+}
+
+task msi(type: Exec) {
+    workingDir './'
+    commandLine(jpackageCommand +
+            [
+             '--type', 'msi',
+             '--icon', './iconos/icon.png'
+            ]
+    )
+}
+
+task dmg(type: Exec) {
+    workingDir './'
+    commandLine(jpackageCommand +
+            [
+             '--type', 'dmg',
+             '--icon', './iconos/icon.png'
+            ]
+    )
 }
