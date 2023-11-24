@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +39,12 @@ public class Chromium {
                     }
                 }
             }
-            String cert = URLDecoder.decode(Chromium.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
-            if (cert.endsWith(".jar")) {
-                cert = new File(cert).getParentFile().getParent() + "/ca/server.crt";
-            } else {
-                cert = System.getProperty("user.dir") + "/ca/server.crt";
+            String pathApp = new File(Firefox.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            String pathBase = new File(pathApp).getParentFile().getAbsolutePath();
+            if (!pathApp.endsWith(".jar") && !pathApp.endsWith("app")) {
+                pathBase = System.getProperty("user.dir");
             }
+            String cert = pathBase + "/ca/server.crt";
             p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", cert, "-t", "cTC,cTC,cTC", "-d", db.getParent() });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;
@@ -54,8 +54,8 @@ public class Chromium {
                     }
                 }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Chromium.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException | IOException ex) {
+            Logger.getLogger(Chromium.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         return false;
     }

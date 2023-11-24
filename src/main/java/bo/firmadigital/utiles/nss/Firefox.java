@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,16 +29,12 @@ public class Firefox {
             if (db == null) {
                 return false;
             }
-            String path = URLDecoder.decode(Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
-            if (path.endsWith(".jar")) {
-                path = new File(path).getParent();
-            } else {
-                path = System.getProperty("user.dir");
+            String pathApp = new File(Firefox.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            String pathBase = new File(pathApp).getParentFile().getAbsolutePath();
+            if (!pathApp.endsWith(".jar") && !pathApp.endsWith("app")) {
+                pathBase = System.getProperty("user.dir");
             }
-            if (path.endsWith("app")) {
-                path = new File(path).getParent();
-            }
-            String certutil = path + "\\ca\\nss\\install.bat";
+            String certutil = pathBase + "\\ca\\nss\\install.bat";
             Process p;
             p = Runtime.getRuntime().exec(new String[] { certutil });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -49,7 +45,7 @@ public class Firefox {
                     }
                 }
             }
-            String cert = path + "\\ca\\server.crt";
+            String cert = pathBase + "\\ca\\server.crt";
             p = Runtime.getRuntime().exec(new String[] { certutil, cert });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;
@@ -59,8 +55,8 @@ public class Firefox {
                     }
                 }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Firefox.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException | IOException ex) {
+            Logger.getLogger(Firefox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         return false;
     }
@@ -85,12 +81,12 @@ public class Firefox {
                     }
                 }
             }
-            String cert = URLDecoder.decode(Firefox.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
-            if (cert.endsWith(".jar")) {
-                cert = new File(cert).getParentFile().getParent() + "/ca/server.crt";
-            } else {
-                cert = System.getProperty("user.dir") + "/ca/server.crt";
+            String pathApp = new File(Firefox.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            String pathBase = new File(pathApp).getParentFile().getAbsolutePath();
+            if (!pathApp.endsWith(".jar") && !pathApp.endsWith("app")) {
+                pathBase = System.getProperty("user.dir");
             }
+            String cert = pathBase + "/ca/server.crt";
             p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", cert, "-t", "cTC,cTC,cTC", "-d", db.getParent() });
             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 String s;
@@ -100,8 +96,8 @@ public class Firefox {
                     }
                 }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Firefox.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException | IOException ex) {
+            Logger.getLogger(Firefox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         return false;
     }
