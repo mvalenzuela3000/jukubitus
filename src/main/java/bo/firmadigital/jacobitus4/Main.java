@@ -142,10 +142,10 @@ public class Main {
                     jettyServer.stop();
                     jettyServer.destroy();
                 } catch (Exception ex2) {
-                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex2);
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
                 }
-                App.run(false, false, false);
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                App.actualizar(false, false, false);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }
