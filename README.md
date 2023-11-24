@@ -3,7 +3,8 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 
 ## Requerimientos
 - OpenJDK **15.0.2**
-- Maven 3.x.x o Gradle 7.6.2
+- Gradle 7.6.2
+- g++ 10.x.x o superior
 - ApiDoc 0.29
 
 ### Instalación de Java 15
@@ -60,6 +61,18 @@ Verificamos la instalación de Gradle.
 $ gradle --version
 ```
 
+### Instalación g++
+
+```bash
+$ sudo apt update && sudo apt -y upgrade
+$ sudo apt -y install build-essential
+```
+
+Verificamos la instalación.
+```bash
+$ g++ --version
+```
+
 ### Instalación git
 
 ```bash
@@ -86,47 +99,75 @@ $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus4.git --recursive
 
 ### Gradle
 Ingresamos a la carpeta **jacobitus4** y ejecutar los siguientes comandos:
+
+### Linux
+
 ```
-$ ./gradlew clean libreria:jar jar
+$ ./gradlew libreria:buildForDebian clean importCA importChangePinDebian jar
+$ ./gradlew run
+```
+
+### Windows
+
+```
+$ ./gradlew libreria:buildForWindows clean importCA importChangePinWindows jar
+$ ./gradlew run
+```
+
+### MacOS
+
+```
+$ ./gradlew libreria:buildForMacOS clean importCA importChangePinMacOS jar
+$ ./gradlew run
 ```
 
 ## Documentación de los servicios REST
+Instalamos de manera global el paquete **apidoc**.
+```
+$ npm install -g apidoc@0.29
+```
+
+Generamos la documentación.
 ```
 $ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/resources/web/apidoc
 ```
 
-## Generar instalador
+## Generar paquete de instalación
 
 ### Linux
-Para la generación de un archivo deb/rpm es necesario:
+
+Para la generación de un archivo deb es necesario:
 
 - fakeroot para Debian/Ubuntu Linux.
+
+Ejecutamos el siguiente comando:
+```
+$ ./gradlew packageDeb
+```
+
+<!-- Para la generación de un archivo rpm es necesario:
+
 - rpm-build para Red Hat Linux.
 
 Ejecutamos el siguiente comando:
 ```
-$ ./gradlew deb
-```
-```
-$ ./gradlew rpm
-```
+$ ./gradlew packageRpm
+``` -->
 
 ### Windows
-Para la generación de un archivo exe/msi es necesario:
 
-- WiX 3.0 o posterior.
+Para la generación de un archivo deb/rpm es necesario:
 
-Ejecutamos el siguiente comando:
+- WiX 3.11.x
+
+Para la generación de un archivo msi es necesario ejecutar:
 ```
-$ ./gradlew msi
+$ ./gradlew packageMsi
 ```
 
 ### MacOS
-Para la generación de un archivo pkg (dmg) es necesario:
 
-- Las herramientas de línea de comandos de Xcode cuando se usa la opción --mac-sign para solicitar que se firme el paquete y cuando se usa la opción --icon para personalizar la imagen DMG.
-
-Ejecutamos el siguiente comando:
+Para la generación de un archivo dmg es necesario ejecutar:
 ```
-$ ./gradlew dmg
+$ ./gradlew packageDmg
 ```
