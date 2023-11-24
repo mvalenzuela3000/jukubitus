@@ -19,13 +19,13 @@ import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.nss.Chromium;
 import bo.firmadigital.utiles.nss.Firefox;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.comun.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.SmartCard;
 import bo.firmadigital.jacobitus.validador.Certificate;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus.validador.MagicBytes;
-import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
@@ -111,7 +111,6 @@ public class App extends Application {
     private static Stage stage;
     private static App app;
     private static final TokenSelected tokenSelected = new TokenSelected();
-    public static final String VERSION = "1.1.0";
 
     private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
         Config config = Config.getInstance();
@@ -139,15 +138,15 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("ADSIB - Jacobitus Total");
+        String version = Constantes.VERSION;
+        stage.setTitle("ADSIB - Jacobitus Total - " + version);
         if (!servicio) {
             Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con páginas web", ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
-        String javaVersion = System.getProperty("java.version");
-        String javafxVersion = System.getProperty("javafx.version");
+
         BorderPane root = new BorderPane();
         MenuBar menuBar = new MenuBar();
         
@@ -407,10 +406,13 @@ public class App extends Application {
         });
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
+            String javaVersion = System.getProperty("java.version");
+            String javafxVersion = System.getProperty("javafx.version");
+            String changePinVersion = new ChangePinJNI().version();
             ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Acerca de ...");
-            alert.setHeaderText("Jacobitus Total " + VERSION + "\nJavaFX " + javafxVersion + "\nJava " + javaVersion);
+            alert.setHeaderText("Jacobitus Total " + version + "\nChangePin Library " + changePinVersion + "\nJavaFX " + javafxVersion + "\nJava " + javaVersion);
             alert.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
             alert.setGraphic(adsib);
             alert.showAndWait();
@@ -1000,7 +1002,7 @@ public class App extends Application {
             new Thread(app.download(url, token, urlPost)).start();
         });
     }
-
+    
     public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated) {
         App.servicio = servicio;
         App.taskBar = taskBar;
@@ -1024,6 +1026,12 @@ public class App extends Application {
         App.token = token;
         App.urlPost = urlPost;
         launch();
+    }
+   
+    public static void actualizar(boolean servicio, boolean taskBar, boolean taskBarEmulated) {
+        App.servicio = servicio;
+        App.taskBar = taskBar;
+        App.taskBarEmulated = taskBarEmulated;
     }
 
     public static TokenSelected service(Slot slot, String ci, JSONArray files) {

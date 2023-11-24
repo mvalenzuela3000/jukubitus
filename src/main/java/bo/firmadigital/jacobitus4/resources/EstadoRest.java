@@ -15,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import bo.firmadigital.jacobitus4.Constantes;
+
 /**
  *
  * @author ADSIB
@@ -32,7 +34,7 @@ public class EstadoRest {
      * {
      *     "datos": {
      *         "compilacion": 3100,
-     *         "api_version": "1.1.0"
+     *         "api_version": "1.0.0"
      *     },
      *     "finalizado": true,
      *     "mensaje": "Servicio ejecutandose correctamente"
@@ -48,7 +50,7 @@ public class EstadoRest {
         try {
             JSONObject datos = new JSONObject();
             datos.put("compilacion", 3100);
-            datos.put("api_version", "1.1.0");
+            datos.put("api_version", Constantes.VERSION);
             json.put("datos", datos);
             json.put("finalizado", true);
             json.put("mensaje", "Servicio ejecutandose correctamente");
