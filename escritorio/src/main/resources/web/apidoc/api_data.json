@@ -1,0 +1,976 @@
+[
+  {
+    "type": "get",
+    "url": "/api/status",
+    "title": "Verifica el estado del servicio.",
+    "group": "Estado",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"compilacion\": 3100,\n        \"api_version\": \"1.0.0\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Servicio ejecutandose correctamente\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/EstadoRest.java",
+    "groupTitle": "Estado",
+    "name": "GetApiStatus",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/status"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/firmar_hash",
+    "title": "Obtiene la firma encriptando el hash.",
+    "group": "Firmador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "alias",
+            "description": "<p>Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "hash",
+            "description": "<p>Suma de verificación calculada usando sha2 a 256bits.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\",\n    \"alias\": \"355409121073\",\n    \"hash\": \"e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"firma\": \"BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Firma realizada correctamente.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Firmador",
+    "name": "PostApiTokenFirmar_hash",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/firmar_hash"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/firmar_lote_pdfs",
+    "title": "Firma un lote de documentos pdf.",
+    "group": "Firmador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "alias",
+            "description": "<p>Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object[]",
+            "optional": false,
+            "field": "pdfs",
+            "description": "<p>Array de objectos con pdfs para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "pdfs.bloquear",
+            "description": "<p>Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdfs.id",
+            "description": "<p>El identificador único para la solicitud.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdfs.pdf",
+            "description": "<p>Archivo pdf en base64 que se desea firmar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\",\n    \"alias\": \"355409121073\",\n    \"pdfs\": [\n        {\n            \"id\": \"documento0.pdf\",\n            \"pdf\": \"MII...truncated...==\"\n        }, {\n            \"id\": \"documento1.pdf\",\n            \"pdf\": \"MII...truncated...==\"\n        }\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"pdfs_firmados\": [\n            {\n                \"id\": \"documento0.pdf\",\n                \"pdf_firmado\": \"MII...truncated...==\"\n            }, {\n                \"id\": \"documento1.pdf\",\n                \"pdf_firmado\": \"MII...truncated...==\"\n            }\n        ]\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se firmaron los pdfs correctamente.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Firmador",
+    "name": "PostApiTokenFirmar_lote_pdfs",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/firmar_lote_pdfs"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/firmar_pdf",
+    "title": "Firma un documento pdf.",
+    "group": "Firmador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "alias",
+            "description": "<p>Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "bloquear",
+            "description": "<p>Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdf",
+            "description": "<p>Archivo pdf en base64 que se desea firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object.",
+            "optional": true,
+            "field": "point",
+            "description": "<p>Coordenadas para la referencia de firma.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Numeric",
+            "optional": true,
+            "field": "point.x",
+            "description": "<p>Coordenada x para la referencia de firma.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Numeric",
+            "optional": true,
+            "field": "point.y",
+            "description": "<p>Coordenada y para la referencia de firma.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "image",
+            "description": "<p>Imagen en base64 a utilizar en la firma.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\",\n    \"alias\": \"355409121073\",\n    \"pdf\": \"MII...truncated...==\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"pdf_firmado\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se firmo el pdf correctamente.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Firmador",
+    "name": "PostApiTokenFirmar_pdf",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/firmar_pdf"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/firmar_pkcs7",
+    "title": "Firma un archivo.",
+    "group": "Firmador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "alias",
+            "description": "<p>Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "detached",
+            "description": "<p>Bandera que en caso de estar presente con valor true, firma sin el contenido del documento.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "file",
+            "description": "<p>Archivo en base64 que se desea firmar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\",\n    \"alias\": \"355409121073\",\n    \"file\": \"MII...truncated...==\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"pkcs7\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se firmo el archivo correctamente.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Firmador",
+    "name": "PostApiTokenFirmar_pkcs7",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/firmar_pkcs7"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/firmar_xml",
+    "title": "Firma un documento xml.",
+    "group": "Firmador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "alias",
+            "description": "<p>Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "file",
+            "description": "<p>Archivo XML en base64 que se desea firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "node",
+            "description": "<p>Nodo del XML que se desea firmar.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "digest",
+            "description": "<p>Algoritmo utilizado para el digest por defecto SHA256.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "signatureAlgorithm",
+            "description": "<p>Algoritmo utilizado para el digest de la firma por RCA por defecto SHA256.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "enveloped",
+            "description": "<p>Requerir modo enveloped aun con nodo.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\",\n    \"alias\": \"355409121073\",\n    \"file\": \"MII...truncated...==\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"xml\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se firmo el archivo correctamente.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Firmador",
+    "name": "PostApiTokenFirmar_xml",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/firmar_xml"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/sign",
+    "title": "Firma documentos pdf o json en bloque.",
+    "group": "Sign",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "pdf",
+            "description": "<p>El array de documentos PDF agrupados por id y pdf</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdf.base64",
+            "description": "<p>El documento PDF en Base64</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdf.name",
+            "description": "<p>El identificado único para la solicitud</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "json",
+            "description": "<p>El array de documentos JSON agrupados por id y json</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "json.base64",
+            "description": "<p>El documento JSON en Base64</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "json.name",
+            "description": "<p>El identificado único para la solicitud</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "ci",
+            "description": "<p>El número de documento de identidad</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"pdf\":[{\n        \"base64\":\"data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....\",\n        \"name\":\"22949.pdf\"\n    }],\n    \"json\":[{\n        \"base64\":\"data:application/json;base64,JVBERi0xLjQKMSAwIG9iago8PAovVGl0b....\",\n        \"name\":\"22950.pdf\"\n    }],\n    \"ci\":\"6817702\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/FirmadorRest.java",
+    "groupTitle": "Sign",
+    "name": "PostApiTokenSign",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/sign"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/api/token/connected",
+    "title": "Obtiene información de los tokens conectados.",
+    "group": "Token",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"connected\": true,\n        \"tokens\": [\n            {\n                \"slot\": 1,\n                \"serial\": \"203531650003002A\",\n                \"name\": \"Feitian Technologies Co., Ltd\",\n                \"model\": \"ePass2003\"\n            }\n        ]\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Lista de Tokens obtenida\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/TokenRest.java",
+    "groupTitle": "Token",
+    "name": "GetApiTokenConnected",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/connected"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/api/token/status",
+    "title": "Verifica el estado de la consola SmartCard.",
+    "group": "Token",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"connected\": true,\n        \"tokens\": [\n            \"FT ePass2003Auto\"\n        ]\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Lista de Tokens obtenida\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/TokenRest.java",
+    "groupTitle": "Token",
+    "name": "GetApiTokenStatus",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/status"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/token/data",
+    "title": "Obtiene información de los certificados en el token conectado al slot.",
+    "group": "Token",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": true,
+            "field": "slot",
+            "description": "<p>Número de slot en el cual se encuentra conectado el token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pin",
+            "description": "<p>Clave de seguridad requerida para acceder al token.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"slot\": 1,\n    \"pin\": \"12345678\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"data_token\": {\n            \"certificates\": 1,\n            \"data\": [\n                {\n                    \"tipo\": \"PRIMARY_KEY\",\n                    \"tipo_desc\": \"Clave Privada\",\n                    \"alias\": \"355409121073\",\n                    \"id\": \"355409121073\",\n                    \"tiene_certificado\": true\n                },\n                {\n                    \"tipo\": \"X509_CERTIFICATE\",\n                    \"tipo_desc\": \"Certificado\",\n                    \"adsib\": false,\n                    \"serialNumber\": \"27cbd28f79876b40\",\n                    \"alias\": \"355409121073\",\n                    \"id\": \"355409121073\",\n                    \"pem\": \"-----BEGIN CERTIFICATE-----\\nMII...truncated...==\\n-----END CERTIFICATE-----\",\n                    \"validez\": {\n                        \"desde\": \"2021-01-29 11:21:19\",\n                        \"hasta\": \"2022-01-29 11:21:19\"\n                    },\n                    \"titular\": {\n                        \"dnQualifier\": \"CI\",\n                        \"CN\": \"Juan Perez\",\n                        \"OU\": \"Gerencia\",\n                        \"O\": \"Perez S.A.\",\n                        \"uidNumber\": \"12345678\"\n                    },\n                    \"emisor\": {\n                        \"CN\": \"ADSIB\",\n                        \"O\": \"ADSIB\"\n                    }\n                }\n            ],\n            \"private_keys\": 1\n        }\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Datos de token obtenidos correctamente\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/TokenRest.java",
+    "groupTitle": "Token",
+    "name": "PostApiTokenData",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/token/data"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/validar_jws",
+    "title": "Validar firma de un documento jws.",
+    "group": "Validador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "file",
+            "description": "<p>Archivo JWS en base64 que se desea validar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"file\": \"MII...truncated...==\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"firmas\": [\n            {\n                \"noModificado\": true,\n                \"cadenaConfianza\": true,\n                \"firmadoDuranteVigencia\": true,\n                \"firmadoAntesRevocacion\": true,\n                \"fechaFirma\": \"2018-06-30T23:59:59.999Z\",\n                \"certificado\": {\n                    \"ci\": \"1234567\",\n                    \"nombreSignatario\": \"Juan Perez\",\n                    \"cargoSignatario\": \"Director Ejecutivo\",\n                    \"organizacionSignatario\": \"Perez S.A.\",\n                    \"emailSignatario\": \"jperez@mail.com\",\n                    \"nombreECA\": \"ADSIB\",\n                    \"descripcionECA\": \"Entidad Certificadora Publica ADSIB\",\n                    \"inicioValidez\": \"2017-08-04T22:46:42.000Z\",\n                    \"finValidez\": \"2018-08-04T22:46:42.000Z\",\n                    \"revocado\": \"2018-06-01T12:30:02.000Z\"\n                }\n            }\n        ],\n        \"file\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se validó las firmas correctamente!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/ValidadorRest.java",
+    "groupTitle": "Validador",
+    "name": "PostApiValidar_jws",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/validar_jws"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/validar_pdf",
+    "title": "Validar firma de un documento pdf.",
+    "group": "Validador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "pdf",
+            "description": "<p>Archivo pdf en base64 que se desea validar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"pdf\": \"MII...truncated...==\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"firmas\": [\n            {\n                \"noModificado\": true,\n                \"cadenaConfianza\": true,\n                \"firmadoDuranteVigencia\": true,\n                \"firmadoAntesRevocacion\": true,\n                \"versionado\": false,\n                \"timeStamp\": false,\n                \"fechaFirma\": \"2018-05-25T23:46:42.000Z\",\n                \"certificado\": {\n                    \"ci\": \"1234567\",\n                    \"nombreSignatario\": \"Juan Perez\",\n                    \"cargoSignatario\": \"Director Ejecutivo\",\n                    \"organizacionSignatario\": \"Perez S.A.\",\n                    \"emailSignatario\": \"jperez@mail.com\",\n                    \"nombreECA\": \"ADSIB\",\n                    \"descripcionECA\": \"Entidad Certificadora Publica ADSIB\",\n                    \"inicioValidez\": \"2017-08-04T22:46:42.000Z\",\n                    \"finValidez\": \"2018-08-04T22:46:42.000Z\",\n                    \"revocado\": \"2018-06-01T12:30:02.000Z\"\n                }\n            }\n        ]\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se validó las firmas correctamente!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/ValidadorRest.java",
+    "groupTitle": "Validador",
+    "name": "PostApiValidar_pdf",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/validar_pdf"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/validar_pkcs7",
+    "title": "Validar firma de un documento p7s.",
+    "group": "Validador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "file",
+            "description": "<p>Archivo p7s en base64 que se desea validar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"file\": \"MII...truncated...==\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"firmas\": [\n            {\n                \"noModificado\": true,\n                \"cadenaConfianza\": true,\n                \"firmadoDuranteVigencia\": true,\n                \"firmadoAntesRevocacion\": true,\n                \"timeStamp\": false,\n                \"fechaFirma\": \"2018-05-25T23:46:42.000Z\",\n                \"certificado\": {\n                    \"ci\": \"1234567\",\n                    \"nombreSignatario\": \"Juan Perez\",\n                    \"cargoSignatario\": \"Director Ejecutivo\",\n                    \"organizacionSignatario\": \"Perez S.A.\",\n                    \"emailSignatario\": \"jperez@mail.com\",\n                    \"nombreECA\": \"ADSIB\",\n                    \"descripcionECA\": \"Entidad Certificadora Publica ADSIB\",\n                    \"inicioValidez\": \"2017-08-04T22:46:42.000Z\",\n                    \"finValidez\": \"2018-08-04T22:46:42.000Z\",\n                    \"revocado\": \"2018-06-01T12:30:02.000Z\"\n                }\n            }\n        ],\n        \"file\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se validó las firmas correctamente!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/ValidadorRest.java",
+    "groupTitle": "Validador",
+    "name": "PostApiValidar_pkcs7",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/validar_pkcs7"
+      }
+    ]
+  },
+  {
+    "type": "post",
+    "url": "/api/validar_xml",
+    "title": "Validar firma de un documento xml.",
+    "group": "Validador",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": true,
+            "field": "Content-Type",
+            "defaultValue": "application/json",
+            "description": "<p>Tipo de contenido</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "file",
+            "description": "<p>Archivo XML en base64 que se desea validar.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"file\": \"MII...truncated...==\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n    \"datos\": {\n        \"firmas\": [\n            {\n                \"noModificado\": true,\n                \"cadenaConfianza\": true,\n                \"firmadoDuranteVigencia\": true,\n                \"firmadoAntesRevocacion\": true,\n                \"fechaFirma\": \"2018-06-30T23:59:59.999Z\",\n                \"certificado\": {\n                    \"ci\": \"1234567\",\n                    \"nombreSignatario\": \"Juan Perez\",\n                    \"cargoSignatario\": \"Director Ejecutivo\",\n                    \"organizacionSignatario\": \"Perez S.A.\",\n                    \"emailSignatario\": \"jperez@mail.com\",\n                    \"nombreECA\": \"ADSIB\",\n                    \"descripcionECA\": \"Entidad Certificadora Publica ADSIB\",\n                    \"inicioValidez\": \"2017-08-04T22:46:42.000Z\",\n                    \"finValidez\": \"2018-08-04T22:46:42.000Z\",\n                    \"revocado\": \"2018-06-01T12:30:02.000Z\"\n                }\n            }\n        ],\n        \"file\": \"MII...truncated...==\"\n    },\n    \"finalizado\": true,\n    \"mensaje\": \"Se validó las firmas correctamente!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "src/main/java/bo/firmadigital/jacobitus4/resources/ValidadorRest.java",
+    "groupTitle": "Validador",
+    "name": "PostApiValidar_xml",
+    "sampleRequest": [
+      {
+        "url": "https://localhost:9000/api/validar_xml"
+      }
+    ]
+  }
+]

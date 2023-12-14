@@ -1,0 +1,15 @@
+define({
+  "name": "jacobitus",
+  "version": "1.0.0",
+  "description": "Servicio JACOBITUS - TOTAL",
+  "url": "https://localhost:9000",
+  "sampleUrl": "https://localhost:9000",
+  "defaultVersion": "0.0.0",
+  "apidoc": "0.3.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2023-11-08T20:33:24.615Z",
+    "url": "https://apidocjs.com",
+    "version": "0.29.0"
+  }
+});

@@ -3,4 +3,5 @@
  */
 
 rootProject.name = 'jacobitus4'
-include('libreria')
+include(':jacobitus-libreria')
+include(':escritorio')
