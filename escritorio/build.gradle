@@ -83,7 +83,7 @@ tasks.register('importCA', Copy) {
     into layout.projectDirectory.dir("build/libs/ca")
 }
 
-tasks.register('importChangePinDebian', Copy) {
+tasks.register('importChangePinLinux', Copy) {
     group 'build'
     from project(':jacobitus-libreria').file("build/libs/libchangepin.so")
     into layout.projectDirectory.dir("build/libs")
@@ -122,15 +122,15 @@ tasks.register('packageDeb', Exec) {
     group 'distribution'
 
     dependsOn clean
-    dependsOn ':jacobitus-libreria:buildForDebian'
+    dependsOn ':jacobitus-libreria:buildForLinux'
     dependsOn importCA
-    dependsOn importChangePinDebian
+    dependsOn importChangePinLinux
     dependsOn jar
 
-    project(':jacobitus-libreria').tasks.findByName('buildForDebian').mustRunAfter 'clean'
+    project(':jacobitus-libreria').tasks.findByName('buildForLinux').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('importChangePinDebian').mustRunAfter 'clean', ':jacobitus-libreria:buildForDebian'
-    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForDebian', 'importChangePinDebian', 'importCA'
+    tasks.findByName('importChangePinLinux').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForLinux', 'importChangePinLinux', 'importCA'
 
     workingDir './'
     commandLine(jpackageCommand + [

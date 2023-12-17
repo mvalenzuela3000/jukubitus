@@ -103,21 +103,21 @@ Ingresamos a la carpeta **jacobitus4** y ejecutar los siguientes comandos:
 ### Linux
 
 ```
-$ ./gradlew jacobitus-libreria:buildForDebian escritorio:clean escritorio:importCA escritorio:importChangePinDebian escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForLinux escritorio:clean escritorio:importCA escritorio:importChangePinLinux escritorio:jar
 $ ./gradlew escritorio:run
 ```
 
 ### Windows
 
 ```
-$ ./gradlew jacobitus-libreria:buildForDebian escritorio:clean escritorio:importCA escritorio:importChangePinDebian escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:importChangePinWindows escritorio:jar
 $ ./gradlew escritorio:run
 ```
 
 ### MacOS
 
 ```
-$ ./gradlew jacobitus-libreria:buildForDebian escritorio:clean escritorio:importCA escritorio:importChangePinDebian escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importCA escritorio:importChangePinMacOS escritorio:jar
 $ ./gradlew escritorio:run
 ```
 
