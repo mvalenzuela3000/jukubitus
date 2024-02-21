@@ -90,6 +90,7 @@ public class Main {
                     java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
                     java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
                     java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
+                    trayIcon.setImageAutoSize(true);
                     trayIcon.addActionListener((ActionEvent e) -> {
                         App.show();
                     });
