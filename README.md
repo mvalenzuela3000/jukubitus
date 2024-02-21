@@ -1,4 +1,4 @@
-# Jacobitus Total (versión de escritorio)
+# Jacobitus Escritorio
 Es una aplicación desarrollada con JavaFX para firma y validación de firma digital en diferentes documentos.
 
 ## Requerimientos
@@ -94,11 +94,11 @@ $ git config --global credential.helper cache
 
 Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 ```
-$ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus4.git --recursive
+$ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
 ### Gradle
-Ingresamos a la carpeta **jacobitus4** y ejecutar los siguientes comandos:
+Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
 ### Linux
 
@@ -121,17 +121,6 @@ $ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importC
 $ ./gradlew escritorio:run
 ```
 
-## Documentación de los servicios REST
-Instalamos de manera global el paquete **apidoc**.
-```
-$ npm install -g apidoc@0.29
-```
-
-Generamos la documentación.
-```
-$ apidoc -i src/main/java/bo/firmadigital/jacobitus4/resources/ -o src/main/resources/web/apidoc
-```
-
 ## Generar paquete de instalación
 
 ### Linux
@@ -144,15 +133,6 @@ Ejecutamos el siguiente comando:
 ```
 $ ./gradlew packageDeb
 ```
-
-<!-- Para la generación de un archivo rpm es necesario:
-
-- rpm-build para Red Hat Linux.
-
-Ejecutamos el siguiente comando:
-```
-$ ./gradlew packageRpm
-``` -->
 
 ### Windows
 
