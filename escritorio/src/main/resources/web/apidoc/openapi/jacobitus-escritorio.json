@@ -6,8 +6,8 @@
   "info": {
     "title": "Jacobitus Escritorio",
     "version": "1.2.0",
-    "summary": "Solución a todo requerimiento de firma digital",
-    "description": "Administra tu dispositivo criptográfico o Token de la manera más intuitiva y fácil con nuestra herramienta.",
+    "summary": "Solución de escritorio para todo requerimiento de firma digital",
+    "description": "Administra tu dispositivo criptográfico (token) de la manera más intuitiva y fácil con esta herramienta.",
     "contact": {
       "name": "UID - Soporte Técnico",
       "email": "uid-soporte@adsib.gob.bo",
@@ -30,9 +30,9 @@
   "paths": {
     "/api/status": {
       "get": {
-        "summary": "Verifica el estado del servicio",
+        "summary": "Verificar el estado del servicio",
         "operationId": "get-api-status",
-        "description": "",
+        "description": "Permite verificar el estado actual del servicio de interoperación.",
         "parameters": [
           {
             "schema": {
@@ -41,7 +41,7 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
+            "description": "Tipo de contenido."
           }
         ],
         "responses": {
@@ -50,19 +50,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatusRespuesta"
-                },
-                "examples": {
-                  "Example 1": {
-                    "value": {
-                      "datos": {
-                        "compilacion": 3100,
-                        "api_version": "1.1.0"
-                      },
-                      "finalizado": true,
-                      "mensaje": "Servicio ejecutandose correctamente"
-                    }
-                  }
+                  "$ref": "#/components/schemas/StatusRespuestaDto"
                 }
               }
             },
@@ -75,565 +63,9 @@
         ]
       }
     },
-    "/api/token/firmar_pkcs7": {
-      "post": {
-        "summary": "Firma un archivo",
-        "operationId": "post-api-token-firmar_pkcs7",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          }
-        ],
-        "description": "",
-        "requestBody": {
-          "content": {
-            "application/xml": {
-              "schema": {
-                "$ref": "#/components/schemas/FirmarPkcs7"
-              },
-              "examples": {}
-            },
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            },
-            "text/html": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            },
-            "text/plain": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            }
-          },
-          "description": ""
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {},
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirmarPkcs7Respuesta"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Firmador"
-        ]
-      }
-    },
-    "/api/token/firmar_pdf": {
-      "post": {
-        "summary": "Firma un documento pdf",
-        "operationId": "post-api-token-firmar_pdf",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirmarPdfRespuesta"
-                },
-                "examples": {}
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "slot",
-            "description": "Número de slot en el cual se encuentra conectado el token."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pin",
-            "description": "Clave de seguridad requerida para acceder al token.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "alias",
-            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "boolean"
-            },
-            "in": "query",
-            "name": "bloquear",
-            "description": "Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pdf",
-            "description": "Archivo pdf en base64 que se desea firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "array"
-            },
-            "in": "query",
-            "name": "point",
-            "description": "Coordenadas para la referencia de firma."
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "x",
-            "description": "Coordenada x para la referencia de firma."
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "y",
-            "description": "Coordenada y para la referencia de firma."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "image",
-            "description": "Imagen en base64 a utilizar en la firma."
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirmarPdf"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "slot": 1,
-                    "pin": "12345678",
-                    "alias": "355409121073",
-                    "pdf": "MII...truncated...=="
-                  }
-                }
-              }
-            }
-          },
-          "description": ""
-        },
-        "description": "",
-        "tags": [
-          "Firmador"
-        ]
-      }
-    },
-    "/api/token/firmar_xml": {
-      "post": {
-        "summary": "Firma un documento xml",
-        "operationId": "post-api-token-firmar_xml",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirmarXmlRespuesta"
-                },
-                "examples": {
-                  "Example 1": {
-                    "value": {
-                      "datos": {
-                        "xml": "MII...truncated...=="
-                      },
-                      "finalizado": true,
-                      "mensaje": "Se firmo el archivo correctamente."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "slot",
-            "description": "Número de slot en el cual se encuentra conectado el token."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pin",
-            "description": "Clave de seguridad requerida para acceder al token.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "alias",
-            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "file",
-            "description": "Archivo XML en base64 que se desea firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "node",
-            "description": "Nodo del XML que se desea firmar."
-          },
-          {
-            "schema": {
-              "type": "boolean"
-            },
-            "in": "query",
-            "name": "enveloped",
-            "description": "Requerir modo enveloped aun con nodo."
-          }
-        ],
-        "description": "",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirmarXml"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "slot": 1,
-                    "pin": "12345678",
-                    "alias": "355409121073",
-                    "file": "MII...truncated...=="
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Firmador"
-        ]
-      }
-    },
-    "/api/token/firmar_lote_pdfs": {
-      "post": {
-        "summary": "Firma un lote de documentos pdf",
-        "operationId": "post-api-token-firmar_lote_pdfs",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirmarLoteDocumentoPdfRespuesta"
-                },
-                "examples": {
-                  "Example 1": {
-                    "value": {
-                      "datos": {
-                        "pdfs_firmados": [
-                          {
-                            "id": "documento0.pdf",
-                            "pdf_firmado": "MII...truncated...=="
-                          },
-                          {
-                            "id": "documento1.pdf",
-                            "pdf_firmado": "MII...truncated...=="
-                          }
-                        ]
-                      },
-                      "finalizado": true,
-                      "mensaje": "Se firmaron los pdfs correctamente."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "slot",
-            "description": "Número de slot en el cual se encuentra conectado el token."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pin",
-            "description": "Clave de seguridad requerida para acceder al token.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "alias",
-            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pdfs",
-            "description": "Array de objectos con pdfs para firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "boolean"
-            },
-            "in": "query",
-            "name": "bloquear",
-            "description": "Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "id",
-            "description": "El identificador único para la solicitud."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pdf",
-            "description": "Archivo pdf en base64 que se desea firmar."
-          }
-        ],
-        "description": "",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirmarLoteDocumentoPdf"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "slot": 1,
-                    "pin": "12345678",
-                    "alias": "355409121073",
-                    "pdfs": [
-                      {
-                        "id": "documento0.pdf",
-                        "pdf": "MII...truncated...=="
-                      },
-                      {
-                        "id": "documento1.pdf",
-                        "pdf": "MII...truncated...=="
-                      }
-                    ]
-                  }
-                }
-              }
-            },
-            "application/xml": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            }
-          }
-        },
-        "tags": [
-          "Firmador"
-        ]
-      }
-    },
-    "/api/token/firmar_hash": {
-      "post": {
-        "summary": "Obtiene la firma encriptando el hash",
-        "operationId": "post-api-token-firmar_hash",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirmarEncriptandoRespuesta"
-                },
-                "examples": {
-                  "Success-Response": {
-                    "value": {
-                      "datos": {
-                        "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
-                      },
-                      "finalizado": true,
-                      "mensaje": "Firma realizada correctamente."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "slot",
-            "description": "Número de slot en el cual se encuentra conectado el token."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pin",
-            "required": true,
-            "description": "Clave de seguridad requerida para acceder al token."
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "alias",
-            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar.",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "hash",
-            "description": "Suma de verificación calculada usando sha2 a 256bits.",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirmarEncriptando"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "slot": 1,
-                    "pin": "12345678",
-                    "alias": "355409121073",
-                    "hash": "e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "description": "",
-        "tags": [
-          "Firmador"
-        ]
-      }
-    },
     "/api/token/data": {
       "post": {
-        "summary": "Obtiene información de los certificados en el token conectado al slot",
+        "summary": "Obtener información de certificados",
         "operationId": "post-api-token-data",
         "responses": {
           "200": {
@@ -641,7 +73,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenDataRespuesta"
+                  "$ref": "#/components/schemas/TokenDataRespuestaDto"
                 },
                 "examples": {
                   "Example 1": {
@@ -694,48 +126,22 @@
             }
           }
         },
-        "description": "",
+        "description": "Permite obtener la información de los certificados contenidos en el token conectado a un determinado slot.",
         "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            },
-            "in": "header",
-            "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "slot",
-            "description": "Número de slot en el cual se encuentra conectado el token."
-          },
           {
             "schema": {
               "type": "string"
             },
-            "in": "query",
-            "name": "pin",
-            "description": "Clave de seguridad requerida para acceder al token.",
-            "required": true
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TokenData"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "slot": 1,
-                    "pin": "12345678"
-                  }
-                }
+                "$ref": "#/components/schemas/TokenDataSolicitudDto"
               }
             }
           }
@@ -747,7 +153,7 @@
     },
     "/api/token/connected": {
       "get": {
-        "summary": "Obtiene información de los tokens conectados",
+        "summary": "Obtener información de los tokens conectados",
         "tags": [
           "Token"
         ],
@@ -757,7 +163,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenConnectedRespuesta"
+                  "$ref": "#/components/schemas/TokenConnectedRespuestaDto"
                 },
                 "examples": {
                   "Success-Response": {
@@ -783,7 +189,7 @@
           }
         },
         "operationId": "get-api-token-connected",
-        "description": "",
+        "description": "Permite obtener información de los dispositivos criptográficos (tokens) conectados.",
         "parameters": [
           {
             "schema": {
@@ -792,14 +198,14 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
+            "description": "Tipo de contenido."
           }
         ]
       }
     },
     "/api/token/status": {
       "get": {
-        "summary": "Verifica el estado de la consola SmartCard",
+        "summary": "Verificar el estado de la consola SmartCard",
         "tags": [
           "Token"
         ],
@@ -809,7 +215,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenStatusSmartCardRespuesta"
+                  "$ref": "#/components/schemas/TokenStatusSmartCardRespuestaDto"
                 },
                 "examples": {
                   "Success-Response": {
@@ -836,7 +242,7 @@
           }
         },
         "operationId": "get-api-token-status",
-        "description": "",
+        "description": "Permite validar el estado de los dispositivos conectados, a través de la consola SmartCard.",
         "parameters": [
           {
             "schema": {
@@ -845,52 +251,157 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
+            "description": "Tipo de contenido."
           }
         ]
       }
     },
-    "/api/validar-jws": {
+    "/api/token/firmar_pkcs7": {
       "post": {
-        "summary": "Validar firma de un documento jws",
-        "operationId": "post-api-validar-jws",
+        "summary": "Firmar un archivo",
+        "operationId": "post-api-token-firmar_pkcs7",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
+          }
+        ],
+        "description": "Permite firmar cualquier formato de archivos digitales.",
+        "requestBody": {
+          "content": {
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmarPkcs7SolicitudDto"
+              },
+              "examples": {}
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            },
+            "text/html": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          },
+          "description": ""
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirmarPkcs7RespuestaDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Firmador"
+        ]
+      }
+    },
+    "/api/token/firmar_pdf": {
+      "post": {
+        "summary": "Firmar un documento pdf",
+        "operationId": "post-api-token-firmar_pdf",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidarJwsRespuesta"
+                  "$ref": "#/components/schemas/FirmarPdfRespuestaDto"
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmarPdfSolicitudDto"
+              },
+              "examples": {
+                "Example 1": {
+                  "value": {
+                    "slot": 1,
+                    "pin": "12345678",
+                    "alias": "355409121073",
+                    "pdf": "MII...truncated...=="
+                  }
+                }
+              }
+            }
+          },
+          "description": ""
+        },
+        "description": "Permite firmar archivos en formato pdf.",
+        "tags": [
+          "Firmador"
+        ]
+      }
+    },
+    "/api/token/firmar_lote_pdfs": {
+      "post": {
+        "summary": "Firmar un lote de documentos pdf",
+        "operationId": "post-api-token-firmar_lote_pdfs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirmarLoteDocumentoPdfRespuestaDto"
                 },
                 "examples": {
-                  "Success-Response": {
+                  "Example 1": {
                     "value": {
                       "datos": {
-                        "firmas": [
+                        "pdfs_firmados": [
                           {
-                            "noModificado": true,
-                            "cadenaConfianza": true,
-                            "firmadoDuranteVigencia": true,
-                            "firmadoAntesRevocacion": true,
-                            "fechaFirma": "2018-06-30T23:59:59.999Z",
-                            "certificado": {
-                              "ci": "1234567",
-                              "nombreSignatario": "Juan Perez",
-                              "cargoSignatario": "Director Ejecutivo",
-                              "organizacionSignatario": "Perez S.A.",
-                              "emailSignatario": "jperez@mail.com",
-                              "nombreECA": "ADSIB",
-                              "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                              "inicioValidez": "2017-08-04T22:46:42.000Z",
-                              "finValidez": "2018-08-04T22:46:42.000Z",
-                              "revocado": "2018-06-01T12:30:02.000Z"
-                            }
+                            "id": "documento0.pdf",
+                            "pdf_firmado": "MII...truncated...=="
+                          },
+                          {
+                            "id": "documento1.pdf",
+                            "pdf_firmado": "MII...truncated...=="
                           }
-                        ],
-                        "file": "MII...truncated...=="
+                        ]
                       },
                       "finalizado": true,
-                      "mensaje": "Se validó las firmas correctamente!"
+                      "mensaje": "Se firmaron los pdfs correctamente."
                     }
                   }
                 }
@@ -898,7 +409,6 @@
             }
           }
         },
-        "description": "",
         "parameters": [
           {
             "schema": {
@@ -907,28 +417,32 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "file",
-            "description": "Archivo JWS en base64 que se desea validar.",
-            "required": true
+            "description": "Tipo de contenido."
           }
         ],
+        "description": "Permite firmar un lote de archivos en formato pdf.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ValidarJws"
+                "$ref": "#/components/schemas/FirmarLoteDocumentoPdfSolicitudDto"
               },
               "examples": {
-                "Request-Example": {
+                "Example 1": {
                   "value": {
-                    "file": "MII...truncated...=="
+                    "slot": 1,
+                    "pin": "12345678",
+                    "alias": "355409121073",
+                    "pdfs": [
+                      {
+                        "id": "documento0.pdf",
+                        "pdf": "MII...truncated...=="
+                      },
+                      {
+                        "id": "documento1.pdf",
+                        "pdf": "MII...truncated...=="
+                      }
+                    ]
                   }
                 }
               }
@@ -938,12 +452,124 @@
                 "type": "object",
                 "properties": {}
               }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "tags": [
+          "Firmador"
+        ]
+      }
+    },
+    "/api/token/firmar_xml": {
+      "post": {
+        "summary": "Firmar un documento xml",
+        "operationId": "post-api-token-firmar_xml",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirmarXmlRespuestaDto"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "datos": {
+                        "xml": "MII...truncated...=="
+                      },
+                      "finalizado": true,
+                      "mensaje": "Se firmo el archivo correctamente."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
+          }
+        ],
+        "description": "Permite firmar archivos en formato xml.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmarXmlSolicitudDto"
+              }
             }
           },
           "description": ""
         },
         "tags": [
-          "Validador"
+          "Firmador"
+        ]
+      }
+    },
+    "/api/token/firmar_hash": {
+      "post": {
+        "summary": "Obtener firma de un hash (encriptando)",
+        "operationId": "post-api-token-firmar_hash",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirmarHashRespuestaDto"
+                },
+                "examples": {
+                  "Success-Response": {
+                    "value": {
+                      "datos": {
+                        "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
+                      },
+                      "finalizado": true,
+                      "mensaje": "Firma realizada correctamente."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmarHashSolicitudDto"
+              }
+            }
+          }
+        },
+        "description": "Permite firmar una cadeda hash.",
+        "tags": [
+          "Firmador"
         ]
       }
     },
@@ -957,7 +583,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidarPkcs7Respuesta"
+                  "$ref": "#/components/schemas/ValidarPkcs7RespuestaDto"
                 },
                 "examples": {
                   "Success-Response": {
@@ -996,7 +622,7 @@
             }
           }
         },
-        "description": "",
+        "description": "Permite validar las firmas digitales de un documento p7s.",
         "parameters": [
           {
             "schema": {
@@ -1005,29 +631,14 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "file",
-            "description": "Archivo p7s en base64 que se desea validar."
+            "description": "Tipo de contenido."
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ValidarPkcs7"
-              },
-              "examples": {
-                "Example 1": {
-                  "value": {
-                    "file": "MII...truncated...=="
-                  }
-                }
+                "$ref": "#/components/schemas/ValidarPkcs7SolicitudDto"
               }
             }
           }
@@ -1047,7 +658,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidarPdfRespuesta"
+                  "$ref": "#/components/schemas/ValidarPdfRespuestaDto"
                 },
                 "examples": {
                   "Example 1": {
@@ -1086,7 +697,7 @@
             }
           }
         },
-        "description": "",
+        "description": "Permite validar las firmas digitales de un documento pdf.",
         "parameters": [
           {
             "schema": {
@@ -1095,29 +706,14 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "pdf",
-            "description": "Archivo pdf en base64 que se desea validar."
+            "description": "Tipo de contenido."
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ValidarPdf"
-              },
-              "examples": {
-                "Request-Example": {
-                  "value": {
-                    "pdf": "MII...truncated...=="
-                  }
-                }
+                "$ref": "#/components/schemas/ValidarPdfSolicitudDto"
               }
             }
           }
@@ -1137,7 +733,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidarXmlRespuesta"
+                  "$ref": "#/components/schemas/ValidarXmlRespuestaDto"
                 },
                 "examples": {
                   "Success-Response": {
@@ -1175,7 +771,7 @@
             }
           }
         },
-        "description": "",
+        "description": "Permite validar las firmas digitales de un documento xml.",
         "parameters": [
           {
             "schema": {
@@ -1184,29 +780,89 @@
             },
             "in": "header",
             "name": "Content-Type",
-            "description": "Tipo de contenido"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "file",
-            "description": "Archivo XML en base64 que se desea validar."
+            "description": "Tipo de contenido."
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ValidarXml"
-              },
-              "examples": {
-                "Request-Example": {
-                  "value": {
-                    "file": "MII...truncated...=="
+                "$ref": "#/components/schemas/ValidarXmlSolicitudDto"
+              }
+            }
+          },
+          "description": ""
+        },
+        "tags": [
+          "Validador"
+        ]
+      }
+    },
+    "/api/validar-jws": {
+      "post": {
+        "summary": "Validar firma de un documento jws",
+        "operationId": "post-api-validar-jws",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidarJwsRespuestaDto"
+                },
+                "examples": {
+                  "Success-Response": {
+                    "value": {
+                      "datos": {
+                        "firmas": [
+                          {
+                            "noModificado": true,
+                            "cadenaConfianza": true,
+                            "firmadoDuranteVigencia": true,
+                            "firmadoAntesRevocacion": true,
+                            "fechaFirma": "2018-06-30T23:59:59.999Z",
+                            "certificado": {
+                              "ci": "1234567",
+                              "nombreSignatario": "Juan Perez",
+                              "cargoSignatario": "Director Ejecutivo",
+                              "organizacionSignatario": "Perez S.A.",
+                              "emailSignatario": "jperez@mail.com",
+                              "nombreECA": "ADSIB",
+                              "descripcionECA": "Entidad Certificadora Publica ADSIB",
+                              "inicioValidez": "2017-08-04T22:46:42.000Z",
+                              "finValidez": "2018-08-04T22:46:42.000Z",
+                              "revocado": "2018-06-01T12:30:02.000Z"
+                            }
+                          }
+                        ],
+                        "file": "MII...truncated...=="
+                      },
+                      "finalizado": true,
+                      "mensaje": "Se validó las firmas correctamente!"
+                    }
                   }
                 }
+              }
+            }
+          }
+        },
+        "description": "Permite validar las firmas digitales de un documento jws.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            },
+            "in": "header",
+            "name": "Content-Type",
+            "description": "Tipo de contenido."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidarJwsSolicitudDto"
               }
             }
           },
@@ -1220,39 +876,10 @@
   },
   "components": {
     "schemas": {
-      "StatusRespuesta": {
+      "StatusRespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "4384c7f4c050a"
-        },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "compilacion": {
-                "type": "integer"
-              },
-              "api_version": {
-                "type": "string"
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "compilacion": 3100,
-              "api_version": "1.1.0"
-            },
-            "finalizado": true,
-            "mensaje": "Servicio ejecutandose correctamente"
-          }
         },
         "examples": [
           {
@@ -1264,36 +891,348 @@
             "mensaje": "Servicio ejecutandose correctamente"
           }
         ],
-        "x-tags": [
-          "StatusModelo"
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "compilacion": {
+                "type": "integer",
+                "description": "Número de compilación del API."
+              },
+              "api_version": {
+                "type": "string",
+                "description": "Versión del API."
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "TokenDataSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
+          },
+          "pin": {
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
+          }
+        },
+        "required": [
+          "pin"
         ]
       },
-      "FirmarPkcs7": {
+      "TokenDataRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "8228dfb954c0a"
+        },
+        "examples": [
+          {
+            "datos": {
+              "data_token": {
+                "certificates": 1,
+                "data": [
+                  {
+                    "tipo": "PRIMARY_KEY",
+                    "tipo_desc": "Clave Privada",
+                    "alias": "355409121073",
+                    "id": "355409121073",
+                    "tiene_certificado": true
+                  },
+                  {
+                    "tipo": "X509_CERTIFICATE",
+                    "tipo_desc": "Certificado",
+                    "adsib": false,
+                    "serialNumber": "27cbd28f79876b40",
+                    "alias": "355409121073",
+                    "id": "355409121073",
+                    "pem": "-----BEGIN CERTIFICATE-----\nMII...truncated...==\n-----END CERTIFICATE-----",
+                    "validez": {
+                      "desde": "2021-01-29 11:21:19",
+                      "hasta": "2022-01-29 11:21:19"
+                    },
+                    "titular": {
+                      "dnQualifier": "CI",
+                      "CN": "Juan Perez",
+                      "OU": "Gerencia",
+                      "O": "Perez S.A.",
+                      "uidNumber": "12345678"
+                    },
+                    "emisor": {
+                      "CN": "ADSIB",
+                      "O": "ADSIB"
+                    }
+                  }
+                ],
+                "private_keys": 1
+              }
+            },
+            "finalizado": true,
+            "mensaje": "Datos de token obtenidos correctamente"
+          }
+        ],
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "data_token": {
+                "type": "object",
+                "description": "Información del dispositivo.",
+                "properties": {
+                  "certificates": {
+                    "type": "integer",
+                    "description": "Número de certificados identificados en el dispositivo conectado."
+                  },
+                  "data": {
+                    "type": "array",
+                    "description": "Lista de certificados y claves privadas.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tipo": {
+                          "type": "string",
+                          "description": "Tipo de certificado.",
+                          "enum": [
+                            "PRIMARY_KEY",
+                            "X509_CERTIFICATE"
+                          ]
+                        },
+                        "tipo_desc": {
+                          "type": "string",
+                          "description": "Descripción del tipo de certificado.",
+                          "enum": [
+                            "Certificado",
+                            "Clave Privada"
+                          ]
+                        },
+                        "alias": {
+                          "type": "string",
+                          "description": "Alias del certificado."
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "Identificador del certificado."
+                        },
+                        "tiene_certificado": {
+                          "type": "boolean",
+                          "description": "Cuando el tipo es clave privada, indica si la misma cuenta con un certificado asociado."
+                        },
+                        "adsib": {
+                          "type": "boolean",
+                          "description": "Cuando el tipo de certificado, indica si el certificado fue emitido por la ADSIB."
+                        },
+                        "serialNumber": {
+                          "type": "string",
+                          "description": "Número de serie del certificado."
+                        },
+                        "pem": {
+                          "type": "string",
+                          "description": "Certificado en formato PEM."
+                        },
+                        "validez": {
+                          "type": "object",
+                          "description": "Periodo de validez del certificado.",
+                          "properties": {
+                            "desde": {
+                              "type": "string",
+                              "description": "Fecha de inicio de la validez del certificado."
+                            },
+                            "hasta": {
+                              "type": "string",
+                              "description": "Fecha de conclusión de la validez del certificado."
+                            }
+                          }
+                        },
+                        "titular": {
+                          "type": "object",
+                          "description": "Información del titular del certificado.",
+                          "properties": {
+                            "dnQualifier": {
+                              "type": "string",
+                              "description": "Tipo de documento del titular."
+                            },
+                            "OU": {
+                              "type": "string",
+                              "description": "Unidad organizacional a la que pertenece el titular."
+                            },
+                            "CN": {
+                              "type": "string",
+                              "description": "Nombre del titular."
+                            },
+                            "O": {
+                              "type": "string",
+                              "description": "Organización a la que pertenece el titular."
+                            },
+                            "uidNumber": {
+                              "type": "string",
+                              "description": "Número de documento del titular."
+                            }
+                          }
+                        },
+                        "emisor": {
+                          "type": "object",
+                          "description": "Información de la Entidad Certificadora Autorizada.",
+                          "properties": {
+                            "CN": {
+                              "type": "string",
+                              "description": "Nombre de la Entidad Certificadora Autorizada."
+                            },
+                            "O": {
+                              "type": "string",
+                              "description": "Organización de la Entidad Certificadora Autorizada."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "private_keys": {
+                    "type": "integer",
+                    "description": "Valor que indica si la información corresponde a una clave privada."
+                  }
+                }
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "TokenConnectedRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "2f61e90dbc085"
+        },
+        "examples": [
+          {
+            "datos": {
+              "connected": true,
+              "tokens": [
+                {
+                  "slot": 1,
+                  "serial": "203531650003002A",
+                  "name": "Feitian Technologies Co., Ltd",
+                  "model": "ePass2003"
+                }
+              ]
+            },
+            "finalizado": true,
+            "mensaje": "Lista de Tokens obtenida"
+          }
+        ],
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "connected": {
+                "type": "boolean",
+                "description": "Valor que indica si almenos un dispositivo se encuentra conectado."
+              },
+              "tokens": {
+                "type": "array",
+                "description": "Lista de dispositivos conectados.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slot": {
+                      "type": "integer",
+                      "description": "Número de slot en el cual se encuentra conectado el token."
+                    },
+                    "serial": {
+                      "type": "string",
+                      "description": "Serial del Token."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Nombre del dispositivo (token)."
+                    },
+                    "model": {
+                      "type": "string",
+                      "description": "Modelo del dispositivo (token)."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "TokenStatusSmartCardRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "18175e554d221"
+        },
+        "examples": [
+          {
+            "datos": {
+              "connected": true,
+              "tokens": [
+                "FT ePass2003Auto"
+              ]
+            },
+            "finalizado": true,
+            "mensaje": "Lista de Tokens obtenida"
+          }
+        ],
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "connected": {
+                "type": "boolean",
+                "description": "Valor que determina si almenos un dispositivo se encuentra conectado."
+              },
+              "tokens": {
+                "type": "array",
+                "description": "Lista de dispositivos conectados.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "FirmarPkcs7SolicitudDto": {
         "type": "object",
         "x-stoplight": {
           "id": "2157ac0bfc6e6"
-        },
-        "properties": {
-          "slot": {
-            "type": "integer"
-          },
-          "pin": {
-            "type": "string"
-          },
-          "alias": {
-            "type": "string"
-          },
-          "file": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "file": "MII...truncated...=="
-          }
         },
         "examples": [
           {
@@ -1304,120 +1243,104 @@
           }
         ],
         "x-internal": false,
-        "title": "",
-        "x-tags": [
-          "FirmarPkcs7Modelo"
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
+          },
+          "pin": {
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
+          },
+          "alias": {
+            "type": "string",
+            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
+          },
+          "file": {
+            "type": "string",
+            "description": "Archivo en formato base64."
+          }
+        },
+        "required": [
+          "pin",
+          "alias",
+          "file"
         ]
       },
-      "FirmarPkcs7Respuesta": {
+      "FirmarPkcs7RespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "617194743203e"
         },
+        "examples": [
+          {
+            "datos": {
+              "pkcs7": "MII...truncated...=="
+            },
+            "finalizado": true,
+            "mensaje": "Se firmo el archivo correctamente."
+          }
+        ],
         "properties": {
           "datos": {
             "type": "object",
+            "description": "Datos devueltos.",
             "properties": {
               "pkcs7": {
-                "type": "string"
+                "type": "string",
+                "description": "Archivo firmado en formato base64."
               }
             }
           },
           "finalizado": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
           },
           "mensaje": {
-            "type": "string"
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "pkcs7": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se firmo el archivo correctamente."
-          }
-        },
+        }
+      },
+      "FirmarPdfSolicitudDto": {
+        "type": "object",
         "examples": [
           {
-            "datos": {
-              "pkcs7": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se firmo el archivo correctamente."
+            "slot": 1,
+            "pin": "12345678",
+            "alias": "355409121073",
+            "pdf": "MII...truncated...=="
           }
         ],
-        "x-tags": [
-          "FirmarPkcs7Modelo"
-        ]
-      },
-      "FirmarPdf": {
-        "type": "object",
         "properties": {
           "slot": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
           },
           "pin": {
-            "type": "string"
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
           },
           "alias": {
-            "type": "string"
+            "type": "string",
+            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
           },
           "pdf": {
-            "type": "string"
+            "type": "string",
+            "description": "Archivo pdf en formato base64."
           }
         },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "pdf": "MII...truncated...=="
-          }
-        },
-        "examples": [
-          {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "pdf": "MII...truncated...=="
-          }
-        ],
-        "x-tags": [
-          "FirmarPdfModelo"
+        "required": [
+          "pin",
+          "alias",
+          "pdf"
         ]
       },
-      "FirmarPdfRespuesta": {
+      "FirmarPdfRespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "560226c2c779f"
         },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "pdf_firmado": {
-                "type": "string"
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "pdf_firmado": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se firmo el pdf correctamente."
-          }
-        },
         "examples": [
           {
             "datos": {
@@ -1427,37 +1350,32 @@
             "mensaje": "Se firmo el pdf correctamente."
           }
         ],
-        "x-tags": [
-          "FirmarPdfModelo"
-        ]
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "pdf_firmado": {
+                "type": "string",
+                "description": "Archivo pdf firmado en formato base64."
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
       },
-      "FirmarXml": {
+      "FirmarXmlSolicitudDto": {
         "type": "object",
         "x-stoplight": {
           "id": "6b02a9c981987"
         },
-        "properties": {
-          "slot": {
-            "type": "integer"
-          },
-          "pin": {
-            "type": "string"
-          },
-          "alias": {
-            "type": "string"
-          },
-          "file": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "file": "MII...truncated...=="
-          }
-        },
         "examples": [
           {
             "slot": 1,
@@ -1466,40 +1384,35 @@
             "file": "MII...truncated...=="
           }
         ],
-        "x-tags": [
-          "FirmarXmlModelo"
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
+          },
+          "pin": {
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
+          },
+          "alias": {
+            "type": "string",
+            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
+          },
+          "file": {
+            "type": "string",
+            "description": "Archivo XML en formato base64."
+          }
+        },
+        "required": [
+          "pin",
+          "alias",
+          "file"
         ]
       },
-      "FirmarXmlRespuesta": {
+      "FirmarXmlRespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "ea56dedd441b2"
         },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "xml": {
-                "type": "string"
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "xml": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se firmo el archivo correctamente."
-          }
-        },
         "examples": [
           {
             "datos": {
@@ -1509,94 +1422,128 @@
             "mensaje": "Se firmo el archivo correctamente."
           }
         ],
-        "x-tags": [
-          "FirmarXmlModelo"
-        ]
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "xml": {
+                "type": "string",
+                "description": "Archivo xml firmado en formato base64."
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
       },
-      "FirmarLoteDocumentoPdf": {
+      "FirmarLoteDocumentoPdfSolicitudDto": {
         "type": "object",
+        "examples": [
+          {
+            "slot": 1,
+            "pin": "12345678",
+            "alias": "355409121073",
+            "pdfs": [
+              {
+                "id": "documento0.pdf",
+                "pdf": "MII...truncated...=="
+              },
+              {
+                "id": "documento1.pdf",
+                "pdf": "MII...truncated...=="
+              }
+            ]
+          }
+        ],
         "properties": {
           "slot": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
           },
           "pin": {
-            "type": "string"
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
           },
           "alias": {
-            "type": "string"
+            "type": "string",
+            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
           },
           "pdfs": {
             "type": "array",
+            "description": "Lista de archivos pdf en formato pdf.",
             "items": {
               "type": "object",
               "properties": {
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Identificador único."
                 },
                 "pdf": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Archivo pdf en formato base64."
                 }
-              }
+              },
+              "required": [
+                "id",
+                "pdf"
+              ]
             }
           }
         },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "pdfs": [
-              {
-                "id": "documento0.pdf",
-                "pdf": "MII...truncated...=="
-              },
-              {
-                "id": "documento1.pdf",
-                "pdf": "MII...truncated...=="
-              }
-            ]
-          }
-        },
-        "examples": [
-          {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "pdfs": [
-              {
-                "id": "documento0.pdf",
-                "pdf": "MII...truncated...=="
-              },
-              {
-                "id": "documento1.pdf",
-                "pdf": "MII...truncated...=="
-              }
-            ]
-          }
-        ],
-        "x-tags": [
-          "FirmarLoteDocumentoPdfModelo"
+        "required": [
+          "pin",
+          "alias",
+          "pdfs"
         ]
       },
-      "FirmarLoteDocumentoPdfRespuesta": {
+      "FirmarLoteDocumentoPdfRespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "8543bfe9d2d6d"
         },
+        "examples": [
+          {
+            "datos": {
+              "pdfs_firmados": [
+                {
+                  "id": "documento0.pdf",
+                  "pdf_firmado": "MII...truncated...=="
+                },
+                {
+                  "id": "documento1.pdf",
+                  "pdf_firmado": "MII...truncated...=="
+                }
+              ]
+            },
+            "finalizado": true,
+            "mensaje": "Se firmaron los pdfs correctamente."
+          }
+        ],
         "properties": {
           "datos": {
             "type": "object",
+            "description": "Datos devueltos.",
             "properties": {
               "pdfs_firmados": {
                 "type": "array",
+                "description": "Lista de archivos firmados en formato base64.",
                 "items": {
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Identificador único."
                     },
                     "pdf_firmado": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Archivo pdf firmado en formato base64."
                     }
                   }
                 }
@@ -1604,587 +1551,276 @@
             }
           },
           "finalizado": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
           },
           "mensaje": {
-            "type": "string"
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "pdfs_firmados": [
-                {
-                  "id": "documento0.pdf",
-                  "pdf_firmado": "MII...truncated...=="
-                },
-                {
-                  "id": "documento1.pdf",
-                  "pdf_firmado": "MII...truncated...=="
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Se firmaron los pdfs correctamente."
-          }
-        },
+        }
+      },
+      "FirmarHashSolicitudDto": {
+        "type": "object",
         "examples": [
           {
-            "datos": {
-              "pdfs_firmados": [
-                {
-                  "id": "documento0.pdf",
-                  "pdf_firmado": "MII...truncated...=="
-                },
-                {
-                  "id": "documento1.pdf",
-                  "pdf_firmado": "MII...truncated...=="
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Se firmaron los pdfs correctamente."
+            "slot": 1,
+            "pin": "12345678",
+            "alias": "355409121073",
+            "hash": "e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f"
           }
         ],
-        "x-tags": [
-          "FirmarLoteDocumentoPdfModelo"
-        ]
-      },
-      "FirmarEncriptando": {
-        "type": "object",
         "properties": {
           "slot": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Número de slot en el cual se encuentra conectado el token."
           },
           "pin": {
-            "type": "string"
+            "type": "string",
+            "description": "Clave de seguridad requerida para acceder al token."
           },
           "alias": {
-            "type": "string"
+            "type": "string",
+            "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
           },
           "hash": {
-            "type": "string"
+            "type": "string",
+            "description": "Suma de verificación calculada usando sha2 a 256bits."
           }
         },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "hash": "e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f"
-          }
-        },
-        "examples": [
-          {
-            "slot": 1,
-            "pin": "12345678",
-            "alias": "355409121073",
-            "hash": "e633f4fc79badea1dc5db970cf397c8248bac47cc3acf9915ba60b5d76b0e88f"
-          }
-        ],
-        "x-tags": [
-          "FirmarEncriptandoModelo"
+        "required": [
+          "pin",
+          "alias",
+          "hash"
         ]
       },
-      "FirmarEncriptandoRespuesta": {
+      "FirmarHashRespuestaDto": {
         "type": "object",
         "x-stoplight": {
           "id": "029a221af3bd7"
         },
+        "examples": [
+          {
+            "datos": {
+              "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
+            },
+            "finalizado": true,
+            "mensaje": "Firma realizada correctamente."
+          }
+        ],
         "properties": {
           "datos": {
             "type": "object",
+            "description": "Datos devueltos.",
             "properties": {
               "firma": {
-                "type": "string"
+                "type": "string",
+                "description": "Hash firmado."
               }
             }
           },
           "finalizado": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
           },
           "mensaje": {
-            "type": "string"
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
-            },
-            "finalizado": true,
-            "mensaje": "Firma realizada correctamente."
-          }
+        }
+      },
+      "ValidarPkcs7SolicitudDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "02f50b8c07ef7"
         },
         "examples": [
           {
-            "datos": {
-              "firma": "BBTDS8+NDwA38cyFd/sd3gQ5PpA42ZkQpkQFXtx3vjKi0YGkuyl50yW87hxYcSsIS674nilBSMLRFnwSg87E6rUUhaG+RS0Rh55PwXqE7GRxbyS0yEJAYF+ifw+epD3UBywExrJyUPikmADcBa1jUqLrlYiWOr1Vdhg7/SPTapNyEGtG/Tlv00KWv0RVt6NNx7hQMeRG52pbdCRv6LyJZcck7QuLsVPHuqGBLwHG6j4q+WnWih1Fi7Mnlj0DXYn1uDH/K5+saXHKfAO5SQTMYZwVbWRiyPSwLOIAFcebprL2+RTIA5cq7pl9hSXOqcyGmBcHDVWG2iNDYsYXtaqdNA=="
-            },
-            "finalizado": true,
-            "mensaje": "Firma realizada correctamente."
+            "file": "MII...truncated...=="
           }
         ],
-        "x-tags": [
-          "FirmarEncriptandoModelo"
-        ]
-      },
-      "TokenData": {
-        "type": "object",
-        "properties": {
-          "slot": {
-            "type": "integer"
-          },
-          "pin": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "slot": 1,
-            "pin": "12345678"
-          }
-        },
-        "x-tags": [
-          "TokenDataModelo"
-        ]
-      },
-      "TokenDataRespuesta": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "8228dfb954c0a"
-        },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "data_token": {
-                "type": "object",
-                "properties": {
-                  "certificates": {
-                    "type": "integer"
-                  },
-                  "data": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "tipo": {
-                          "type": "string"
-                        },
-                        "tipo_desc": {
-                          "type": "string"
-                        },
-                        "alias": {
-                          "type": "string"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "tiene_certificado": {
-                          "type": "boolean"
-                        },
-                        "adsib": {
-                          "type": "boolean"
-                        },
-                        "serialNumber": {
-                          "type": "string"
-                        },
-                        "pem": {
-                          "type": "string"
-                        },
-                        "validez": {
-                          "type": "object",
-                          "properties": {
-                            "desde": {
-                              "type": "string"
-                            },
-                            "hasta": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "titular": {
-                          "type": "object",
-                          "properties": {
-                            "dnQualifier": {
-                              "type": "string"
-                            },
-                            "CN": {
-                              "type": "string"
-                            },
-                            "OU": {
-                              "type": "string"
-                            },
-                            "O": {
-                              "type": "string"
-                            },
-                            "uidNumber": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "emisor": {
-                          "type": "object",
-                          "properties": {
-                            "CN": {
-                              "type": "string"
-                            },
-                            "O": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "private_keys": {
-                    "type": "integer"
-                  }
-                }
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "data_token": {
-                "certificates": 1,
-                "data": [
-                  {
-                    "tipo": "PRIMARY_KEY",
-                    "tipo_desc": "Clave Privada",
-                    "alias": "355409121073",
-                    "id": "355409121073",
-                    "tiene_certificado": true
-                  },
-                  {
-                    "tipo": "X509_CERTIFICATE",
-                    "tipo_desc": "Certificado",
-                    "adsib": false,
-                    "serialNumber": "27cbd28f79876b40",
-                    "alias": "355409121073",
-                    "id": "355409121073",
-                    "pem": "-----BEGIN CERTIFICATE-----\nMII...truncated...==\n-----END CERTIFICATE-----",
-                    "validez": {
-                      "desde": "2021-01-29 11:21:19",
-                      "hasta": "2022-01-29 11:21:19"
-                    },
-                    "titular": {
-                      "dnQualifier": "CI",
-                      "CN": "Juan Perez",
-                      "OU": "Gerencia",
-                      "O": "Perez S.A.",
-                      "uidNumber": "12345678"
-                    },
-                    "emisor": {
-                      "CN": "ADSIB",
-                      "O": "ADSIB"
-                    }
-                  }
-                ],
-                "private_keys": 1
-              }
-            },
-            "finalizado": true,
-            "mensaje": "Datos de token obtenidos correctamente"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "data_token": {
-                "certificates": 1,
-                "data": [
-                  {
-                    "tipo": "PRIMARY_KEY",
-                    "tipo_desc": "Clave Privada",
-                    "alias": "355409121073",
-                    "id": "355409121073",
-                    "tiene_certificado": true
-                  },
-                  {
-                    "tipo": "X509_CERTIFICATE",
-                    "tipo_desc": "Certificado",
-                    "adsib": false,
-                    "serialNumber": "27cbd28f79876b40",
-                    "alias": "355409121073",
-                    "id": "355409121073",
-                    "pem": "-----BEGIN CERTIFICATE-----\nMII...truncated...==\n-----END CERTIFICATE-----",
-                    "validez": {
-                      "desde": "2021-01-29 11:21:19",
-                      "hasta": "2022-01-29 11:21:19"
-                    },
-                    "titular": {
-                      "dnQualifier": "CI",
-                      "CN": "Juan Perez",
-                      "OU": "Gerencia",
-                      "O": "Perez S.A.",
-                      "uidNumber": "12345678"
-                    },
-                    "emisor": {
-                      "CN": "ADSIB",
-                      "O": "ADSIB"
-                    }
-                  }
-                ],
-                "private_keys": 1
-              }
-            },
-            "finalizado": true,
-            "mensaje": "Datos de token obtenidos correctamente"
-          }
-        ],
-        "x-tags": [
-          "TokenDataModelo"
-        ]
-      },
-      "TokenConnectedRespuesta": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "2f61e90dbc085"
-        },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "connected": {
-                "type": "boolean"
-              },
-              "tokens": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "slot": {
-                      "type": "integer"
-                    },
-                    "serial": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "connected": true,
-              "tokens": [
-                {
-                  "slot": 1,
-                  "serial": "203531650003002A",
-                  "name": "Feitian Technologies Co., Ltd",
-                  "model": "ePass2003"
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Lista de Tokens obtenida"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "connected": true,
-              "tokens": [
-                {
-                  "slot": 1,
-                  "serial": "203531650003002A",
-                  "name": "Feitian Technologies Co., Ltd",
-                  "model": "ePass2003"
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Lista de Tokens obtenida"
-          }
-        ],
-        "x-tags": [
-          "TokenConnectedModelo"
-        ]
-      },
-      "TokenStatusSmartCardRespuesta": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "18175e554d221"
-        },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "connected": {
-                "type": "boolean"
-              },
-              "tokens": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "connected": true,
-              "tokens": [
-                "FT ePass2003Auto"
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Lista de Tokens obtenida"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "connected": true,
-              "tokens": [
-                "FT ePass2003Auto"
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Lista de Tokens obtenida"
-          }
-        ],
-        "x-tags": [
-          "TokenStatusSmartCardModelo"
-        ]
-      },
-      "ValidarJws": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "b374820750f50"
-        },
         "properties": {
           "file": {
-            "type": "string"
+            "type": "string",
+            "description": "Archivo p7s en formato base64."
           }
         },
-        "x-examples": {
-          "Example 1": {
-            "file": "MII...truncated...=="
-          }
+        "required": [
+          "file"
+        ]
+      },
+      "ValidarPkcs7RespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "f05a7003067b9"
         },
         "examples": [
           {
-            "file": "MII...truncated...=="
+            "datos": {
+              "firmas": [
+                {
+                  "noModificado": true,
+                  "cadenaConfianza": true,
+                  "firmadoDuranteVigencia": true,
+                  "firmadoAntesRevocacion": true,
+                  "timeStamp": false,
+                  "fechaFirma": "2018-05-25T23:46:42.000Z",
+                  "certificado": {
+                    "ci": "1234567",
+                    "nombreSignatario": "Juan Perez",
+                    "cargoSignatario": "Director Ejecutivo",
+                    "organizacionSignatario": "Perez S.A.",
+                    "emailSignatario": "jperez@mail.com",
+                    "nombreECA": "ADSIB",
+                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
+                    "inicioValidez": "2017-08-04T22:46:42.000Z",
+                    "finValidez": "2018-08-04T22:46:42.000Z",
+                    "revocado": "2018-06-01T12:30:02.000Z"
+                  }
+                }
+              ],
+              "file": "MII...truncated...=="
+            },
+            "finalizado": true,
+            "mensaje": "Se validó las firmas correctamente!"
           }
         ],
-        "x-tags": [
-          "ValidarJwsModelo"
-        ]
-      },
-      "ValidarJwsRespuesta": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "4ff3e66069208"
-        },
         "properties": {
           "datos": {
             "type": "object",
+            "description": "Datos devueltos.",
             "properties": {
               "firmas": {
                 "type": "array",
+                "description": "Lista de firmas digitales identificadas.",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "noModificado": {
-                      "type": "boolean"
-                    },
-                    "cadenaConfianza": {
-                      "type": "boolean"
-                    },
-                    "firmadoDuranteVigencia": {
-                      "type": "boolean"
-                    },
-                    "firmadoAntesRevocacion": {
-                      "type": "boolean"
-                    },
-                    "fechaFirma": {
-                      "type": "string"
-                    },
-                    "certificado": {
-                      "type": "object",
-                      "properties": {
-                        "ci": {
-                          "type": "string"
-                        },
-                        "nombreSignatario": {
-                          "type": "string"
-                        },
-                        "cargoSignatario": {
-                          "type": "string"
-                        },
-                        "organizacionSignatario": {
-                          "type": "string"
-                        },
-                        "emailSignatario": {
-                          "type": "string"
-                        },
-                        "nombreECA": {
-                          "type": "string"
-                        },
-                        "descripcionECA": {
-                          "type": "string"
-                        },
-                        "inicioValidez": {
-                          "type": "string"
-                        },
-                        "finValidez": {
-                          "type": "string"
-                        },
-                        "revocado": {
-                          "type": "string"
-                        }
-                      }
-                    }
+                  "$ref": "#/components/schemas/FirmaDto",
+                  "x-stoplight": {
+                    "id": "iea37a6o0045e"
                   }
                 }
               },
               "file": {
-                "type": "string"
+                "type": "string",
+                "description": "Archivo original."
               }
             }
           },
           "finalizado": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
           },
           "mensaje": {
-            "type": "string"
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "ValidarPdfSolicitudDto": {
+        "type": "object",
+        "x-extension-1": null,
+        "examples": [
+          {
+            "pdf": "MII...truncated...=="
+          }
+        ],
+        "properties": {
+          "pdf": {
+            "type": "string",
+            "description": "Archivo pdf en formato base64."
           }
         },
-        "x-examples": {
-          "Example 1": {
+        "required": [
+          "pdf"
+        ]
+      },
+      "ValidarPdfRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "a983ed23ecce0"
+        },
+        "examples": [
+          {
+            "datos": {
+              "firmas": [
+                {
+                  "noModificado": true,
+                  "cadenaConfianza": true,
+                  "firmadoDuranteVigencia": true,
+                  "firmadoAntesRevocacion": true,
+                  "versionado": false,
+                  "timeStamp": false,
+                  "fechaFirma": "2018-05-25T23:46:42.000Z",
+                  "certificado": {
+                    "ci": "1234567",
+                    "nombreSignatario": "Juan Perez",
+                    "cargoSignatario": "Director Ejecutivo",
+                    "organizacionSignatario": "Perez S.A.",
+                    "emailSignatario": "jperez@mail.com",
+                    "nombreECA": "ADSIB",
+                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
+                    "inicioValidez": "2017-08-04T22:46:42.000Z",
+                    "finValidez": "2018-08-04T22:46:42.000Z",
+                    "revocado": "2018-06-01T12:30:02.000Z"
+                  }
+                }
+              ]
+            },
+            "finalizado": true,
+            "mensaje": "Se validó las firmas correctamente!"
+          }
+        ],
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "firmas": {
+                "type": "array",
+                "description": "Lista de firmas digitales identificadas.",
+                "items": {
+                  "$ref": "#/components/schemas/FirmaDto"
+                }
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "ValidarXmlSolicitudDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "d1c47c93f3517"
+        },
+        "examples": [
+          {
+            "file": "MII...truncated...=="
+          }
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Archivo XML en formato base64."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "ValidarXmlRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "37c3eac2ddcf9"
+        },
+        "examples": [
+          {
             "datos": {
               "firmas": [
                 {
@@ -2212,6 +1848,59 @@
             "finalizado": true,
             "mensaje": "Se validó las firmas correctamente!"
           }
+        ],
+        "properties": {
+          "datos": {
+            "type": "object",
+            "description": "Datos devueltos.",
+            "properties": {
+              "firmas": {
+                "type": "array",
+                "description": "Lista de firmas digitales identificadas.",
+                "items": {
+                  "$ref": "#/components/schemas/FirmaDto"
+                }
+              },
+              "file": {
+                "type": "string",
+                "description": "Archivo xml original."
+              }
+            }
+          },
+          "finalizado": {
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
+          }
+        }
+      },
+      "ValidarJwsSolicitudDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "b374820750f50"
+        },
+        "examples": [
+          {
+            "file": "MII...truncated...=="
+          }
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Archivo json en formato base64."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "ValidarJwsRespuestaDto": {
+        "type": "object",
+        "x-stoplight": {
+          "id": "4ff3e66069208"
         },
         "examples": [
           {
@@ -2243,518 +1932,119 @@
             "mensaje": "string"
           }
         ],
-        "x-tags": [
-          "ValidarJwsModelo"
-        ]
-      },
-      "ValidarPkcs7": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "02f50b8c07ef7"
-        },
-        "properties": {
-          "file": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "file": "MII...truncated...=="
-          }
-        },
-        "examples": [
-          {
-            "file": "MII...truncated...=="
-          }
-        ],
-        "x-tags": [
-          "ValidarPkcs7Modelo"
-        ]
-      },
-      "ValidarPkcs7Respuesta": {
-        "type": "object",
-        "x-stoplight": {
-          "id": "f05a7003067b9"
-        },
         "properties": {
           "datos": {
             "type": "object",
+            "description": "Datos devueltos.",
             "properties": {
               "firmas": {
                 "type": "array",
+                "description": "Lista de firmas digitales identificadas.",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "noModificado": {
-                      "type": "boolean"
-                    },
-                    "cadenaConfianza": {
-                      "type": "boolean"
-                    },
-                    "firmadoDuranteVigencia": {
-                      "type": "boolean"
-                    },
-                    "firmadoAntesRevocacion": {
-                      "type": "boolean"
-                    },
-                    "timeStamp": {
-                      "type": "boolean"
-                    },
-                    "fechaFirma": {
-                      "type": "string"
-                    },
-                    "certificado": {
-                      "type": "object",
-                      "properties": {
-                        "ci": {
-                          "type": "string"
-                        },
-                        "nombreSignatario": {
-                          "type": "string"
-                        },
-                        "cargoSignatario": {
-                          "type": "string"
-                        },
-                        "organizacionSignatario": {
-                          "type": "string"
-                        },
-                        "emailSignatario": {
-                          "type": "string"
-                        },
-                        "nombreECA": {
-                          "type": "string"
-                        },
-                        "descripcionECA": {
-                          "type": "string"
-                        },
-                        "inicioValidez": {
-                          "type": "string"
-                        },
-                        "finValidez": {
-                          "type": "string"
-                        },
-                        "revocado": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/FirmaDto"
                 }
               },
               "file": {
-                "type": "string"
+                "type": "string",
+                "description": "Archivo json original."
               }
             }
           },
           "finalizado": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Valor que indica si la consulta se ejecuto satisfactoriamente."
           },
           "mensaje": {
-            "type": "string"
+            "type": "string",
+            "description": "Descripción del resultado de la consulta."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "timeStamp": false,
-                  "fechaFirma": "2018-05-25T23:46:42.000Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ],
-              "file": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "timeStamp": false,
-                  "fechaFirma": "2018-05-25T23:46:42.000Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ],
-              "file": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        ],
-        "x-tags": [
-          "ValidarPkcs7Modelo"
-        ]
+        }
       },
-      "ValidarPdf": {
-        "type": "object",
-        "properties": {
-          "pdf": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "pdf": "MII...truncated...=="
-          }
-        },
-        "x-extension-1": null,
-        "examples": [
-          {
-            "pdf": "MII...truncated...=="
-          }
-        ],
-        "x-tags": [
-          "ValidarPdfModelo"
-        ]
-      },
-      "ValidarPdfRespuesta": {
-        "type": "object",
+      "FirmaDto": {
+        "title": "FirmaDto",
         "x-stoplight": {
-          "id": "a983ed23ecce0"
+          "id": "28s7mgy7gte3e"
         },
-        "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "firmas": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "noModificado": {
-                      "type": "boolean"
-                    },
-                    "cadenaConfianza": {
-                      "type": "boolean"
-                    },
-                    "firmadoDuranteVigencia": {
-                      "type": "boolean"
-                    },
-                    "firmadoAntesRevocacion": {
-                      "type": "boolean"
-                    },
-                    "versionado": {
-                      "type": "boolean"
-                    },
-                    "timeStamp": {
-                      "type": "boolean"
-                    },
-                    "fechaFirma": {
-                      "type": "string"
-                    },
-                    "certificado": {
-                      "type": "object",
-                      "properties": {
-                        "ci": {
-                          "type": "string"
-                        },
-                        "nombreSignatario": {
-                          "type": "string"
-                        },
-                        "cargoSignatario": {
-                          "type": "string"
-                        },
-                        "organizacionSignatario": {
-                          "type": "string"
-                        },
-                        "emailSignatario": {
-                          "type": "string"
-                        },
-                        "nombreECA": {
-                          "type": "string"
-                        },
-                        "descripcionECA": {
-                          "type": "string"
-                        },
-                        "inicioValidez": {
-                          "type": "string"
-                        },
-                        "finValidez": {
-                          "type": "string"
-                        },
-                        "revocado": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "finalizado": {
-            "type": "boolean"
-          },
-          "mensaje": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "versionado": false,
-                  "timeStamp": false,
-                  "fechaFirma": "2018-05-25T23:46:42.000Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "versionado": false,
-                  "timeStamp": false,
-                  "fechaFirma": "2018-05-25T23:46:42.000Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ]
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        ],
-        "x-tags": [
-          "ValidarPdfModelo"
-        ]
-      },
-      "ValidarXml": {
         "type": "object",
-        "x-stoplight": {
-          "id": "d1c47c93f3517"
-        },
         "properties": {
-          "file": {
-            "type": "string"
+          "noModificado": {
+            "type": "boolean",
+            "description": "Valor que determina si el documento ha sido modificado posterior a la firma del mismo."
+          },
+          "cadenaConfianza": {
+            "type": "boolean",
+            "description": "Valor que determina si el certificado utilizado para la firma pertenece a la infraestructura de clave pública del Estado Plurinacioanl de Bolivia."
+          },
+          "firmadoDuranteVigencia": {
+            "type": "boolean",
+            "description": "Valor que determina si la firma ha sido realizada durante el periodo de vigencia del certificado."
+          },
+          "firmadoAntesRevocacion": {
+            "type": "boolean",
+            "description": "Valor que determina si la firma ha sido realizada antes de la revocación o con un certificado revocado."
+          },
+          "timeStamp": {
+            "type": "boolean",
+            "description": "Valor que determina si la fecha del documento fue determinada mediante sellado de tiempo."
+          },
+          "fechaFirma": {
+            "type": "string",
+            "description": "Fecha de firma del documento."
+          },
+          "certificado": {
+            "$ref": "#/components/schemas/CertificadoDto",
+            "description": "Información del certificado."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "file": "MII...truncated...=="
-          }
-        },
-        "examples": [
-          {
-            "file": "MII...truncated...=="
-          }
-        ],
-        "x-tags": [
-          "ValidarXmlModelo"
-        ]
+        }
       },
-      "ValidarXmlRespuesta": {
-        "type": "object",
+      "CertificadoDto": {
+        "title": "CertificadoDto",
         "x-stoplight": {
-          "id": "37c3eac2ddcf9"
+          "id": "c4kuo4jnz7q2o"
         },
+        "type": "object",
         "properties": {
-          "datos": {
-            "type": "object",
-            "properties": {
-              "firmas": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "noModificado": {
-                      "type": "boolean"
-                    },
-                    "cadenaConfianza": {
-                      "type": "boolean"
-                    },
-                    "firmadoDuranteVigencia": {
-                      "type": "boolean"
-                    },
-                    "firmadoAntesRevocacion": {
-                      "type": "boolean"
-                    },
-                    "fechaFirma": {
-                      "type": "string"
-                    },
-                    "certificado": {
-                      "type": "object",
-                      "properties": {
-                        "ci": {
-                          "type": "string"
-                        },
-                        "nombreSignatario": {
-                          "type": "string"
-                        },
-                        "cargoSignatario": {
-                          "type": "string"
-                        },
-                        "organizacionSignatario": {
-                          "type": "string"
-                        },
-                        "emailSignatario": {
-                          "type": "string"
-                        },
-                        "nombreECA": {
-                          "type": "string"
-                        },
-                        "descripcionECA": {
-                          "type": "string"
-                        },
-                        "inicioValidez": {
-                          "type": "string"
-                        },
-                        "finValidez": {
-                          "type": "string"
-                        },
-                        "revocado": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "file": {
-                "type": "string"
-              }
-            }
+          "ci": {
+            "type": "string",
+            "description": "Número de cédula de identidad del signatario."
           },
-          "finalizado": {
-            "type": "boolean"
+          "nombreSignatario": {
+            "type": "string",
+            "description": "Nombre completo del signatario."
           },
-          "mensaje": {
-            "type": "string"
+          "cargoSignatario": {
+            "type": "string",
+            "description": "Cargo que ocupa el signatario."
+          },
+          "organizacionSignatario": {
+            "type": "string",
+            "description": "Organización a la que pertece el cargo del signatario."
+          },
+          "emailSignatario": {
+            "type": "string",
+            "description": "Correo electrónico del signatario."
+          },
+          "nombreECA": {
+            "type": "string",
+            "description": "Nombre de la Entidad Certificadora Autorizada."
+          },
+          "descripcionECA": {
+            "type": "string",
+            "description": "Nombre completo de la Entidad Certificadora Autorizada."
+          },
+          "inicioValidez": {
+            "type": "string",
+            "description": "Inicio de Validez del certificado."
+          },
+          "finValidez": {
+            "type": "string",
+            "description": "Fin de validez del certificado."
+          },
+          "revocado": {
+            "type": "string",
+            "description": "Fecha de revocación del certificado (solo si el certificado fue revocado)."
           }
-        },
-        "x-examples": {
-          "Example 1": {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "fechaFirma": "2018-06-30T23:59:59.999Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ],
-              "file": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        },
-        "examples": [
-          {
-            "datos": {
-              "firmas": [
-                {
-                  "noModificado": true,
-                  "cadenaConfianza": true,
-                  "firmadoDuranteVigencia": true,
-                  "firmadoAntesRevocacion": true,
-                  "fechaFirma": "2018-06-30T23:59:59.999Z",
-                  "certificado": {
-                    "ci": "1234567",
-                    "nombreSignatario": "Juan Perez",
-                    "cargoSignatario": "Director Ejecutivo",
-                    "organizacionSignatario": "Perez S.A.",
-                    "emailSignatario": "jperez@mail.com",
-                    "nombreECA": "ADSIB",
-                    "descripcionECA": "Entidad Certificadora Publica ADSIB",
-                    "inicioValidez": "2017-08-04T22:46:42.000Z",
-                    "finValidez": "2018-08-04T22:46:42.000Z",
-                    "revocado": "2018-06-01T12:30:02.000Z"
-                  }
-                }
-              ],
-              "file": "MII...truncated...=="
-            },
-            "finalizado": true,
-            "mensaje": "Se validó las firmas correctamente!"
-          }
-        ],
-        "x-tags": [
-          "ValidarXmlModelo"
-        ]
+        }
       }
     },
     "securitySchemes": {},
@@ -2766,145 +2056,31 @@
       "name": "Rutas",
       "tags": [
         "Estado",
-        "Firmador",
-        "Sign",
         "Token",
+        "Firmador",
         "Validador"
-      ]
-    },
-    {
-      "name": "Modelos",
-      "tags": [
-        "StatusRespuestaModelo",
-        "FirmarPkcs7Modelo",
-        "FirmarPdfModelo",
-        "FirmarXmlModelo",
-        "FirmarLoteDocumentoPdfModelo",
-        "FirmarEncriptandoModelo",
-        "TokenDataModelo",
-        "TokenConnectedModelo",
-        "TokenStatusSmartCardModelo",
-        "ValidarJwsModelo",
-        "ValidarPkcs7Modelo",
-        "ValidarPdfModelo",
-        "ValidarXmlModelo"
       ]
     }
   ],
   "tags": [
     {
-      "name": "StatusRespuestaModelo",
-      "x-displayName": "StatusRespuesta",
+      "name": "Estado",
+      "x-displayName": "Estado",
       "description": ""
     },
     {
-      "name": "FirmarPkcs7Modelo",
-      "x-displayName": "FirmarPkcs7",
+      "name": "Token",
+      "x-displayName": "Token",
       "description": ""
     },
     {
-      "name": "FirmarPkcs7RespuestaModelo",
-      "x-displayName": "FirmarPkcs7Respuesta",
+      "name": "Firmador",
+      "x-displayName": "Firmador",
       "description": ""
     },
     {
-      "name": "FirmarPdfModelo",
-      "x-displayName": "FirmarPdf",
-      "description": ""
-    },
-    {
-      "name": "FirmarPdfRespuestaModelo",
-      "x-displayName": "FirmarPdfRespuesta",
-      "description": ""
-    },
-    {
-      "name": "FirmarXmlModelo",
-      "x-displayName": "FirmarXml",
-      "description": ""
-    },
-    {
-      "name": "FirmarXmlRespuestaModelo",
-      "x-displayName": "FirmarXmlRespuesta",
-      "description": ""
-    },
-    {
-      "name": "FirmarLoteDocumentoPdfModelo",
-      "x-displayName": "FirmarLoteDocumentoPdf",
-      "description": ""
-    },
-    {
-      "name": "FirmarLoteDocumentoPdfRespuestaModelo",
-      "x-displayName": "FirmarLoteDocumentoPdfRespuesta",
-      "description": ""
-    },
-    {
-      "name": "FirmarEncriptandoModelo",
-      "x-displayName": "FirmarEncriptando",
-      "description": ""
-    },
-    {
-      "name": "FirmarEncriptandoRespuestaModelo",
-      "x-displayName": "FirmarEncriptandoRespuesta",
-      "description": ""
-    },
-    {
-      "name": "TokenDataModelo",
-      "x-displayName": "TokenData",
-      "description": ""
-    },
-    {
-      "name": "TokenDataRespuestaModelo",
-      "x-displayName": "TokenDataRespuesta",
-      "description": ""
-    },
-    {
-      "name": "TokenConnectedRespuestaModelo",
-      "x-displayName": "TokenConnectedRespuesta",
-      "description": ""
-    },
-    {
-      "name": "TokenStatusSmartCardRespuestaModelo",
-      "x-displayName": "TokenStatusSmartCardRespuesta",
-      "description": ""
-    },
-    {
-      "name": "ValidarJwsModelo",
-      "x-displayName": "ValidarJws",
-      "description": ""
-    },
-    {
-      "name": "ValidarJwsRespuestaModelo",
-      "x-displayName": "ValidarJwsRespuesta",
-      "description": ""
-    },
-    {
-      "name": "ValidarPkcs7Modelo",
-      "x-displayName": "ValidarPkcs7",
-      "description": ""
-    },
-    {
-      "name": "ValidarPkcs7RespuestaModelo",
-      "x-displayName": "ValidarPkcs7Respuesta",
-      "description": ""
-    },
-    {
-      "name": "ValidarPdfModelo",
-      "x-displayName": "ValidarPdf",
-      "description": ""
-    },
-    {
-      "name": "ValidarPdfRespuestaModelo",
-      "x-displayName": "ValidarPdfRespuesta",
-      "description": ""
-    },
-    {
-      "name": "ValidarXmlModelo",
-      "x-displayName": "ValidarXml",
-      "description": ""
-    },
-    {
-      "name": "ValidarXmlRespuestaModelo",
-      "x-displayName": "ValidarXmlRespuesta",
+      "name": "Validador",
+      "x-displayName": "Validador",
       "description": ""
     }
   ]
