@@ -164,6 +164,27 @@ tasks.register('packageRpm', Exec) {
     ])
 }
 
+tasks.register('packagePkg', Exec) {
+    group 'distribution'
+
+    dependsOn clean
+    dependsOn ':jacobitus-libreria:buildForMacOS'
+    dependsOn importCA
+    dependsOn importChangePinMacOS
+    dependsOn jar
+
+    project(':jacobitus-libreria').tasks.findByName('buildForMacOS').mustRunAfter 'clean'
+    tasks.findByName('importCA').mustRunAfter 'clean'
+    tasks.findByName('importChangePinMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
+
+    workingDir './'
+    commandLine(jpackageCommand + [
+        '--type', 'pkg',
+        '--icon', './iconos/icon.icns'
+    ])
+}
+
 tasks.register('packageDmg', Exec) {
     group 'distribution'
 
