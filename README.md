@@ -5,7 +5,6 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 - OpenJDK **15.0.2**
 - Gradle 7.6.2
 - g++ 10.x.x o superior
-- ApiDoc 0.29
 
 ### Instalación de Java 15
 
