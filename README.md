@@ -146,7 +146,7 @@ $ ./gradlew packageMsi
 
 ### MacOS
 
-Para la generación de un archivo dmg es necesario ejecutar:
+Para la generación de un archivo pkg es necesario ejecutar:
 ```
-$ ./gradlew packageDmg
+$ ./gradlew packagePkg
 ```
