@@ -11,14 +11,11 @@ import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
-import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.CertUtil;
-import bo.firmadigital.utiles.nss.Chromium;
-import bo.firmadigital.utiles.nss.Firefox;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.comun.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
@@ -390,18 +387,6 @@ public class App extends Application {
         Menu helpMenu = new Menu("Ayuda");
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
-            Firefox.registrarCertificado();
-            if (!Chromium.registrarCertificado() && OS.isMac()) {
-                ContrasenaMac contrasena = new ContrasenaMac(stage);
-                contrasena.showAndWait();
-                if (contrasena.getPass() == null) {
-                    return;
-                } else {
-                    if (!Chromium.registrarCertificado(contrasena.getPass())) {
-                        return;
-                    }
-                }
-            }
             HostServices hostServices = getHostServices();
             hostServices.showDocument("https://localhost:9000");
         });
@@ -654,8 +639,7 @@ public class App extends Application {
         Task task = new Task() {
             @Override
             protected Object call() throws Exception {
-                Firefox.registrarCertificado();
-                Chromium.registrarCertificado();
+                // TODO: Registrar certificados al iniciar la aplicacion
                 return true;
             }
         };
