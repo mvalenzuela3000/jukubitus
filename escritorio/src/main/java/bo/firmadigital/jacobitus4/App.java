@@ -16,6 +16,7 @@ import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
+import bo.firmadigital.utiles.CertUtil;
 import bo.firmadigital.utiles.nss.Chromium;
 import bo.firmadigital.utiles.nss.Firefox;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
@@ -409,15 +410,77 @@ public class App extends Application {
             String javaVersion = System.getProperty("java.version");
             String javafxVersion = System.getProperty("javafx.version");
             String changePinVersion = new ChangePinJNI().version();
+            String certificadoServicioLocal = "";
+            try {
+                if (CertUtil.verificarCertificadoServicioLocal()) {
+                    certificadoServicioLocal = "Certificado de servicio local instalado";
+                } else {
+                    certificadoServicioLocal = "Certificado de servicio local sin instalar";
+                }
+            } catch (IOException e1) {
+                certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
+            }
+            String certificadoECRB = "";
+            try {
+                if (CertUtil.verificarCertificadoECRB()) {
+                    certificadoECRB = "Certificado de la ECRB instalado";
+                } else {
+                    certificadoECRB = "Certificado de la ECRB sin instalar";
+                }
+            } catch (IOException e1) {
+                certificadoECRB = "Problemas al verificar certificado de la ECRB";
+            }
             ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Acerca de ...");
-            alert.setHeaderText("Jacobitus Total " + version + "\nChangePin Library " + changePinVersion + "\nJavaFX " + javafxVersion + "\nJava " + javaVersion);
+            alert.setHeaderText("Jacobitus Total " + version + "\nChangePin Library " + changePinVersion + "\nJavaFX " + javafxVersion + "\nJava " + javaVersion + "\n" + certificadoServicioLocal + "\n" + certificadoECRB);
             alert.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
             alert.setGraphic(adsib);
             alert.showAndWait();
         });
-        helpMenu.getItems().addAll(servicioItem, aboutItem);
+
+        MenuItem instalarCertificadoServicioLocalItem = new MenuItem("Instalar certificado servicio local");
+        instalarCertificadoServicioLocalItem.setOnAction((ActionEvent e) -> {
+            try {
+                CertUtil.instalarCertificadoServicioLocal();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+
+        MenuItem desinstalarCertificadoServicioLocalItem = new MenuItem("Desinstalar certificado servicio local");
+        desinstalarCertificadoServicioLocalItem.setOnAction((ActionEvent e) -> {
+            try {
+                CertUtil.desinstalarCertificadoServicioLocal();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+
+        
+        MenuItem instalarCertificadoECRBItem = new MenuItem("Instalar certificado ECRB");
+        instalarCertificadoECRBItem.setOnAction((ActionEvent e) -> {
+            try {
+                CertUtil.instalarCertificadoECRB();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+
+        MenuItem desinstalarCertificadoECRBItem = new MenuItem("Desinstalar certificado ECRB");
+        desinstalarCertificadoECRBItem.setOnAction((ActionEvent e) -> {
+            try {
+                CertUtil.desinstalarCertificadoECRB();
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+
+        helpMenu.getItems().addAll(servicioItem, aboutItem, instalarCertificadoServicioLocalItem, desinstalarCertificadoServicioLocalItem, instalarCertificadoECRBItem, desinstalarCertificadoECRBItem);
         menuBar.getMenus().add(helpMenu);
         root.setTop(menuBar);
 
