@@ -7,6 +7,7 @@ package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
@@ -46,6 +47,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -61,12 +63,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -135,7 +139,7 @@ public class App extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws IOException {
         String version = Constantes.VERSION;
         stage.setTitle("ADSIB - Jacobitus Total - " + version);
         if (!servicio) {
@@ -427,8 +431,18 @@ public class App extends Application {
         MenuItem instalarCertificadoServicioLocalItem = new MenuItem("Instalar certificado servicio local");
         instalarCertificadoServicioLocalItem.setOnAction((ActionEvent e) -> {
             try {
-                CertUtil.instalarCertificadoServicioLocal();
-            } catch (IOException e1) {
+                if (OS.isMac()) {
+                    ContrasenaMac contrasena = new ContrasenaMac(stage);
+                    contrasena.showAndWait();
+                    if (contrasena.getPass() == null) {
+                        return;
+                    } else {
+                        CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
+                    }
+                } else {
+                    CertUtil.instalarCertificadoServicioLocal();
+                }
+            } catch (IOException | InterruptedException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
@@ -437,7 +451,25 @@ public class App extends Application {
         MenuItem desinstalarCertificadoServicioLocalItem = new MenuItem("Desinstalar certificado servicio local");
         desinstalarCertificadoServicioLocalItem.setOnAction((ActionEvent e) -> {
             try {
-                CertUtil.desinstalarCertificadoServicioLocal();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText(null);
+                alert.setTitle("Confirmación");
+                alert.setContentText("¿Está seguro de desinstalar el certificado?");
+                Optional<ButtonType> action = alert.showAndWait();
+
+                if (action.get() == ButtonType.OK) {
+                    if (OS.isMac()) {
+                        ContrasenaMac contrasena = new ContrasenaMac(stage);
+                        contrasena.showAndWait();
+                        if (contrasena.getPass() == null) {
+                            return;
+                        } else {
+                            CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
+                        }
+                    } else {
+                        CertUtil.desinstalarCertificadoServicioLocal();
+                    }
+                }
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
@@ -448,7 +480,17 @@ public class App extends Application {
         MenuItem instalarCertificadoECRBItem = new MenuItem("Instalar certificado ECRB");
         instalarCertificadoECRBItem.setOnAction((ActionEvent e) -> {
             try {
-                CertUtil.instalarCertificadoECRB();
+                if (OS.isMac()) {
+                    ContrasenaMac contrasena = new ContrasenaMac(stage);
+                    contrasena.showAndWait();
+                    if (contrasena.getPass() == null) {
+                        return;
+                    } else {
+                        CertUtil.instalarCertificadoECRB(contrasena.getPass());
+                    }
+                } else {
+                    CertUtil.instalarCertificadoECRB();
+                }
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
@@ -458,14 +500,44 @@ public class App extends Application {
         MenuItem desinstalarCertificadoECRBItem = new MenuItem("Desinstalar certificado ECRB");
         desinstalarCertificadoECRBItem.setOnAction((ActionEvent e) -> {
             try {
-                CertUtil.desinstalarCertificadoECRB();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText(null);
+                alert.setTitle("Confirmación");
+                alert.setContentText("¿Está seguro de desinstalar el certificado?");
+                Optional<ButtonType> action = alert.showAndWait();
+
+                if (action.get() == ButtonType.OK) {
+                    if (OS.isMac()) {
+                        ContrasenaMac contrasena = new ContrasenaMac(stage);
+                        contrasena.showAndWait();
+                        if (contrasena.getPass() == null) {
+                            return;
+                        } else {
+                            CertUtil.desinstalarCertificadoECRB(contrasena.getPass());
+                        }
+                    } else {
+                        CertUtil.desinstalarCertificadoECRB();
+                    }
+                }
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         });
 
-        helpMenu.getItems().addAll(servicioItem, aboutItem, instalarCertificadoServicioLocalItem, desinstalarCertificadoServicioLocalItem, instalarCertificadoECRBItem, desinstalarCertificadoECRBItem);
+        helpMenu.setOnShowing((e) -> {
+            try {
+                instalarCertificadoServicioLocalItem.setVisible(!CertUtil.verificarCertificadoServicioLocal());
+                desinstalarCertificadoServicioLocalItem.setVisible(CertUtil.verificarCertificadoServicioLocal());
+                instalarCertificadoECRBItem.setVisible(!CertUtil.verificarCertificadoECRB());
+                desinstalarCertificadoECRBItem.setVisible(CertUtil.verificarCertificadoECRB());
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+        SeparatorMenuItem sep = new SeparatorMenuItem();
+        helpMenu.getItems().addAll(instalarCertificadoServicioLocalItem, desinstalarCertificadoServicioLocalItem, instalarCertificadoECRBItem, desinstalarCertificadoECRBItem, servicioItem, sep, aboutItem);
         menuBar.getMenus().add(helpMenu);
         root.setTop(menuBar);
 

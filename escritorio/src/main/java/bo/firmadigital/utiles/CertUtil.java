@@ -113,6 +113,18 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
+                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", "./ca/localhost.crt" });
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    String s;
+                    while ((s = in.readLine()) != null) {
+                        if (s.contains("certificate verification successful")) {
+                            return true;
+                        }
+                        if (s.contains("CSSMERR_TP_NOT_TRUSTED")) {
+                            return false;
+                        }
+                    }
+                }
                 return false;
             default:
                 return false;
@@ -144,7 +156,11 @@ public class CertUtil {
         }
     }
 
-    public static boolean instalarCertificadoServicioLocal() throws IOException {
+    public static boolean instalarCertificadoServicioLocal() throws IOException, InterruptedException {
+        return CertUtil.instalarCertificadoServicioLocal(null);
+    }
+
+    public static boolean instalarCertificadoServicioLocal(String contrasenia) throws IOException, InterruptedException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -226,13 +242,18 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./ca/localhost.crt" });
+                return true;
             default:
                 return false;
         }
     }
     
     public static boolean desinstalarCertificadoServicioLocal() throws IOException {
+        return CertUtil.desinstalarCertificadoServicioLocal(null);
+    }
+
+    public static boolean desinstalarCertificadoServicioLocal(String contrasenia) throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -274,7 +295,8 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d ./ca/localhost.crt && sudo -S security delete-certificate -c adsib.gob.bo" });
+                return true;
             default:
                 return false;
         }
@@ -308,6 +330,18 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
+                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", "./ca/ecrb.crt" });
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    String s;
+                    while ((s = in.readLine()) != null) {
+                        if (s.contains("certificate verification successful")) {
+                            return true;
+                        }
+                        if (s.contains("CSSMERR_TP_NOT_TRUSTED")) {
+                            return false;
+                        }
+                    }
+                }
                 return false;
             default:
                 return false;
@@ -340,6 +374,10 @@ public class CertUtil {
     }
 
     public static boolean instalarCertificadoECRB() throws IOException {
+        return CertUtil.desinstalarCertificadoServicioLocal(null);
+    }
+
+    public static boolean instalarCertificadoECRB(String contrasenia) throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -362,13 +400,18 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./ca/ecrb.crt" });
+                return true;
             default:
                 return false;
         }
     }
     
     public static boolean desinstalarCertificadoECRB() throws IOException {
+        return CertUtil.desinstalarCertificadoServicioLocal(null);
+    }
+
+    public static boolean desinstalarCertificadoECRB(String contrasenia) throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -384,18 +427,14 @@ public class CertUtil {
                 if (hashCertificado != null) {
                     p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-delstore", "-f", "-user", "root", hashCertificado });
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                        String s;
-                        while ((s = in.readLine()) != null) {
-                            if (s.toLowerCase().startsWith("certutil: -delstore") && (s.toLowerCase().contains("correctamente") || s.toLowerCase().contains("successfully"))) {
-                                return true;
-                            }
-                        }
+                        return true;
                     }
                 }
                 return false;
             case "MACOS":
-                return false;
-            default:
+            p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d ./ca/ecrb.crt && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
+                return true;
+        default:
                 return false;
         }
     }
