@@ -39,7 +39,7 @@ dependencies {
 }
 
 group = 'bo.firmadigital.jacobitus4'
-version = '1.2.1'
+version = '1.2.2'
 description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
 
