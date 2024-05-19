@@ -32,6 +32,8 @@ public class CambiarContrasena extends Stage {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -87,8 +89,8 @@ public class CambiarContrasena extends Stage {
                     if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
                         error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
                     } else {
-                        GestorSlot gestorSlot = GestorSlot.getInstance();
-                        IToken token = gestorSlot.obtenerSlot(slot, this.getOpciones()).getToken();
+                        GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                        IToken token = gestorSlot.obtenerSlot(slot).getToken();
                         try {
                             String oldPass = oldPasswordField.getText();
                             if (oldPass.startsWith("@unlock:")) {

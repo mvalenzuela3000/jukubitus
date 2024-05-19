@@ -81,6 +81,8 @@ public class FirmadorRest {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -100,9 +102,9 @@ public class FirmadorRest {
         try {
             JSONObject req = new JSONObject(body);
             byte[] dataByte = Base64.getDecoder().decode(req.getString("data"));
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.listarSlots(this.getOpciones());
-            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            gestorSlot.listarSlots();
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
             IToken token = slot.getToken();
             token.iniciar(req.getString("pin"));
             // Crea un firmador RSA256
@@ -289,8 +291,8 @@ public class FirmadorRest {
                 jsonReader.close();
             }
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots(this.getOpciones());
+                GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -334,9 +336,9 @@ public class FirmadorRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.listarSlots(this.getOpciones());
-            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            gestorSlot.listarSlots();
+            Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
             IToken token = slot.getToken();
             token.iniciar(req.getString("pin"));
             JSONArray data = req.getJSONArray("data");
@@ -417,13 +419,13 @@ public class FirmadorRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            Slot[] slots = gestorSlot.listarSlots();
             if (!req.has("slot") && slots.length == 1) {
                 req.put("slot", slots[0].getSlotID());
             }
             if (req.has("slot") && req.has("pin") && req.has("alias") && req.has("hash")) {
-                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"), this.getOpciones());
+                Slot slot = gestorSlot.obtenerSlot(req.getLong("slot"));
                 IToken token = slot.getToken();
                 token.iniciar(req.getString("pin"));
                 JSONObject datos = new JSONObject();
@@ -538,8 +540,8 @@ public class FirmadorRest {
                 jsonReader.close();
             }
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots(this.getOpciones());
+                GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -669,8 +671,8 @@ public class FirmadorRest {
                 jsonReader.close();
             }
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots(this.getOpciones());
+                GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
@@ -795,8 +797,8 @@ public class FirmadorRest {
         try {
             JSONObject req = new JSONObject(body);
             if (!req.has("slot")) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                Slot[] slots = gestorSlot.listarSlots(this.getOpciones());
+                GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     req.put("slot", slots[0].getSlotID());
                 }
@@ -805,7 +807,7 @@ public class FirmadorRest {
                 JSONObject datos = new JSONObject();
                 json.put("datos", datos);
 
-                IToken token = GestorSlot.getInstance().obtenerSlot(req.getLong("slot"), this.getOpciones()).getToken();
+                IToken token = GestorSlot.getInstance(this.getOpciones()).obtenerSlot(req.getLong("slot")).getToken();
                 token.iniciar(req.getString("pin"));
                 try {
                     if (token.obtenerCertificado(req.getString("alias")) == null) {
@@ -890,8 +892,8 @@ public class FirmadorRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String sign(String body) {
         JSONObject json = new JSONObject();
-        GestorSlot gestorSlot = GestorSlot.getInstance();
-        Slot[] slots = gestorSlot.listarSlots(true, this.getOpciones());
+        GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+        Slot[] slots = gestorSlot.listarSlots(true);
         TokenSelected dt;
         try {
             JSONObject req = new JSONObject(body);

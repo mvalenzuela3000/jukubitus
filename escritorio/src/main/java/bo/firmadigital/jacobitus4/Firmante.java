@@ -51,6 +51,8 @@ public class Firmante extends Stage {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -144,8 +146,8 @@ public class Firmante extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();

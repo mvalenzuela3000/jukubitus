@@ -17,6 +17,7 @@ import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.CertUtil;
+import bo.firmadigital.utiles.Controlador;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.comun.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -63,7 +65,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -119,6 +120,8 @@ public class App extends Application {
         bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -139,7 +142,7 @@ public class App extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, URISyntaxException {
         String version = Constantes.VERSION;
         stage.setTitle("ADSIB - Jacobitus Total - " + version);
         if (!servicio) {
@@ -665,11 +668,13 @@ public class App extends Application {
         Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);
         stage.show();
-        if (taskBar) {
+        if (taskBar && !OS.isDebian()) {
             Platform.setImplicitExit(false);
             if (url == null && param == null) {
                 stage.hide();
             }
+        } else {
+            new Thread(listarTokens()).start();
         }
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (servicio && (!taskBar || taskBarEmulated)) {
@@ -725,8 +730,8 @@ public class App extends Application {
             protected Object call() throws Exception {
                
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    Slot[] slots = gestorSlot.listarSlots(getOpcionesFirmador());
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpcionesFirmador());
+                    Slot[] slots = gestorSlot.listarSlots();
                     List<CK_TOKEN_INFO> list = new LinkedList();
                     for (Slot s : slots) {
                         list.add(s.detalleToken());

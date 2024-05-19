@@ -83,10 +83,22 @@ tasks.register('importCA', Copy) {
     into layout.projectDirectory.dir("build/libs/ca")
 }
 
-tasks.register('importDrivers', Copy) {
+tasks.register('addDriversLinux', Copy) {
     group 'build'
-    from project(':jacobitus-libreria').file("build/libs/controladores")
-    into layout.projectDirectory.dir("build/libs/controladores")
+    from layout.projectDirectory.file('controladores/linux')
+    into layout.projectDirectory.dir('build/libs/controladores')
+}
+
+tasks.register('addDriversMacOS', Copy) {
+    group 'build'
+    from layout.projectDirectory.file('controladores/macos')
+    into layout.projectDirectory.dir('build/libs/controladores')
+}
+
+tasks.register('addDriversWindows', Copy) {
+    group 'build'
+    from layout.projectDirectory.file('controladores/windows')
+    into layout.projectDirectory.dir('build/libs/controladores')
 }
 
 tasks.register('importChangePinLinux', Copy) {
@@ -130,13 +142,13 @@ tasks.register('packageDeb', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForLinux'
     dependsOn importCA
-    dependsOn importDrivers
+    dependsOn addDriversLinux
     dependsOn importChangePinLinux
     dependsOn jar
 
     project(':jacobitus-libreria').tasks.findByName('buildForLinux').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('importDrivers').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
+    tasks.findByName('addDriversLinux').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
     tasks.findByName('importChangePinLinux').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
     tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForLinux', 'importChangePinLinux', 'importCA'
 
@@ -178,13 +190,13 @@ tasks.register('packagePkg', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForMacOS'
     dependsOn importCA
-    dependsOn importDrivers
+    dependsOn addDriversMacOS
     dependsOn importChangePinMacOS
     dependsOn jar
 
     project(':jacobitus-libreria').tasks.findByName('buildForMacOS').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('importDrivers').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
+    tasks.findByName('addDriversMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('importChangePinMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
 
@@ -201,13 +213,13 @@ tasks.register('packageDmg', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForMacOS'
     dependsOn importCA
-    dependsOn importDrivers
+    dependsOn addDriversMacOS
     dependsOn importChangePinMacOS
     dependsOn jar
 
     project(':jacobitus-libreria').tasks.findByName('buildForMacOS').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('importDrivers').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
+    tasks.findByName('addDriversMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('importChangePinMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
 
@@ -224,13 +236,13 @@ tasks.register('packageMsi', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForWindows'
     dependsOn importCA
-    dependsOn importDrivers
+    dependsOn addDriversWindows
     dependsOn importChangePinWindows
     dependsOn jar
 
     project(':jacobitus-libreria').tasks.findByName('buildForWindows').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('importDrivers').mustRunAfter 'clean', ':jacobitus-libreria:buildForWindows'
+    tasks.findByName('addDriversWindows').mustRunAfter 'clean', ':jacobitus-libreria:buildForWindows'
     tasks.findByName('importChangePinWindows').mustRunAfter 'clean', ':jacobitus-libreria:buildForWindows'
     tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForWindows', 'importChangePinWindows', 'importCA'
 

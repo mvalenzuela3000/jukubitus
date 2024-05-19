@@ -67,6 +67,8 @@ public class Configuracion extends Stage {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -250,7 +252,7 @@ public class Configuracion extends Stage {
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
                 Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
-                TokenPKCS12 token = new TokenPKCS12(slot);
+                TokenPKCS12 token = new TokenPKCS12(getOpciones(), slot);
                 try {
                     token.crear(contrasena.getPass());
                     textFieldToken.setText(config.getToken().getName());

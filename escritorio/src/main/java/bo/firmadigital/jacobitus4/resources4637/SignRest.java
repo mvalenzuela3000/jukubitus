@@ -33,6 +33,8 @@ public class SignRest {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -77,8 +79,8 @@ public class SignRest {
             if (req.has("software")) {
                 software = req.getBoolean("software");
             }
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            Slot[] slots = gestorSlot.listarSlots(software, this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");
             }

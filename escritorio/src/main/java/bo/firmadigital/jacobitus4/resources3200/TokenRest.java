@@ -11,7 +11,6 @@ import bo.firmadigital.jacobitus.comun.token.Slot;
 import bo.firmadigital.jacobitus.comun.token.SmartCard;
 import bo.firmadigital.jacobitus.comun.token.IToken;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus4.util.Config;
 
@@ -50,6 +49,8 @@ public class TokenRest {
         bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -120,8 +121,8 @@ public class TokenRest {
                         }
                         slots = null;
                     }
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    slots = gestorSlot.listarSlots(this.getOpcionesFirmador());
+                    GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpcionesFirmador());
+                    slots = gestorSlot.listarSlots();
                     if (slots.length == 1) {
                         slots[0].getToken().iniciar(pin);
                         json.put("finalizado", true);

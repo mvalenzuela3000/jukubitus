@@ -15,6 +15,8 @@ import java.net.URLClassLoader;
 import java.util.Properties;
 import javax.swing.filechooser.FileSystemView;
 
+import bo.firmadigital.utiles.Controlador;
+
 /**
  *
  * @author ADSIB
@@ -259,6 +261,14 @@ public class Config {
         } else {
             options.setProperty("hsmType", type);
         }
+    }
+
+    public String getDirectorioControladores() {
+        return Controlador.obtenerDirectorio();
+    }
+
+    public String getDispositivosCompatibles() {
+        return Controlador.obtenerDispositivosCompatibles();
     }
 
     public void save() {

@@ -9,6 +9,7 @@ import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.utiles.Controlador;
 import bo.firmadigital.jacobitus.comun.token.GestorSlot;
 import bo.firmadigital.jacobitus.comun.token.IToken;
 import bo.firmadigital.jacobitus.validador.Certificate;
@@ -71,6 +72,8 @@ public class TokenInfo extends Stage {
         Opciones opciones = new Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
+        opciones.setDirectorioControladores(config.getDirectorioControladores());
+        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
         opciones.setSelloTiempoHabilitado(config.isTSEnabled());
         opciones.setApiSelloTiempo(config.getTS());
         opciones.setJwtSelloTiempo(config.getTSJWT());
@@ -206,8 +209,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();
@@ -257,8 +260,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     BigInteger max = new BigInteger("1000000000000");
                     BigInteger id = new BigInteger(max.bitLength(), new SecureRandom()).mod(max);
@@ -295,8 +298,8 @@ public class TokenInfo extends Stage {
                         byte[] cert = is.readAllBytes();
                         pem = Certificate.getPem(cert);
                     }
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
                         token.cargarCertificado(pem, label);
@@ -329,8 +332,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
                         DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
@@ -370,8 +373,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
                         DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
@@ -410,8 +413,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance();
-                    IToken token = gestorSlot.obtenerSlot(slot, getOpciones()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     token.eliminarClaves(label);
                     token.salir();
