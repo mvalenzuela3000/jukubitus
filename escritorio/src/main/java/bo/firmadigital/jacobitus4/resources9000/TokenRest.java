@@ -6,13 +6,13 @@
 package bo.firmadigital.jacobitus4.resources9000;
 
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.jacobitus.comun.token.SmartCard;
-import bo.firmadigital.jacobitus.comun.token.GestorSlot;
-import bo.firmadigital.jacobitus.comun.token.Slot;
-import bo.firmadigital.jacobitus.comun.token.IToken;
-import bo.firmadigital.jacobitus.comun.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;

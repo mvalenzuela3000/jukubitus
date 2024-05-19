@@ -9,10 +9,10 @@ import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.jacobitus.comun.token.GestorSlot;
-import bo.firmadigital.jacobitus.comun.token.Slot;
-import bo.firmadigital.jacobitus.comun.token.IToken;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus4.util.Config;
 

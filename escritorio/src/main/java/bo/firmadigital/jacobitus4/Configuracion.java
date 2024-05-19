@@ -7,9 +7,9 @@ package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus.comun.token.Slot;
-import bo.firmadigital.jacobitus.comun.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.token.TokenPKCS12;
 
 import java.io.BufferedInputStream;
 import java.io.File;

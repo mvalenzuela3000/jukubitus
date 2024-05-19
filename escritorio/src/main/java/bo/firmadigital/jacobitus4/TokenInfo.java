@@ -7,11 +7,11 @@ package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.utiles.Controlador;
-import bo.firmadigital.jacobitus.comun.token.GestorSlot;
-import bo.firmadigital.jacobitus.comun.token.IToken;
 import bo.firmadigital.jacobitus.validador.Certificate;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.File;

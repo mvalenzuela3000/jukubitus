@@ -6,10 +6,10 @@
 package bo.firmadigital.jacobitus4.resources3200;
 
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
-import bo.firmadigital.jacobitus.comun.token.GestorSlot;
-import bo.firmadigital.jacobitus.comun.token.Slot;
-import bo.firmadigital.jacobitus.comun.token.SmartCard;
-import bo.firmadigital.jacobitus.comun.token.IToken;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus4.util.Config;
