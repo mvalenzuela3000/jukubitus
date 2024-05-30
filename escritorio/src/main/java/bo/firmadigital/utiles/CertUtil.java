@@ -48,17 +48,6 @@ public class CertUtil {
                             }
                         }
                     }
-                    if (!chromiumInstalado) {
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", "./ca/localhost.crt", "-t", "cTC,cTC,cTC", "-d", chromiumBD.getParent() });
-                        try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                            String s;
-                            while ((s = in.readLine()) != null) {
-                                if (s.startsWith("adsib.gob.bo")) {
-                                    chromiumInstalado = true;
-                                }
-                            }
-                        }
-                    }
                     respuesta = respuesta && chromiumInstalado;
                 }
                 File mozilla = new File(System.getProperty("user.home") + "/.mozilla/firefox/");
@@ -81,17 +70,6 @@ public class CertUtil {
                             while ((s = in.readLine()) != null) {
                                 if (s.startsWith("adsib.gob.bo")) {
                                     mozillaInstalado = true;
-                                }
-                            }
-                        }
-                        if (!mozillaInstalado) {
-                            p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", "./ca/localhost.crt", "-t", "cTC,cTC,cTC", "-d", mozillaBD.getParent() });
-                            try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                                String s;
-                                while ((s = in.readLine()) != null) {
-                                    if (s.startsWith("adsib.gob.bo")) {
-                                        mozillaInstalado = true;
-                                    }
                                 }
                             }
                         }
