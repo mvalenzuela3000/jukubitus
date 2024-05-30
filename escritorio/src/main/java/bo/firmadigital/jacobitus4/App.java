@@ -413,14 +413,16 @@ public class App extends Application {
                 certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
             }
             String certificadoECRB = "";
-            try {
-                if (CertUtil.verificarCertificadoECRB()) {
-                    certificadoECRB = "Certificado de la ECRB instalado";
-                } else {
-                    certificadoECRB = "Certificado de la ECRB sin instalar";
+            if (!OS.isDebian()) {
+                try {
+                    if (CertUtil.verificarCertificadoECRB()) {
+                        certificadoECRB = "Certificado de la ECRB instalado";
+                    } else {
+                        certificadoECRB = "Certificado de la ECRB sin instalar";
+                    }
+                } catch (IOException e1) {
+                    certificadoECRB = "Problemas al verificar certificado de la ECRB";
                 }
-            } catch (IOException e1) {
-                certificadoECRB = "Problemas al verificar certificado de la ECRB";
             }
             ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
             Alert alert = new Alert(AlertType.INFORMATION);
@@ -530,10 +532,17 @@ public class App extends Application {
 
         helpMenu.setOnShowing((e) -> {
             try {
-                instalarCertificadoServicioLocalItem.setVisible(!CertUtil.verificarCertificadoServicioLocal());
-                desinstalarCertificadoServicioLocalItem.setVisible(CertUtil.verificarCertificadoServicioLocal());
-                instalarCertificadoECRBItem.setVisible(!CertUtil.verificarCertificadoECRB());
-                desinstalarCertificadoECRBItem.setVisible(CertUtil.verificarCertificadoECRB());
+                Boolean certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
+                instalarCertificadoServicioLocalItem.setVisible(!certificadoServicioLocalInstalado);
+                desinstalarCertificadoServicioLocalItem.setVisible(certificadoServicioLocalInstalado);
+                if (!OS.isDebian()) {
+                    Boolean certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
+                    instalarCertificadoECRBItem.setVisible(!certificadoECRBInstalado);
+                    desinstalarCertificadoECRBItem.setVisible(certificadoECRBInstalado);
+                } else {
+                    instalarCertificadoECRBItem.setVisible(false);
+                    desinstalarCertificadoECRBItem.setVisible(false);
+                }
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
