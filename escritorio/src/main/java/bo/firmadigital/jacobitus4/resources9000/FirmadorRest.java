@@ -40,6 +40,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -189,8 +191,30 @@ public class FirmadorRest {
             json.put("datos", jsonResult);
         } catch (JSONException | GeneralSecurityException | IOException ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -320,8 +344,30 @@ public class FirmadorRest {
             }
         } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -374,8 +420,30 @@ public class FirmadorRest {
             json.put("mensaje", "Se firmo las solicitudes correctamente!");
         } catch (JSONException | GeneralSecurityException | URISyntaxException | JOSEException ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -450,8 +518,30 @@ public class FirmadorRest {
             }
         } catch (GeneralSecurityException | JSONException ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -566,8 +656,30 @@ public class FirmadorRest {
             }
         } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -732,8 +844,30 @@ public class FirmadorRest {
             }
         } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -839,8 +973,30 @@ public class FirmadorRest {
             }
         } catch (JSONException | IOException | GeneralSecurityException | OutOfMemoryError ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }
@@ -936,8 +1092,30 @@ public class FirmadorRest {
             }
         } catch (JSONException | OutOfMemoryError ex) {
             try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
                 json.put("finalizado", false);
-                json.put("mensaje", ex.getMessage());
+                json.put("mensaje", mensaje);
             } catch (JSONException e) {
                 Logger.getLogger(FirmadorRest.class.getName()).log(Level.SEVERE, null, e);
             }

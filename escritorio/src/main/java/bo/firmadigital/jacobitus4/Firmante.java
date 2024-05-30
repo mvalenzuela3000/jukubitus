@@ -11,6 +11,7 @@ import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,6 +163,17 @@ public class Firmante extends Stage {
                     updateProgress(100, 100);
                     return true;
                 } catch (GeneralSecurityException ex) {
+                    if (ex.getCause() instanceof IOException) {
+                        if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                            throw new RuntimeException("Pin incorrecto, intente nuevamente.");
+                        }
+                    }
+                    if (ex instanceof java.security.cert.CertificateExpiredException) {
+                        throw new RuntimeException("El certificado se encuentra expirado.");
+                    }
+                    if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                        throw new RuntimeException("El certificado aún no está vigente.");
+                    }
                     if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
                         if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
                             throw new RuntimeException("Por favor verifique el pin.");

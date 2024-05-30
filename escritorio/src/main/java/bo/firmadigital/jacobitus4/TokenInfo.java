@@ -11,7 +11,6 @@ import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.utiles.Controlador;
 import bo.firmadigital.jacobitus.validador.Certificate;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.File;
@@ -223,6 +222,17 @@ public class TokenInfo extends Stage {
                     updateProgress(100, 100);
                     return true;
                 } catch (GeneralSecurityException ex) {
+                    if (ex.getCause() instanceof IOException) {
+                        if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                            throw new RuntimeException("Pin incorrecto, intente nuevamente.");
+                        }
+                    }
+                    if (ex instanceof java.security.cert.CertificateExpiredException) {
+                        throw new RuntimeException("El certificado se encuentra expirado.");
+                    }
+                    if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                        throw new RuntimeException("El certificado aún no está vigente.");
+                    }
                     if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
                         if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
                             throw new RuntimeException("Por favor verifique el pin.");
