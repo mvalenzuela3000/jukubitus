@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,6 +14,30 @@ import java.util.stream.Stream;
 import bo.firmadigital.jacobitus.utilidades.OS;
 
 public class CertUtil {
+    public static String obtenerDirectorio() {
+        try {
+            String ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            String rutaBase = new File(ruta).getParentFile().getAbsolutePath();
+            String directorio = rutaBase + "/ca";
+            if (directorio.contains("build/classes/java") || directorio.contains("build\\classes\\java")) {
+                ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getPath();
+                rutaBase = new File(ruta).getParentFile().getAbsolutePath();
+                directorio = rutaBase + "/libs/ca";
+            }
+            return directorio;
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    public static String obtenerRutaCertificadoServicioLocal() {
+        return CertUtil.obtenerDirectorio() + "/localhost.crt";
+    }
+    
+    public static String obtenerRutaCertificadoECRB() {
+        return CertUtil.obtenerDirectorio() + "/ecrb.crt";
+    }
+
     private static String obtenerDistribucion() {
         if (OS.isUnix()) {
             if (OS.isDebian()) {
@@ -29,7 +54,6 @@ public class CertUtil {
         }
         return null;
     }
-
 
     public static boolean verificarCertificadoServicioLocal() throws IOException {
         Process p;
@@ -91,7 +115,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", "./ca/localhost.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", CertUtil.obtenerRutaCertificadoServicioLocal() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -117,7 +141,7 @@ public class CertUtil {
             case "RHEL":
                 return null;
             case "WINDOWS":
-                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", "./ca/localhost.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", CertUtil.obtenerRutaCertificadoServicioLocal() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -156,7 +180,7 @@ public class CertUtil {
                         }
                     }
                     if (!chromiumInstalado) {
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", "./ca/localhost.crt", "-t", "cTC,cTC,cTC", "-d", chromiumBD.getParent() });
+                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", chromiumBD.getParent() });
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
@@ -192,7 +216,7 @@ public class CertUtil {
                             }
                         }
                         if (!mozillaInstalado) {
-                            p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", "./ca/localhost.crt", "-t", "cTC,cTC,cTC", "-d", mozillaBD.getParent() });
+                            p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", mozillaBD.getParent() });
                             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                                 String s;
                                 while ((s = in.readLine()) != null) {
@@ -209,7 +233,7 @@ public class CertUtil {
             case "RHEL":
                 return false;
             case "WINDOWS":
-                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", "./ca/localhost.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", CertUtil.obtenerRutaCertificadoServicioLocal() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -220,7 +244,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./ca/localhost.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "+ CertUtil.obtenerRutaCertificadoServicioLocal() });
                 return true;
             default:
                 return false;
@@ -273,7 +297,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d ./ca/localhost.crt && sudo -S security delete-certificate -c adsib.gob.bo" });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoServicioLocal() + " && sudo -S security delete-certificate -c adsib.gob.bo" });
                 return true;
             default:
                 return false;
@@ -308,7 +332,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", "./ca/ecrb.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", CertUtil.obtenerRutaCertificadoECRB() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -334,7 +358,7 @@ public class CertUtil {
             case "RHEL":
                 return null;
             case "WINDOWS":
-                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", "./ca/ecrb.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", CertUtil.obtenerRutaCertificadoECRB() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -359,7 +383,7 @@ public class CertUtil {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
-                p = Runtime.getRuntime().exec(new String[] { "sudo", "cp", "./ca/ecrb.crt", "/usr/local/share/ca-certificates" });
+                p = Runtime.getRuntime().exec(new String[] { "sudo", "cp", CertUtil.obtenerRutaCertificadoECRB(), "/usr/local/share/ca-certificates" });
                 if (CertUtil.verificarCertificadoECRB()) {
                     p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-certificates" });
                 }
@@ -367,7 +391,7 @@ public class CertUtil {
             case "RHEL":
                 return false;
             case "WINDOWS":
-                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", "./ca/ecrb.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", CertUtil.obtenerRutaCertificadoECRB() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
                     while ((s = in.readLine()) != null) {
@@ -378,7 +402,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./ca/ecrb.crt" });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain " + CertUtil.obtenerRutaCertificadoECRB() });
                 return true;
             default:
                 return false;
@@ -410,7 +434,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-            p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d ./ca/ecrb.crt && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
+            p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoECRB() + " && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
                 return true;
         default:
                 return false;
