@@ -140,7 +140,8 @@ public class TokenRest {
     public String connected() {
         JSONObject json = new JSONObject();
         try {
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             try {
                 Slot[] slots = gestorSlot.listarSlots();
                 json.put("datos", new JSONObject());
@@ -244,7 +245,8 @@ public class TokenRest {
             InputStream is = getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
             List<X509Certificate> intermediates = (List<X509Certificate>) fact.generateCertificates(is);
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot[] slots = gestorSlot.listarSlots();
             if (slots.length == 1 && !req.has("slot")) {
                 req.put("slot", slots[0].getSlotID());
@@ -379,7 +381,8 @@ public class TokenRest {
     public String generate_keypar(@QueryParam("pin") String pin, @QueryParam("slot") Integer slotNumber) {
         JSONObject json = new JSONObject();
         try {
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(slotNumber);
             IToken token = slot.getToken();
             token.iniciar(pin);
@@ -417,7 +420,8 @@ public class TokenRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
             IToken token = slot.getToken();
             JSONObject datos = new JSONObject();
@@ -446,7 +450,8 @@ public class TokenRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
             IToken token = slot.getToken();
             json.put("datos", new JSONObject());
@@ -474,7 +479,8 @@ public class TokenRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
             try {
                 IToken token = slot.getToken();
@@ -499,7 +505,8 @@ public class TokenRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
             try {
                 IToken token = slot.getToken();
@@ -524,7 +531,8 @@ public class TokenRest {
         JSONObject json = new JSONObject();
         try {
             JSONObject req = new JSONObject(body);
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot slot = gestorSlot.obtenerSlot(req.getInt("slot"));
             try {
                 IToken token = slot.getToken();

@@ -208,7 +208,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
@@ -270,7 +271,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     BigInteger max = new BigInteger("1000000000000");
@@ -308,7 +310,8 @@ public class TokenInfo extends Stage {
                         byte[] cert = is.readAllBytes();
                         pem = Certificate.getPem(cert);
                     }
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
@@ -342,7 +345,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
@@ -383,7 +387,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     try {
@@ -423,7 +428,8 @@ public class TokenInfo extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     token.eliminarClaves(label);

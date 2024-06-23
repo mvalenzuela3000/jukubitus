@@ -147,7 +147,8 @@ public class Firmante extends Stage {
             @Override
             protected Object call() {
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpciones());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
                     IToken token = gestorSlot.obtenerSlot(slot).getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();

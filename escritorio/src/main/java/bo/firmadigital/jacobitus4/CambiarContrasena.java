@@ -89,7 +89,8 @@ public class CambiarContrasena extends Stage {
                     if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
                         error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
                     } else {
-                        GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+                        GestorSlot gestorSlot = GestorSlot.getInstance();
+                        gestorSlot.setOpciones(this.getOpciones());
                         IToken token = gestorSlot.obtenerSlot(slot).getToken();
                         try {
                             String oldPass = oldPasswordField.getText();

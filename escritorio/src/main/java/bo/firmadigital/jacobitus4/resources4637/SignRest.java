@@ -80,7 +80,8 @@ public class SignRest {
             if (req.has("software")) {
                 software = req.getBoolean("software");
             }
-            GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpciones());
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(this.getOpciones());
             Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
                 throw new RuntimeException("Por favor conecte solo un token.");

@@ -121,7 +121,8 @@ public class TokenRest {
                         }
                         slots = null;
                     }
-                    GestorSlot gestorSlot = GestorSlot.getInstance(this.getOpcionesFirmador());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(this.getOpcionesFirmador());
                     slots = gestorSlot.listarSlots();
                     if (slots.length == 1) {
                         slots[0].getToken().iniciar(pin);

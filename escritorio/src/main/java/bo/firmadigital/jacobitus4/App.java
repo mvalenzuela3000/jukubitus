@@ -20,7 +20,6 @@ import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.CertUtil;
-import bo.firmadigital.utiles.Controlador;
 import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.validador.Certificate;
@@ -739,7 +738,8 @@ public class App extends Application {
             protected Object call() throws Exception {
                
                 try {
-                    GestorSlot gestorSlot = GestorSlot.getInstance(getOpcionesFirmador());
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpcionesFirmador());
                     Slot[] slots = gestorSlot.listarSlots();
                     List<CK_TOKEN_INFO> list = new LinkedList();
                     for (Slot s : slots) {

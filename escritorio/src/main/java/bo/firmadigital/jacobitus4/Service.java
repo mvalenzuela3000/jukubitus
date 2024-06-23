@@ -106,8 +106,9 @@ public class Service extends Stage {
             tokensChoiceBox.setPrefHeight(27);
             tokensChoiceBox.getSelectionModel().selectedIndexProperty()
                     .addListener((ObservableValue<? extends Number> ov, Number t, Number t1) -> {
-                        tokenSelected.setSlot(GestorSlot.getInstance(this.getOpciones())
-                                .obtenerSlot(tokens.get(ov.getValue().intValue()).getSlot()));
+                        GestorSlot gestorSlot = GestorSlot.getInstance();
+                        gestorSlot.setOpciones(this.getOpciones());
+                        tokenSelected.setSlot(gestorSlot.obtenerSlot(tokens.get(ov.getValue().intValue()).getSlot()));
                     });
             tokensChoiceBox.getSelectionModel().selectFirst();
             root.add(tokensChoiceBox, 0, 0, 2, 1);
@@ -180,8 +181,9 @@ public class Service extends Stage {
                 if (files.length() + filesJson.length() == 0) {
                     updateProgress(100, 100);
                 } else {
-                    IToken token = GestorSlot.getInstance(getOpciones())
-                            .obtenerSlot(tokenSelected.getSlot().getSlotID()).getToken();
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(tokenSelected.getSlot().getSlotID()).getToken();
                     token.iniciar(tokenSelected.getPin());
                     if (format == "both") {
                         JSONArray arr = new JSONArray();
