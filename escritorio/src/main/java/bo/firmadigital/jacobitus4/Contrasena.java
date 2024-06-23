@@ -15,6 +15,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -46,6 +48,12 @@ public class Contrasena extends Stage {
         vBox.setSpacing(4);
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
+        passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                pass = passwordField.getText();
+                close();
+            }
+        });
         vBox.getChildren().add(passwordField);
         vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
         switch (tipo) {
@@ -81,11 +89,13 @@ public class Contrasena extends Stage {
         }
         vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
         root.setCenter(vBox);
+
         Button buttonAceptar = new Button("Aceptar");
         buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
             pass = passwordField.getText();
             close();
         });
+
         Button buttonCancelar = new Button("Cancelar");
         buttonCancelar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
             close();
