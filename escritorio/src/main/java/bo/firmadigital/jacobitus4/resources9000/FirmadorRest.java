@@ -335,7 +335,7 @@ public class FirmadorRest {
                 } else {
                     firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, this.getOpciones());
                 }
-                firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
+                firmar.firmar(new ByteArrayInputStream(file), out, bloquear, false);
 
                 datos.put("pdf_firmado", Base64.getEncoder().encodeToString(out.toByteArray()));
                 json.put("finalizado", true);
@@ -649,7 +649,7 @@ public class FirmadorRest {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     FirmadorPKCS7 firmar = FirmadorPKCS7.getInstance(slot, alias, pin, this.getOpciones());
                     try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
-                        firmar.firmar(is, out, detached);
+                        firmar.firmar(is, out, detached, false);
                     }
                     datos.put("pkcs7", Base64.getEncoder().encodeToString(out.toByteArray()));
                 }
@@ -707,6 +707,7 @@ public class FirmadorRest {
      * @apiParam {String} [digest] Algoritmo utilizado para el digest por defecto SHA256.
      * @apiParam {String} [signatureAlgorithm] Algoritmo utilizado para el digest de la firma por RCA por defecto SHA256.
      * @apiParam {Boolean} [enveloped] Requerir modo enveloped aun con nodo.
+     * @apiParam {Boolean} [prefix] Utilizar prefijo ds para la firma.
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -736,7 +737,8 @@ public class FirmadorRest {
             Long slot = null;
             byte[] file = null;
             String node = null;
-            Boolean enveloped = false;
+            Boolean forzarEnveloped = false;
+            Boolean usarPrefijo = false;
             String digest = null;
             String signatureAlgorithm = null;
             JsonFactory factory = new ObjectMapper().getJsonFactory();
@@ -779,7 +781,10 @@ public class FirmadorRest {
                             signatureAlgorithm = jsonReader.readValueAs(String.class);
                             break;
                         case "enveloped":
-                            enveloped = jsonReader.readValueAs(Boolean.class);
+                            forzarEnveloped = jsonReader.readValueAs(Boolean.class);
+                            break;
+                        case "prefix":
+                            usarPrefijo = jsonReader.readValueAs(Boolean.class);
                             break;
                         default:
                             Logger.getLogger(FirmadorRest.class.getName()).log(Level.WARNING, null, label);
@@ -838,7 +843,7 @@ public class FirmadorRest {
                         }
                     }
                     try (InputStream is = new BufferedInputStream(new ByteArrayInputStream(file))) {
-                        firmar.firmar(is, out, enveloped);
+                        firmar.firmar(is, out, forzarEnveloped, usarPrefijo);
                     }
                     datos.put("xml", Base64.getEncoder().encodeToString(out.toByteArray()));
                 }

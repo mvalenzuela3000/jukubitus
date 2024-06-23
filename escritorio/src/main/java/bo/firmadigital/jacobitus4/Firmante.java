@@ -45,6 +45,8 @@ public class Firmante extends Stage {
     private String label;
     private String pass = null;
     private boolean bloquea;
+    private boolean forzarEnveloped;
+    private boolean usarPrefijo;
     private String node;
 
     private Opciones getOpciones() {
@@ -89,7 +91,7 @@ public class Firmante extends Stage {
                 @Override
                 public void updateItem(DatosCertificado datos, boolean empty) {
                     super.updateItem(datos, empty);
-                    if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                    if (datos != null) {
                         CertInformation pane = new CertInformation(datos, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -118,7 +120,8 @@ public class Firmante extends Stage {
                 close();
             } else {
                 pass = contrasena.getPass();
-                bloquea = contrasena.isBloquea();
+                forzarEnveloped = contrasena.getForzarEnveloped();
+                usarPrefijo = contrasena.getUsarPrefijo();
                 node = contrasena.getNode();
                 new Thread(listarCertificados(contrasena.getPass())).start();
             }
@@ -135,6 +138,14 @@ public class Firmante extends Stage {
 
     public boolean isBloquea() {
         return bloquea;
+    }
+
+    public boolean getForzarEnveloped() {
+        return forzarEnveloped;
+    }
+
+    public boolean getUsarPrefijo() {
+        return usarPrefijo;
     }
 
     public String getNode() {
@@ -155,9 +166,7 @@ public class Firmante extends Stage {
                     List<DatosCertificado> certificados = new LinkedList<>();
                     for (String label : labels) {
                         DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        if (entry.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
-                            certificados.add(entry);
-                        }
+                        certificados.add(entry);
                     }
                     token.salir();
                     table.setItems(FXCollections.observableList(certificados));

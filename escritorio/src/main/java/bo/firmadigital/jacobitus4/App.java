@@ -341,7 +341,7 @@ public class App extends Application {
                         Firmante firmante = new Firmante(stage, item.getSlot(), Constants.DSIG);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
-                            new Thread(firmarXml(item.getSlot(), firmante.getLabel(), firmante.getPass(), firmante.getNode(), firmante.isBloquea())).start();
+                            new Thread(firmarXml(item.getSlot(), firmante.getLabel(), firmante.getPass(), firmante.getNode(), firmante.getForzarEnveloped(), firmante.getUsarPrefijo())).start();
                         }
                     }
                 }
@@ -922,7 +922,7 @@ public class App extends Application {
                             }
                             File out = new File(destino, name);
                             try (InputStream is = new FileInputStream(files.get(i).getAbsolutePath()); OutputStream os = new FileOutputStream(out)) {
-                                firmar.firmar(is, os, bloquear);
+                                firmar.firmar(is, os, bloquear, false);
                             }
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidadorPdf(out, opcionesValidador));
@@ -1027,7 +1027,7 @@ public class App extends Application {
         return task;
     }
 
-    public Task firmarXml(long slot, String label, String pass, String node, Boolean enveloped) {
+    public Task firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped, Boolean usarPrefijo) {
         progressBar.progressProperty().unbind();
         Task task = new Task() {
             @Override
@@ -1052,7 +1052,7 @@ public class App extends Application {
                         }
                         File out = new File(destino, name);
                         try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
-                            firmar.firmar(is, os, enveloped);
+                            firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
                         }
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidadorXml(out, opcionesValidador));
@@ -1095,7 +1095,7 @@ public class App extends Application {
                         }
                         File out = new File(destino, name);
                         try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
-                            firmar.firmar(is, os, false);
+                            firmar.firmar(is, os, false, false);
                         }
                         updateProgress(i + 1, files.size());
                         tableFile.getItems().set(i, new ValidadorJws(out, opcionesValidador));

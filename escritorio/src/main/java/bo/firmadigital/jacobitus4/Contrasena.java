@@ -29,6 +29,8 @@ import javafx.stage.Stage;
 public class Contrasena extends Stage {
     private String pass;
     private boolean bloquea = false;
+    private boolean forzarEnveloped = false;
+    private boolean usarPrefijo = false;
     private int height = 120;
     private TextField  nodeField;
 
@@ -67,9 +69,14 @@ public class Contrasena extends Stage {
                 CheckBox checkBoxEnveloped = new CheckBox("Forzar enveloped.");
                 vBox.getChildren().add(checkBoxEnveloped);
                 checkBoxEnveloped.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    bloquea = newValue;
+                    forzarEnveloped = newValue;
                 });
-                height = 150;
+                CheckBox checkBoxPrefix = new CheckBox("Usar prefijo.");
+                vBox.getChildren().add(checkBoxPrefix);
+                checkBoxPrefix.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    usarPrefijo = newValue;
+                });
+                height = 180;
                 break;
         }
         vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
@@ -98,6 +105,14 @@ public class Contrasena extends Stage {
 
     public boolean isBloquea() {
         return bloquea;
+    }
+
+    public boolean getForzarEnveloped() {
+        return forzarEnveloped;
+    }
+
+    public boolean getUsarPrefijo() {
+        return usarPrefijo;
     }
 
     public String getNode() {
