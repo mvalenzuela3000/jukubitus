@@ -877,6 +877,11 @@ public class App extends Application {
                         certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
                         certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
+                        // TODO: Ajustar los mensajes de validacion de documentos xml y json, considerando que no se puede determinar si fueron firmados dentro del periodo de vigencia del certificado
+                        // } else if (files.get(i).getName().endsWith(".xml")) {
+                        //     certs.add(new ValidadorXml(files.get(i), getOpcionesValidador()));
+                        // } else if (files.get(i).getName().endsWith(".jws")) {
+                        //     certs.add(new ValidadorJws(files.get(i), getOpcionesValidador()));
                     } else {
                         certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                     }
