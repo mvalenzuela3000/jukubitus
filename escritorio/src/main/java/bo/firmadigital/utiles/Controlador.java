@@ -11,7 +11,7 @@ public class Controlador {
             String ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
             String rutaBase = new File(ruta).getParentFile().getAbsolutePath();
             String directorio = rutaBase + "/controladores";
-            if (directorio.contains("build/classes/java")) {
+            if (directorio.contains("build/classes/java") || directorio.contains("build\\classes\\java")) {
                 ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getPath();
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/controladores";
@@ -32,7 +32,7 @@ public class Controlador {
             String ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
             String rutaBase = new File(ruta).getParentFile().getAbsolutePath();
             String directorio = rutaBase + "/controladores";
-            if (directorio.contains("build/classes/java")) {
+            if (directorio.contains("build/classes/java") || directorio.contains("build\\classes\\java")) {
                 ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getPath();
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/controladores";
