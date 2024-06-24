@@ -5,7 +5,7 @@
   },
   "info": {
     "title": "Jacobitus Escritorio",
-    "version": "1.2.2-beta2",
+    "version": "1.2.2-beta",
     "summary": "Solución de escritorio para todo requerimiento de firma digital",
     "description": "Administra tu dispositivo criptográfico (token) de la manera más intuitiva y fácil con esta herramienta.",
     "contact": {
@@ -1529,9 +1529,31 @@
             "type": "string",
             "description": "Identificador del certificado o clave privada contenida en el token y que se utilizará para firmar."
           },
+          "bloquear": {
+            "type": "boolean",
+            "description": "Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento."
+          },
           "pdf": {
             "type": "string",
             "description": "Archivo pdf en formato base64."
+          },
+          "point": {
+            "type": "object",
+            "description": "Coordenadas para la referencia de firma.",
+            "properties": {
+              "x": {
+                "type": "number",
+                "description": "Coordenada x para la referencia de firma."
+              },
+              "y": {
+                "type": "number",
+                "description": "Coordenada y para la referencia de firma."
+              }
+            }
+          },
+          "image": {
+            "type": "string",
+            "description": "Imagen en base64 a utilizar en la firma."
           }
         },
         "required": [
@@ -1604,6 +1626,28 @@
           "file": {
             "type": "string",
             "description": "Archivo XML en formato base64."
+          },
+          "node": {
+            "type": "string",
+            "description": "Nodo del XML que se desea firmar."
+          },
+          "digest": {
+            "type": "string",
+            "description": "Algoritmo utilizado para el digest por defecto SHA256.",
+            "default": "SHA256"
+          },
+          "signatureAlgorithm": {
+            "type": "string",
+            "description": "Algoritmo utilizado para el digest de la firma por RCA por defecto SHA256.",
+            "default": "SHA256"
+          },
+          "enveloped": {
+            "type": "boolean",
+            "description": "Requerir modo enveloped aun con nodo."
+          },
+          "prefix": {
+            "type": "boolean",
+            "description": "Utilizar prefijo ds para la firma."
           }
         },
         "required": [
@@ -1692,6 +1736,10 @@
                 "pdf": {
                   "type": "string",
                   "description": "Archivo pdf en formato base64."
+                },
+                "bloquear": {
+                  "type": "boolean",
+                  "description": "Bandera que en caso de estar presente con valor true, bloqueará la posibilidad de añadir más firmas al documento."
                 }
               },
               "required": [
