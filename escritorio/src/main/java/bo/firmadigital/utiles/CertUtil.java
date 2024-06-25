@@ -376,7 +376,7 @@ public class CertUtil {
     }
 
     public static boolean instalarCertificadoECRB() throws IOException {
-        return CertUtil.desinstalarCertificadoServicioLocal(null);
+        return CertUtil.instalarCertificadoECRB(null);
     }
 
     public static boolean instalarCertificadoECRB(String contrasenia) throws IOException {
@@ -410,7 +410,7 @@ public class CertUtil {
     }
     
     public static boolean desinstalarCertificadoECRB() throws IOException {
-        return CertUtil.desinstalarCertificadoServicioLocal(null);
+        return CertUtil.desinstalarCertificadoECRB(null);
     }
 
     public static boolean desinstalarCertificadoECRB(String contrasenia) throws IOException {
