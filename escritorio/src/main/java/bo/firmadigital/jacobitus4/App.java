@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -56,9 +57,10 @@ import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -395,8 +397,6 @@ public class App extends Application {
         Menu helpMenu = new Menu("Ayuda");
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
-            // stage.getScene().setCursor(Cursor.WAIT);
-           
             String certificadoServicioLocal = "";
             boolean certificadoServicioLocalInstalado = false;
             try {
@@ -469,16 +469,16 @@ public class App extends Application {
                             } else {
                                 resultado = CertUtil.desinstalarCertificadoServicioLocal();
                             }
-                            Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                            mensaje.initOwner(stage);
-                            mensaje.initModality(Modality.APPLICATION_MODAL);
-                            mensaje.setHeaderText(null);
-                            mensaje.setTitle("Respuesta");
-                            if (resultado) {
-                                mensaje.setContentText("Operación concluida satisfactoriamente.");
-                            } else {
-                                mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                            }
+                            // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
+                            // mensaje.initOwner(stage);
+                            // mensaje.initModality(Modality.APPLICATION_MODAL);
+                            // mensaje.setHeaderText(null);
+                            // mensaje.setTitle("Respuesta");
+                            // if (resultado) {
+                            //     mensaje.setContentText("Operación concluida satisfactoriamente.");
+                            // } else {
+                            //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
+                            // }
                         }
                     } catch (IOException e2) {
                         // TODO Auto-generated catch block
@@ -511,16 +511,16 @@ public class App extends Application {
                             } else {
                                 resultado = CertUtil.instalarCertificadoServicioLocal();
                             }
-                            Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                            mensaje.initOwner(stage);
-                            mensaje.initModality(Modality.APPLICATION_MODAL);
-                            mensaje.setHeaderText(null);
-                            mensaje.setTitle("Respuesta");
-                            if (resultado) {
-                                mensaje.setContentText("Operación concluida satisfactoriamente.");
-                            } else {
-                                mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                            }
+                            // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
+                            // mensaje.initOwner(stage);
+                            // mensaje.initModality(Modality.APPLICATION_MODAL);
+                            // mensaje.setHeaderText(null);
+                            // mensaje.setTitle("Respuesta");
+                            // if (resultado) {
+                            //     mensaje.setContentText("Operación concluida satisfactoriamente.");
+                            // } else {
+                            //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
+                            // }
                         }
                     } catch (IOException | InterruptedException e2) {
                         // TODO Auto-generated catch block
@@ -616,8 +616,6 @@ public class App extends Application {
 
             verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
             verificarServicioAlerta.showAndWait();
-
-            // stage.getScene().setCursor(Cursor.DEFAULT);
         });
 
         MenuItem aboutItem = new MenuItem("Acerca de ...");
@@ -792,6 +790,7 @@ public class App extends Application {
         });
 
         new Thread(registrarCertificado()).start();
+
         if (url == null) {
             if (param == null) {
                 if (taskBar) {
@@ -815,10 +814,10 @@ public class App extends Application {
         App.app = this;
     }
 
-    public Task registrarCertificado() {
-        Task task = new Task() {
+    public Task<Boolean> registrarCertificado() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 // TODO: Registrar certificados al iniciar la aplicacion
                 return true;
             }
@@ -826,11 +825,12 @@ public class App extends Application {
         return task;
     }
     
-    public Task listarTokens() {
+    public Task<Boolean> listarTokens() {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
+                
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpcionesFirmador());
@@ -850,7 +850,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING);
             alert.setTitle("Jacobitus");
@@ -871,11 +871,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task validar(List<File> files) {
+    public Task<Boolean> validar(List<File> files) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
@@ -899,7 +899,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -907,11 +907,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task firmar(boolean bloquear, long slot, String label, String pass) {
+    public Task<Boolean> firmar(boolean bloquear, long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 Config config = Config.getInstance();
                 bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                 opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
@@ -955,7 +955,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -963,11 +963,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task validarPKCS7(List<File> files) {
+    public Task<Boolean> validarPKCS7(List<File> files) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (MagicBytes.PDF.is(files.get(i))) {
@@ -994,7 +994,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -1002,11 +1002,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task firmarPKCS7(long slot, String label, String pass) {
+    public Task<Boolean> firmarPKCS7(long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1031,7 +1031,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -1039,11 +1039,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped, Boolean usarPrefijo) {
+    public Task<Boolean> firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped, Boolean usarPrefijo) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1074,7 +1074,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -1082,11 +1082,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task firmarJws(long slot, String label, String pass) {
+    public Task<Boolean> firmarJws(long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1117,7 +1117,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
@@ -1125,11 +1125,11 @@ public class App extends Application {
         return task;
     }
 
-    public Task download(String urlFile, String token, String urlPost) {
+    public Task<Boolean> download(String urlFile, String token, String urlPost) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 URL url = new URL(urlFile);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 if (token != null) {
@@ -1177,7 +1177,7 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
