@@ -396,9 +396,7 @@ public class App extends Application {
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
             // stage.getScene().setCursor(Cursor.WAIT);
-            // HostServices hostServices = getHostServices();
-            // hostServices.showDocument("https://localhost:9000");
-            
+           
             String certificadoServicioLocal = "";
             boolean certificadoServicioLocalInstalado = false;
             try {
@@ -444,9 +442,9 @@ public class App extends Application {
             vbox.setSpacing(5);
 
             FlowPane fpCertificadoServicioLocal = new FlowPane();
-            Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal);
-            Hyperlink instalarCertificadoServicioLocal = new Hyperlink("instalar");
-            Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("desinstalar");
+            Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal + " ->");
+            Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
+            Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("Desinstalar");
             if (certificadoServicioLocalInstalado) {
                 desinstalarCertificadoServicioLocal.setOnAction(e1 -> {
                     try {
@@ -533,9 +531,18 @@ public class App extends Application {
                 fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
             }
 
+            FlowPane fpLocalhost9000 = new FlowPane();
+            Label lblLocalhost9000 = new Label("Abrir");
+            Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
+            localhost9000.setOnAction((e1) -> {
+                HostServices hostServices = getHostServices();
+                hostServices.showDocument("https://localhost:9000");
+            });
+            fpLocalhost9000.getChildren().addAll(lblLocalhost9000, localhost9000);
+
             if (!OS.isDebian()) {
                 FlowPane fpCertificadoECRB = new FlowPane();
-                Label lblCertificadoECRB = new Label(certificadoECRB);
+                Label lblCertificadoECRB = new Label(certificadoECRB + " ->");
                 Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
                 Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
                 if (certificadoECRBInstalado) {
@@ -602,9 +609,9 @@ public class App extends Application {
                     fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
                 }
 
-                vbox.getChildren().addAll(fpCertificadoServicioLocal, fpCertificadoECRB);
+                vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
             } else {
-                vbox.getChildren().addAll(fpCertificadoServicioLocal);
+                vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000);
             }
 
             verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
