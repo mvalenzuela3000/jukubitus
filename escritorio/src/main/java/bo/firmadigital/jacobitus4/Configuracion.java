@@ -52,8 +52,6 @@ public class Configuracion extends Stage {
     private TextField textFieldIP;
     private TextField textFieldPort;
     private TextField textFieldToken;
-    private final ProgressBar progressBar;
-    private final Button buttonDescargar;
     private final Button buttonControlador;
     private final CheckBox checkBoxHsm;
     private TextField textFieldHsmCloud;
@@ -303,18 +301,7 @@ public class Configuracion extends Stage {
             close();
         });
         vbox3.getChildren().add(buttonGuardarTS);
-        Label titleC = new Label("Conversor ODT y DOCX");
-        titleC.setStyle("-fx-font-weight: bold");
-        vbox3.getChildren().add(titleC);
-        progressBar = new ProgressBar();
-        progressBar.prefWidthProperty().bind(vbox3.widthProperty());
-        vbox3.getChildren().add(progressBar);
-        buttonDescargar = new Button("Descargar");
-        vbox3.getChildren().add(buttonDescargar);
-        buttonDescargar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            buttonDescargar.setDisable(true);
-            new Thread(descargar()).start();
-        });
+
         root.getChildren().add(vbox3);
         checkBox.setSelected(true);
         checkBox.setSelected(config.isProxyEnabled());
@@ -332,46 +319,5 @@ public class Configuracion extends Stage {
         checkBoxTS.setSelected(config.isTSEnabled());
         Scene scene = new Scene(root, 640, 378);
         setScene(scene);
-    }
-
-    public Task descargar() {
-        progressBar.progressProperty().unbind();
-        Task task = new Task() {
-            @Override
-            protected Object call() throws Exception {
-                try {
-                    URL url = new URL("https://firmadigital.bo/jacobitus4/descargas/ConversorPdf.jar");
-                    HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-                    httpConnection.setRequestMethod("HEAD");
-                    int fileSize = httpConnection.getContentLength();
-                    httpConnection.disconnect();
-                    try (BufferedInputStream is = new BufferedInputStream(url.openStream())) {
-                        try (FileOutputStream out = new FileOutputStream(config.getConversorFile())) {
-                            byte[] buffer = new byte[4096];
-                            int descargado = 0, count;
-                            while ((count = is.read(buffer)) != -1) {
-                                out.write(buffer, 0, count);
-                                descargado += count;
-                                updateProgress(descargado, fileSize);
-                            }
-                        }
-                    }
-                    buttonDescargar.setDisable(false);
-                    return true;
-                } catch (IOException ex) {
-                    updateProgress(100, 100);
-                    throw ex;
-                }
-            }
-        };
-        progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR, task.getException().getMessage(), ButtonType.OK);
-            alert.setTitle("Jacobitus");
-            alert.setHeaderText("No se pudo acceder");
-            alert.showAndWait();
-            buttonDescargar.setDisable(false);
-        });
-        return task;
     }
 }

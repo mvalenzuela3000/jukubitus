@@ -17,9 +17,9 @@ import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.Converter;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.CertUtil;
+import bo.firmadigital.utiles.Conversor;
 import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.validador.Certificate;
@@ -666,9 +666,9 @@ public class App extends Application {
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
-                        certs.add(new ValidadorPdf(Converter.odtToPdf(files.get(i)), getOpcionesValidador()));
+                        certs.add(new ValidadorPdf(Conversor.odtAPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".docx")) {
-                        certs.add(new ValidadorPdf(Converter.docxToPdf(files.get(i)), getOpcionesValidador()));
+                        certs.add(new ValidadorPdf(Conversor.docxAPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
                         certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
                         // TODO: Ajustar los mensajes de validacion de documentos xml y json, considerando que no se puede determinar si fueron firmados dentro del periodo de vigencia del certificado

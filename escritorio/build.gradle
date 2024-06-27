@@ -35,6 +35,8 @@ dependencies {
     implementation 'org.apache.santuario:xmlsec:2.3.1'
     implementation 'com.digitalpersona.onetouch:dpotapi:1.0'
     implementation 'com.digitalpersona.onetouch:dpotjni:1.0'
+    implementation 'fr.opensagres.xdocreport:org.odftoolkit.odfdom.converter.pdf:1.0.6'
+    implementation 'fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.pdf:1.0.6'
     testImplementation 'junit:junit:4.13.2'
 }
 

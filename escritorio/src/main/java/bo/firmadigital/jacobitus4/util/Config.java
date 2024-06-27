@@ -283,29 +283,4 @@ public class Config {
             throw new RuntimeException(ex.getMessage());
         }
     }
-
-    public File getConversorFile() {
-        if (!user.exists()) {
-            if (!user.mkdir()) {
-                throw new RuntimeException("No se pudo crear el directorio " + user);
-            }
-        }
-        return new File(user, "ConversorPdf.jar");
-    }
-
-    public URLClassLoader getConversor() {
-        File jar = new File(user, "ConversorPdf.jar");
-        if (jar.exists()) {
-            try {
-                URLClassLoader child = new URLClassLoader(
-                        new URL[] {jar.toURI().toURL()},
-                        this.getClass().getClassLoader()
-                );
-                return child;
-            } catch (MalformedURLException ex) {
-                return null;
-            }
-        }
-        return null;
-    }
 }
