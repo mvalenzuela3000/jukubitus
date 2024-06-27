@@ -147,9 +147,10 @@ public class App extends Application {
         String version = Constantes.VERSION;
         stage.setTitle("ADSIB - Jacobitus Total - " + version);
         if (!servicio) {
-            Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con páginas web", ButtonType.OK);
+            Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.setTitle("ADSIB - Jacobitus Total - " + version + " (Servicio detenido)");
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
 
@@ -1256,12 +1257,6 @@ public class App extends Application {
         App.token = token;
         App.urlPost = urlPost;
         launch();
-    }
-   
-    public static void actualizar(boolean servicio, boolean taskBar, boolean taskBarEmulated) {
-        App.servicio = servicio;
-        App.taskBar = taskBar;
-        App.taskBarEmulated = taskBarEmulated;
     }
 
     public static TokenSelected service(Slot slot, String ci, JSONArray files) {
