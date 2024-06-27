@@ -59,6 +59,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -396,225 +397,7 @@ public class App extends Application {
         Menu helpMenu = new Menu("Ayuda");
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
-            String certificadoServicioLocal = "";
-            boolean certificadoServicioLocalInstalado = false;
-            try {
-                certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
-                if (certificadoServicioLocalInstalado) {
-                    certificadoServicioLocal = "Certificado de servicio local instalado";
-                } else {
-                    certificadoServicioLocal = "Certificado de servicio local sin instalar";
-                }
-            } catch (IOException e1) {
-                certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
-            }
-            String certificadoECRB = "";
-            boolean certificadoECRBInstalado = false;
-            if (!OS.isDebian()) {
-                try {
-                    certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
-                    if (certificadoECRBInstalado) {
-                        certificadoECRB = "Certificado de la ECRB instalado";
-                    } else {
-                        certificadoECRB = "Certificado de la ECRB sin instalar";
-                    }
-                } catch (IOException e1) {
-                    certificadoECRB = "Problemas al verificar certificado de la ECRB";
-                }
-            }
-            
-            ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
-            StringBuilder sb = new StringBuilder();
-            sb.append("Jacobitus Total " + version + "\n");
-            sb.append(certificadoServicioLocal + "\n");
-            sb.append(certificadoECRB);
-            
-            Alert verificarServicioAlerta = new Alert(AlertType.INFORMATION);
-            verificarServicioAlerta.initOwner(stage);
-            verificarServicioAlerta.initModality(Modality.APPLICATION_MODAL);
-            verificarServicioAlerta.setTitle("Verificar servicio");
-            verificarServicioAlerta.setHeaderText(sb.toString());
-            verificarServicioAlerta.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
-            verificarServicioAlerta.setGraphic(adsib);
-
-            VBox vbox = new VBox();
-            vbox.setSpacing(5);
-
-            FlowPane fpCertificadoServicioLocal = new FlowPane();
-            Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal + " ->");
-            Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
-            Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("Desinstalar");
-            if (certificadoServicioLocalInstalado) {
-                desinstalarCertificadoServicioLocal.setOnAction(e1 -> {
-                    try {
-                        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmacion.initOwner(stage);
-                        confirmacion.initModality(Modality.APPLICATION_MODAL);
-                        confirmacion.setHeaderText(null);
-                        confirmacion.setTitle("Confirmación");
-                        confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
-
-                        boolean resultado = false;
-                        Optional<ButtonType> action = confirmacion.showAndWait();
-                        if (action.get() == ButtonType.OK) {
-                            if (OS.isMac()) {
-                                ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                contrasena.showAndWait();
-                                if (contrasena.getPass() == null) {
-                                    return;
-                                } else {
-                                    resultado = CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
-                                }
-                            } else {
-                                resultado = CertUtil.desinstalarCertificadoServicioLocal();
-                            }
-                            // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                            // mensaje.initOwner(stage);
-                            // mensaje.initModality(Modality.APPLICATION_MODAL);
-                            // mensaje.setHeaderText(null);
-                            // mensaje.setTitle("Respuesta");
-                            // if (resultado) {
-                            //     mensaje.setContentText("Operación concluida satisfactoriamente.");
-                            // } else {
-                            //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                            // }
-                        }
-                    } catch (IOException e2) {
-                        // TODO Auto-generated catch block
-                        e2.printStackTrace();
-                    }
-                    verificarServicioAlerta.close();
-                });
-                fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, desinstalarCertificadoServicioLocal);
-            } else {
-                instalarCertificadoServicioLocal.setOnAction((e1) -> {
-                    try {
-                        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmacion.initOwner(stage);
-                        confirmacion.initModality(Modality.APPLICATION_MODAL);
-                        confirmacion.setHeaderText(null);
-                        confirmacion.setTitle("Confirmación");
-                        confirmacion.setContentText("¿Está seguro de instalar el certificado?");
-
-                        boolean resultado = false;
-                        Optional<ButtonType> action = confirmacion.showAndWait();
-                        if (action.get() == ButtonType.OK) {
-                            if (OS.isMac()) {
-                                ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                contrasena.showAndWait();
-                                if (contrasena.getPass() == null) {
-                                    return;
-                                } else {
-                                    resultado = CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
-                                }
-                            } else {
-                                resultado = CertUtil.instalarCertificadoServicioLocal();
-                            }
-                            // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                            // mensaje.initOwner(stage);
-                            // mensaje.initModality(Modality.APPLICATION_MODAL);
-                            // mensaje.setHeaderText(null);
-                            // mensaje.setTitle("Respuesta");
-                            // if (resultado) {
-                            //     mensaje.setContentText("Operación concluida satisfactoriamente.");
-                            // } else {
-                            //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                            // }
-                        }
-                    } catch (IOException | InterruptedException e2) {
-                        // TODO Auto-generated catch block
-                        e2.printStackTrace();
-                    }
-                    verificarServicioAlerta.close();
-                });
-                fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
-            }
-
-            FlowPane fpLocalhost9000 = new FlowPane();
-            Label lblLocalhost9000 = new Label("Abrir");
-            Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
-            localhost9000.setOnAction((e1) -> {
-                HostServices hostServices = getHostServices();
-                hostServices.showDocument("https://localhost:9000");
-            });
-            fpLocalhost9000.getChildren().addAll(lblLocalhost9000, localhost9000);
-
-            if (!OS.isDebian()) {
-                FlowPane fpCertificadoECRB = new FlowPane();
-                Label lblCertificadoECRB = new Label(certificadoECRB + " ->");
-                Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
-                Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
-                if (certificadoECRBInstalado) {
-                    desinstalarCertificadoECRB.setOnAction((e1) -> {
-                        try {
-                            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                            confirmacion.initOwner(stage);
-                            confirmacion.initModality(Modality.APPLICATION_MODAL);
-                            confirmacion.setHeaderText(null);
-                            confirmacion.setTitle("Confirmación");
-                            confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
-
-                            Optional<ButtonType> action = confirmacion.showAndWait();
-                            if (action.get() == ButtonType.OK) {
-                                if (OS.isMac()) {
-                                    ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                    contrasena.showAndWait();
-                                    if (contrasena.getPass() == null) {
-                                        return;
-                                    } else {
-                                        CertUtil.desinstalarCertificadoECRB(contrasena.getPass());
-                                    }
-                                } else {
-                                    CertUtil.desinstalarCertificadoECRB();
-                                }
-                            }
-                        } catch (IOException e2) {
-                            // TODO Auto-generated catch block
-                            e2.printStackTrace();
-                        }
-                        verificarServicioAlerta.close();
-                    });
-                    fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
-                } else {
-                    instalarCertificadoECRB.setOnAction((e1) -> {
-                        try {
-                            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                            confirmacion.initOwner(stage);
-                            confirmacion.initModality(Modality.APPLICATION_MODAL);
-                            confirmacion.setHeaderText(null);
-                            confirmacion.setTitle("Confirmación");
-                            confirmacion.setContentText("¿Está seguro de instalar el certificado?");
-
-                            Optional<ButtonType> action = confirmacion.showAndWait();
-                            if (action.get() == ButtonType.OK) {
-                                    if (OS.isMac()) {
-                                    ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                    contrasena.showAndWait();
-                                    if (contrasena.getPass() == null) {
-                                        return;
-                                    } else {
-                                        CertUtil.instalarCertificadoECRB(contrasena.getPass());
-                                    }
-                                } else {
-                                    CertUtil.instalarCertificadoECRB();
-                                }
-                            }
-                        } catch (IOException e2) {
-                            // TODO Auto-generated catch block
-                            e2.printStackTrace();
-                        }
-                        verificarServicioAlerta.close();
-                    });
-                    fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
-                }
-
-                vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
-            } else {
-                vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000);
-            }
-
-            verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
-            verificarServicioAlerta.showAndWait();
+            new Thread(verificarServicio(version)).start();
         });
 
         MenuItem aboutItem = new MenuItem("Acerca de ...");
@@ -774,7 +557,9 @@ public class App extends Application {
                 stage.hide();
             }
         } else {
-            new Thread(listarTokens()).start();
+            Platform.runLater(() -> {
+                new Thread(listarTokens()).start();
+            });
         }
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (servicio && (!taskBar || taskBarEmulated)) {
@@ -829,7 +614,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
-                
+                stage.getScene().setCursor(Cursor.WAIT);
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpcionesFirmador());
@@ -840,6 +625,7 @@ public class App extends Application {
                     }
                     table.setItems(FXCollections.observableList(list));
                     updateProgress(100, 100);
+                    stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } catch (RuntimeException ex) {
                     updateProgress(100, 100);
@@ -875,6 +661,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (files.get(i).getName().endsWith(".odt")) {
@@ -894,6 +681,7 @@ public class App extends Application {
                     updateProgress(i + 1, files.size());
                 }
                 tableFile.setItems(FXCollections.observableList(certs));
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 return true;
             }
         };
@@ -911,6 +699,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 Config config = Config.getInstance();
                 bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
                 opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
@@ -947,6 +736,7 @@ public class App extends Application {
                     }
                 }
                 if (errores.length() == 0) {
+                    stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } else {
                     throw new RuntimeException(errores.toString());
@@ -967,6 +757,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 List<Validador> certs = new LinkedList();
                 for (int i = 0; i < files.size(); i++) {
                     if (MagicBytes.PDF.is(files.get(i))) {
@@ -989,6 +780,7 @@ public class App extends Application {
                     updateProgress(i + 1, files.size());
                 }
                 tableFile.setItems(FXCollections.observableList(certs));
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 return true;
             }
         };
@@ -1006,6 +798,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1026,6 +819,7 @@ public class App extends Application {
                         tableFile.getItems().set(i, new ValidadorPKCS7(out, opcionesValidador));
                     }
                 }
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 return true;
             }
         };
@@ -1043,6 +837,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1069,6 +864,7 @@ public class App extends Application {
                         tableFile.getItems().set(i, new ValidadorXml(out, opcionesValidador));
                     }
                 }
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 return true;
             }
         };
@@ -1086,6 +882,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
@@ -1112,6 +909,7 @@ public class App extends Application {
                         tableFile.getItems().set(i, new ValidadorJws(out, opcionesValidador));
                     }
                 }
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 return true;
             }
         };
@@ -1129,6 +927,7 @@ public class App extends Application {
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
+                stage.getScene().setCursor(Cursor.WAIT);
                 URL url = new URL(urlFile);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 if (token != null) {
@@ -1169,6 +968,7 @@ public class App extends Application {
                     if (size == 0) {
                         updateProgress(1, 1);
                     }
+                    stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } else {
                     throw new RuntimeException("No se pudo descargar el archivo.");
@@ -1176,6 +976,245 @@ public class App extends Application {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
+        task.setOnFailed((WorkerStateEvent evt) -> {
+            Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.setTitle("Jacobitus");
+            alert.showAndWait();
+        });
+        return task;
+    }
+
+    
+    public Task<Void> verificarServicio(String version) {
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                Platform.runLater(() -> {
+                    stage.getScene().setCursor(Cursor.WAIT);
+                    String certificadoServicioLocal = "";
+                    boolean certificadoServicioLocalInstalado = false;
+                    try {
+                        certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
+                        if (certificadoServicioLocalInstalado) {
+                            certificadoServicioLocal = "Certificado de servicio local instalado";
+                        } else {
+                            certificadoServicioLocal = "Certificado de servicio local sin instalar";
+                        }
+                    } catch (IOException e1) {
+                        certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
+                    }
+                    String certificadoECRB = "";
+                    boolean certificadoECRBInstalado = false;
+                    if (!OS.isDebian()) {
+                        try {
+                            certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
+                            if (certificadoECRBInstalado) {
+                                certificadoECRB = "Certificado de la ECRB instalado";
+                            } else {
+                                certificadoECRB = "Certificado de la ECRB sin instalar";
+                            }
+                        } catch (IOException e1) {
+                            certificadoECRB = "Problemas al verificar certificado de la ECRB";
+                        }
+                    }
+                    
+                    ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Jacobitus Total " + version + "\n");
+                    sb.append(certificadoServicioLocal + "\n");
+                    sb.append(certificadoECRB);
+                    
+                    Alert verificarServicioAlerta = new Alert(AlertType.INFORMATION);
+                    verificarServicioAlerta.initOwner(stage);
+                    verificarServicioAlerta.initModality(Modality.APPLICATION_MODAL);
+                    verificarServicioAlerta.setTitle("Verificar servicio");
+                    verificarServicioAlerta.setHeaderText(sb.toString());
+                    verificarServicioAlerta.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
+                    verificarServicioAlerta.setGraphic(adsib);
+    
+                    VBox vbox = new VBox();
+                    vbox.setSpacing(5);
+    
+                    FlowPane fpCertificadoServicioLocal = new FlowPane();
+                    Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal + " ->");
+                    Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
+                    Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("Desinstalar");
+                    if (certificadoServicioLocalInstalado) {
+                        desinstalarCertificadoServicioLocal.setOnAction(e1 -> {
+                            try {
+                                Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                                confirmacion.initOwner(stage);
+                                confirmacion.initModality(Modality.APPLICATION_MODAL);
+                                confirmacion.setHeaderText(null);
+                                confirmacion.setTitle("Confirmación");
+                                confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
+    
+                                boolean resultado = false;
+                                Optional<ButtonType> action = confirmacion.showAndWait();
+                                if (action.get() == ButtonType.OK) {
+                                    if (OS.isMac()) {
+                                        ContrasenaMac contrasena = new ContrasenaMac(stage);
+                                        contrasena.showAndWait();
+                                        if (contrasena.getPass() == null) {
+                                            return;
+                                        } else {
+                                            resultado = CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
+                                        }
+                                    } else {
+                                        resultado = CertUtil.desinstalarCertificadoServicioLocal();
+                                    }
+                                    // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
+                                    // mensaje.initOwner(stage);
+                                    // mensaje.initModality(Modality.APPLICATION_MODAL);
+                                    // mensaje.setHeaderText(null);
+                                    // mensaje.setTitle("Respuesta");
+                                    // if (resultado) {
+                                    //     mensaje.setContentText("Operación concluida satisfactoriamente.");
+                                    // } else {
+                                    //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
+                                    // }
+                                }
+                            } catch (IOException e2) {
+                                // TODO Auto-generated catch block
+                                e2.printStackTrace();
+                            }
+                            verificarServicioAlerta.close();
+                        });
+                        fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, desinstalarCertificadoServicioLocal);
+                    } else {
+                        instalarCertificadoServicioLocal.setOnAction((e1) -> {
+                            try {
+                                Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                                confirmacion.initOwner(stage);
+                                confirmacion.initModality(Modality.APPLICATION_MODAL);
+                                confirmacion.setHeaderText(null);
+                                confirmacion.setTitle("Confirmación");
+                                confirmacion.setContentText("¿Está seguro de instalar el certificado?");
+    
+                                boolean resultado = false;
+                                Optional<ButtonType> action = confirmacion.showAndWait();
+                                if (action.get() == ButtonType.OK) {
+                                    if (OS.isMac()) {
+                                        ContrasenaMac contrasena = new ContrasenaMac(stage);
+                                        contrasena.showAndWait();
+                                        if (contrasena.getPass() == null) {
+                                            return;
+                                        } else {
+                                            resultado = CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
+                                        }
+                                    } else {
+                                        resultado = CertUtil.instalarCertificadoServicioLocal();
+                                    }
+                                    // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
+                                    // mensaje.initOwner(stage);
+                                    // mensaje.initModality(Modality.APPLICATION_MODAL);
+                                    // mensaje.setHeaderText(null);
+                                    // mensaje.setTitle("Respuesta");
+                                    // if (resultado) {
+                                    //     mensaje.setContentText("Operación concluida satisfactoriamente.");
+                                    // } else {
+                                    //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
+                                    // }
+                                }
+                            } catch (IOException | InterruptedException e2) {
+                                // TODO Auto-generated catch block
+                                e2.printStackTrace();
+                            }
+                            verificarServicioAlerta.close();
+                        });
+                        fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
+                    }
+    
+                    FlowPane fpLocalhost9000 = new FlowPane();
+                    Label lblLocalhost9000 = new Label("Abrir");
+                    Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
+                    localhost9000.setOnAction((e1) -> {
+                        HostServices hostServices = getHostServices();
+                        hostServices.showDocument("https://localhost:9000");
+                    });
+                    fpLocalhost9000.getChildren().addAll(lblLocalhost9000, localhost9000);
+    
+                    if (!OS.isDebian()) {
+                        FlowPane fpCertificadoECRB = new FlowPane();
+                        Label lblCertificadoECRB = new Label(certificadoECRB + " ->");
+                        Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
+                        Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
+                        if (certificadoECRBInstalado) {
+                            desinstalarCertificadoECRB.setOnAction((e1) -> {
+                                try {
+                                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                                    confirmacion.initOwner(stage);
+                                    confirmacion.initModality(Modality.APPLICATION_MODAL);
+                                    confirmacion.setHeaderText(null);
+                                    confirmacion.setTitle("Confirmación");
+                                    confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
+    
+                                    Optional<ButtonType> action = confirmacion.showAndWait();
+                                    if (action.get() == ButtonType.OK) {
+                                        if (OS.isMac()) {
+                                            ContrasenaMac contrasena = new ContrasenaMac(stage);
+                                            contrasena.showAndWait();
+                                            if (contrasena.getPass() == null) {
+                                                return;
+                                            } else {
+                                                CertUtil.desinstalarCertificadoECRB(contrasena.getPass());
+                                            }
+                                        } else {
+                                            CertUtil.desinstalarCertificadoECRB();
+                                        }
+                                    }
+                                } catch (IOException e2) {
+                                    // TODO Auto-generated catch block
+                                    e2.printStackTrace();
+                                }
+                                verificarServicioAlerta.close();
+                            });
+                            fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
+                        } else {
+                            instalarCertificadoECRB.setOnAction((e1) -> {
+                                try {
+                                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                                    confirmacion.initOwner(stage);
+                                    confirmacion.initModality(Modality.APPLICATION_MODAL);
+                                    confirmacion.setHeaderText(null);
+                                    confirmacion.setTitle("Confirmación");
+                                    confirmacion.setContentText("¿Está seguro de instalar el certificado?");
+    
+                                    Optional<ButtonType> action = confirmacion.showAndWait();
+                                    if (action.get() == ButtonType.OK) {
+                                            if (OS.isMac()) {
+                                            ContrasenaMac contrasena = new ContrasenaMac(stage);
+                                            contrasena.showAndWait();
+                                            if (contrasena.getPass() == null) {
+                                                return;
+                                            } else {
+                                                CertUtil.instalarCertificadoECRB(contrasena.getPass());
+                                            }
+                                        } else {
+                                            CertUtil.instalarCertificadoECRB();
+                                        }
+                                    }
+                                } catch (IOException e2) {
+                                    // TODO Auto-generated catch block
+                                    e2.printStackTrace();
+                                }
+                                verificarServicioAlerta.close();
+                            });
+                            fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
+                        }
+    
+                        vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
+                    } else {
+                        vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000);
+                    }
+    
+                    verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
+                    verificarServicioAlerta.showAndWait();
+                    stage.getScene().setCursor(Cursor.DEFAULT);
+                });
+                return null;
+            }
+        };
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
