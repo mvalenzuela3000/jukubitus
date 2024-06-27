@@ -652,6 +652,7 @@ public class App extends Application {
                 label.setText("No se encontro el controlador del token, por favor descargue e instale del siguiente link.");
             }
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -690,6 +691,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -748,6 +750,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -789,6 +792,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -828,6 +832,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -873,6 +878,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -918,6 +924,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -980,6 +987,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
@@ -1219,6 +1227,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
+            stage.getScene().setCursor(Cursor.DEFAULT);
         });
         return task;
     }
