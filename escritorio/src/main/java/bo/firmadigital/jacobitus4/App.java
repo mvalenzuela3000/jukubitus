@@ -176,7 +176,7 @@ public class App extends Application {
                 new Thread(validar(files)).start();
             }
         });
-        MenuItem abrirOtroItem = new MenuItem("Abrir Otro");
+        MenuItem abrirOtroItem = new MenuItem("Abrir otros formatos");
         abrirOtroItem.setOnAction((ActionEvent e) -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Abrir Otro");
@@ -193,6 +193,19 @@ public class App extends Application {
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
             if (files != null && files.size() > 0) {
                 new Thread(validarPKCS7(files)).start();
+            }
+        });
+        MenuItem convertiAPdf = new MenuItem("Convertir a PDF");
+        convertiAPdf.setOnAction((ActionEvent e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Convertir a PDF");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos ODT (*.odt)", "*.odt");
+            fileChooser.getExtensionFilters().add(extFilter);
+            extFilter = new FileChooser.ExtensionFilter("Archivos DOCX (*.docx)", "*.docx");
+            fileChooser.getExtensionFilters().add(extFilter);
+            List<File> files = fileChooser.showOpenMultipleDialog(stage);
+            if (files != null && files.size() > 0) {
+                new Thread(validar(files)).start();
             }
         });
         MenuItem limpiarItem = new MenuItem("Limpiar Lista");
@@ -247,7 +260,7 @@ public class App extends Application {
                 stage.close();
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, limpiarItem, opcionesItem, abrirCrt, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, convertiAPdf, limpiarItem, opcionesItem, abrirCrt, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");
@@ -992,7 +1005,6 @@ public class App extends Application {
         return task;
     }
 
-    
     public Task<Void> verificarServicio(String version) {
         Task<Void> task = new Task<Void>() {
             @Override
