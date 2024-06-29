@@ -292,7 +292,7 @@ public class Configuracion extends Stage {
                     Runtime.getRuntime().exec(new String[] { "sh", "-c", "/usr/bin/xdg-open '" + config.getToken().getParentFile().getPath() + "'" });
                 }
                 if (OS.isWindows()) {
-                    Runtime.getRuntime().exec("explorer '" + config.getToken().getParentFile().getPath() + "'");
+                    Runtime.getRuntime().exec("explorer " + config.getToken().getParentFile().getPath());
                 }
                 if (OS.isMac()) {
                     Runtime.getRuntime().exec(new String[]{"/usr/bin/open", config.getToken().getParentFile().getPath()});
