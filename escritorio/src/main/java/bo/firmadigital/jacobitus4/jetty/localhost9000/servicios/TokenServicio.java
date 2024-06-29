@@ -131,79 +131,84 @@ public class TokenServicio {
 
             if (objetoDto != null) {
                 Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-                IToken token = slot.getToken();
-                respuesta.setDatos(new TokenDataRespuestaDto());
-                try {
-                    token.iniciar(objetoDto.getPin());
-                    respuesta.setFinalizado(true);
-                    respuesta.setMensaje("Datos de token obtenidos correctamente");
-                    List<String> llaves = token.listarIdentificadorClaves();
-                    TokenDataDto data = new TokenDataDto();
-                    ((TokenDataRespuestaDto) respuesta.getDatos()).setData_token(data);
-                    data.setCertificates(llaves.size());
-                    data.setData(new ArrayList<ITokenCertificateDto>());
-
-                    for (int i = 0; i < llaves.size(); ++i) {
-                        TokenPrivateCertificateDto key = new TokenPrivateCertificateDto();
-                        key.setTipo("PRIMARY_KEY");
-                        key.setTipo_desc("Clave Privada");
-                        key.setAlias((String) llaves.get(i));
-                        key.setId((String) llaves.get(i));
-                        X509Certificate cert = token.obtenerCertificado((String) llaves.get(i));
-                        DatosCertificado datos = new DatosCertificado(cert);
-                        key.setTiene_certificado(cert != null);
-                        data.getData().add(key);
-
-                        if (key.getTiene_certificado()) {
-                            TokenPublicCertificateDto x509 = new TokenPublicCertificateDto();
-                            x509.setTipo("X509_CERTIFICATE");
-                            x509.setTipo_desc("Certificado");
-                            x509.setAdsib(false);
-
-                            for (X509Certificate intermediate : intermediates) {
-                                try {
-                                    cert.verify(intermediate.getPublicKey());
-                                    x509.setAdsib(true);
-                                    break;
-                                } catch (GeneralSecurityException ex) {
+                if (slot != null) {
+                    IToken token = slot.getToken();
+                    respuesta.setDatos(new TokenDataRespuestaDto());
+                    try {
+                        token.iniciar(objetoDto.getPin());
+                        respuesta.setFinalizado(true);
+                        respuesta.setMensaje("Datos de token obtenidos correctamente");
+                        List<String> llaves = token.listarIdentificadorClaves();
+                        TokenDataDto data = new TokenDataDto();
+                        ((TokenDataRespuestaDto) respuesta.getDatos()).setData_token(data);
+                        data.setCertificates(llaves.size());
+                        data.setData(new ArrayList<ITokenCertificateDto>());
+    
+                        for (int i = 0; i < llaves.size(); ++i) {
+                            TokenPrivateCertificateDto key = new TokenPrivateCertificateDto();
+                            key.setTipo("PRIMARY_KEY");
+                            key.setTipo_desc("Clave Privada");
+                            key.setAlias((String) llaves.get(i));
+                            key.setId((String) llaves.get(i));
+                            X509Certificate cert = token.obtenerCertificado((String) llaves.get(i));
+                            DatosCertificado datos = new DatosCertificado(cert);
+                            key.setTiene_certificado(cert != null);
+                            data.getData().add(key);
+    
+                            if (key.getTiene_certificado()) {
+                                TokenPublicCertificateDto x509 = new TokenPublicCertificateDto();
+                                x509.setTipo("X509_CERTIFICATE");
+                                x509.setTipo_desc("Certificado");
+                                x509.setAdsib(false);
+    
+                                for (X509Certificate intermediate : intermediates) {
+                                    try {
+                                        cert.verify(intermediate.getPublicKey());
+                                        x509.setAdsib(true);
+                                        break;
+                                    } catch (GeneralSecurityException ex) {
+                                    }
                                 }
+    
+                                x509.setSerialNumber(cert.getSerialNumber().toString(16));
+                                x509.setAlias((String) llaves.get(i));
+                                x509.setId((String) llaves.get(i));
+                                String pem = "-----BEGIN CERTIFICATE-----\n";
+                                pem = pem + Base64.getEncoder().encodeToString(cert.getEncoded());
+                                pem = pem + "\n-----END CERTIFICATE-----";
+                                x509.setPem(pem);
+                                x509.setValidez(new TokenCertificateValidezDto());
+                                x509.getValidez().setDesde(dateFormat.format(datos.getInicioValidez()));
+                                x509.getValidez().setHasta(dateFormat.format(datos.getFinValidez()));
+                                TokenCertificateTitularDto titular = new TokenCertificateTitularDto();
+                                titular.setDnQualifier(datos.getTipoDocumentoSubject());
+                                titular.setUidNumber(datos.getNumeroDocumentoSubject());
+                                titular.setUID(datos.getComplementoSubject());
+                                titular.setCN(datos.getNombreComunSubject());
+                                titular.setT(datos.getCargoSubject());
+                                titular.setO(datos.getOrganizacionSubject());
+                                titular.setOU(datos.getUnidadOrganizacionalSubject());
+                                titular.setEmailAddress(datos.getCorreoSubject());
+                                titular.setDescription(datos.getDescripcionSubject());
+                                x509.setTitular(titular);
+                                x509.setCommon_name(datos.getNombreComunSubject());
+                                x509.setEmisor(new TokenCertificateEmisorDto());
+                                x509.getEmisor().setCN(datos.getNombreComunIssuer());
+                                x509.getEmisor().setO(datos.getOrganizacionIssuer());
+                                data.getData().add(x509);
                             }
-
-                            x509.setSerialNumber(cert.getSerialNumber().toString(16));
-                            x509.setAlias((String) llaves.get(i));
-                            x509.setId((String) llaves.get(i));
-                            String pem = "-----BEGIN CERTIFICATE-----\n";
-                            pem = pem + Base64.getEncoder().encodeToString(cert.getEncoded());
-                            pem = pem + "\n-----END CERTIFICATE-----";
-                            x509.setPem(pem);
-                            x509.setValidez(new TokenCertificateValidezDto());
-                            x509.getValidez().setDesde(dateFormat.format(datos.getInicioValidez()));
-                            x509.getValidez().setHasta(dateFormat.format(datos.getFinValidez()));
-                            TokenCertificateTitularDto titular = new TokenCertificateTitularDto();
-                            titular.setDnQualifier(datos.getTipoDocumentoSubject());
-                            titular.setUidNumber(datos.getNumeroDocumentoSubject());
-                            titular.setUID(datos.getComplementoSubject());
-                            titular.setCN(datos.getNombreComunSubject());
-                            titular.setT(datos.getCargoSubject());
-                            titular.setO(datos.getOrganizacionSubject());
-                            titular.setOU(datos.getUnidadOrganizacionalSubject());
-                            titular.setEmailAddress(datos.getCorreoSubject());
-                            titular.setDescription(datos.getDescripcionSubject());
-                            x509.setTitular(titular);
-                            x509.setCommon_name(datos.getNombreComunSubject());
-                            x509.setEmisor(new TokenCertificateEmisorDto());
-                            x509.getEmisor().setCN(datos.getNombreComunIssuer());
-                            x509.getEmisor().setO(datos.getOrganizacionIssuer());
-                            data.getData().add(x509);
                         }
+    
+                        data.setPrivate_keys(llaves.size());
+                    } catch (GeneralSecurityException ex) {
+                        respuesta.setFinalizado(false);
+                        respuesta.setMensaje(ex.getMessage());
                     }
-
-                    data.setPrivate_keys(llaves.size());
-                } catch (GeneralSecurityException var21) {
+                    token.salir();
+                } else {
                     respuesta.setFinalizado(false);
-                    respuesta.setMensaje(var21.getMessage());
+                    respuesta.setMensaje("No se encontró ningún token conectado al slot " + objetoDto.getSlot() + ".");
                 }
-                token.salir();
             } else {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot y pin.");
