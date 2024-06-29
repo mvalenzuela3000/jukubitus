@@ -85,7 +85,7 @@ public class Main {
             if (config.isTertiaryPortEnabled()) {
                 ServletHolder servletHolderDF = servletContextHandler.addServlet(ServletContainer.class, "/*");
                 servletHolderDF.setInitOrder(1);
-                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources3200");
+                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost3200");
             }
             try {
                 createServerConnectorHTTPS();
