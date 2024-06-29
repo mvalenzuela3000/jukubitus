@@ -21,7 +21,7 @@ import bo.firmadigital.jacobitus4.localhost4637.servicios.FirmadorServicio;
  * @author ADSIB
  */
 @Path("/")
-public class SignRest {
+public class FirmadorRest {
     /**
      * @api {post} /sign Firma documentos pdf en bloque.
      * @apiGroup Sign
