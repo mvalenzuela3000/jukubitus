@@ -14,13 +14,18 @@ import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus4.localhost9000.servicios.FirmadorServicio;
 import bo.firmadigital.jacobitus4.util.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -322,7 +327,33 @@ public class Service extends Stage {
                 buttonFirmar.setDisable(true);
             }
         } catch (GeneralSecurityException ex) {
-            message.setText(ex.getMessage());
+            try {
+                String mensaje = ex.getMessage();
+                if (ex.getCause() instanceof IOException) {
+                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                        mensaje = "Pin incorrecto, intente nuevamente.";
+                    }
+                }
+                if (ex instanceof java.security.cert.CertificateExpiredException) {
+                    mensaje = "El certificado se encuentra expirado.";
+                }
+                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+                    mensaje = "El certificado aún no está vigente.";
+                }
+                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                        mensaje = "Por favor verifique el pin.";
+                    }
+                }
+                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+                    }
+                }
+                message.setText(mensaje);
+            } catch (Exception ex1) {
+                message.setText(ex1.getMessage());
+            }
         }
     }
 

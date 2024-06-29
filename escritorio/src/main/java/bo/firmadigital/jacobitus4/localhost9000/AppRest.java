@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bo.firmadigital.jacobitus4.resources9000;
+package bo.firmadigital.jacobitus4.localhost9000;
 
 import bo.firmadigital.jacobitus4.App;
 import java.io.File;

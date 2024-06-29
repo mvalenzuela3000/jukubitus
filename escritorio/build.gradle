@@ -37,6 +37,9 @@ dependencies {
     implementation 'com.digitalpersona.onetouch:dpotjni:1.0'
     implementation 'fr.opensagres.xdocreport:org.odftoolkit.odfdom.converter.pdf:1.0.6'
     implementation 'fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.pdf:1.0.6'
+    compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
     testImplementation 'junit:junit:4.13.2'
 }
 

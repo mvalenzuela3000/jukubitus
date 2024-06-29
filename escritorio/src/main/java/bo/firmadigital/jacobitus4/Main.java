@@ -69,7 +69,7 @@ public class Main {
             jettyServer.setHandler(handlers);
             ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
             servletHolder.setInitOrder(0);
-            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources9000");
+            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost9000");
 
             Config config = Config.getInstance();
             if (config.isSecondaryPortEnabled()) {
