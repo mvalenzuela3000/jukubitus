@@ -73,19 +73,19 @@ public class Main {
             jettyServer.setHandler(handlers);
             ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
             servletHolder.setInitOrder(0);
-            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost9000");
+            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost9000");
 
             Config config = Config.getInstance();
             if (config.isSecondaryPortEnabled()) {
                 ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/*");
                 servletHolderSign.setInitOrder(1);
-                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost4637");
+                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost4637");
             }
 
             if (config.isTertiaryPortEnabled()) {
                 ServletHolder servletHolderDF = servletContextHandler.addServlet(ServletContainer.class, "/*");
                 servletHolderDF.setInitOrder(1);
-                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost3200");
+                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost3200");
             }
             try {
                 createServerConnectorHTTPS();
