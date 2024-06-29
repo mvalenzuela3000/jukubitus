@@ -16,7 +16,7 @@ public class EstadoServicio {
         RespuestaDto<VersionDto> respuesta = new RespuestaDto<VersionDto>();
         try {
             VersionDto datos = new VersionDto();
-            datos.setCompilacion(3100);
+            datos.setCompilacion(Constantes.COMPILACION);
             datos.setApi_version(Constantes.VERSION);
 
             respuesta.setDatos(datos);

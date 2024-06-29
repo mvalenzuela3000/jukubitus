@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VersionDto {
-    private Integer compilacion;
+    private Long compilacion;
     private String api_version;
 }
