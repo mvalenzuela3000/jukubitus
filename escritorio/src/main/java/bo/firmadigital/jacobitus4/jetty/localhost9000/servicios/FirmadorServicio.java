@@ -367,7 +367,7 @@ public class FirmadorServicio {
                 ObjectMapper mapper = new ObjectMapper();
                 enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
                 inicial = false;
-            } catch (IOException var30) {
+            } catch (IOException ex) {
                 enviadoJson = new CompleteSign();
             }
 

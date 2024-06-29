@@ -76,8 +76,7 @@ public class ValidacionFirmaDto {
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        String var10000 = dateFormat.format(((X509Certificate) cert.getCertificate()).getNotBefore());
-        String periodo = var10000 + " y " + dateFormat.format(((X509Certificate) cert.getCertificate()).getNotAfter());
+        String periodo = dateFormat.format(((X509Certificate) cert.getCertificate()).getNotBefore()) + " y " + dateFormat.format(((X509Certificate) cert.getCertificate()).getNotAfter());
         if (cert.isActive()) {
             if (cert.isActiveAlerted()) {
                 this.periodoValidez = "ERROR";

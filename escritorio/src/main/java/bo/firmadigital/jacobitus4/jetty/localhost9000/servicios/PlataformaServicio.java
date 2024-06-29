@@ -102,8 +102,8 @@ public class PlataformaServicio {
                         respuesta.setFinalizado(true);
                         respuesta.setMensaje("Token generado correctamente.");
                         token.salir();
-                    } catch (GeneralSecurityException var10) {
-                        respuesta.setMensaje(var10.getMessage());
+                    } catch (GeneralSecurityException ex) {
+                        respuesta.setMensaje(ex.getMessage());
                     }
                 } else {
                     respuesta.setMensaje(
@@ -208,9 +208,9 @@ public class PlataformaServicio {
                         objetoDto.getId());
                 respuesta.setFinalizado(true);
                 respuesta.setMensaje("El certificado fue adicionado correctamente");
-            } catch (UnsupportedEncodingException | GeneralSecurityException var7) {
+            } catch (UnsupportedEncodingException | GeneralSecurityException ex) {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(var7.getMessage());
+                respuesta.setMensaje(ex.getMessage());
             }
 
             token.salir();
@@ -234,9 +234,9 @@ public class PlataformaServicio {
                 token.modificarPin(objetoDto.getOld_pin(), objetoDto.getNew_pin());
                 respuesta.setFinalizado(true);
                 respuesta.setMensaje("El pin se cambi\u00f3 correctamente");
-            } catch (RuntimeException var6) {
+            } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(var6.getMessage());
+                respuesta.setMensaje(ex.getMessage());
             }
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -258,9 +258,9 @@ public class PlataformaServicio {
                 token.modificarPinSo(objetoDto.getOld_pin(), objetoDto.getNew_pin());
                 respuesta.setFinalizado(true);
                 respuesta.setMensaje("El pin se cambi\u00f3 correctamente");
-            } catch (RuntimeException var6) {
+            } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(var6.getMessage());
+                respuesta.setMensaje(ex.getMessage());
             }
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -282,9 +282,9 @@ public class PlataformaServicio {
                 token.test(objetoDto.getPin());
                 respuesta.setFinalizado(true);
                 respuesta.setMensaje("El pin se valid\u00f3 correctamente");
-            } catch (RuntimeException var6) {
+            } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(var6.getMessage());
+                respuesta.setMensaje(ex.getMessage());
             }
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
