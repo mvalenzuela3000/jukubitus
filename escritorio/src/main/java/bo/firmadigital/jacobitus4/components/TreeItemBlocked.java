@@ -14,9 +14,11 @@ import javafx.scene.control.TreeItem;
  * @author ADSIB
  * @param <T>
  */
+@SuppressWarnings("rawtypes")
 public class TreeItemBlocked<T extends Object> extends TreeItem {
     protected CertDate cert;
 
+    @SuppressWarnings("unchecked")
     public TreeItemBlocked(T t, Node node, CertDate cert) {
         super(t, node);
         this.cert = cert;

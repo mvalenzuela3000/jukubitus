@@ -6,6 +6,7 @@
 package bo.firmadigital.jacobitus4.pojo;
 
 import java.util.Map;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**

@@ -272,7 +272,7 @@ public class Configuracion extends Stage {
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
                 Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
-                TokenPKCS12 token = new TokenPKCS12(getOpciones(), slot);
+                TokenPKCS12 token = new TokenPKCS12(slot);
                 try {
                     token.crear(contrasena.getPass());
                     textFieldToken.setText(config.getToken().getName());

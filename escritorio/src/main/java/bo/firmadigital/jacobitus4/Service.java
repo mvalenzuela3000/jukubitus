@@ -5,6 +5,17 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Base64;
+import java.util.List;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
+
+import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.Opciones;
@@ -12,26 +23,14 @@ import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus4.localhost9000.servicios.FirmadorServicio;
 import bo.firmadigital.jacobitus4.util.Config;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Base64;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.Event;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -50,8 +49,6 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 
 /**
  *
@@ -63,7 +60,7 @@ public class Service extends Stage {
     private final String format;
     private final PasswordField passwordField;
     private final Button button;
-    private final ChoiceBox aliasChoiceBox;
+    private final ChoiceBox<DatosCertificado> aliasChoiceBox;
     private final Label estado;
     private final ProgressBar progressBar;
     private final Button buttonFirmar;
@@ -106,7 +103,7 @@ public class Service extends Stage {
             for (Slot slot : tokenSelected.getSlots()) {
                 tokens.add(new DetalleToken(slot.detalleToken()));
             }
-            ChoiceBox tokensChoiceBox = new ChoiceBox(tokens);
+            ChoiceBox<DetalleToken> tokensChoiceBox = new ChoiceBox<DetalleToken>(tokens);
             tokensChoiceBox.prefWidthProperty().bind(root.widthProperty());
             tokensChoiceBox.setPrefHeight(27);
             tokensChoiceBox.getSelectionModel().selectedIndexProperty()
@@ -131,7 +128,7 @@ public class Service extends Stage {
         anchorPane.getChildren().add(button);
         root.add(anchorPane, 1, 0 + r, 1, 1);
         certificates = FXCollections.observableArrayList();
-        aliasChoiceBox = new ChoiceBox(certificates);
+        aliasChoiceBox = new ChoiceBox<DatosCertificado>(certificates);
         aliasChoiceBox.prefWidthProperty().bind(root.widthProperty());
         aliasChoiceBox.setPrefHeight(55);
         root.add(aliasChoiceBox, 0, 1 + r, 2, 1);
@@ -175,11 +172,11 @@ public class Service extends Stage {
         return tokenSelected;
     }
 
-    public Task firmar() {
+    public Task<Boolean> firmar() {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 final JSONArray files = tokenSelected.getFiles();
                 final JSONArray filesJson = tokenSelected.getFilesJson() == null ? new JSONArray()
                         : tokenSelected.getFilesJson();
@@ -284,7 +281,7 @@ public class Service extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             tokenSelected.setAlias(null);
             tokenSelected.setPin(null);
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
@@ -294,7 +291,7 @@ public class Service extends Stage {
                 close();
             }
         });
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             close();
         });
         return task;

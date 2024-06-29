@@ -5,12 +5,13 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
-import bo.firmadigital.jacobitus.validador.CertDate;
-import bo.firmadigital.jacobitus.validador.Validador;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+
+import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
 import javafx.application.HostServices;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
@@ -38,6 +39,7 @@ public class Detalle extends Stage {
     private final Image alertSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("alert.png"));
     private final Image errorSmallIcon = new Image(this.getClass().getClassLoader().getResourceAsStream("error.png"));
 
+    @SuppressWarnings("unchecked")
     public Detalle(Stage parent, Validador validar, HostServices hostServices) {
         setTitle("Detalle de firmas");
         initOwner(parent);
@@ -132,6 +134,7 @@ public class Detalle extends Stage {
         }
         TreeView<String> tree = new TreeView<>(rootItem);
         tree.setCellFactory(param -> new TextFieldTreeCell<String>() {
+            @SuppressWarnings("rawtypes")
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);

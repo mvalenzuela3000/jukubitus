@@ -5,6 +5,21 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.PdfException;
@@ -21,18 +36,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.property.AreaBreakType;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,7 +64,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -223,11 +226,11 @@ public class Pdf extends Stage {
         }
     }
 
-    public Task insertarPdf(File file) {
+    public Task<Boolean> insertarPdf(File file) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 try {
                     PdfReader reader = new PdfReader(file.getAbsolutePath());
                     PdfDocument pdf = new PdfDocument(reader);
@@ -289,11 +292,11 @@ public class Pdf extends Stage {
         return task;
     }
     
-    public Task insertarImagen(File file) {
+    public Task<Boolean> insertarImagen(File file) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() throws Exception {
+            protected Boolean call() throws Exception {
                 try {
                     if (lv.getItems().size() > 0) {
                         document.add(new AreaBreak(AreaBreakType.LAST_PAGE));

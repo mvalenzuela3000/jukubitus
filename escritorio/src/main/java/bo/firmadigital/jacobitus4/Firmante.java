@@ -5,19 +5,20 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus.firmador.Opciones;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.IToken;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import java.util.List;
+
+import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
-import javafx.event.Event;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -37,6 +38,7 @@ import javafx.stage.WindowEvent;
  *
  * @author ADSIB
  */
+@SuppressWarnings("rawtypes")
 public class Firmante extends Stage {
     private final ProgressBar progressBar;
     private final TableView table;
@@ -66,6 +68,7 @@ public class Firmante extends Stage {
         return opciones;
     }
 
+    @SuppressWarnings("unchecked")
     public Firmante(Stage parent, long slot, int tipo) {
         this.slot = slot;
         this.tipo = tipo;
@@ -152,11 +155,12 @@ public class Firmante extends Stage {
         return node;
     }
 
-    public Task listarCertificados(String pass) {
+    public Task<Boolean> listarCertificados(String pass) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -199,7 +203,7 @@ public class Firmante extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();

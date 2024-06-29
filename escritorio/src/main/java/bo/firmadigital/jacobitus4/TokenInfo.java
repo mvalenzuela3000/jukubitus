@@ -5,14 +5,6 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus.firmador.Constants;
-import bo.firmadigital.jacobitus.firmador.Opciones;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.IToken;
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus.validador.Certificate;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,10 +16,22 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
+
+import bo.firmadigital.jacobitus.firmador.Constants;
+import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.validador.Certificate;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -50,13 +54,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 
 /**
  *
  * @author ADSIB
  */
+@SuppressWarnings("rawtypes")
 public class TokenInfo extends Stage {
     private final ProgressBar progressBar;
     private final TableView table;
@@ -83,6 +86,7 @@ public class TokenInfo extends Stage {
         return opciones;
     }
     
+    @SuppressWarnings("unchecked")
     public TokenInfo(Stage parent, long slot) {
         this.slot = slot;
         setTitle("Claves contenidas en el Token - " + slot);
@@ -202,11 +206,12 @@ public class TokenInfo extends Stage {
         });
     }
 
-    public Task listarCertificados(String pass) {
+    public Task<Boolean> listarCertificados(String pass) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -249,7 +254,7 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
@@ -265,11 +270,11 @@ public class TokenInfo extends Stage {
         return task;
     }
 
-    public Task crearClave() {
+    public Task<Boolean> crearClave() {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -286,11 +291,11 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             buttonClave.setDisable(false);
             new Thread(listarCertificados(pass)).start();
         });
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
@@ -299,11 +304,11 @@ public class TokenInfo extends Stage {
         return task;
     }
 
-    public Task cargarCertificado(File file) {
+    public Task<Boolean> cargarCertificado(File file) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     String pem;
                     try (FileInputStream is = new FileInputStream(file)) {
@@ -328,10 +333,10 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             new Thread(listarCertificados(pass)).start();
         });
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
@@ -339,11 +344,11 @@ public class TokenInfo extends Stage {
         return task;
     }
 
-    public Task exportarCertificado(File destino) {
+    public Task<Boolean> exportarCertificado(File destino) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -369,11 +374,11 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.INFORMATION, "El certificado se exportó correctamente.");
             alert.showAndWait();
         });
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
@@ -381,11 +386,11 @@ public class TokenInfo extends Stage {
         return task;
     }
 
-    public Task exportarClave(File destino) {
+    public Task<Boolean> exportarClave(File destino) {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -410,11 +415,11 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.INFORMATION, "La clave se exportó correctamente.");
             alert.showAndWait();
         });
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();
@@ -422,11 +427,11 @@ public class TokenInfo extends Stage {
         return task;
     }
 
-    public Task borrarClave() {
+    public Task<Boolean> borrarClave() {
         progressBar.progressProperty().unbind();
-        Task task = new Task() {
+        Task<Boolean> task = new Task<Boolean>() {
             @Override
-            protected Object call() {
+            protected Boolean call() {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -441,10 +446,10 @@ public class TokenInfo extends Stage {
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
-        task.setOnSucceeded((Event evt) -> {
+        task.setOnSucceeded((WorkerStateEvent evt) -> {
             new Thread(listarCertificados(pass)).start();
         });
-        task.setOnFailed((Event evt) -> {
+        task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
             alert.showAndWait();

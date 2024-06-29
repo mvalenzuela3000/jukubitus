@@ -95,7 +95,7 @@ public class PlataformaServicio {
                 if (num >= 1 && may >= 1 && minu >= 1) {
                     Config config = Config.getInstance();
                     Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
-                    TokenPKCS12 token = new TokenPKCS12(this.getOpciones(), slot);
+                    TokenPKCS12 token = new TokenPKCS12(slot);
 
                     try {
                         token.crear(objetoDto.getPin());

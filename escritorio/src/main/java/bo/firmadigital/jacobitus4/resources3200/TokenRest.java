@@ -5,15 +5,6 @@
  */
 package bo.firmadigital.jacobitus4.resources3200;
 
-import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.IToken;
-import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.comun.SmartCard;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.Validador;
-import bo.firmadigital.jacobitus4.util.Config;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -32,9 +24,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
+import bo.firmadigital.jacobitus.comun.SmartCard;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus4.util.Config;
 
 /**
  *

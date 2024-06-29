@@ -5,23 +5,25 @@
  */
 package bo.firmadigital.jacobitus4.resources4637;
 
-import bo.firmadigital.jacobitus.firmador.Opciones;
-import bo.firmadigital.jacobitus.firmador.TokenSelected;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.App;
-import bo.firmadigital.jacobitus4.util.Config;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
+import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus4.util.Config;
 
 /**
  *

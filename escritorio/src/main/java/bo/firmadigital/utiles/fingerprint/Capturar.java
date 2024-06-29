@@ -5,11 +5,6 @@
  */
 package bo.firmadigital.utiles.fingerprint;
 
-import com.digitalpersona.onetouch.DPFPGlobal;
-import com.digitalpersona.onetouch.capture.DPFPCapture;
-import com.digitalpersona.onetouch.capture.DPFPCapturePriority;
-import com.digitalpersona.onetouch.capture.event.DPFPDataEvent;
-import com.digitalpersona.onetouch.readers.DPFPReadersCollection;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -23,9 +18,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
+
 import org.jnbis.Bitmap;
 import org.jnbis.WSQEncoder;
+
+import com.digitalpersona.onetouch.DPFPGlobal;
+import com.digitalpersona.onetouch.capture.DPFPCapture;
+import com.digitalpersona.onetouch.capture.DPFPCapturePriority;
+import com.digitalpersona.onetouch.capture.event.DPFPDataEvent;
+import com.digitalpersona.onetouch.readers.DPFPReadersCollection;
 
 /**
  *
@@ -57,6 +60,7 @@ public class Capturar {
         capture.startCapture();
     }
 
+    @SuppressWarnings("resource")
     public static void capturarLinux(Fingerprint fingerprint) {
         try {
             File file = new File("captured.bmp");

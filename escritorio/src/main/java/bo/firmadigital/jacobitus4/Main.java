@@ -5,14 +5,15 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus.utilidades.OS;
+import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
+
 import javax.imageio.ImageIO;
+
 import org.codehaus.jettison.json.JSONObject;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -26,11 +27,14 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
+
+import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus4.util.Config;
+import javafx.application.Platform;
 
 /**
  *
@@ -164,7 +168,7 @@ public class Main {
         sslContextFactory.setKeyStorePassword("12345678");
         sslContextFactory.setKeyManagerPassword("12345678");
 
-        ArrayList<ServerConnector> connectors = new ArrayList();
+        ArrayList<ServerConnector> connectors = new ArrayList<ServerConnector>();
  
         // Configuring the connector
         ServerConnector sslConnector = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));

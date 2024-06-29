@@ -5,32 +5,6 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus.firmador.Constants;
-import bo.firmadigital.jacobitus.firmador.TokenSelected;
-import bo.firmadigital.jacobitus.token.ChangePinJNI;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus.firmador.FirmadorJws;
-import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
-import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
-import bo.firmadigital.jacobitus.firmador.FirmadorXml;
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.UrlFileName;
-import bo.firmadigital.utiles.CertUtil;
-import bo.firmadigital.utiles.Conversor;
-import bo.firmadigital.jacobitus.comun.SmartCard;
-import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.jacobitus.validador.Certificate;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.MagicBytes;
-import bo.firmadigital.jacobitus.validador.Validador;
-import bo.firmadigital.jacobitus.validador.ValidadorJws;
-import bo.firmadigital.jacobitus.validador.ValidadorPdf;
-import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
-import bo.firmadigital.jacobitus.validador.ValidadorXml;
-import com.itextpdf.kernel.PdfException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +25,37 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.codehaus.jettison.json.JSONArray;
+
+import com.itextpdf.kernel.PdfException;
+
+import bo.firmadigital.jacobitus.comun.SmartCard;
+import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.firmador.Constants;
+import bo.firmadigital.jacobitus.firmador.FirmadorJws;
+import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.FirmadorXml;
+import bo.firmadigital.jacobitus.firmador.IFirmador;
+import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.token.ChangePinJNI;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.validador.Certificate;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.MagicBytes;
+import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.ValidadorJws;
+import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
+import bo.firmadigital.jacobitus.validador.ValidadorPdf;
+import bo.firmadigital.jacobitus.validador.ValidadorXml;
+import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.UrlFileName;
+import bo.firmadigital.utiles.CertUtil;
+import bo.firmadigital.utiles.Conversor;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -91,13 +96,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.codehaus.jettison.json.JSONArray;
-import bo.firmadigital.jacobitus.firmador.IFirmador;
 
 /**
  *
  * @author ADSIB
  */
+@SuppressWarnings("rawtypes")
 public class App extends Application {
     private ProgressBar progressBar;
     private ContextMenu contextMenuToken;
@@ -143,6 +147,7 @@ public class App extends Application {
         return opciones;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
         String version = Constantes.VERSION;
@@ -625,6 +630,7 @@ public class App extends Application {
     public Task<Boolean> listarTokens() {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -673,6 +679,7 @@ public class App extends Application {
     public Task<Boolean> validar(List<File> files) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -712,6 +719,7 @@ public class App extends Application {
     public Task<Boolean> firmar(boolean bloquear, long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -771,6 +779,7 @@ public class App extends Application {
     public Task<Boolean> validarPKCS7(List<File> files) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -813,6 +822,7 @@ public class App extends Application {
     public Task<Boolean> firmarPKCS7(long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -853,6 +863,7 @@ public class App extends Application {
     public Task<Boolean> firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped, Boolean usarPrefijo) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -899,6 +910,7 @@ public class App extends Application {
     public Task<Boolean> firmarJws(long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -945,6 +957,7 @@ public class App extends Application {
     public Task<Boolean> download(String urlFile, String token, String urlPost) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
+            @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
@@ -1069,7 +1082,6 @@ public class App extends Application {
                                 confirmacion.setTitle("Confirmación");
                                 confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
     
-                                boolean resultado = false;
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
@@ -1078,21 +1090,11 @@ public class App extends Application {
                                         if (contrasena.getPass() == null) {
                                             return;
                                         } else {
-                                            resultado = CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
+                                            CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
                                         }
                                     } else {
-                                        resultado = CertUtil.desinstalarCertificadoServicioLocal();
+                                        CertUtil.desinstalarCertificadoServicioLocal();
                                     }
-                                    // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                                    // mensaje.initOwner(stage);
-                                    // mensaje.initModality(Modality.APPLICATION_MODAL);
-                                    // mensaje.setHeaderText(null);
-                                    // mensaje.setTitle("Respuesta");
-                                    // if (resultado) {
-                                    //     mensaje.setContentText("Operación concluida satisfactoriamente.");
-                                    // } else {
-                                    //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                                    // }
                                 }
                             } catch (IOException e2) {
                                 // TODO Auto-generated catch block
@@ -1111,7 +1113,6 @@ public class App extends Application {
                                 confirmacion.setTitle("Confirmación");
                                 confirmacion.setContentText("¿Está seguro de instalar el certificado?");
     
-                                boolean resultado = false;
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
@@ -1120,21 +1121,11 @@ public class App extends Application {
                                         if (contrasena.getPass() == null) {
                                             return;
                                         } else {
-                                            resultado = CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
+                                            CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
                                         }
                                     } else {
-                                        resultado = CertUtil.instalarCertificadoServicioLocal();
+                                        CertUtil.instalarCertificadoServicioLocal();
                                     }
-                                    // Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-                                    // mensaje.initOwner(stage);
-                                    // mensaje.initModality(Modality.APPLICATION_MODAL);
-                                    // mensaje.setHeaderText(null);
-                                    // mensaje.setTitle("Respuesta");
-                                    // if (resultado) {
-                                    //     mensaje.setContentText("Operación concluida satisfactoriamente.");
-                                    // } else {
-                                    //     mensaje.setContentText("No se pudo completar la operación, inténtelo nuevamente.");
-                                    // }
                                 }
                             } catch (IOException | InterruptedException e2) {
                                 // TODO Auto-generated catch block
