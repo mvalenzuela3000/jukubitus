@@ -77,9 +77,9 @@ public class Main {
 
             Config config = Config.getInstance();
             if (config.isSecondaryPortEnabled()) {
-                ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/sign/*");
+                ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/*");
                 servletHolderSign.setInitOrder(1);
-                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.resources4637");
+                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.localhost4637");
             }
 
             if (config.isTertiaryPortEnabled()) {
