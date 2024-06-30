@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.TokenServicio;
 
@@ -75,7 +76,7 @@ public class TokenRest {
         try {
             return om.writeValueAsString(servicio.status());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -145,7 +146,7 @@ public class TokenRest {
         try {
             return om.writeValueAsString(servicio.connected());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -311,7 +312,7 @@ public class TokenRest {
             TokenAutenticacionDto objetoDto = om.readValue(body, TokenAutenticacionDto.class);
             return om.writeValueAsString(servicio.data(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }

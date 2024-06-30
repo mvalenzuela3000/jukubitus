@@ -15,8 +15,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.servicios.FirmadorServicio;
 
@@ -39,7 +42,7 @@ public class FirmadorRest {
     @Path("/tokens")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String tokens() {
+    public String tokens() throws JsonGenerationException, JsonMappingException, IOException {
         // JSONObject json = new JSONObject();
         // try {
         //     try {
@@ -64,7 +67,7 @@ public class FirmadorRest {
         try {
             return om.writeValueAsString(servicio.tokens());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -116,7 +119,7 @@ public class FirmadorRest {
         try {
             return om.writeValueAsString(servicio.start(pin));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -186,7 +189,7 @@ public class FirmadorRest {
         try {
             return om.writeValueAsString(servicio.certs());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -269,7 +272,7 @@ public class FirmadorRest {
             FirmaPdfDto objetoDto = om.readValue(body, FirmaPdfDto.class);
             return om.writeValueAsString(servicio.sign(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -312,7 +315,7 @@ public class FirmadorRest {
         try {
             return om.writeValueAsString(servicio.finish());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -333,7 +336,7 @@ public class FirmadorRest {
         try {
             return om.writeValueAsString(servicio.estadoToken());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 

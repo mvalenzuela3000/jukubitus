@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaLotePdfDto;
@@ -162,7 +163,7 @@ public class FirmadorRest {
             FirmaJsonDto objetoDto = om.readValue(body, FirmaJsonDto.class);
             return om.writeValueAsString(servicio.firmarJson(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -324,7 +325,7 @@ public class FirmadorRest {
             FirmaPdfDto objetoDto = om.readValue(body, FirmaPdfDto.class);
             return om.writeValueAsString(servicio.firmarPdf(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -431,7 +432,7 @@ public class FirmadorRest {
             FirmaHashDto objetoDto = om.readValue(body, FirmaHashDto.class);
             return om.writeValueAsString(servicio.firmarHash(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -578,7 +579,7 @@ public class FirmadorRest {
             FirmaPkcs7Dto objetoDto = om.readValue(body, FirmaPkcs7Dto.class);
             return om.writeValueAsString(servicio.firmarPkcs7(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -780,7 +781,7 @@ public class FirmadorRest {
             FirmaXmlDto objetoDto = om.readValue(body, FirmaXmlDto.class);
             return om.writeValueAsString(servicio.firmarXml(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -920,7 +921,7 @@ public class FirmadorRest {
             FirmaLotePdfDto objetoDto = om.readValue(body, FirmaLotePdfDto.class);
             return om.writeValueAsString(servicio.firmarLotePdfs(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -1048,7 +1049,7 @@ public class FirmadorRest {
             FirmaModoSeguroDto objetoDto = om.readValue(body, FirmaModoSeguroDto.class);
             return om.writeValueAsString(servicio.firmarModoSeguro(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }

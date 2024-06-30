@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.HuellaServicio;
 
 /**
@@ -73,7 +74,7 @@ public class HuellaRest {
         try {
             return om.writeValueAsString(servicio.capturar());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }

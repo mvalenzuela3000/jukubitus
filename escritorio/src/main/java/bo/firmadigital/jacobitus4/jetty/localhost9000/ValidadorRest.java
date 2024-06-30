@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.ValidadorServicio;
@@ -167,7 +168,7 @@ public class ValidadorRest {
             ValidacionPdfDto objetoDto = om.readValue(body, ValidacionPdfDto.class);
             return om.writeValueAsString(servicio.validarPdf(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -311,7 +312,7 @@ public class ValidadorRest {
             ValidacionArchivoDto objetoDto = om.readValue(body, ValidacionArchivoDto.class);
             return om.writeValueAsString(servicio.validarPkcs7(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -452,7 +453,7 @@ public class ValidadorRest {
             ValidacionArchivoDto objetoDto = om.readValue(body, ValidacionArchivoDto.class);
             return om.writeValueAsString(servicio.validarXml(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -594,7 +595,7 @@ public class ValidadorRest {
             ValidacionArchivoDto objetoDto = om.readValue(body, ValidacionArchivoDto.class);
             return om.writeValueAsString(servicio.validarJws(objetoDto));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }

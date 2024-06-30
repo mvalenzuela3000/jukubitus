@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.io.IOException;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenChangePinDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCreacionCsrDto;
@@ -79,7 +80,7 @@ public class PlataformaRest {
             TokenCreacionDto objetoDto = om.readValue(body, TokenCreacionDto.class);
             return om.writeValueAsString(servicio.create(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -127,7 +128,7 @@ public class PlataformaRest {
             objetoDto.setSlot(Long.parseLong(slotNumber.toString()));
             return om.writeValueAsString(servicio.generateKeypar(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -165,7 +166,7 @@ public class PlataformaRest {
             TokenCreacionCsrDto objetoDto = om.readValue(body, TokenCreacionCsrDto.class);
             return om.writeValueAsString(servicio.generateCsr(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -202,7 +203,7 @@ public class PlataformaRest {
             TokenPemDto objetoDto = om.readValue(body, TokenPemDto.class);
             return om.writeValueAsString(servicio.cargarPem(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -236,7 +237,7 @@ public class PlataformaRest {
             TokenChangePinDto objetoDto = om.readValue(body, TokenChangePinDto.class);
             return om.writeValueAsString(servicio.cambiarPin(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -270,7 +271,7 @@ public class PlataformaRest {
             TokenChangePinDto objetoDto = om.readValue(body, TokenChangePinDto.class);
             return om.writeValueAsString(servicio.cambiarPinSO(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 
@@ -304,7 +305,7 @@ public class PlataformaRest {
             TokenAutenticacionDto objetoDto = om.readValue(body, TokenAutenticacionDto.class);
             return om.writeValueAsString(servicio.testPinSO(objetoDto));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
     
@@ -389,7 +390,7 @@ public class PlataformaRest {
             TokenSolicitudDto objetoDto = om.readValue(body, TokenSolicitudDto.class);
             return om.writeValueAsString(servicio.firmarSolicitudes(objetoDto));
         } catch (IOException | JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }

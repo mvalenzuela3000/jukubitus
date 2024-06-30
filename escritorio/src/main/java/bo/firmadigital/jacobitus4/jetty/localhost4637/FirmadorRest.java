@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.servicios.FirmadorServicio;
 
@@ -97,7 +98,7 @@ public class FirmadorRest {
             FirmaModoSeguroDto objetoDto = om.readValue(body, FirmaModoSeguroDto.class);
             return om.writeValueAsString(servicio.firmarModoSeguro(objetoDto));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return JettyHelper.generarRespuesta(e.getMessage());
         }
     }
 }
