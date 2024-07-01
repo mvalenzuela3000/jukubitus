@@ -17,7 +17,6 @@ import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionFirmaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfRespuestaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
@@ -66,8 +65,6 @@ public class ValidadorServicio {
                 certificado.setNumeroSerie(((X509Certificate) cert.getCertificate()).getSerialNumber().toString(16));
                 firma.setCertificado(certificado);
                 firmas.add(firma);
-                ValidacionFirmaDto validacion = new ValidacionFirmaDto(cert);
-                validacion.imprimir();
             }
 
             ValidacionPdfRespuestaDto validacion = new ValidacionPdfRespuestaDto();
