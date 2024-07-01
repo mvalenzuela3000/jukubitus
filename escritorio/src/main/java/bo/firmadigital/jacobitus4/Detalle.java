@@ -39,7 +39,7 @@ public class Detalle extends Stage {
         TreeItem<String> rootItem = new TreeItem<>(validar.getAbsolutePath());
         rootItem.setExpanded(true);
         for (CertDate cert : validar) {
-            DetalleValidacion detalleValidacion = new DetalleValidacion(cert);
+            DetalleValidacion detalleValidacion = new DetalleValidacion(cert, validar.getExtension());
             TreeItem<String> item;
             item = new TreeItemBlocked<>(detalleValidacion.getCertificadoTitular() + detalleValidacion.getCertificadoSelladoTiempo(), new ImageView(this.obtenerIcono(detalleValidacion.getCertificadoValidacion(), "NORMAL")), cert);
             TreeItem<String> intItem, intItemDetalle;
