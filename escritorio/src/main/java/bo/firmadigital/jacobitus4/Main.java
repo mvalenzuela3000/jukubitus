@@ -5,35 +5,15 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
-
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.glassfish.jersey.servlet.ServletContainer;
 
 import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus4.util.Config;
 import javafx.application.Platform;
 
 /**
@@ -41,7 +21,7 @@ import javafx.application.Platform;
  * @author ADSIB
  */
 public class Main {
-    public static Server jettyServer = new Server();
+    // public static Server jettyServer = new Server();
 
     public static void main(String[] args) {
         Request req = new Request();
@@ -52,47 +32,11 @@ public class Main {
                 req.show();
             }
         } else {
-            ServletContextHandler servletContextHandler = new ServletContextHandler(NO_SESSIONS);
-            servletContextHandler.setContextPath("/");
-            // AGREGAR FILTER CORS
-            FilterHolder filterHolder = new FilterHolder(CrossOriginFilter.class);
-            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-            filterHolder.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-            filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE");
-            filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-            servletContextHandler.addFilter(filterHolder, "/*", null);
-            // Aplicar
-            ServletHolder staticResource = new ServletHolder("default", DefaultServlet.class);
-            staticResource.setInitParameter("resourceBase", jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
-            staticResource.setInitParameter("dirAllowed", "false");
-            servletContextHandler.addServlet(staticResource, "/");
-
-            HandlerList handlers = new HandlerList();
-            handlers.setHandlers(new Handler[] { servletContextHandler });
-            jettyServer.setHandler(handlers);
-            ServletHolder servletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
-            servletHolder.setInitOrder(0);
-            servletHolder.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost9000");
-
-            Config config = Config.getInstance();
-            if (config.isSecondaryPortEnabled()) {
-                ServletHolder servletHolderSign = servletContextHandler.addServlet(ServletContainer.class, "/*");
-                servletHolderSign.setInitOrder(1);
-                servletHolderSign.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost4637");
-            }
-
-            if (config.isTertiaryPortEnabled()) {
-                ServletHolder servletHolderDF = servletContextHandler.addServlet(ServletContainer.class, "/*");
-                servletHolderDF.setInitOrder(1);
-                servletHolderDF.setInitParameter("jersey.config.server.provider.packages", "bo.firmadigital.jacobitus4.jetty.localhost3200");
-            }
             try {
-                createServerConnectorHTTPS();
-                jettyServer.start();
+                WebServer.iniciar();
                 if (java.awt.SystemTray.isSupported()) {
                     java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
-                    java.awt.Image image = ImageIO.read(jettyServer.getClass().getClassLoader().getResource("sicon.png"));
+                    java.awt.Image image = ImageIO.read(Main.class.getClassLoader().getResource("sicon.png"));
                     java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
                     trayIcon.setImageAutoSize(true);
                     trayIcon.addActionListener((ActionEvent e) -> {
@@ -105,8 +49,7 @@ public class Main {
                     java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
                     exitItem.addActionListener(event -> {
                         try {
-                            jettyServer.stop();
-                            jettyServer.destroy();
+                            WebServer.detener();
                         } catch (Exception ex) {
                             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -144,8 +87,7 @@ public class Main {
                 }
             } catch (Exception ex) {
                 try {
-                    jettyServer.stop();
-                    jettyServer.destroy();
+                    WebServer.detener();
                 } catch (Exception ex2) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
                 }
@@ -153,47 +95,5 @@ public class Main {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
-    }
-
-    private static void createServerConnectorHTTPS() throws Exception {
-	// HTTPS configuration
-        HttpConfiguration https = new HttpConfiguration();
-        https.addCustomizer(new SecureRequestCustomizer());
- 
-        // Configuring SSL
-        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
- 
-        // Defining keystore path and passwords
-        sslContextFactory.setKeyStorePath(jettyServer.getClass().getClassLoader().getResource("server.jks").toExternalForm());
-        sslContextFactory.setKeyStorePassword("12345678");
-        sslContextFactory.setKeyManagerPassword("12345678");
-
-        ArrayList<ServerConnector> connectors = new ArrayList<ServerConnector>();
- 
-        // Configuring the connector
-        ServerConnector sslConnector = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
-        sslConnector.setHost("127.0.0.1");
-        sslConnector.setPort(9000);
-        connectors.add(sslConnector);
-
-        // Configuring the connector
-        Config config = Config.getInstance();
-        if (config.isSecondaryPortEnabled()) {
-            ServerConnector sslConnector2 = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
-            sslConnector2.setHost("127.0.0.1");
-            sslConnector2.setPort(4637);
-            connectors.add(sslConnector2);
-        }
-
-        // Configuring the connector
-        if (config.isTertiaryPortEnabled()) {
-            ServerConnector sslConnector3 = new ServerConnector(jettyServer, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
-            sslConnector3.setHost("127.0.0.1");
-            sslConnector3.setPort(3200);
-            connectors.add(sslConnector3);
-        }
- 
-        // Setting HTTP and HTTPS connectors
-        jettyServer.setConnectors(connectors.toArray(new Connector[0]));
     }
 }

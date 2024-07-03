@@ -255,8 +255,7 @@ public class App extends Application {
             if (servicio && (!taskBar || taskBarEmulated)) {
                 Platform.setImplicitExit(taskBarEmulated);
                 try {
-                    Main.jettyServer.stop();
-                    Main.jettyServer.destroy();
+                    WebServer.detener();
                     stage.close();
                 } catch (Exception ex) {
                     Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
@@ -583,8 +582,7 @@ public class App extends Application {
             if (servicio && (!taskBar || taskBarEmulated)) {
                 Platform.setImplicitExit(taskBarEmulated);
                 try {
-                    Main.jettyServer.stop();
-                    Main.jettyServer.destroy();
+                    WebServer.detener();
                 } catch (Exception ex) {
                     Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                 }
