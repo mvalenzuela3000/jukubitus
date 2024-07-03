@@ -5,14 +5,15 @@
  */
 package bo.firmadigital.jacobitus4.jetty.localhost9000;
 
+import java.io.IOException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.HuellaServicio;
@@ -73,7 +74,7 @@ public class HuellaRest {
         ObjectMapper om = new ObjectMapper();
         try {
             return om.writeValueAsString(servicio.capturar());
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             return JettyHelper.generarRespuesta(e.getMessage());
         }
     }

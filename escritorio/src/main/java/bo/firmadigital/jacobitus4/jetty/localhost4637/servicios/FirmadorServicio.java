@@ -3,10 +3,9 @@ package bo.firmadigital.jacobitus4.jetty.localhost4637.servicios;
 import java.util.Arrays;
 import java.util.List;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
