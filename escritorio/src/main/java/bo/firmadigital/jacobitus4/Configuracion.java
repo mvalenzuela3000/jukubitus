@@ -130,15 +130,15 @@ public class Configuracion extends Stage {
                     config.save();
                     if (checkBoxEvent) {
                         Alert alert = new Alert(Alert.AlertType.WARNING,
-                                "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
+                                "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     }
-                    checkBoxEvent = true;
-                    if (newValue && checkBoxPort3.isSelected()) {
-                        checkBoxEvent = false;
-                        checkBoxPort3.setSelected(false);
-                    }
+                    // checkBoxEvent = true;
+                    // if (newValue && checkBoxPort3.isSelected()) {
+                    //     checkBoxEvent = false;
+                    //     checkBoxPort3.setSelected(false);
+                    // }
                 });
         checkBoxPort3.selectedProperty()
                 .addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -146,15 +146,15 @@ public class Configuracion extends Stage {
                     config.save();
                     if (checkBoxEvent) {
                         Alert alert = new Alert(Alert.AlertType.WARNING,
-                                "Para que este cambio tenga efecto,\ndebe reiniciar Jacobitus Total.", ButtonType.OK);
+                                "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     }
-                    checkBoxEvent = true;
-                    if (newValue && checkBoxPort2.isSelected()) {
-                        checkBoxEvent = false;
-                        checkBoxPort2.setSelected(false);
-                    }
+                    // checkBoxEvent = true;
+                    // if (newValue && checkBoxPort2.isSelected()) {
+                    //     checkBoxEvent = false;
+                    //     checkBoxPort2.setSelected(false);
+                    // }
                 });
         vbox1.getChildren().add(checkBoxPort3);
 
