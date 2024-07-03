@@ -42,8 +42,6 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 
-import bo.firmadigital.jacobitus.comun.CompleteSign;
-import bo.firmadigital.jacobitus.comun.Signs;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
@@ -72,6 +70,8 @@ import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPkcs7RespuestaDt
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlRespuestaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.CompleteSign;
+import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.Signs;
 import bo.firmadigital.jacobitus4.util.Config;
 
 public class FirmadorServicio {
@@ -355,7 +355,7 @@ public class FirmadorServicio {
             PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
             if (pk == null) {
                 token.salir();
-                throw new KeyStoreException("No se encontr\u00f3 la clave con alias: " + objetoDto.getAlias());
+                throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
             }
 
             JWSSigner signer = new RSASSASigner(pk);
@@ -556,7 +556,7 @@ public class FirmadorServicio {
                 PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
                 if (pk == null) {
                     token.salir();
-                    throw new KeyStoreException("No se encontr\u00f3 la clave con alias: " + objetoDto.getAlias());
+                    throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
                 }
 
                 signature.initSign(pk);

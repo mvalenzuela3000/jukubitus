@@ -71,7 +71,7 @@ public class ValidadorServicio {
             validacion.setFirmas(firmas);
 
             respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se valid\u00f3 las firmas correctamente!");
+            respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
             return respuesta;
         } catch (Exception ex) {
@@ -127,7 +127,7 @@ public class ValidadorServicio {
             validacion.setFirmas(firmas);
             validacion.setFile(validar.exportB64(new ByteArrayInputStream(file)));
             respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se valid\u00f3 las firmas correctamente!");
+            respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
             return respuesta;
         } catch (Exception ex) {
@@ -183,7 +183,7 @@ public class ValidadorServicio {
             validacion.setFirmas(firmas);
             validacion.setFile(objetoDto.getFile());
             respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se valid\u00f3 las firmas correctamente!");
+            respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
             return respuesta;
         } catch (Exception ex) {
@@ -239,7 +239,7 @@ public class ValidadorServicio {
             validacion.setFirmas(firmas);
             validacion.setFile(validar.exportB64(new ByteArrayInputStream(file)));
             respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se valid\u00f3 las firmas correctamente!");
+            respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
             return respuesta;
         } catch (Exception ex) {

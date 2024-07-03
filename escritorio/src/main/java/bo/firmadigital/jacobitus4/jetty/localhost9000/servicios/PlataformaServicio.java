@@ -107,7 +107,7 @@ public class PlataformaServicio {
                     }
                 } else {
                     respuesta.setMensaje(
-                            "El pin debe contener al menos un n\u00famero, una letra may\u00fascula y una letra min\u00fascula.");
+                            "El pin debe contener al menos un número, una letra mayúscula y una letra minúscula.");
                 }
             }
         } catch (Exception ex) {
@@ -233,7 +233,7 @@ public class PlataformaServicio {
                 IToken token = slot.getToken();
                 token.modificarPin(objetoDto.getOld_pin(), objetoDto.getNew_pin());
                 respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se cambi\u00f3 correctamente");
+                respuesta.setMensaje("El pin se cambió correctamente");
             } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(ex.getMessage());
@@ -257,7 +257,7 @@ public class PlataformaServicio {
                 IToken token = slot.getToken();
                 token.modificarPinSo(objetoDto.getOld_pin(), objetoDto.getNew_pin());
                 respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se cambi\u00f3 correctamente");
+                respuesta.setMensaje("El pin se cambió correctamente");
             } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(ex.getMessage());
@@ -281,7 +281,7 @@ public class PlataformaServicio {
                 IToken token = slot.getToken();
                 token.test(objetoDto.getPin());
                 respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se valid\u00f3 correctamente");
+                respuesta.setMensaje("El pin se validó correctamente");
             } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(ex.getMessage());
