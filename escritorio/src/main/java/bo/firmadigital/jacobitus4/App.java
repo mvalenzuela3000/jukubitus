@@ -120,6 +120,7 @@ public class App extends Application {
     private static Stage stage;
     private static App app;
     private static final TokenSelected tokenSelected = new TokenSelected();
+    private static String contraseniaMacOS = null;
 
     private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
         Config config = Config.getInstance();
@@ -1024,28 +1025,52 @@ public class App extends Application {
                     stage.getScene().setCursor(Cursor.WAIT);
                     String certificadoServicioLocal = "";
                     boolean certificadoServicioLocalInstalado = false;
+                    boolean errorCertificadoServicioLocalInstalado = false;
                     try {
-                        certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
+                        if (OS.isMac()) {
+                            ContrasenaMac contrasena = new ContrasenaMac(stage);
+                            contrasena.showAndWait();
+                            App.contraseniaMacOS = contrasena.getPass();
+                            if (App.contraseniaMacOS == null) {
+                                return;
+                            }
+                        } else {
+                            App.contraseniaMacOS = null;
+                        }
+                        if (OS.isMac()) {
+                            certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal(App.contraseniaMacOS);
+                        } else {
+                            certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
+                        }
                         if (certificadoServicioLocalInstalado) {
                             certificadoServicioLocal = "Certificado de servicio local instalado";
                         } else {
                             certificadoServicioLocal = "Certificado de servicio local sin instalar";
                         }
                     } catch (IOException e1) {
-                        certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
+                        // certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
+                        certificadoServicioLocal = e1.getMessage();
+                        errorCertificadoServicioLocalInstalado = true;
                     }
                     String certificadoECRB = "";
                     boolean certificadoECRBInstalado = false;
+                    boolean errorCertificadoECRBInstalado = false;
                     if (!OS.isDebian()) {
                         try {
-                            certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
+                            if (OS.isMac()) {
+                                certificadoECRBInstalado = CertUtil.verificarCertificadoECRB(App.contraseniaMacOS);
+                            } else {
+                                certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
+                            }
                             if (certificadoECRBInstalado) {
                                 certificadoECRB = "Certificado de la ECRB instalado";
                             } else {
                                 certificadoECRB = "Certificado de la ECRB sin instalar";
                             }
                         } catch (IOException e1) {
-                            certificadoECRB = "Problemas al verificar certificado de la ECRB";
+                            // certificadoECRB = "Problemas al verificar certificado de la ECRB";
+                            certificadoECRB = e1.getMessage();
+                            errorCertificadoECRBInstalado = true;
                         }
                     }
                     
@@ -1083,24 +1108,21 @@ public class App extends Application {
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
-                                        ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                        contrasena.showAndWait();
-                                        if (contrasena.getPass() == null) {
-                                            return;
-                                        } else {
-                                            CertUtil.desinstalarCertificadoServicioLocal(contrasena.getPass());
-                                        }
+                                        CertUtil.desinstalarCertificadoServicioLocal(App.contraseniaMacOS);
                                     } else {
                                         CertUtil.desinstalarCertificadoServicioLocal();
                                     }
                                 }
-                            } catch (IOException e2) {
-                                // TODO Auto-generated catch block
-                                e2.printStackTrace();
+                            } catch (IOException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             verificarServicioAlerta.close();
                         });
-                        fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, desinstalarCertificadoServicioLocal);
+                        if (errorCertificadoServicioLocalInstalado) {
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal);
+                        } else {
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, desinstalarCertificadoServicioLocal);
+                        }
                     } else {
                         instalarCertificadoServicioLocal.setOnAction((e1) -> {
                             try {
@@ -1114,26 +1136,23 @@ public class App extends Application {
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
-                                        ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                        contrasena.showAndWait();
-                                        if (contrasena.getPass() == null) {
-                                            return;
-                                        } else {
-                                            CertUtil.instalarCertificadoServicioLocal(contrasena.getPass());
-                                        }
+                                        CertUtil.instalarCertificadoServicioLocal(App.contraseniaMacOS);
                                     } else {
                                         CertUtil.instalarCertificadoServicioLocal();
                                     }
                                 }
-                            } catch (IOException | InterruptedException e2) {
-                                // TODO Auto-generated catch block
-                                e2.printStackTrace();
+                            } catch (IOException | InterruptedException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             verificarServicioAlerta.close();
                         });
-                        fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
+                        if (errorCertificadoServicioLocalInstalado) {
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal);
+                        } else {
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
+                        }
                     }
-    
+
                     FlowPane fpLocalhost9000 = new FlowPane();
                     Label lblLocalhost9000 = new Label("Abrir");
                     Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
@@ -1161,24 +1180,21 @@ public class App extends Application {
                                     Optional<ButtonType> action = confirmacion.showAndWait();
                                     if (action.get() == ButtonType.OK) {
                                         if (OS.isMac()) {
-                                            ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                            contrasena.showAndWait();
-                                            if (contrasena.getPass() == null) {
-                                                return;
-                                            } else {
-                                                CertUtil.desinstalarCertificadoECRB(contrasena.getPass());
-                                            }
+                                            CertUtil.desinstalarCertificadoECRB(App.contraseniaMacOS);
                                         } else {
                                             CertUtil.desinstalarCertificadoECRB();
                                         }
                                     }
-                                } catch (IOException e2) {
-                                    // TODO Auto-generated catch block
-                                    e2.printStackTrace();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 verificarServicioAlerta.close();
                             });
-                            fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
+                            if (errorCertificadoECRBInstalado) {
+                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
+                            } else {
+                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
+                            }
                         } else {
                             instalarCertificadoECRB.setOnAction((e1) -> {
                                 try {
@@ -1191,25 +1207,22 @@ public class App extends Application {
     
                                     Optional<ButtonType> action = confirmacion.showAndWait();
                                     if (action.get() == ButtonType.OK) {
-                                            if (OS.isMac()) {
-                                            ContrasenaMac contrasena = new ContrasenaMac(stage);
-                                            contrasena.showAndWait();
-                                            if (contrasena.getPass() == null) {
-                                                return;
-                                            } else {
-                                                CertUtil.instalarCertificadoECRB(contrasena.getPass());
-                                            }
+                                        if (OS.isMac()) {
+                                            CertUtil.instalarCertificadoECRB(App.contraseniaMacOS);
                                         } else {
                                             CertUtil.instalarCertificadoECRB();
                                         }
                                     }
-                                } catch (IOException e2) {
-                                    // TODO Auto-generated catch block
-                                    e2.printStackTrace();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 verificarServicioAlerta.close();
                             });
-                            fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
+                            if (errorCertificadoECRBInstalado) {
+                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
+                            } else {
+                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
+                            }
                         }
     
                         vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
