@@ -149,7 +149,7 @@ public class PlataformaServicio {
                 token.salir();
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }
         } catch (GeneralSecurityException ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -189,7 +189,7 @@ public class PlataformaServicio {
                 token.salir();
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -220,7 +220,7 @@ public class PlataformaServicio {
                 token.salir();
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -248,7 +248,7 @@ public class PlataformaServicio {
                 }
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -276,7 +276,7 @@ public class PlataformaServicio {
                 }
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -304,7 +304,7 @@ public class PlataformaServicio {
                 }
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -355,7 +355,7 @@ public class PlataformaServicio {
                 respuesta.setMensaje("Se firmo las solicitudes correctamente!");
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }
         } catch (GeneralSecurityException | URISyntaxException | JOSEException ex) {
             String mensaje = ex.getMessage();
