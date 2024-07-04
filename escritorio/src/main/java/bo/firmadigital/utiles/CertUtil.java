@@ -24,6 +24,9 @@ public class CertUtil {
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/ca";
             }
+            if (OS.isMac()) {
+                directorio = directorio.replace(" ", "\\ ");
+            }
             return directorio;
         } catch (URISyntaxException e) {
             return null;
@@ -56,6 +59,10 @@ public class CertUtil {
     }
 
     public static boolean verificarCertificadoServicioLocal() throws IOException {
+        return CertUtil.verificarCertificadoServicioLocal(null);
+    }
+
+    public static boolean verificarCertificadoServicioLocal(String contrasenia) throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -115,16 +122,24 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", CertUtil.obtenerRutaCertificadoServicioLocal() });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security verify-cert -c " + CertUtil.obtenerRutaCertificadoServicioLocal() + " -v" });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
+                    Integer c = 0;
                     while ((s = in.readLine()) != null) {
+                        if (s.contains("try again")) {
+                            throw new IOException("La contraseña ingresada no válida.");
+                        }
                         if (s.contains("certificate verification successful")) {
                             return true;
                         }
                         if (s.contains("CSSMERR_TP_NOT_TRUSTED")) {
                             return false;
                         }
+                        c++;
+                    }
+                    if (s == null && c == 0) {
+                        throw new IOException("La contraseña ingresada no válida.");
                     }
                 }
                 return false;
@@ -244,7 +259,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "+ CertUtil.obtenerRutaCertificadoServicioLocal() });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain " + CertUtil.obtenerRutaCertificadoServicioLocal() });
                 return true;
             default:
                 return false;
@@ -305,6 +320,10 @@ public class CertUtil {
     }
 
     public static boolean verificarCertificadoECRB() throws IOException {
+        return CertUtil.verificarCertificadoECRB(null);
+    }
+
+    public static boolean verificarCertificadoECRB(String contrasenia) throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
@@ -332,16 +351,24 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-                p = Runtime.getRuntime().exec(new String[] { "security", "verify-cert", "-c", CertUtil.obtenerRutaCertificadoECRB() });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security verify-cert -c " + CertUtil.obtenerRutaCertificadoECRB() + " -v" });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String s;
+                    Integer c = 0;
                     while ((s = in.readLine()) != null) {
+                        if (s.contains("try again")) {
+                            throw new IOException("La contraseña ingresada no válida.");
+                        }
                         if (s.contains("certificate verification successful")) {
                             return true;
                         }
                         if (s.contains("CSSMERR_TP_NOT_TRUSTED")) {
                             return false;
                         }
+                        c++;
+                    }
+                    if (s == null && c == 0) {
+                        throw new IOException("La contraseña ingresada no válida.");
                     }
                 }
                 return false;
@@ -434,7 +461,7 @@ public class CertUtil {
                 }
                 return false;
             case "MACOS":
-            p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoECRB() + " && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
+                p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoECRB() + " && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
                 return true;
         default:
                 return false;
