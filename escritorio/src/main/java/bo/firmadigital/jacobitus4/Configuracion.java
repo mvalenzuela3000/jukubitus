@@ -8,6 +8,8 @@ package bo.firmadigital.jacobitus4;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.token.Slot;
@@ -297,9 +299,8 @@ public class Configuracion extends Stage {
                 if (OS.isMac()) {
                     Runtime.getRuntime().exec(new String[]{"/usr/bin/open", config.getToken().getParentFile().getPath()});
                 }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (IOException ex) {
+                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
         vbox2.getChildren().add(btnAbrirUbicacion);
