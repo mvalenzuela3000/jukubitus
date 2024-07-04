@@ -31,6 +31,10 @@ import javafx.stage.Stage;
 public class Detalle extends Stage {
     private String pass;
 
+    public String getPass() {
+        return pass;
+    }
+
     @SuppressWarnings("unchecked")
     public Detalle(Stage parent, Validador validar, HostServices hostServices) {
         setTitle("Detalle de firmas");
@@ -40,23 +44,28 @@ public class Detalle extends Stage {
         rootItem.setExpanded(true);
         for (CertDate cert : validar) {
             DetalleValidacion detalleValidacion = new DetalleValidacion(cert, validar.getExtension());
+            // Validacion de certificado
             TreeItem<String> item;
             item = new TreeItemBlocked<>(detalleValidacion.getCertificadoTitular() + detalleValidacion.getCertificadoSelladoTiempo(), new ImageView(this.obtenerIcono(detalleValidacion.getCertificadoValidacion(), "NORMAL")), cert);
+            // Validacion de integridad
             TreeItem<String> intItem, intItemDetalle;
             intItem = new TreeItem<>(detalleValidacion.getDocumentoEstado(), new ImageView(this.obtenerIcono(detalleValidacion.getDocumentoValidacion(), "PEQUENIO")));
             intItemDetalle = new TreeItem<>(detalleValidacion.getDocumentoDescripcion());
             intItem.getChildren().add(intItemDetalle);
             item.getChildren().add(intItem);
+            // Validacion de cadena de confianza
             TreeItem<String> pkiItem, pkiItemDetalle;
             pkiItem = new TreeItem<>(detalleValidacion.getCadenaConfianzaEstado(), new ImageView(this.obtenerIcono(detalleValidacion.getCadenaConfianzaValidacion(), "PEQUENIO")));
             pkiItemDetalle = new TreeItem<>(detalleValidacion.getCadenaConfianzaDescripcion());
             pkiItem.getChildren().add(pkiItemDetalle);
             item.getChildren().add(pkiItem);
+            // Validacion del estado de revocacion
             TreeItem<String> vigItem, vigItemDetalle;
             vigItem = new TreeItem<>(detalleValidacion.getPeriodoValidezEstado(), new ImageView(this.obtenerIcono(detalleValidacion.getPeriodoValidezValidacion(), "PEQUENIO")));
             vigItemDetalle = new TreeItem<>(detalleValidacion.getPeriodoValidezDescripcion());
             vigItem.getChildren().add(vigItemDetalle);
             item.getChildren().add(vigItem);
+            
             TreeItem<String> ocspItem, ocspItemDetalle;
             ocspItem = new TreeItem<>(detalleValidacion.getRevocacionEstado(), new ImageView(this.obtenerIcono(detalleValidacion.getRevocacionValidacion(), "PEQUENIO")));
             ocspItemDetalle = new TreeItem<>(detalleValidacion.getRevocacionDescripcion());
@@ -132,9 +141,5 @@ public class Detalle extends Stage {
                 break;
         }
         return null;
-    }
-
-    public String getPass() {
-        return pass;
     }
 }
