@@ -124,28 +124,33 @@ public class PlataformaServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            IToken token = slot.getToken();
-            token.iniciar(objetoDto.getPin());
-            BigInteger max = new BigInteger("1000000000000");
-            BigInteger id = (new BigInteger(max.bitLength(), new SecureRandom())).mod(max);
-            token.generarClaves(id.toString(), objetoDto.getPin(), Integer.parseInt(objetoDto.getSlot().toString()));
-            TokenDataRespuestaDto datos = new TokenDataRespuestaDto();
-            respuesta.setDatos(datos);
-            TokenDataDto data_token = new TokenDataDto();
-            datos.setData_token(data_token);
-            data_token.setCertificates(0);
-            List<ITokenCertificateDto> data = new ArrayList<ITokenCertificateDto>();
-            data_token.setData(data);
-            TokenPrivateCertificateDto pk = new TokenPrivateCertificateDto();
-            data.add(pk);
-            pk.setTipo("PRIMARY_KEY");
-            pk.setTipo_desc("Clave Privada");
-            pk.setAlias(id.toString());
-            pk.setTiene_certificado(false);
-            data_token.setPrivate_keys(1);
-            respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se genero el par de claves correctamente.");
-            token.salir();
+            if (slot != null) {
+                IToken token = slot.getToken();
+                token.iniciar(objetoDto.getPin());
+                BigInteger max = new BigInteger("1000000000000");
+                BigInteger id = (new BigInteger(max.bitLength(), new SecureRandom())).mod(max);
+                token.generarClaves(id.toString(), objetoDto.getPin(), Integer.parseInt(objetoDto.getSlot().toString()));
+                TokenDataRespuestaDto datos = new TokenDataRespuestaDto();
+                respuesta.setDatos(datos);
+                TokenDataDto data_token = new TokenDataDto();
+                datos.setData_token(data_token);
+                data_token.setCertificates(0);
+                List<ITokenCertificateDto> data = new ArrayList<ITokenCertificateDto>();
+                data_token.setData(data);
+                TokenPrivateCertificateDto pk = new TokenPrivateCertificateDto();
+                data.add(pk);
+                pk.setTipo("PRIMARY_KEY");
+                pk.setTipo_desc("Clave Privada");
+                pk.setAlias(id.toString());
+                pk.setTiene_certificado(false);
+                data_token.setPrivate_keys(1);
+                respuesta.setFinalizado(true);
+                respuesta.setMensaje("Se genero el par de claves correctamente.");
+                token.salir();
+            } else {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+            }
         } catch (GeneralSecurityException ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -160,31 +165,32 @@ public class PlataformaServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            IToken token = slot.getToken();
-            TokenCsrDto datos = new TokenCsrDto();
-            respuesta.setDatos(datos);
-
-            try {
-                token.iniciar(objetoDto.getPin());
-                List<TokenCreacionCsrSubjectItemDto> lista = objetoDto.getSubject();
-                JSONArray array = new JSONArray();
-
-                for (int i = 0; i < lista.size(); ++i) {
-                    JSONObject item = new JSONObject();
-                    item.put("oid", ((TokenCreacionCsrSubjectItemDto) lista.get(i)).getOid());
-                    item.put("value", ((TokenCreacionCsrSubjectItemDto) lista.get(i)).getValue());
-                    array.put(item);
+            if (slot != null) {
+                IToken token = slot.getToken();
+                TokenCsrDto datos = new TokenCsrDto();
+                respuesta.setDatos(datos);
+                try {
+                    token.iniciar(objetoDto.getPin());
+                    List<TokenCreacionCsrSubjectItemDto> lista = objetoDto.getSubject();
+                    JSONArray array = new JSONArray();
+                        for (int i = 0; i < lista.size(); ++i) {
+                        JSONObject item = new JSONObject();
+                        item.put("oid", ((TokenCreacionCsrSubjectItemDto) lista.get(i)).getOid());
+                        item.put("value", ((TokenCreacionCsrSubjectItemDto) lista.get(i)).getValue());
+                        array.put(item);
+                    }
+                    datos.setCsr(token.generarCSR(objetoDto.getAlias_certificado(), array));
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("Se genero el CSR correctamente");
+                } catch (GeneralSecurityException ex) {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje(ex.getMessage());
                 }
-
-                datos.setCsr(token.generarCSR(objetoDto.getAlias_certificado(), array));
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Se genero el CSR correctamente");
-            } catch (GeneralSecurityException ex) {
+                token.salir();
+            } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(ex.getMessage());
-            }
-
-            token.salir();
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+            }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -194,26 +200,28 @@ public class PlataformaServicio {
 
     public RespuestaDto<String> cargarPem(TokenPemDto objetoDto) {
         RespuestaDto<String> respuesta = new RespuestaDto<String>();
-
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            IToken token = slot.getToken();
-            respuesta.setDatos(null);
-
-            try {
-                token.iniciar(objetoDto.getPin());
-                token.cargarCertificado(new String(Base64.getDecoder().decode(objetoDto.getPem()), "UTF-8"),
-                        objetoDto.getId());
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("El certificado fue adicionado correctamente");
-            } catch (UnsupportedEncodingException | GeneralSecurityException ex) {
+            if (slot != null) {
+                IToken token = slot.getToken();
+                respuesta.setDatos(null);
+                try {
+                    token.iniciar(objetoDto.getPin());
+                    token.cargarCertificado(new String(Base64.getDecoder().decode(objetoDto.getPem()), "UTF-8"),
+                            objetoDto.getId());
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("El certificado fue adicionado correctamente");
+                } catch (UnsupportedEncodingException | GeneralSecurityException ex) {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje(ex.getMessage());
+                }
+                token.salir();
+            } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(ex.getMessage());
-            }
-
-            token.salir();
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+            }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -228,16 +236,20 @@ public class PlataformaServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-
-            try {
-                IToken token = slot.getToken();
-                token.modificarPin(objetoDto.getOld_pin(), objetoDto.getNew_pin());
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se cambió correctamente");
-            } catch (RuntimeException ex) {
+            if (slot != null) {
+                try {
+                    IToken token = slot.getToken();
+                    token.modificarPin(objetoDto.getOld_pin(), objetoDto.getNew_pin());
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("El pin se cambió correctamente");
+                } catch (RuntimeException ex) {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje(ex.getMessage());
+                }
+            } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(ex.getMessage());
-            }
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+            }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -252,16 +264,20 @@ public class PlataformaServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-
-            try {
-                IToken token = slot.getToken();
-                token.modificarPinSo(objetoDto.getOld_pin(), objetoDto.getNew_pin());
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se cambió correctamente");
-            } catch (RuntimeException ex) {
+            if (slot != null) {
+                try {
+                    IToken token = slot.getToken();
+                    token.modificarPinSo(objetoDto.getOld_pin(), objetoDto.getNew_pin());
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("El pin se cambió correctamente");
+                } catch (RuntimeException ex) {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje(ex.getMessage());
+                }
+            } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(ex.getMessage());
-            }
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
+            }    
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -276,15 +292,19 @@ public class PlataformaServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-
-            try {
-                IToken token = slot.getToken();
-                token.test(objetoDto.getPin());
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("El pin se validó correctamente");
-            } catch (RuntimeException ex) {
+            if (slot != null) {
+                try {
+                    IToken token = slot.getToken();
+                    token.test(objetoDto.getPin());
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("El pin se validó correctamente");
+                } catch (RuntimeException ex) {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje(ex.getMessage());
+                }
+            } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje(ex.getMessage());
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
             }
         } catch (Exception ex) {
             Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -300,38 +320,43 @@ public class PlataformaServicio {
             gestorSlot.setOpciones(this.getOpciones());
             gestorSlot.listarSlots();
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            IToken token = slot.getToken();
-            token.iniciar(objetoDto.getPin());
-            List<TokenSolicitudDetalleDto> data = objetoDto.getData();
-            List<TokenSolicitudRespuestaDto> datos = new ArrayList<TokenSolicitudRespuestaDto>();
-            for (int i = 0; i < data.size(); i++) {
-                TokenSolicitudRespuestaDto element = new TokenSolicitudRespuestaDto();
-                element.setId(data.get(i).getId());
-                PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
-                if (pk == null) {
-                    token.salir();
-                    throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
-                }
-                JWSSigner jwsSigner = new RSASSASigner(pk);
-                JWSHeader.Builder builder = new JWSHeader.Builder(JWSAlgorithm.RS256);
-                if (data.get(i).getUrl() == null) {
-                    builder.x509CertURL(new URI("https://agencia.firmadigital.bo/services_ar/certificado?serial_number=" + token.obtenerCertificado(objetoDto.getAlias()).getSerialNumber()));
-                } else {
-                    if (data.get(i).getUrl().contains("?")) {
-                        builder.x509CertURL(new URI(data.get(i).getUrl()));
-                    } else {
-                        builder.x509CertURL(new URI(data.get(i).getUrl() + "?serial_number=" + token.obtenerCertificado(objetoDto.getAlias()).getSerialNumber()));
+            if (slot != null) {
+                IToken token = slot.getToken();
+                token.iniciar(objetoDto.getPin());
+                List<TokenSolicitudDetalleDto> data = objetoDto.getData();
+                List<TokenSolicitudRespuestaDto> datos = new ArrayList<TokenSolicitudRespuestaDto>();
+                for (int i = 0; i < data.size(); i++) {
+                    TokenSolicitudRespuestaDto element = new TokenSolicitudRespuestaDto();
+                    element.setId(data.get(i).getId());
+                    PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
+                    if (pk == null) {
+                        token.salir();
+                        throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
                     }
+                    JWSSigner jwsSigner = new RSASSASigner(pk);
+                    JWSHeader.Builder builder = new JWSHeader.Builder(JWSAlgorithm.RS256);
+                    if (data.get(i).getUrl() == null) {
+                        builder.x509CertURL(new URI("https://agencia.firmadigital.bo/services_ar/certificado?serial_number=" + token.obtenerCertificado(objetoDto.getAlias()).getSerialNumber()));
+                    } else {
+                        if (data.get(i).getUrl().contains("?")) {
+                            builder.x509CertURL(new URI(data.get(i).getUrl()));
+                        } else {
+                            builder.x509CertURL(new URI(data.get(i).getUrl() + "?serial_number=" + token.obtenerCertificado(objetoDto.getAlias()).getSerialNumber()));
+                        }
+                    }
+                    JWSObject jwsObject = new JWSObject(builder.build(),new Payload(data.get(i).getPayload()));
+                    jwsObject.sign(jwsSigner);
+                    element.setJws(jwsObject.serialize());
+                    datos.add(element);
                 }
-                JWSObject jwsObject = new JWSObject(builder.build(),new Payload(data.get(i).getPayload()));
-                jwsObject.sign(jwsSigner);
-                element.setJws(jwsObject.serialize());
-                datos.add(element);
+                token.salir();
+                respuesta.setDatos(datos);
+                respuesta.setFinalizado(true);
+                respuesta.setMensaje("Se firmo las solicitudes correctamente!");
+            } else {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
             }
-            token.salir();
-            respuesta.setDatos(datos);
-            respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se firmo las solicitudes correctamente!");
         } catch (GeneralSecurityException | URISyntaxException | JOSEException ex) {
             String mensaje = ex.getMessage();
             if (ex.getCause() instanceof IOException) {

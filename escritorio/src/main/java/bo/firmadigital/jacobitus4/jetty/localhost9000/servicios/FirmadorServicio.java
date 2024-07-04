@@ -350,74 +350,79 @@ public class FirmadorServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            IToken token = slot.getToken();
-            token.iniciar(objetoDto.getPin());
-            PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
-            if (pk == null) {
+            if (slot != null) {
+                IToken token = slot.getToken();
+                token.iniciar(objetoDto.getPin());
+                PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
+                if (pk == null) {
+                    token.salir();
+                    throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
+                }
+    
+                JWSSigner signer = new RSASSASigner(pk);
+                boolean inicial = true;
+    
+                CompleteSign enviadoJson;
+                try {
+                    String enviado = new String(dataByte);
+                    ObjectMapper mapper = new ObjectMapper();
+                    enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
+                    inicial = false;
+                } catch (IOException ex) {
+                    enviadoJson = new CompleteSign();
+                }
+    
+                JWSObject jwsObject;
+                if (inicial) {
+                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(dataByte));
+                    enviadoJson.setPayload(new String(Base64.getEncoder().encode(dataByte), StandardCharsets.UTF_8));
+                    enviadoJson.setSignatures(new ArrayList<Signs>());
+                } else {
+                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(),
+                            new Payload(enviadoJson.getPayload()));
+                }
+    
+                try {
+                    jwsObject.sign(signer);
+                } catch (JOSEException ex) {
+                    throw new RuntimeException("Error al firmar: " + ex.getMessage());
+                }
+    
+                X509Certificate cert = token.obtenerCertificado(objetoDto.getAlias());
+                String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
                 token.salir();
-                throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
-            }
-
-            JWSSigner signer = new RSASSASigner(pk);
-            boolean inicial = true;
-
-            CompleteSign enviadoJson;
-            try {
-                String enviado = new String(dataByte);
+                Signs sign = new Signs();
+                Map<String, Object> mapa = new HashMap<String, Object>();
+                mapa.put("gen", "MEFP-DGSGIF");
+                mapa.put("x5c", pemCert.replaceAll("(\r\n|\n)", "").toCharArray());
+                sign.setHeader(mapa);
+                String serial = jwsObject.serialize();
+                String[] partes = serial.split("\\.");
+                sign.setProtect(partes[0]);
+                sign.setSignature(jwsObject.getSignature().toString());
+                enviadoJson.getSignatures().add(sign);
                 ObjectMapper mapper = new ObjectMapper();
-                enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
-                inicial = false;
-            } catch (IOException ex) {
-                enviadoJson = new CompleteSign();
-            }
-
-            JWSObject jwsObject;
-            if (inicial) {
-                jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(dataByte));
-                enviadoJson.setPayload(new String(Base64.getEncoder().encode(dataByte), StandardCharsets.UTF_8));
-                enviadoJson.setSignatures(new ArrayList<Signs>());
+                byte[] bytes = mapper.writeValueAsBytes(enviadoJson);
+                InputStream input = new ByteArrayInputStream(bytes);
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
+                String resultado = (String) buffer.lines().collect(Collectors.joining("\n"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                Calendar calendar = Calendar.getInstance();
+                String fechaFirma = dateFormat.format(new Timestamp(calendar.getTime().getTime()));
+                FirmaJsonRespuestaDto datos = new FirmaJsonRespuestaDto();
+                datos.setJson_firmado(Base64.getEncoder().encodeToString(resultado.getBytes()));
+                X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(objetoDto.getAlias())))
+                        .getSubject();
+                datos.setCn(IETFUtils
+                        .valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
+                datos.setFecha_firma(fechaFirma);
+                respuesta.setFinalizado(true);
+                respuesta.setMensaje("Se firmo la solicitud correctamente!");
+                respuesta.setDatos(datos);
             } else {
-                jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(),
-                        new Payload(enviadoJson.getPayload()));
-            }
-
-            try {
-                jwsObject.sign(signer);
-            } catch (JOSEException ex) {
-                throw new RuntimeException("Error al firmar: " + ex.getMessage());
-            }
-
-            X509Certificate cert = token.obtenerCertificado(objetoDto.getAlias());
-            String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
-            token.salir();
-            Signs sign = new Signs();
-            Map<String, Object> mapa = new HashMap<String, Object>();
-            mapa.put("gen", "MEFP-DGSGIF");
-            mapa.put("x5c", pemCert.replaceAll("(\r\n|\n)", "").toCharArray());
-            sign.setHeader(mapa);
-            String serial = jwsObject.serialize();
-            String[] partes = serial.split("\\.");
-            sign.setProtect(partes[0]);
-            sign.setSignature(jwsObject.getSignature().toString());
-            enviadoJson.getSignatures().add(sign);
-            ObjectMapper mapper = new ObjectMapper();
-            byte[] bytes = mapper.writeValueAsBytes(enviadoJson);
-            InputStream input = new ByteArrayInputStream(bytes);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
-            String resultado = (String) buffer.lines().collect(Collectors.joining("\n"));
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-            Calendar calendar = Calendar.getInstance();
-            String fechaFirma = dateFormat.format(new Timestamp(calendar.getTime().getTime()));
-            FirmaJsonRespuestaDto datos = new FirmaJsonRespuestaDto();
-            datos.setJson_firmado(Base64.getEncoder().encodeToString(resultado.getBytes()));
-            X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(objetoDto.getAlias())))
-                    .getSubject();
-            datos.setCn(IETFUtils
-                    .valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
-            datos.setFecha_firma(fechaFirma);
-            respuesta.setFinalizado(true);
-            respuesta.setMensaje("Se firmo la solicitud correctamente!");
-            respuesta.setDatos(datos);
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
+            }    
         } catch (IOException | GeneralSecurityException ex) {
             try {
                 String mensaje = ex.getMessage();
@@ -473,7 +478,11 @@ public class FirmadorServicio {
                 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
                 gestorSlot.setOpciones(this.getOpciones());
-                IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                Slot oSlot = gestorSlot.obtenerSlot(slot);
+                if (oSlot == null) {
+                    throw new IOException("El slot " + slot + " no se encuentra disponible.");
+                }
+                IToken token = oSlot.getToken();
                 token.iniciar(pin);
                 try {
                     if (token.obtenerCertificado(alias) == null) {
@@ -483,7 +492,7 @@ public class FirmadorServicio {
                     for (int i = 0; i < pdfs.size(); i++) {
                         boolean bloquear = pdfs.get(i).getBloquear() != null && pdfs.get(i).getBloquear();
                         byte[] file = Base64.getDecoder().decode(pdfs.get(i).getPdf().getBytes("UTF-8"));
-
+   
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
                         FirmadorPdf.firmar(new ByteArrayInputStream(file), out, bloquear, token, alias);
                         FirmaPdfItemRespuestaDto pdfItem = new FirmaPdfItemRespuestaDto();
@@ -491,9 +500,9 @@ public class FirmadorServicio {
                         pdfItem.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
                         pdfsFirmados.add(pdfItem);
                     }
-
+   
                     datos.setPdfs_firmados(pdfsFirmados);
-
+   
                     respuesta.setDatos(datos);
                     respuesta.setFinalizado(true);
                     respuesta.setMensaje("Se firmaron los pdfs correctamente!");
@@ -501,7 +510,7 @@ public class FirmadorServicio {
                     respuesta.setFinalizado(false);
                     respuesta.setMensaje(ex.getMessage());
                 }
-                token.salir();
+                token.salir();    
             } else {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot, pin, alias y pdfs.");
@@ -549,24 +558,28 @@ public class FirmadorServicio {
             if (objetoDto.getSlot() != null && objetoDto.getPin() != null && objetoDto.getAlias() != null
                     && objetoDto.getHash() != null) {
                 Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-                IToken token = slot.getToken();
-                token.iniciar(objetoDto.getPin());
-                FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
-                Signature signature = Signature.getInstance("SHA256withRSA");
-                PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
-                if (pk == null) {
+                if (slot != null) {
+                    IToken token = slot.getToken();
+                    token.iniciar(objetoDto.getPin());
+                    FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
+                    Signature signature = Signature.getInstance("SHA256withRSA");
+                    PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
+                    if (pk == null) {
+                        token.salir();
+                        throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
+                    }
+                    signature.initSign(pk);
+                    signature.update(Base64.getDecoder().decode(objetoDto.getHash()));
+                    byte[] signed = signature.sign();
                     token.salir();
-                    throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
-                }
-
-                signature.initSign(pk);
-                signature.update(Base64.getDecoder().decode(objetoDto.getHash()));
-                byte[] signed = signature.sign();
-                token.salir();
-                datos.setFirma(Base64.getEncoder().encodeToString(signed));
-                respuesta.setDatos(datos);
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Firma realizada correctamente.");
+                    datos.setFirma(Base64.getEncoder().encodeToString(signed));
+                    respuesta.setDatos(datos);
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("Firma realizada correctamente.");
+                } else {
+                    respuesta.setFinalizado(false);
+                    respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
+                } 
             } else {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot, pin, alias y hash.");

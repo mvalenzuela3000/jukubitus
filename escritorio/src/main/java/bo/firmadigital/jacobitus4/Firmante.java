@@ -13,6 +13,7 @@ import java.util.List;
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
@@ -164,7 +165,11 @@ public class Firmante extends Stage {
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
-                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                    Slot oSlot = gestorSlot.obtenerSlot(slot);
+                    if (oSlot == null) {
+                        throw new IOException("El slot " + slot + " no se encuentra disponible.");
+                    }
+                    IToken token = oSlot.getToken();
                     token.iniciar(pass);
                     List<String> labels = token.listarIdentificadorClaves();
                     List<DatosCertificado> certificados = new LinkedList<>();
@@ -176,7 +181,7 @@ public class Firmante extends Stage {
                     table.setItems(FXCollections.observableList(certificados));
                     updateProgress(100, 100);
                     return true;
-                } catch (GeneralSecurityException ex) {
+                } catch (GeneralSecurityException | IOException ex) {
                     if (ex.getCause() instanceof IOException) {
                         if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
                             throw new RuntimeException("Pin incorrecto, intente nuevamente.");

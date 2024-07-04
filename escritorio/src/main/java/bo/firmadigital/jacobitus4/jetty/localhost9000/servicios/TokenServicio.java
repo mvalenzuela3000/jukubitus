@@ -207,7 +207,7 @@ public class TokenServicio {
                     token.salir();
                 } else {
                     respuesta.setFinalizado(false);
-                    respuesta.setMensaje("No se encontró ningún token conectado al slot " + objetoDto.getSlot() + ".");
+                    respuesta.setMensaje(""El slot " + objetoDto.getSlot() + " no se encuentra disponible." " + objetoDto.getSlot() + ".");
                 }
             } else {
                 respuesta.setFinalizado(false);

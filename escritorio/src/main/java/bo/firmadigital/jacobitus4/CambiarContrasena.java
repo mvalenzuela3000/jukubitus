@@ -5,9 +5,12 @@
  */
 package bo.firmadigital.jacobitus4;
 
+import com.itextpdf.io.IOException;
+
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -120,7 +123,11 @@ public class CambiarContrasena extends Stage {
                 } else {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(this.getOpciones());
-                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                    Slot oSlot = gestorSlot.obtenerSlot(slot);
+                    if (oSlot == null) {
+                        throw new IOException("El slot " + slot + " no se encuentra disponible.");
+                    }
+                    IToken token = oSlot.getToken();
                     try {
                         String oldPass = oldPassword;
                         if (oldPass.startsWith("@unlock:")) {
