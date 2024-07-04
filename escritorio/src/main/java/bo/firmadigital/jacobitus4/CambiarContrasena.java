@@ -16,6 +16,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -65,58 +67,25 @@ public class CambiarContrasena extends Stage {
         root.getChildren().add(label2);
         PasswordField passwordField2 = new PasswordField();
         passwordField2.setPromptText("Repita nuevo pin");
+        oldPasswordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                passwordField.requestFocus();
+            }
+        });
+        passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                passwordField2.requestFocus();
+            }
+        });
+        passwordField2.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                cambiarContrasenia(slot, oldPasswordField.getText(), passwordField.getText(), passwordField2.getText());
+            }
+        });
         root.getChildren().add(passwordField2);
         Button buttonAceptar = new Button("Aceptar");
         buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            String pass = passwordField.getText();
-            String pass2 = passwordField2.getText();
-            String error;
-            if (pass.equals(pass2)) {
-                if (pass.length() < 8) {
-                    error = "La contraseña es muy corta.";
-                } else {
-                    int num = 0, may = 0, minu = 0;
-                    char[] password = pass.toCharArray();
-                    for (int i = 0; i < pass.length(); i++) {
-                        if (password[i] >= '0' && password[i] <= '9') {
-                            num++;
-                        } else if (password[i] >= 'A' && password[i] <= 'Z') {
-                            may++;
-                        } else if (password[i] >= 'a' && password[i] <= 'z') {
-                            minu++;
-                        }
-                    }
-                    if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
-                        error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
-                    } else {
-                        GestorSlot gestorSlot = GestorSlot.getInstance();
-                        gestorSlot.setOpciones(this.getOpciones());
-                        IToken token = gestorSlot.obtenerSlot(slot).getToken();
-                        try {
-                            String oldPass = oldPasswordField.getText();
-                            if (oldPass.startsWith("@unlock:")) {
-                                token.unlockPin(oldPass.split("@unlock:")[1], pass);
-                            } else if (oldPass.startsWith("@so:")) {
-                                token.modificarPinSo(oldPass.split("@so:")[1], pass);
-                            } else {
-                                token.modificarPin(oldPass, pass);
-                            }
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
-                            alert.setTitle("Jacobitus");
-                            alert.showAndWait();
-                            close();
-                            return;
-                        } catch (RuntimeException ex) {
-                            error = ex.getMessage();
-                        }
-                    }
-                }
-            } else {
-                error = "Las contraseñas no coinciden.";
-            }
-            Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
-            alert.setTitle("Jacobitus");
-            alert.showAndWait();
+            cambiarContrasenia(slot, oldPasswordField.getText(), passwordField.getText(), passwordField2.getText());
         });
         Button buttonCancelar = new Button("Cancelar");
         buttonCancelar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
@@ -127,5 +96,55 @@ public class CambiarContrasena extends Stage {
         root.getChildren().add(hBox);
         Scene scene = new Scene(root, 300, 220);
         setScene(scene);
+    }
+
+    private void cambiarContrasenia(long slot, String oldPassword, String pass, String pass2) {
+        String error;
+        if (pass.equals(pass2)) {
+            if (pass.length() < 8) {
+                error = "La contraseña es muy corta.";
+            } else {
+                int num = 0, may = 0, minu = 0;
+                char[] password = pass.toCharArray();
+                for (int i = 0; i < pass.length(); i++) {
+                    if (password[i] >= '0' && password[i] <= '9') {
+                        num++;
+                    } else if (password[i] >= 'A' && password[i] <= 'Z') {
+                        may++;
+                    } else if (password[i] >= 'a' && password[i] <= 'z') {
+                        minu++;
+                    }
+                }
+                if (slot == -1 && (num < 1 || may < 1 || minu < 1)) {
+                    error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
+                } else {
+                    GestorSlot gestorSlot = GestorSlot.getInstance();
+                    gestorSlot.setOpciones(this.getOpciones());
+                    IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                    try {
+                        String oldPass = oldPassword;
+                        if (oldPass.startsWith("@unlock:")) {
+                            token.unlockPin(oldPass.split("@unlock:")[1], pass);
+                        } else if (oldPass.startsWith("@so:")) {
+                            token.modificarPinSo(oldPass.split("@so:")[1], pass);
+                        } else {
+                            token.modificarPin(oldPass, pass);
+                        }
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
+                        alert.setTitle("Jacobitus");
+                        alert.showAndWait();
+                        close();
+                        return;
+                    } catch (RuntimeException ex) {
+                        error = ex.getMessage();
+                    }
+                }
+            }
+        } else {
+            error = "Las contraseñas no coinciden.";
+        }
+        Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
+        alert.setTitle("Jacobitus");
+        alert.showAndWait();
     }
 }
