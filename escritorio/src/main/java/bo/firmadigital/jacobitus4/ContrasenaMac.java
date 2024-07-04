@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Separator;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -27,17 +29,25 @@ public class ContrasenaMac extends Stage {
     private String pass;
 
     public ContrasenaMac(Stage parent) {
-        setTitle("Contraseña MacOS");
+        setTitle("Seguridad MacOS");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
         BorderPane root = new BorderPane();
-        Label label = new Label("El certificado ssl no se encuentra registrado.\nPara poder registrarlo se requiere la contraseña de\nsu usuario MacOS.\nPor favor introduzca su contraseña:");
-        root.setTop(label);
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(4));
         vBox.setSpacing(4);
+        Label label1 = new Label("Estás realizando cambios en la configuración de\nconfianza para los certificados del sistema.\n");
+        Label label2 = new Label("Ingresa tu contraseña para permitir esta acción:");
+        vBox.getChildren().add(label1);
+        vBox.getChildren().add(label2);
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Su contraseña");
+        passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                pass = passwordField.getText();
+                close();
+            }
+        });
         vBox.getChildren().add(passwordField);
         vBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
         root.setCenter(vBox);
