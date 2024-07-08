@@ -121,6 +121,7 @@ public class App extends Application {
     private static App app;
     private static final TokenSelected tokenSelected = new TokenSelected();
     private static String contraseniaMacOS = null;
+    private static boolean isLaunched = false;
 
     private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
         Config config = Config.getInstance();
@@ -154,7 +155,8 @@ public class App extends Application {
         String version = Constantes.VERSION;
         stage.setTitle("ADSIB - Jacobitus Total - " + version);
         if (!servicio) {
-            Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
+            // Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
+            Alert alert = new Alert(AlertType.ERROR, WebServer.mensaje, ButtonType.OK);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.setTitle("ADSIB - Jacobitus Total - " + version + " (Servicio detenido)");
@@ -597,7 +599,7 @@ public class App extends Application {
                 if (taskBar) {
                     SmartCard.cards(this.getOpcionesFirmador());
                 } else {
-                    new Thread(listarTokens()).start();
+                    // new Thread(listarTokens()).start();
                 }
             } else {
                 File file = new File(param);
@@ -632,7 +634,7 @@ public class App extends Application {
             @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
-                stage.getScene().setCursor(Cursor.WAIT);
+                App.stage.getScene().setCursor(Cursor.WAIT);
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpcionesFirmador());
@@ -643,7 +645,7 @@ public class App extends Application {
                     }
                     table.setItems(FXCollections.observableList(list));
                     updateProgress(100, 100);
-                    stage.getScene().setCursor(Cursor.DEFAULT);
+                    App.stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } catch (RuntimeException ex) {
                     updateProgress(100, 100);
@@ -1300,7 +1302,10 @@ public class App extends Application {
         App.servicio = servicio;
         App.taskBar = taskBar;
         App.taskBarEmulated = taskBarEmulated;
-        launch();
+        if (!App.isLaunched) {
+            launch();
+            App.isLaunched = true;
+        }
     }
 
     public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String file) {
@@ -1308,7 +1313,10 @@ public class App extends Application {
         App.taskBar = taskBar;
         App.taskBarEmulated = taskBarEmulated;
         App.param = file;
-        launch();
+        if (!App.isLaunched) {
+            launch();
+            App.isLaunched = true;
+        }
     }
 
     public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String url, String token, String urlPost) {
@@ -1318,7 +1326,10 @@ public class App extends Application {
         App.url = url;
         App.token = token;
         App.urlPost = urlPost;
-        launch();
+        if (!App.isLaunched) {
+            launch();
+            App.isLaunched = true;
+        }
     }
 
     public static TokenSelected service(Slot slot, String ci, JSONArray files) {
