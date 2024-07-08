@@ -28,6 +28,7 @@ import bo.firmadigital.jacobitus4.util.Config;
 
 public class WebServer {
     public static Server jettyServer = new Server();
+    public static String mensaje = "";
 
     public static void iniciar() {
         // Configuracion de CORS
@@ -92,6 +93,20 @@ public class WebServer {
             
         } catch (Exception ex) {
             try {
+                switch (ex.getMessage()) {
+                    case "Failed to bind to /127.0.0.1:9000":
+                        WebServer.mensaje = "Hubo un problema con el puerto 9000.";
+                        break;
+                    case "Failed to bind to /127.0.0.1:4637":
+                        WebServer.mensaje = "Hubo un problema con el puerto 4637.";
+                        break;
+                    case "Failed to bind to /127.0.0.1:3200":
+                        WebServer.mensaje = "Hubo un problema con el puerto 3200.";
+                        break;
+                    default:
+                        WebServer.mensaje = "Servicio detenido, no podrá interactuar con aplicaciones web.";
+                        break;
+                }
                 jettyServer.stop();
                 jettyServer.destroy();
             } catch (Exception ex2) {
@@ -149,6 +164,6 @@ public class WebServer {
             connectors.add(sslConnector3200);
         }
  
-        jettyServer.setConnectors(connectors.toArray(new Connector[2]));
+        jettyServer.setConnectors(connectors.toArray(new Connector[0]));
     }
 }
