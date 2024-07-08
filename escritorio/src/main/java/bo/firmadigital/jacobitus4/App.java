@@ -63,6 +63,7 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -241,11 +242,15 @@ public class App extends Application {
                     }
                     DatosCertificado datosCertificado = new DatosCertificado(file.getName(), certificate);
                     CertInformation information = new CertInformation(datosCertificado, true);
+                    VBox vBox = new VBox();
+                    vBox.setPadding(new Insets(10));
+                    vBox.setSpacing(4);
+                    vBox.getChildren().add(information);
                     Stage info = new Stage();
                     info.setTitle("Certificado");
                     info.initOwner(stage);
                     info.initModality(Modality.APPLICATION_MODAL);
-                    Scene scene = new Scene(information);
+                    Scene scene = new Scene(vBox);
                     info.setScene(scene);
                     info.showAndWait();
                 } catch (IOException | CertificateEncodingException ex) {
