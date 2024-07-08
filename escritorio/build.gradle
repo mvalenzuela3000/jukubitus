@@ -5,6 +5,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'bo.firmadigital.jacobitus4.java-conventions'
 }
@@ -27,7 +28,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-servlets:10.0.21'
     implementation 'org.glassfish.jersey.containers:jersey-container-jetty-servlet:2.43'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.43'
-    implementation 'org.bouncycastle:bcpkix-jdk15on:1.68'
+    shadow 'org.bouncycastle:bcpkix-jdk15on:1.70'
     implementation 'com.itextpdf:sign:7.1.15'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
     implementation 'org.codehaus.jettison:jettison:1.5.1'
@@ -43,7 +44,7 @@ dependencies {
 }
 
 group = 'bo.firmadigital.jacobitus4'
-version = '1.2.2'
+version = '1.3.0'
 description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
 
@@ -60,18 +61,21 @@ javafx {
 }
 
 jar {
-    archiveBaseName = rootProject.name
     manifest {
         attributes(
             'Main-Class': 'bo.firmadigital.jacobitus4.Main',
         )
     }
-    tasks.withType(Jar){
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+shadowJar {
+    archiveBaseName = rootProject.name
+    archiveVersion = version
+    archiveClassifier = ''
+    dependencies {
+        exclude 'org/bouncycastle/**/*.*'
     }
-    from(configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
-        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    }
+    mergeServiceFiles()
 }
 
 tasks.withType(JavaCompile) {
@@ -85,6 +89,11 @@ tasks.withType(Javadoc) {
 tasks.register('importCA', Copy) {
     from layout.projectDirectory.dir("ca")
     into layout.projectDirectory.dir("build/libs/ca")
+}
+
+tasks.register('importDependencies', Copy) {
+    from layout.projectDirectory.dir("dependencias")
+    into layout.projectDirectory.dir("build/libs")
 }
 
 tasks.register('addDriversLinux', Copy) {
@@ -146,15 +155,17 @@ tasks.register('packageDeb', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForLinux'
     dependsOn importCA
+    dependsOn importDependencies
     dependsOn addDriversLinux
     dependsOn importChangePinLinux
-    dependsOn jar
+    dependsOn shadowJar
 
     project(':jacobitus-libreria').tasks.findByName('buildForLinux').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
+    tasks.findByName('importDependencies').mustRunAfter 'clean'
     tasks.findByName('addDriversLinux').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
     tasks.findByName('importChangePinLinux').mustRunAfter 'clean', ':jacobitus-libreria:buildForLinux'
-    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForLinux', 'importChangePinLinux', 'importCA'
+    tasks.findByName('shadowJar').mustRunAfter ':jacobitus-libreria:buildForLinux', 'importChangePinLinux', 'importCA'
 
     workingDir './'
     commandLine(jpackageCommand + [
@@ -173,11 +184,13 @@ tasks.register('packageRpm', Exec) {
     // dependsOn clean
     // dependsOn ':jacobitus-libreria:buildForFedora'
     // dependsOn importCA
+    // dependsOn importDependencies
     // dependsOn importChangePinFedora
     // dependsOn jar
 
     // project(':jacobitus-libreria').tasks.findByName('buildForFedora').mustRunAfter 'clean'
     // tasks.findByName('importCA').mustRunAfter 'clean'
+    // tasks.findByName('importDependencies').mustRunAfter 'clean'
     // tasks.findByName('importChangePinFedora').mustRunAfter 'clean', ':jacobitus-libreria:buildForFedora'
     // tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForFedora', 'importChangePinFedora', 'importCA'
 
@@ -194,15 +207,17 @@ tasks.register('packagePkg', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForMacOS'
     dependsOn importCA
+    dependsOn importDependencies
     dependsOn addDriversMacOS
     dependsOn importChangePinMacOS
-    dependsOn jar
+    dependsOn shadowJar
 
     project(':jacobitus-libreria').tasks.findByName('buildForMacOS').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
+    tasks.findByName('importDependencies').mustRunAfter 'clean'
     tasks.findByName('addDriversMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('importChangePinMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
-    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
+    tasks.findByName('shadowJar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
 
     workingDir './'
     commandLine(jpackageCommand + [
@@ -217,15 +232,17 @@ tasks.register('packageDmg', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForMacOS'
     dependsOn importCA
+    dependsOn importDependencies
     dependsOn addDriversMacOS
     dependsOn importChangePinMacOS
-    dependsOn jar
+    dependsOn shadowJar
 
     project(':jacobitus-libreria').tasks.findByName('buildForMacOS').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
+    tasks.findByName('importDependencies').mustRunAfter 'clean'
     tasks.findByName('addDriversMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
     tasks.findByName('importChangePinMacOS').mustRunAfter 'clean', ':jacobitus-libreria:buildForMacOS'
-    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
+    tasks.findByName('shadowJar').mustRunAfter ':jacobitus-libreria:buildForMacOS', 'importChangePinMacOS', 'importCA'
 
     workingDir './'
     commandLine(jpackageCommand + [
@@ -240,15 +257,17 @@ tasks.register('packageMsi', Exec) {
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildForWindows'
     dependsOn importCA
+    dependsOn importDependencies
     dependsOn addDriversWindows
     dependsOn importChangePinWindows
-    dependsOn jar
+    dependsOn shadowJar
 
     project(':jacobitus-libreria').tasks.findByName('buildForWindows').mustRunAfter 'clean'
     tasks.findByName('importCA').mustRunAfter 'clean'
+    tasks.findByName('importDependencies').mustRunAfter 'clean'
     tasks.findByName('addDriversWindows').mustRunAfter 'clean', ':jacobitus-libreria:buildForWindows'
     tasks.findByName('importChangePinWindows').mustRunAfter 'clean', ':jacobitus-libreria:buildForWindows'
-    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildForWindows', 'importChangePinWindows', 'importCA'
+    tasks.findByName('shadowJar').mustRunAfter ':jacobitus-libreria:buildForWindows', 'importChangePinWindows', 'importCA'
 
     workingDir './'
     commandLine(jpackageCommand + [

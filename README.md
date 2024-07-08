@@ -102,21 +102,21 @@ Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes coman
 ### Linux
 
 ```
-$ ./gradlew jacobitus-libreria:buildForLinux escritorio:clean escritorio:importCA escritorio:addDriversLinux escritorio:importChangePinLinux escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForLinux escritorio:clean escritorio:importCA escritorio:importDependencies escritorio:addDriversLinux escritorio:importChangePinLinux escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
 ### Windows
 
 ```
-$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:addDriversWindows escritorio:importChangePinWindows escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:importDependencies escritorio:addDriversWindows escritorio:importChangePinWindows escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
 ### MacOS
 
 ```
-$ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importCA escritorio:addDriversMacOS escritorio:importChangePinMacOS escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importCA escritorio:importDependencies escritorio:addDriversMacOS escritorio:importChangePinMacOS escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
