@@ -2,6 +2,8 @@ package bo.firmadigital.jacobitus4.jetty.localhost3200.dtos;
 
 import java.math.BigInteger;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,5 +27,7 @@ public class CertificadoDto {
     private String finValidez;
     private String alias;
     private Boolean esValido;
+    @Setter(onMethod = @__(@JsonProperty(value = "OCSP"))) 
+    @Getter(onMethod = @__(@JsonProperty(value = "OCSP"))) 
     private String OCSP;
 }
