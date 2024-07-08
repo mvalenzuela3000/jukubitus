@@ -6,12 +6,15 @@
 package bo.firmadigital.jacobitus4;
 
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,9 +26,15 @@ import javafx.stage.Stage;
  * @author ADSIB
  */
 public class ContrasenaNueva extends Stage {
+    private Stage stage;
     private String pass;
 
+    public String getPass() {
+        return pass;
+    }
+    
     public ContrasenaNueva(Stage parent) {
+        stage = parent;
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
@@ -40,42 +49,23 @@ public class ContrasenaNueva extends Stage {
         Label label2 = new Label("Repita pin:");
         root.getChildren().add(label2);
         PasswordField passwordField2 = new PasswordField();
-        passwordField.setPromptText("Repita su contraseña");
+        passwordField2.setPromptText("Repita su contraseña");
+        passwordField.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                passwordField2.requestFocus();
+            }
+        });
+        passwordField2.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                establecerContrasenia(passwordField.getText(), passwordField2.getText());
+                close();
+            }
+        });
         root.getChildren().add(passwordField2);
         Button buttonAceptar = new Button("Aceptar");
         buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
-            pass = passwordField.getText();
-            String pass2 = passwordField2.getText();
-            String error;
-            if (pass.equals(pass2)) {
-                if (pass.length() < 8) {
-                    error = "La contraseña es muy corta.";
-                } else {
-                    int num = 0, may = 0, minu = 0;
-                    char[] password = pass.toCharArray();
-                    for (int i = 0; i < pass.length(); i++) {
-                        if (password[i] >= '0' && password[i] <= '9') {
-                            num++;
-                        } else if (password[i] >= 'A' && password[i] <= 'Z') {
-                            may++;
-                        } else if (password[i] >= 'a' && password[i] <= 'z') {
-                            minu++;
-                        }
-                    }
-                    if (num < 1 || may < 1 || minu < 1) {
-                        error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
-                    } else {
-                        close();
-                        return;
-                    }
-                }
-            } else {
-                error = "Las contraseñas no coinciden.";
-            }
-            pass = null;
-            Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
-            alert.setTitle("Jacobitus");
-            alert.showAndWait();
+            establecerContrasenia(passwordField.getText(), passwordField2.getText());
+            close();
         });
         Button buttonCancelar = new Button("Cancelar");
         buttonCancelar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
@@ -88,7 +78,39 @@ public class ContrasenaNueva extends Stage {
         setScene(scene);
     }
 
-    public String getPass() {
-        return pass;
+    private void establecerContrasenia(String contrasenia1, String contrasenia2) {
+        stage.getScene().setCursor(Cursor.WAIT);
+        String error;
+        if (contrasenia1.equals(contrasenia2)) {
+            if (contrasenia1.length() < 8) {
+                error = "La contraseña es muy corta.";
+            } else {
+                int num = 0, may = 0, minu = 0;
+                char[] password = contrasenia1.toCharArray();
+                for (int i = 0; i < contrasenia1.length(); i++) {
+                    if (password[i] >= '0' && password[i] <= '9') {
+                        num++;
+                    } else if (password[i] >= 'A' && password[i] <= 'Z') {
+                        may++;
+                    } else if (password[i] >= 'a' && password[i] <= 'z') {
+                        minu++;
+                    }
+                }
+                if (num < 1 || may < 1 || minu < 1) {
+                    error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
+                } else {
+                    stage.getScene().setCursor(Cursor.DEFAULT);
+                    pass = contrasenia1;
+                    return;
+                }
+            }
+        } else {
+            error = "Las contraseñas no coinciden.";
+        }
+        contrasenia1 = null;
+        stage.getScene().setCursor(Cursor.DEFAULT);
+        Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
+        alert.setTitle("Jacobitus");
+        alert.showAndWait();
     }
 }

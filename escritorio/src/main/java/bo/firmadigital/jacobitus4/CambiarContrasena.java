@@ -13,6 +13,7 @@ import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -32,6 +33,8 @@ import javafx.stage.Stage;
  * @author ADSIB
  */
 public class CambiarContrasena extends Stage {
+    private Stage stage;
+
     private Opciones getOpciones() {
         Config config = Config.getInstance();
         Opciones opciones = new Opciones();
@@ -50,6 +53,7 @@ public class CambiarContrasena extends Stage {
     }
 
     public CambiarContrasena(Stage parent, long slot) {
+        stage = parent;
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
@@ -102,6 +106,7 @@ public class CambiarContrasena extends Stage {
     }
 
     private void cambiarContrasenia(long slot, String oldPassword, String pass, String pass2) {
+        stage.getScene().setCursor(Cursor.WAIT);
         String error;
         if (pass.equals(pass2)) {
             if (pass.length() < 8) {
@@ -137,6 +142,7 @@ public class CambiarContrasena extends Stage {
                         } else {
                             token.modificarPin(oldPass, pass);
                         }
+                        stage.getScene().setCursor(Cursor.WAIT);
                         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
@@ -150,6 +156,7 @@ public class CambiarContrasena extends Stage {
         } else {
             error = "Las contraseñas no coinciden.";
         }
+        stage.getScene().setCursor(Cursor.WAIT);
         Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
         alert.setTitle("Jacobitus");
         alert.showAndWait();
