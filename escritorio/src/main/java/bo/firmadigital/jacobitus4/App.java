@@ -1055,8 +1055,7 @@ public class App extends Application {
                             certificadoServicioLocal = "Certificado de servicio local sin instalar";
                         }
                     } catch (IOException e1) {
-                        // certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
-                        certificadoServicioLocal = e1.getMessage();
+                        certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
                         errorCertificadoServicioLocalInstalado = true;
                     }
                     String certificadoECRB = "";
@@ -1075,8 +1074,7 @@ public class App extends Application {
                                 certificadoECRB = "Certificado de la ECRB sin instalar";
                             }
                         } catch (IOException e1) {
-                            // certificadoECRB = "Problemas al verificar certificado de la ECRB";
-                            certificadoECRB = e1.getMessage();
+                            certificadoECRB = "Problemas al verificar certificado de la ECRB";
                             errorCertificadoECRBInstalado = true;
                         }
                     }
@@ -1099,7 +1097,7 @@ public class App extends Application {
                     vbox.setSpacing(5);
     
                     FlowPane fpCertificadoServicioLocal = new FlowPane();
-                    Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal + " ->");
+                    Label lblCertificadoServicioLocal = new Label("Certificado de servicio local ->");
                     Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
                     Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("Desinstalar");
                     if (certificadoServicioLocalInstalado) {
@@ -1171,7 +1169,7 @@ public class App extends Application {
     
                     if (!OS.isDebian()) {
                         FlowPane fpCertificadoECRB = new FlowPane();
-                        Label lblCertificadoECRB = new Label(certificadoECRB + " ->");
+                        Label lblCertificadoECRB = new Label("Certificado de la ECRB ->");
                         Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
                         Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
                         if (certificadoECRBInstalado) {
