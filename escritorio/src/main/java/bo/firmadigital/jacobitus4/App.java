@@ -63,6 +63,7 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -241,11 +242,15 @@ public class App extends Application {
                     }
                     DatosCertificado datosCertificado = new DatosCertificado(file.getName(), certificate);
                     CertInformation information = new CertInformation(datosCertificado, true);
+                    VBox vBox = new VBox();
+                    vBox.setPadding(new Insets(10));
+                    vBox.setSpacing(4);
+                    vBox.getChildren().add(information);
                     Stage info = new Stage();
                     info.setTitle("Certificado");
                     info.initOwner(stage);
                     info.initModality(Modality.APPLICATION_MODAL);
-                    Scene scene = new Scene(information);
+                    Scene scene = new Scene(vBox);
                     info.setScene(scene);
                     info.showAndWait();
                 } catch (IOException | CertificateEncodingException ex) {
@@ -1050,8 +1055,7 @@ public class App extends Application {
                             certificadoServicioLocal = "Certificado de servicio local sin instalar";
                         }
                     } catch (IOException e1) {
-                        // certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
-                        certificadoServicioLocal = e1.getMessage();
+                        certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
                         errorCertificadoServicioLocalInstalado = true;
                     }
                     String certificadoECRB = "";
@@ -1070,8 +1074,7 @@ public class App extends Application {
                                 certificadoECRB = "Certificado de la ECRB sin instalar";
                             }
                         } catch (IOException e1) {
-                            // certificadoECRB = "Problemas al verificar certificado de la ECRB";
-                            certificadoECRB = e1.getMessage();
+                            certificadoECRB = "Problemas al verificar certificado de la ECRB";
                             errorCertificadoECRBInstalado = true;
                         }
                     }
@@ -1094,7 +1097,7 @@ public class App extends Application {
                     vbox.setSpacing(5);
     
                     FlowPane fpCertificadoServicioLocal = new FlowPane();
-                    Label lblCertificadoServicioLocal = new Label(certificadoServicioLocal + " ->");
+                    Label lblCertificadoServicioLocal = new Label("Certificado de servicio local ->");
                     Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
                     Hyperlink desinstalarCertificadoServicioLocal = new Hyperlink("Desinstalar");
                     if (certificadoServicioLocalInstalado) {
@@ -1166,7 +1169,7 @@ public class App extends Application {
     
                     if (!OS.isDebian()) {
                         FlowPane fpCertificadoECRB = new FlowPane();
-                        Label lblCertificadoECRB = new Label(certificadoECRB + " ->");
+                        Label lblCertificadoECRB = new Label("Certificado de la ECRB ->");
                         Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
                         Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
                         if (certificadoECRBInstalado) {
