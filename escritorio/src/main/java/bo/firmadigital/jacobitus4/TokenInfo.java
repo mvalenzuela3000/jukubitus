@@ -226,7 +226,9 @@ public class TokenInfo extends Stage {
                     List<DatosCertificado> certificados = new LinkedList<>();
                     for (String label : labels) {
                         DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        certificados.add(entry);
+                        if (entry.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                            certificados.add(entry);
+                        }
                     }
                     token.salir();
                     table.setItems(FXCollections.observableList(certificados));
