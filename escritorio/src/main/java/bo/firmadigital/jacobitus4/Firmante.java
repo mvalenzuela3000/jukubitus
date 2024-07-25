@@ -95,7 +95,7 @@ public class Firmante extends Stage {
                 @Override
                 public void updateItem(DatosCertificado datos, boolean empty) {
                     super.updateItem(datos, empty);
-                    if (datos != null) {
+                    if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
                         CertInformation pane = new CertInformation(datos, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
