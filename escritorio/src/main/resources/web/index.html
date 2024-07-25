@@ -1,57 +1,160 @@
 <!doctype html>
-<!-- Website Template by freewebsitetemplates.com -->
-<html>
+<html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Jacobitus Total</title>
-	<link rel="icon" href="favicon.ico">
-	<link rel="stylesheet" type="text/css" href="css/style.css">
-	<link rel="stylesheet" type="text/css" href="css/mobile.css" media="screen and (max-width : 568px)">
-	<script type="text/javascript" src="js/mobile.js"></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+  <meta name="viewport" content="width=device-width" />
+
+  <title>Jacobitus</title>
+  <link rel="icon" href="assets/images/favicon.ico"/>
+
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="assets/css/all.min.css"/>
+
+  <style>
+    .navbar a {
+      opacity: 0.7;
+    }
+
+    .navbar a:hover {
+      opacity: 1;
+    }
+
+    .navbar .navbar-brand {
+      opacity: 1 !important;
+    }
+
+    .main {
+      background-image: url('assets/images/jacobitus.jpg');
+      background-position: center center;
+      background-size: cover;
+      height: auto;
+      left: 0;
+      min-height: 100%;
+      min-width: 100%;
+      position: absolute;
+      top: 0;
+      width: auto;
+    }
+
+    .main .titulo {
+      color: #FFFFFF;
+      font-size: 56px;
+      font-weight: 300;
+      position: relative;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.33);
+      margin-top: 150px;
+      z-index: 3;
+    }
+
+    .cover {
+      position: fixed;
+      opacity: 1;
+      background-color: rgba(0, 0, 0, .6);
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .content {
+      position: relative;
+      color: #FFFFFF;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.33);
+      z-index: 4;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      right: 0px;
+      width: 100%;
+      z-index: 4;
+      margin-top: 50px;
+    }
+  </style>
 </head>
+
 <body>
-	<div id="header">
-		<a href="index.html" class="logo">
-			<img src="images/logo.png" alt="">
-		</a>
-		<ul id="navigation">
-			<li class="selected">
-				<a href="https://adsib.gob.bo">ADSIB</a>
-			</li>
-			<li>
-				<a href="https://firmadigital.bo">firmadigital.bo</a>
-			</li>
-			<li>
-				<a href="https://solicitud.firmadigital.bo/">Solicitudes</a>
-			</li>
-			<li>
-				<a href="apidoc">Documentación</a>
-			</li>
-		</ul>
-	</div>
-	<div id="body">
-		<div id="featured">
-			<img src="images/the-beacon.jpg" alt="">
-			<div>
-				<h2>Jacobitus Total</h2>
-				<span>Solución total a la firma de documentos</span>
-				<span>El servicio se está ejecutando correctamente</span>
-			</div>
-		</div>
-	</div>
-	<div id="footer">
-		<div>
-			<p>2024 ADSIB.</p>
-			<ul>
-				<li>
-					<a href="https://twitter.com/AdsibBolivia" id="twitter">twitter</a>
-				</li>
-				<li>
-					<a href="https://www.facebook.com/AdsibBolivia/" id="facebook">facebook</a>
-				</li>
-			</ul>
-		</div>
-	</div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <nav class="navbar fixed-top navbar-expand-lg navbar-dark p-md-3 navscroll">
+          <div class="container">
+            <a class="navbar-brand" href="#">
+              <img width="35" src="assets/images/favicon.ico" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://solicitud.firmadigital.bo" target="_blank">
+                    <i class="fa-solid fa-desktop"></i> Plataforma de solicitudes</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://validar.firmadigital.bo" target="_blank">
+                    <i class="fa fa-check"></i> Validador de documentos</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://localhost:9000/apidoc/" target="_blank">
+                    <i class="fa-solid fa-desktop"></i> Documentación</a>
+                </li>
+              </ul>
+              <div class="mx-auto"></div>
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://www.facebook.com/AdsibBolivia" target="_blank">
+                    <i class="fab fa-facebook-f fa-lg mx-2"></i></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://x.com/AdsibBolivia" target="_blank">
+                    <i class="fab fa-twitter fa-lg mx-2"></i></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://www.youtube.com/@Adsib.Bolivia" target="_blank">
+                    <i class="fab fa-youtube fa-lg mx-2"></i></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://www.instagram.com/adsibbolivia" target="_blank">
+                    <i class="fab fa-instagram fa-lg mx-2"></i></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="https://www.tiktok.com/@adsib.bolivia" target="_blank">
+                    <i class="fa-brands fa-tiktok fa-lg mx-2"></i></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <div class="main">
+          <div class="cover"></div>
+          <div class="container content">
+            <h1 class="text-center display-3" style="text-shadow: 0 0 10px rgba(0, 0, 0, 0.33); margin-top: 150px;">
+              Jacobitus 1.3.0-beta
+            </h1>
+            <h5 class="text-center text-white" style="text-shadow: 0 0 10px rgba(0, 0, 0, 0.33);">
+              VERSIÓN DE ESCRITORIO
+            </h5>
+            <span class="d-block lead fs-1 text-center text-white mt-5" style="text-shadow: 0 0 10px rgba(0, 0, 0, 0.33);">Solución a todo requerimiento de firma digital</span>
+          </div>
+          <div class="footer text-center">
+            <div class="container">
+              <a href="https://adsib.gob.bo/portal_frontend/" target="_blank"><img width="250"
+                  src="assets/images/logo-adsib-inverso.png" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
 </html>
