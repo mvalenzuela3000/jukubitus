@@ -144,6 +144,8 @@ public class CambiarContrasena extends Stage {
                         }
                         stage.getScene().setCursor(Cursor.WAIT);
                         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                         close();
@@ -158,6 +160,8 @@ public class CambiarContrasena extends Stage {
         }
         stage.getScene().setCursor(Cursor.WAIT);
         Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
+        alert.initOwner(stage);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.setTitle("Jacobitus");
         alert.showAndWait();
     }

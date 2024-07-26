@@ -122,6 +122,8 @@ public class TokenInfo extends Stage {
         MenuItem exportarClaveItem = new MenuItem("Exportar Clave");
         exportarClaveItem.setOnAction((ActionEvent e) -> {
             Alert alert = new Alert(AlertType.WARNING);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Advertencia");
             alert.setHeaderText("Esta acción dejará vulnerable su clave privada.\nHágalo solo si conoce los riesgos.");
             alert.setContentText("¿Desea continuar?");
@@ -138,6 +140,8 @@ public class TokenInfo extends Stage {
         MenuItem deleteItem = new MenuItem("Borrar Clave");
         deleteItem.setOnAction((ActionEvent e) -> {
             Alert alert = new Alert(AlertType.WARNING);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Advertencia");
             alert.setHeaderText("Esta acción eliminará la clave y el certificado de forma permanente.");
             alert.setContentText("¿Desea continuar?");
@@ -166,7 +170,7 @@ public class TokenInfo extends Stage {
                 @Override
                 public void updateItem(DatosCertificado datos, boolean empty) {
                     super.updateItem(datos, empty);
-                    if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                    if (datos != null) {
                         CertInformation pane = new CertInformation(datos, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -226,9 +230,7 @@ public class TokenInfo extends Stage {
                     List<DatosCertificado> certificados = new LinkedList<>();
                     for (String label : labels) {
                         DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        if (entry.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
-                            certificados.add(entry);
-                        }
+                        certificados.add(entry);
                     }
                     token.salir();
                     table.setItems(FXCollections.observableList(certificados));
@@ -264,6 +266,8 @@ public class TokenInfo extends Stage {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
             Contrasena contrasena = new Contrasena(TokenInfo.this, Constants.INFO);
             contrasena.showAndWait();
@@ -309,6 +313,8 @@ public class TokenInfo extends Stage {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
             buttonClave.setDisable(false);
         });
@@ -354,6 +360,8 @@ public class TokenInfo extends Stage {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         return task;
@@ -395,11 +403,15 @@ public class TokenInfo extends Stage {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnSucceeded((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.INFORMATION, "El certificado se exportó correctamente.");
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         return task;
@@ -440,11 +452,15 @@ public class TokenInfo extends Stage {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnSucceeded((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.INFORMATION, "La clave se exportó correctamente.");
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         return task;
@@ -479,6 +495,8 @@ public class TokenInfo extends Stage {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
         });
         return task;

@@ -133,6 +133,8 @@ public class Configuracion extends Stage {
                     if (checkBoxEvent) {
                         Alert alert = new Alert(Alert.AlertType.WARNING,
                                 "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
+                        alert.initOwner(parent);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     }
@@ -149,6 +151,8 @@ public class Configuracion extends Stage {
                     if (checkBoxEvent) {
                         Alert alert = new Alert(Alert.AlertType.WARNING,
                                 "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
+                        alert.initOwner(parent);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     }
@@ -282,6 +286,8 @@ public class Configuracion extends Stage {
                     btnAbrirUbicacion.setDisable(false);
                 } catch (GeneralSecurityException ex) {
                     Alert alert = new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK);
+                    alert.initOwner(parent);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 }

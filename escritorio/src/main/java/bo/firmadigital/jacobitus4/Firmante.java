@@ -95,7 +95,7 @@ public class Firmante extends Stage {
                 @Override
                 public void updateItem(DatosCertificado datos, boolean empty) {
                     super.updateItem(datos, empty);
-                    if (datos != null && datos.getNombreComunIssuer().equals("Entidad Certificadora Publica ADSIB")) {
+                    if (datos != null) {
                         CertInformation pane = new CertInformation(datos, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -211,6 +211,8 @@ public class Firmante extends Stage {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING, err);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
             Contrasena contrasena = new Contrasena(Firmante.this, tipo);
             contrasena.showAndWait();

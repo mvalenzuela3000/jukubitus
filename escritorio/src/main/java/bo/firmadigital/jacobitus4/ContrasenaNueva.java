@@ -110,6 +110,8 @@ public class ContrasenaNueva extends Stage {
         contrasenia1 = null;
         stage.getScene().setCursor(Cursor.DEFAULT);
         Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
+        alert.initOwner(stage);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.setTitle("Jacobitus");
         alert.showAndWait();
     }

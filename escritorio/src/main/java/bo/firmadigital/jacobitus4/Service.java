@@ -25,6 +25,7 @@ import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.ECA;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -285,6 +286,8 @@ public class Service extends Stage {
             tokenSelected.setAlias(null);
             tokenSelected.setPin(null);
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(this);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             if (task.getException() instanceof CustomException) {
@@ -310,18 +313,25 @@ public class Service extends Stage {
                 if (!cert.getComplementoSubject().equals("")) {
                     doc += "-" + cert.getComplementoSubject();
                 }
-                if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
-                    certificates.add(cert);
+                if (ECA.esValida(tokenSelected.getSlot(), passwordField.getText(), clave) && ECA.esPublica(tokenSelected.getSlot(), passwordField.getText(), clave)) {
+                    if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
+                        certificates.add(cert);
+                    }
+                    else {
+                        message.setText("No se encontró ningún certificado para el ci: " + tokenSelected.getCI());
+                        buttonFirmar.setDisable(true);
+                    }
+                } else {
+                    message.setText("Certificado no emitido por la ECP-ADSIB.");
+                    buttonFirmar.setDisable(true);
                 }
             }
             token.salir();
             if (certificates.size() > 0) {
                 aliasChoiceBox.getSelectionModel().selectFirst();
+                message.setText("");
                 buttonFirmar.setDisable(false);
                 buttonFirmar.requestFocus();
-            } else {
-                message.setText("No se encontró ningún certificado para el ci: " + tokenSelected.getCI());
-                buttonFirmar.setDisable(true);
             }
         } catch (GeneralSecurityException ex) {
             try {

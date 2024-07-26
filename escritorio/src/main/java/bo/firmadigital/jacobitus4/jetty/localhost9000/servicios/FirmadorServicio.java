@@ -73,6 +73,7 @@ import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.CompleteSign;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.Signs;
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.ECA;
 
 public class FirmadorServicio {
 
@@ -108,13 +109,18 @@ public class FirmadorServicio {
             Integer x = objetoDto.getPoint() != null ? objetoDto.getPoint().getX() : null;
             Integer y = objetoDto.getPoint() != null ? objetoDto.getPoint().getY() : null;
             String image = objetoDto.getImage() != null ? objetoDto.getImage() : null;
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(getOpciones());
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpciones());
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
+            }
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
             }
             if (slot != null && pin != null && alias != null && file != null) {
                 FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
@@ -178,15 +184,19 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             Boolean detached = objetoDto.getDetached();
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(getOpciones());
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpciones());
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
             }
-
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
+            }
             if (slot != null && pin != null && alias != null && file != null) {
                 FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
                 respuesta.setDatos(datos);
@@ -247,15 +257,19 @@ public class FirmadorServicio {
             String signatureAlgorithm = objetoDto.getSignatureAlgorithm();
             Boolean enveloped = objetoDto.getEnveloped();
             Boolean prefix = objetoDto.getPrefix();
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(getOpciones());
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpciones());
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slot = slots[0].getSlotID();
                 }
             }
-
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
+            }
             if (slot != null && pin != null && alias != null && file != null) {
                 FirmaXmlRespuestaDto datos = new FirmaXmlRespuestaDto();
                 respuesta.setDatos(datos);
@@ -346,17 +360,31 @@ public class FirmadorServicio {
         RespuestaDto<FirmaJsonRespuestaDto> respuesta = new RespuestaDto<FirmaJsonRespuestaDto>();
 
         try {
-            byte[] dataByte = Base64.getDecoder().decode(objetoDto.getData());
+            Long slot = objetoDto.getSlot();
+            String pin = objetoDto.getPin();
+            String alias = objetoDto.getAlias();
+            byte[] data = Base64.getDecoder().decode(objetoDto.getData().getBytes("UTF-8"));
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
-            Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-            if (slot != null) {
-                IToken token = slot.getToken();
-                token.iniciar(objetoDto.getPin());
-                PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
+            if (slot == null) {
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    slot = slots[0].getSlotID();
+                }
+            }
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
+            }
+            if (slot != null && pin != null && alias != null && data != null) {
+                Slot oSlot = gestorSlot.obtenerSlot(slot);
+                IToken token = oSlot.getToken();
+                token.iniciar(pin);
+                PrivateKey pk = token.obtenerClavePrivada(alias);
                 if (pk == null) {
                     token.salir();
-                    throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
+                    throw new KeyStoreException("No se encontró la clave con alias: " + alias);
                 }
     
                 JWSSigner signer = new RSASSASigner(pk);
@@ -364,7 +392,7 @@ public class FirmadorServicio {
     
                 CompleteSign enviadoJson;
                 try {
-                    String enviado = new String(dataByte);
+                    String enviado = new String(data);
                     ObjectMapper mapper = new ObjectMapper();
                     enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
                     inicial = false;
@@ -374,8 +402,8 @@ public class FirmadorServicio {
     
                 JWSObject jwsObject;
                 if (inicial) {
-                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(dataByte));
-                    enviadoJson.setPayload(new String(Base64.getEncoder().encode(dataByte), StandardCharsets.UTF_8));
+                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(data));
+                    enviadoJson.setPayload(new String(Base64.getEncoder().encode(data), StandardCharsets.UTF_8));
                     enviadoJson.setSignatures(new ArrayList<Signs>());
                 } else {
                     jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(),
@@ -388,7 +416,7 @@ public class FirmadorServicio {
                     throw new RuntimeException("Error al firmar: " + ex.getMessage());
                 }
     
-                X509Certificate cert = token.obtenerCertificado(objetoDto.getAlias());
+                X509Certificate cert = token.obtenerCertificado(alias);
                 String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
                 token.salir();
                 Signs sign = new Signs();
@@ -411,7 +439,7 @@ public class FirmadorServicio {
                 String fechaFirma = dateFormat.format(new Timestamp(calendar.getTime().getTime()));
                 FirmaJsonRespuestaDto datos = new FirmaJsonRespuestaDto();
                 datos.setJson_firmado(Base64.getEncoder().encodeToString(resultado.getBytes()));
-                X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(objetoDto.getAlias())))
+                X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(alias)))
                         .getSubject();
                 datos.setCn(IETFUtils
                         .valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
@@ -421,7 +449,7 @@ public class FirmadorServicio {
                 respuesta.setDatos(datos);
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
+                respuesta.setMensaje("El slot " + slot + " no se encuentra disponible.");
             }    
         } catch (IOException | GeneralSecurityException ex) {
             try {
@@ -464,20 +492,21 @@ public class FirmadorServicio {
             String pin = objetoDto.getPin();
             String alias = objetoDto.getAlias();
             List<FirmaPdfItemDto> pdfs = objetoDto.getPdfs();
-
+            GestorSlot gestorSlot = GestorSlot.getInstance();
+            gestorSlot.setOpciones(getOpciones());
             if (slot == null) {
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(this.getOpciones());
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
-                    objetoDto.setSlot(slots[0].getSlotID());
+                    slot = slots[0].getSlotID();
                 }
+            }
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
             }
             if (slot != null && pin != null && alias != null && pdfs != null) {
                 FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
-                
-                GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(this.getOpciones());
                 Slot oSlot = gestorSlot.obtenerSlot(slot);
                 if (oSlot == null) {
                     throw new IOException("El slot " + slot + " no se encuentra disponible.");
@@ -548,18 +577,27 @@ public class FirmadorServicio {
     public RespuestaDto<FirmaHashRespuestaDto> firmarHash(FirmaHashDto objetoDto) {
         RespuestaDto<FirmaHashRespuestaDto> respuesta = new RespuestaDto<FirmaHashRespuestaDto>();
         try {
+            Long slot = objetoDto.getSlot();
+            String pin = objetoDto.getPin();
+            String alias = objetoDto.getAlias();
+            String hash = objetoDto.getHash();
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
-            Slot[] slots = gestorSlot.listarSlots();
-            if (objetoDto.getSlot() == null && slots.length == 1) {
-                objetoDto.setSlot(slots[0].getSlotID());
+            if (slot == null) {
+                Slot[] slots = gestorSlot.listarSlots();
+                if (slots.length == 1) {
+                    slot = slots[0].getSlotID();
+                }
             }
-
-            if (objetoDto.getSlot() != null && objetoDto.getPin() != null && objetoDto.getAlias() != null
-                    && objetoDto.getHash() != null) {
-                Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-                if (slot != null) {
-                    IToken token = slot.getToken();
+            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+                return respuesta;
+            }
+            if (slot != null && pin != null && alias != null && hash != null) {
+                Slot oSlot = gestorSlot.obtenerSlot(objetoDto.getSlot());
+                if (oSlot != null) {
+                    IToken token = oSlot.getToken();
                     token.iniciar(objetoDto.getPin());
                     FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
                     Signature signature = Signature.getInstance("SHA256withRSA");

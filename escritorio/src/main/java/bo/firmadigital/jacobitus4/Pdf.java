@@ -328,12 +328,16 @@ public class Pdf extends Stage {
 
     public void error(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.initOwner(this);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.setTitle("Jacobitus");
         alert.showAndWait();
     }
     
     public void config() {
         Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.initOwner(this);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.setTitle("Jacobitus");
         GridPane content = new GridPane();
         Label labelAncho = new Label("Ancho:");

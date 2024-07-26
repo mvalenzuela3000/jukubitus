@@ -53,6 +53,7 @@ import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus4.util.ECA;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
 import bo.firmadigital.utiles.CertUtil;
 import bo.firmadigital.utiles.Conversor;
@@ -158,6 +159,8 @@ public class App extends Application {
         if (!servicio) {
             // Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
             Alert alert = new Alert(AlertType.ERROR, WebServer.mensaje, ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.setTitle("ADSIB - Jacobitus Total - " + version + " (Servicio detenido)");
@@ -280,12 +283,16 @@ public class App extends Application {
         firmarItem.setOnAction((ActionEvent e) -> {
             if (tableFile.getItems().isEmpty()) {
                 Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.initOwner(stage);
+                alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
                 CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
@@ -298,13 +305,15 @@ public class App extends Application {
                     }
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
                         Firmante firmante = new Firmante(stage, item.getSlot(), Constants.PDF);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
-                            new Thread(firmar(firmante.isBloquea(), item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                            new Thread(firmarPdf(firmante.isBloquea(), item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
                         }
                     }
                 }
@@ -314,12 +323,16 @@ public class App extends Application {
         firmarPKCS7Item.setOnAction((ActionEvent e) -> {
             if (tableFile.getItems().isEmpty()) {
                 Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.initOwner(stage);
+                alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
                 CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
@@ -332,6 +345,8 @@ public class App extends Application {
                     }
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
@@ -348,12 +363,16 @@ public class App extends Application {
         firmarXmlItem.setOnAction((ActionEvent e) -> {
             if (tableFile.getItems().isEmpty()) {
                 Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.initOwner(stage);
+                alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
                 CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
@@ -362,6 +381,8 @@ public class App extends Application {
                     destino = directoryChooser.showDialog(stage);
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
@@ -378,12 +399,16 @@ public class App extends Application {
         firmarJwsItem.setOnAction((ActionEvent e) -> {
             if (tableFile.getItems().isEmpty()) {
                 Alert alert = new Alert(AlertType.WARNING, "No se tienen documentos para firmar.", ButtonType.OK);
+                alert.initOwner(stage);
+                alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
                 CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
@@ -392,6 +417,8 @@ public class App extends Application {
                     destino = directoryChooser.showDialog(stage);
                     if (destino == null) {
                         Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
                         alert.showAndWait();
                     } else {
@@ -473,9 +500,13 @@ public class App extends Application {
                 try {
                     Files.copy(config.getToken().toPath(), new File(destino, "softoken.p12").toPath(), StandardCopyOption.COPY_ATTRIBUTES);
                     Alert alert = new Alert(AlertType.INFORMATION, "El softoken se exportó correctamente.");
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.showAndWait();
                 } catch (IOException ex) {
                     Alert alert = new Alert(AlertType.ERROR, ex.getMessage());
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
                     alert.showAndWait();
                 }
             }
@@ -663,6 +694,8 @@ public class App extends Application {
         task.setOnFailed((WorkerStateEvent evt) -> {
             String err = task.getException().getMessage();
             Alert alert = new Alert(AlertType.WARNING);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             BorderPane pane = new BorderPane();
             Label label = new Label(err);
@@ -715,6 +748,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -722,18 +757,19 @@ public class App extends Application {
         return task;
     }
 
-    public Task<Boolean> firmar(boolean bloquear, long slot, String label, String pass) {
+    public Task<Boolean> firmarPdf(boolean bloquear, long slot, String label, String pass) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
             @SuppressWarnings("unchecked")
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
-                Config config = Config.getInstance();
-                bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
-                opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
-                opcionesValidador.setServidorProxy(config.getProxyIP());
-                opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                gestorSlot.setOpciones(getOpcionesFirmador());
+                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                }
 
                 StringBuilder errores = new StringBuilder();
                 List<Validador> files = tableFile.getItems();
@@ -754,7 +790,7 @@ public class App extends Application {
                                 firmar.firmar(is, os, bloquear, false);
                             }
                             updateProgress(i + 1, files.size());
-                            tableFile.getItems().set(i, new ValidadorPdf(out, opcionesValidador));
+                            tableFile.getItems().set(i, new ValidadorPdf(out, getOpcionesValidador()));
                         } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
                             errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
@@ -775,6 +811,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -818,6 +856,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -832,16 +872,17 @@ public class App extends Application {
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
+
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                gestorSlot.setOpciones(getOpcionesFirmador());
+                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                }
+
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
-                    opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
-                    opcionesValidador.setServidorProxy(config.getProxyIP());
-                    opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-                    
                     IFirmador firmar = FirmadorPKCS7.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
@@ -849,7 +890,7 @@ public class App extends Application {
                             firmar.firmar(is, os);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorPKCS7(out, opcionesValidador));
+                        tableFile.getItems().set(i, new ValidadorPKCS7(out, getOpcionesValidador()));
                     }
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
@@ -859,6 +900,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -873,16 +916,17 @@ public class App extends Application {
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
+
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                gestorSlot.setOpciones(getOpcionesFirmador());
+                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                }
+
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
-                    opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
-                    opcionesValidador.setServidorProxy(config.getProxyIP());
-                    opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
                     IFirmador firmar = FirmadorXml.getInstance(slot, label, pass, node, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
@@ -896,7 +940,7 @@ public class App extends Application {
                             firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorXml(out, opcionesValidador));
+                        tableFile.getItems().set(i, new ValidadorXml(out, getOpcionesValidador()));
                     }
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
@@ -906,6 +950,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -920,16 +966,17 @@ public class App extends Application {
             @Override
             protected Boolean call() throws Exception {
                 stage.getScene().setCursor(Cursor.WAIT);
+
+                GestorSlot gestorSlot = GestorSlot.getInstance();
+                gestorSlot.setOpciones(getOpcionesFirmador());
+                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                }
+
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    Config config = Config.getInstance();
-                    bo.firmadigital.jacobitus.validador.Opciones opcionesValidador = new bo.firmadigital.jacobitus.validador.Opciones();
-                    opcionesValidador.setProxyHabilitado(config.isProxyEnabled());
-                    opcionesValidador.setServidorProxy(config.getProxyIP());
-                    opcionesValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-
                     IFirmador firmar = FirmadorJws.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         String name = new File(files.get(i).getAbsolutePath()).getName();
@@ -943,7 +990,7 @@ public class App extends Application {
                             firmar.firmar(is, os, false, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorJws(out, opcionesValidador));
+                        tableFile.getItems().set(i, new ValidadorJws(out, getOpcionesValidador()));
                     }
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
@@ -953,6 +1000,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -1017,6 +1066,8 @@ public class App extends Application {
         progressBar.progressProperty().bind(task.progressProperty());
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -1244,6 +1295,8 @@ public class App extends Application {
         };
         task.setOnFailed((WorkerStateEvent evt) -> {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -1264,6 +1317,8 @@ public class App extends Application {
     public static void show(String error) {
         Platform.runLater(() -> {
             Alert alert = new Alert(AlertType.ERROR, error, ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
         });
