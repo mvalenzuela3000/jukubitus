@@ -41,6 +41,7 @@ import bo.firmadigital.jacobitus.firmador.IFirmador;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.utilidades.OS;
 import bo.firmadigital.jacobitus.validador.Certificate;
@@ -767,7 +768,11 @@ public class App extends Application {
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
                 gestorSlot.setOpciones(getOpcionesFirmador());
-                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                token.iniciar(pass);
+                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                token.salir();
+                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
                     throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
                 }
 
@@ -875,7 +880,11 @@ public class App extends Application {
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
                 gestorSlot.setOpciones(getOpcionesFirmador());
-                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                token.iniciar(pass);
+                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                token.salir();
+                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
                     throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
                 }
 
@@ -919,7 +928,11 @@ public class App extends Application {
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
                 gestorSlot.setOpciones(getOpcionesFirmador());
-                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                token.iniciar(pass);
+                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                token.salir();
+                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
                     throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
                 }
 
@@ -969,7 +982,11 @@ public class App extends Application {
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
                 gestorSlot.setOpciones(getOpcionesFirmador());
-                if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pass, label) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pass, label)) {
+                IToken token = gestorSlot.obtenerSlot(slot).getToken();
+                token.iniciar(pass);
+                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                token.salir();
+                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
                     throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
                 }
 

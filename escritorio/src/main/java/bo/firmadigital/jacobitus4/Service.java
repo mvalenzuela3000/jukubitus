@@ -313,7 +313,7 @@ public class Service extends Stage {
                 if (!cert.getComplementoSubject().equals("")) {
                     doc += "-" + cert.getComplementoSubject();
                 }
-                if (ECA.esValida(tokenSelected.getSlot(), passwordField.getText(), clave) && ECA.esPublica(tokenSelected.getSlot(), passwordField.getText(), clave)) {
+                if (ECA.esValida(cert) && ECA.esPublica(cert)) {
                     if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
                         certificates.add(cert);
                     }

@@ -51,6 +51,7 @@ import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.validador.DatosCertificado;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
@@ -117,30 +118,32 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || file == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Datos requeridos slot, pin, alias y pdf.");
+            }
+            IToken token = gestorSlot.obtenerSlot(slot).getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            token.salir();
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && file != null) {
-                FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
-                respuesta.setDatos(datos);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                FirmadorPdf firmar;
-                if (x == null) {
-                    firmar = FirmadorPdf.getInstance(slot, alias, pin, this.getOpciones());
-                } else {
-                    firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, this.getOpciones());
-                }
-
-                firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
-                datos.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Se firmo el pdf correctamente!");
+            FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
+            respuesta.setDatos(datos);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            FirmadorPdf firmar;
+            if (x == null) {
+                firmar = FirmadorPdf.getInstance(slot, alias, pin, this.getOpciones());
             } else {
-                respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot, pin, alias y pdf.");
+                firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, this.getOpciones());
             }
+            firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
+            datos.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
+            respuesta.setFinalizado(true);
+            respuesta.setMensaje("Se firmo el pdf correctamente!");
         } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
             try {
                 String mensaje = ex.getMessage();
@@ -192,24 +195,27 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || file == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
+            }
+            IToken token = gestorSlot.obtenerSlot(slot).getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            token.salir();
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && file != null) {
-                FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
-                respuesta.setDatos(datos);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                IFirmador firmar = FirmadorPKCS7.getInstance(slot, alias, pin, this.getOpciones());
-                firmar.firmar(new ByteArrayInputStream(file), out, detached);
-                datos.setPkcs7(Base64.getEncoder().encodeToString(out.toByteArray()));
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Se firmo el archivo correctamente!");
-            } else {
-                respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
-            }
+            FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
+            respuesta.setDatos(datos);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IFirmador firmar = FirmadorPKCS7.getInstance(slot, alias, pin, this.getOpciones());
+            firmar.firmar(new ByteArrayInputStream(file), out, detached);
+            datos.setPkcs7(Base64.getEncoder().encodeToString(out.toByteArray()));
+            respuesta.setFinalizado(true);
+            respuesta.setMensaje("Se firmo el archivo correctamente!");
         } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
             try {
                 String mensaje = ex.getMessage();
@@ -265,63 +271,66 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || file == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
+            }
+            IToken token = gestorSlot.obtenerSlot(slot).getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            token.salir();
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && file != null) {
-                FirmaXmlRespuestaDto datos = new FirmaXmlRespuestaDto();
-                respuesta.setDatos(datos);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                FirmadorXml firmar;
-                if (node == null) {
-                    firmar = FirmadorXml.getInstance(slot, alias, pin, this.getOpciones());
-                } else {
-                    firmar = FirmadorXml.getInstance(slot, alias, pin, node, this.getOpciones());
-                }
-
-                if (digest != null) {
-                    switch (digest.toUpperCase()) {
-                        case "SHA1":
-                            firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA1);
-                            break;
-                        case "SHA256":
-                            firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
-                            break;
-                        case "SHA512":
-                            firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA512);
-                            break;
-                        default:
-                            throw new GeneralSecurityException("Algoritmos soportado para el digest SHA1, SHA256 y SHA512");
-                    }
-                }
-
-                if (signatureAlgorithm != null) {
-                    switch (signatureAlgorithm.toUpperCase()) {
-                        case "SHA1":
-                            firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA1);
-                            break;
-                        case "SHA256":
-                            firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
-                            break;
-                        case "SHA512":
-                            firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA512);
-                            break;
-                        default:
-                            throw new GeneralSecurityException("Algoritmos soportado para el digest de la firma SHA1, SHA256 y SHA512");
-                    }
-                }
-
-                firmar.firmar(new ByteArrayInputStream(file), out, enveloped, prefix);
-                datos.setXml(Base64.getEncoder().encodeToString(out.toByteArray()));
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Se firmo el archivo correctamente!");
-                return respuesta;
+            FirmaXmlRespuestaDto datos = new FirmaXmlRespuestaDto();
+            respuesta.setDatos(datos);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            FirmadorXml firmar;
+            if (node == null) {
+                firmar = FirmadorXml.getInstance(slot, alias, pin, this.getOpciones());
             } else {
-                respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
+                firmar = FirmadorXml.getInstance(slot, alias, pin, node, this.getOpciones());
             }
+
+            if (digest != null) {
+                switch (digest.toUpperCase()) {
+                    case "SHA1":
+                        firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA1);
+                        break;
+                    case "SHA256":
+                        firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA256);
+                        break;
+                    case "SHA512":
+                        firmar.setMessageDigestAlgorithm(MessageDigestAlgorithm.ALGO_ID_DIGEST_SHA512);
+                        break;
+                    default:
+                        throw new GeneralSecurityException("Algoritmos soportado para el digest SHA1, SHA256 y SHA512");
+                }
+            }
+
+            if (signatureAlgorithm != null) {
+                switch (signatureAlgorithm.toUpperCase()) {
+                    case "SHA1":
+                        firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA1);
+                        break;
+                    case "SHA256":
+                        firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
+                        break;
+                    case "SHA512":
+                        firmar.setSignatureMethodAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA512);
+                        break;
+                    default:
+                        throw new GeneralSecurityException("Algoritmos soportado para el digest de la firma SHA1, SHA256 y SHA512");
+                }
+            }
+
+            firmar.firmar(new ByteArrayInputStream(file), out, enveloped, prefix);
+            datos.setXml(Base64.getEncoder().encodeToString(out.toByteArray()));
+            respuesta.setFinalizado(true);
+            respuesta.setMensaje("Se firmo el archivo correctamente!");
+            return respuesta;
         } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
             try {
                 String mensaje = ex.getMessage();
@@ -372,85 +381,87 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || data == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("El slot " + slot + " no se encuentra disponible.");
+            }    
+            Slot oSlot = gestorSlot.obtenerSlot(slot);
+            IToken token = oSlot.getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            token.salir();
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && data != null) {
-                Slot oSlot = gestorSlot.obtenerSlot(slot);
-                IToken token = oSlot.getToken();
-                token.iniciar(pin);
-                PrivateKey pk = token.obtenerClavePrivada(alias);
-                if (pk == null) {
-                    token.salir();
-                    throw new KeyStoreException("No se encontró la clave con alias: " + alias);
-                }
-    
-                JWSSigner signer = new RSASSASigner(pk);
-                boolean inicial = true;
-    
-                CompleteSign enviadoJson;
-                try {
-                    String enviado = new String(data);
-                    ObjectMapper mapper = new ObjectMapper();
-                    enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
-                    inicial = false;
-                } catch (IOException ex) {
-                    enviadoJson = new CompleteSign();
-                }
-    
-                JWSObject jwsObject;
-                if (inicial) {
-                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(data));
-                    enviadoJson.setPayload(new String(Base64.getEncoder().encode(data), StandardCharsets.UTF_8));
-                    enviadoJson.setSignatures(new ArrayList<Signs>());
-                } else {
-                    jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(),
-                            new Payload(enviadoJson.getPayload()));
-                }
-    
-                try {
-                    jwsObject.sign(signer);
-                } catch (JOSEException ex) {
-                    throw new RuntimeException("Error al firmar: " + ex.getMessage());
-                }
-    
-                X509Certificate cert = token.obtenerCertificado(alias);
-                String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
+
+            PrivateKey pk = token.obtenerClavePrivada(alias);
+            if (pk == null) {
                 token.salir();
-                Signs sign = new Signs();
-                Map<String, Object> mapa = new HashMap<String, Object>();
-                mapa.put("gen", "MEFP-DGSGIF");
-                mapa.put("x5c", pemCert.replaceAll("(\r\n|\n)", "").toCharArray());
-                sign.setHeader(mapa);
-                String serial = jwsObject.serialize();
-                String[] partes = serial.split("\\.");
-                sign.setProtect(partes[0]);
-                sign.setSignature(jwsObject.getSignature().toString());
-                enviadoJson.getSignatures().add(sign);
+                throw new KeyStoreException("No se encontró la clave con alias: " + alias);
+            }
+
+            JWSSigner signer = new RSASSASigner(pk);
+            boolean inicial = true;
+
+            CompleteSign enviadoJson;
+            try {
+                String enviado = new String(data);
                 ObjectMapper mapper = new ObjectMapper();
-                byte[] bytes = mapper.writeValueAsBytes(enviadoJson);
-                InputStream input = new ByteArrayInputStream(bytes);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
-                String resultado = (String) buffer.lines().collect(Collectors.joining("\n"));
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                Calendar calendar = Calendar.getInstance();
-                String fechaFirma = dateFormat.format(new Timestamp(calendar.getTime().getTime()));
-                FirmaJsonRespuestaDto datos = new FirmaJsonRespuestaDto();
-                datos.setJson_firmado(Base64.getEncoder().encodeToString(resultado.getBytes()));
-                X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(alias)))
-                        .getSubject();
-                datos.setCn(IETFUtils
-                        .valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
-                datos.setFecha_firma(fechaFirma);
-                respuesta.setFinalizado(true);
-                respuesta.setMensaje("Se firmo la solicitud correctamente!");
-                respuesta.setDatos(datos);
+                enviadoJson = (CompleteSign) mapper.readValue(enviado, CompleteSign.class);
+                inicial = false;
+            } catch (IOException ex) {
+                enviadoJson = new CompleteSign();
+            }
+
+            JWSObject jwsObject;
+            if (inicial) {
+                jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(), new Payload(data));
+                enviadoJson.setPayload(new String(Base64.getEncoder().encode(data), StandardCharsets.UTF_8));
+                enviadoJson.setSignatures(new ArrayList<Signs>());
             } else {
-                respuesta.setFinalizado(false);
-                respuesta.setMensaje("El slot " + slot + " no se encuentra disponible.");
-            }    
+                jwsObject = new JWSObject((new JWSHeader.Builder(JWSAlgorithm.RS256)).build(),
+                        new Payload(enviadoJson.getPayload()));
+            }
+
+            try {
+                jwsObject.sign(signer);
+            } catch (JOSEException ex) {
+                throw new RuntimeException("Error al firmar: " + ex.getMessage());
+            }
+
+            X509Certificate cert = token.obtenerCertificado(alias);
+            String pemCert = Base64.getEncoder().encodeToString(cert.getEncoded());
+            token.salir();
+            Signs sign = new Signs();
+            Map<String, Object> mapa = new HashMap<String, Object>();
+            mapa.put("gen", "MEFP-DGSGIF");
+            mapa.put("x5c", pemCert.replaceAll("(\r\n|\n)", "").toCharArray());
+            sign.setHeader(mapa);
+            String serial = jwsObject.serialize();
+            String[] partes = serial.split("\\.");
+            sign.setProtect(partes[0]);
+            sign.setSignature(jwsObject.getSignature().toString());
+            enviadoJson.getSignatures().add(sign);
+            ObjectMapper mapper = new ObjectMapper();
+            byte[] bytes = mapper.writeValueAsBytes(enviadoJson);
+            InputStream input = new ByteArrayInputStream(bytes);
+            BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
+            String resultado = (String) buffer.lines().collect(Collectors.joining("\n"));
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            Calendar calendar = Calendar.getInstance();
+            String fechaFirma = dateFormat.format(new Timestamp(calendar.getTime().getTime()));
+            FirmaJsonRespuestaDto datos = new FirmaJsonRespuestaDto();
+            datos.setJson_firmado(Base64.getEncoder().encodeToString(resultado.getBytes()));
+            X500Name x500Name = (new JcaX509CertificateHolder(token.obtenerCertificado(alias)))
+                    .getSubject();
+            datos.setCn(IETFUtils
+                    .valueToString(x500Name.getRDNs(new ASN1ObjectIdentifier("2.5.4.3"))[0].getFirst().getValue()));
+            datos.setFecha_firma(fechaFirma);
+            respuesta.setFinalizado(true);
+            respuesta.setMensaje("Se firmo la solicitud correctamente!");
+            respuesta.setDatos(datos);
         } catch (IOException | GeneralSecurityException ex) {
             try {
                 String mensaje = ex.getMessage();
@@ -500,50 +511,46 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || pdfs == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Datos requeridos slot, pin, alias y pdfs.");
+            }
+            IToken token = gestorSlot.obtenerSlot(slot).getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && pdfs != null) {
-                FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
-                Slot oSlot = gestorSlot.obtenerSlot(slot);
-                if (oSlot == null) {
-                    throw new IOException("El slot " + slot + " no se encuentra disponible.");
+            FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
+            try {
+                if (token.obtenerCertificado(alias) == null) {
+                    throw new RuntimeException("No se encontró un certificado con el alias proporcionado.");
                 }
-                IToken token = oSlot.getToken();
-                token.iniciar(pin);
-                try {
-                    if (token.obtenerCertificado(alias) == null) {
-                        throw new RuntimeException("No se encontró un certificado con el alias proporcionado.");
-                    }
-                    List<FirmaPdfItemRespuestaDto> pdfsFirmados = new ArrayList<FirmaPdfItemRespuestaDto>();
-                    for (int i = 0; i < pdfs.size(); i++) {
-                        boolean bloquear = pdfs.get(i).getBloquear() != null && pdfs.get(i).getBloquear();
-                        byte[] file = Base64.getDecoder().decode(pdfs.get(i).getPdf().getBytes("UTF-8"));
-   
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        FirmadorPdf.firmar(new ByteArrayInputStream(file), out, bloquear, token, alias);
-                        FirmaPdfItemRespuestaDto pdfItem = new FirmaPdfItemRespuestaDto();
-                        pdfItem.setId(pdfs.get(i).getId());
-                        pdfItem.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
-                        pdfsFirmados.add(pdfItem);
-                    }
-   
-                    datos.setPdfs_firmados(pdfsFirmados);
-   
-                    respuesta.setDatos(datos);
-                    respuesta.setFinalizado(true);
-                    respuesta.setMensaje("Se firmaron los pdfs correctamente!");
-                } catch (RuntimeException ex) {
-                    respuesta.setFinalizado(false);
-                    respuesta.setMensaje(ex.getMessage());
+                List<FirmaPdfItemRespuestaDto> pdfsFirmados = new ArrayList<FirmaPdfItemRespuestaDto>();
+                for (int i = 0; i < pdfs.size(); i++) {
+                    boolean bloquear = pdfs.get(i).getBloquear() != null && pdfs.get(i).getBloquear();
+                    byte[] file = Base64.getDecoder().decode(pdfs.get(i).getPdf().getBytes("UTF-8"));
+
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    FirmadorPdf.firmar(new ByteArrayInputStream(file), out, bloquear, token, alias);
+                    FirmaPdfItemRespuestaDto pdfItem = new FirmaPdfItemRespuestaDto();
+                    pdfItem.setId(pdfs.get(i).getId());
+                    pdfItem.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
+                    pdfsFirmados.add(pdfItem);
                 }
-                token.salir();    
-            } else {
+
+                datos.setPdfs_firmados(pdfsFirmados);
+
+                respuesta.setDatos(datos);
+                respuesta.setFinalizado(true);
+                respuesta.setMensaje("Se firmaron los pdfs correctamente!");
+            } catch (RuntimeException ex) {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot, pin, alias y pdfs.");
+                respuesta.setMensaje(ex.getMessage());
             }
+            token.salir();
         } catch (IOException | GeneralSecurityException | OutOfMemoryError ex) {
             String mensaje = ex.getMessage();
             if (ex.getCause() instanceof IOException) {
@@ -589,39 +596,40 @@ public class FirmadorServicio {
                     slot = slots[0].getSlotID();
                 }
             }
-            if (!ECA.esValida(gestorSlot.obtenerSlot(slot), pin, alias) || !ECA.esPublica(gestorSlot.obtenerSlot(slot), pin, alias)) {
+            if (slot == null || pin == null || alias == null || hash == null) {
+                respuesta.setFinalizado(false);
+                respuesta.setMensaje("Datos requeridos slot, pin, alias y hash.");
+            }
+            IToken token = gestorSlot.obtenerSlot(slot).getToken();
+            token.iniciar(pin);
+            DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
+            token.salir();
+            if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
                 return respuesta;
             }
-            if (slot != null && pin != null && alias != null && hash != null) {
-                Slot oSlot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-                if (oSlot != null) {
-                    IToken token = oSlot.getToken();
-                    token.iniciar(objetoDto.getPin());
-                    FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
-                    Signature signature = Signature.getInstance("SHA256withRSA");
-                    PrivateKey pk = token.obtenerClavePrivada(objetoDto.getAlias());
-                    if (pk == null) {
-                        token.salir();
-                        throw new KeyStoreException("No se encontró la clave con alias: " + objetoDto.getAlias());
-                    }
-                    signature.initSign(pk);
-                    signature.update(Base64.getDecoder().decode(objetoDto.getHash()));
-                    byte[] signed = signature.sign();
+            Slot oSlot = gestorSlot.obtenerSlot(objetoDto.getSlot());
+            if (oSlot != null) {
+                FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
+                Signature signature = Signature.getInstance("SHA256withRSA");
+                PrivateKey pk = token.obtenerClavePrivada(alias);
+                if (pk == null) {
                     token.salir();
-                    datos.setFirma(Base64.getEncoder().encodeToString(signed));
-                    respuesta.setDatos(datos);
-                    respuesta.setFinalizado(true);
-                    respuesta.setMensaje("Firma realizada correctamente.");
-                } else {
-                    respuesta.setFinalizado(false);
-                    respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
-                } 
+                    throw new KeyStoreException("No se encontró la clave con alias: " + alias);
+                }
+                signature.initSign(pk);
+                signature.update(Base64.getDecoder().decode(hash));
+                byte[] signed = signature.sign();
+                token.salir();
+                datos.setFirma(Base64.getEncoder().encodeToString(signed));
+                respuesta.setDatos(datos);
+                respuesta.setFinalizado(true);
+                respuesta.setMensaje("Firma realizada correctamente.");
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot, pin, alias y hash.");
-            }
+                respuesta.setMensaje("El slot " + slot + " no se encuentra disponible.");
+            } 
         } catch (GeneralSecurityException ex) {
             try {
                 String mensaje = ex.getMessage();
