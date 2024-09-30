@@ -1126,32 +1126,32 @@ public class App extends Application {
                         certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
                         errorCertificadoServicioLocalInstalado = true;
                     }
-                    String certificadoECRB = "";
-                    boolean certificadoECRBInstalado = false;
-                    boolean errorCertificadoECRBInstalado = false;
-                    if (!OS.isDebian()) {
-                        try {
-                            if (OS.isMac()) {
-                                certificadoECRBInstalado = CertUtil.verificarCertificadoECRB(App.contraseniaMacOS);
-                            } else {
-                                certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
-                            }
-                            if (certificadoECRBInstalado) {
-                                certificadoECRB = "Certificado de la ECRB instalado";
-                            } else {
-                                certificadoECRB = "Certificado de la ECRB sin instalar";
-                            }
-                        } catch (IOException e1) {
-                            certificadoECRB = "Problemas al verificar certificado de la ECRB";
-                            errorCertificadoECRBInstalado = true;
-                        }
-                    }
+                    // String certificadoECRB = "";
+                    // boolean certificadoECRBInstalado = false;
+                    // boolean errorCertificadoECRBInstalado = false;
+                    // if (!OS.isDebian()) {
+                    //     try {
+                    //         if (OS.isMac()) {
+                    //             certificadoECRBInstalado = CertUtil.verificarCertificadoECRB(App.contraseniaMacOS);
+                    //         } else {
+                    //             certificadoECRBInstalado = CertUtil.verificarCertificadoECRB();
+                    //         }
+                    //         if (certificadoECRBInstalado) {
+                    //             certificadoECRB = "Certificado de la ECRB instalado";
+                    //         } else {
+                    //             certificadoECRB = "Certificado de la ECRB sin instalar";
+                    //         }
+                    //     } catch (IOException e1) {
+                    //         certificadoECRB = "Problemas al verificar certificado de la ECRB";
+                    //         errorCertificadoECRBInstalado = true;
+                    //     }
+                    // }
                     
                     ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
                     StringBuilder sb = new StringBuilder();
                     sb.append("Jacobitus Total " + version + "\n");
-                    sb.append(certificadoServicioLocal + "\n");
-                    sb.append(certificadoECRB);
+                    sb.append(certificadoServicioLocal);
+                    // sb.append(certificadoECRB);
                     
                     Alert verificarServicioAlerta = new Alert(AlertType.INFORMATION);
                     verificarServicioAlerta.initOwner(stage);
@@ -1226,82 +1226,82 @@ public class App extends Application {
                         }
                     }
 
-                    FlowPane fpLocalhost9000 = new FlowPane();
-                    Label lblLocalhost9000 = new Label("Abrir");
-                    Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
-                    localhost9000.setOnAction((e1) -> {
-                        HostServices hostServices = getHostServices();
-                        hostServices.showDocument("https://localhost:9000");
-                    });
-                    fpLocalhost9000.getChildren().addAll(lblLocalhost9000, localhost9000);
+                    // FlowPane fpLocalhost9000 = new FlowPane();
+                    // Label lblLocalhost9000 = new Label("Abrir");
+                    // Hyperlink localhost9000 = new Hyperlink("https://localhost:9000");
+                    // localhost9000.setOnAction((e1) -> {
+                    //     HostServices hostServices = getHostServices();
+                    //     hostServices.showDocument("https://localhost:9000");
+                    // });
+                    // fpLocalhost9000.getChildren().addAll(lblLocalhost9000, localhost9000);
     
-                    if (!OS.isDebian()) {
-                        FlowPane fpCertificadoECRB = new FlowPane();
-                        Label lblCertificadoECRB = new Label("Certificado de la ECRB ->");
-                        Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
-                        Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
-                        if (certificadoECRBInstalado) {
-                            desinstalarCertificadoECRB.setOnAction((e1) -> {
-                                try {
-                                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                                    confirmacion.initOwner(stage);
-                                    confirmacion.initModality(Modality.APPLICATION_MODAL);
-                                    confirmacion.setHeaderText(null);
-                                    confirmacion.setTitle("Confirmación");
-                                    confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
+                    // if (!OS.isDebian()) {
+                    //     FlowPane fpCertificadoECRB = new FlowPane();
+                    //     Label lblCertificadoECRB = new Label("Certificado de la ECRB ->");
+                    //     Hyperlink instalarCertificadoECRB = new Hyperlink("Instalar");
+                    //     Hyperlink desinstalarCertificadoECRB = new Hyperlink("Desinstalar");
+                    //     if (certificadoECRBInstalado) {
+                    //         desinstalarCertificadoECRB.setOnAction((e1) -> {
+                    //             try {
+                    //                 Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                    //                 confirmacion.initOwner(stage);
+                    //                 confirmacion.initModality(Modality.APPLICATION_MODAL);
+                    //                 confirmacion.setHeaderText(null);
+                    //                 confirmacion.setTitle("Confirmación");
+                    //                 confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
     
-                                    Optional<ButtonType> action = confirmacion.showAndWait();
-                                    if (action.get() == ButtonType.OK) {
-                                        if (OS.isMac()) {
-                                            CertUtil.desinstalarCertificadoECRB(App.contraseniaMacOS);
-                                        } else {
-                                            CertUtil.desinstalarCertificadoECRB();
-                                        }
-                                    }
-                                } catch (IOException ex) {
-                                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                verificarServicioAlerta.close();
-                            });
-                            if (errorCertificadoECRBInstalado) {
-                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
-                            } else {
-                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
-                            }
-                        } else {
-                            instalarCertificadoECRB.setOnAction((e1) -> {
-                                try {
-                                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                                    confirmacion.initOwner(stage);
-                                    confirmacion.initModality(Modality.APPLICATION_MODAL);
-                                    confirmacion.setHeaderText(null);
-                                    confirmacion.setTitle("Confirmación");
-                                    confirmacion.setContentText("¿Está seguro de instalar el certificado?");
+                    //                 Optional<ButtonType> action = confirmacion.showAndWait();
+                    //                 if (action.get() == ButtonType.OK) {
+                    //                     if (OS.isMac()) {
+                    //                         CertUtil.desinstalarCertificadoECRB(App.contraseniaMacOS);
+                    //                     } else {
+                    //                         CertUtil.desinstalarCertificadoECRB();
+                    //                     }
+                    //                 }
+                    //             } catch (IOException ex) {
+                    //                 Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    //             }
+                    //             verificarServicioAlerta.close();
+                    //         });
+                    //         if (errorCertificadoECRBInstalado) {
+                    //             fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
+                    //         } else {
+                    //             fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, desinstalarCertificadoECRB);
+                    //         }
+                    //     } else {
+                    //         instalarCertificadoECRB.setOnAction((e1) -> {
+                    //             try {
+                    //                 Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                    //                 confirmacion.initOwner(stage);
+                    //                 confirmacion.initModality(Modality.APPLICATION_MODAL);
+                    //                 confirmacion.setHeaderText(null);
+                    //                 confirmacion.setTitle("Confirmación");
+                    //                 confirmacion.setContentText("¿Está seguro de instalar el certificado?");
     
-                                    Optional<ButtonType> action = confirmacion.showAndWait();
-                                    if (action.get() == ButtonType.OK) {
-                                        if (OS.isMac()) {
-                                            CertUtil.instalarCertificadoECRB(App.contraseniaMacOS);
-                                        } else {
-                                            CertUtil.instalarCertificadoECRB();
-                                        }
-                                    }
-                                } catch (IOException ex) {
-                                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                verificarServicioAlerta.close();
-                            });
-                            if (errorCertificadoECRBInstalado) {
-                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
-                            } else {
-                                fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
-                            }
-                        }
+                    //                 Optional<ButtonType> action = confirmacion.showAndWait();
+                    //                 if (action.get() == ButtonType.OK) {
+                    //                     if (OS.isMac()) {
+                    //                         CertUtil.instalarCertificadoECRB(App.contraseniaMacOS);
+                    //                     } else {
+                    //                         CertUtil.instalarCertificadoECRB();
+                    //                     }
+                    //                 }
+                    //             } catch (IOException ex) {
+                    //                 Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    //             }
+                    //             verificarServicioAlerta.close();
+                    //         });
+                    //         if (errorCertificadoECRBInstalado) {
+                    //             fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB);
+                    //         } else {
+                    //             fpCertificadoECRB.getChildren().addAll(lblCertificadoECRB, instalarCertificadoECRB);
+                    //         }
+                    //     }
     
-                        vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
-                    } else {
-                        vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000);
-                    }
+                    //     vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000, fpCertificadoECRB);
+                    // } else {
+                    //     vbox.getChildren().addAll(fpCertificadoServicioLocal, fpLocalhost9000);
+                    // }
     
                     verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
                     verificarServicioAlerta.showAndWait();
