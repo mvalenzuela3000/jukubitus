@@ -10,33 +10,17 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 
 Descargamos el JDK desde el sitio web https://jdk.java.net/archive/
 ```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo apt -y install wget
+$ sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+$ sudo brew install wget
 
-$ sudo wget https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_linux-x64_bin.tar.gz
+$ sudo wget https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_osx-x64_bin.tar.gz
 ```
 
-Descomprimimos el archivo **openjdk-15.0.2_linux-x64_bin.tar.gz** en la carpeta **/usr/lib/jvm**.
+Descomprimimos el archivo **openjdk-15.0.2_osx-x64_bin.tar.gz** en la carpeta **/Library/Java/JavaVirtualMachines/**.
 ```bash
-$ sudo tar -zxf ./openjdk-15.0.2_linux-x64_bin.tar.gz -C /usr/lib/jvm
+$ sudo brew install tar
+$ sudo tar -zxf ./openjdk-15.0.2_osx-x64_bin.tar.gz -C /Library/Java/JavaVirtualMachines/
 ```
-
-Registramos la versión de **java**.
-```bash
-$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-15.0.2/bin/java 1502
-```
-
-Registramos la versión de **java**.
-```bash
-$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-15.0.2/bin/javac 1502
-```
-
-Establecemos Java 15 como versión por defecto.
-```bash
-$ sudo update-alternatives --config java
-```
-
-Seleccionamos la versión que se encuentra en la ruta **/usr/lib/jvm/jdk-15.0.2/bin/java**.
 
 Verificamos la instalación.
 ```bash
@@ -60,17 +44,24 @@ $ ls /opt/gradle/gradle-7.6.2
 $ export PATH=$PATH:/opt/gradle/gradle-7.6.2/bin
 ```
 
-Verificamos la instalación.
+Verificamos la instalación de Gradle.
 ```bash
 $ gradle --version
 ```
 
+### Instalación de Herramientas de línea de comandos de Xcode
+```bash
+$ xcode-select --install
+```
+
+Verificamos la instalación.
+```bash
+$ xcode-select -p
+```
+
 ### Instalación g++
 
-```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo apt -y install build-essential
-```
+El compilador viene con las Herramientas de línea de comandos de Xcode.
 
 Verificamos la instalación.
 ```bash
@@ -79,10 +70,7 @@ $ g++ --version
 
 ### Instalación git
 
-```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo apt -y install git
-```
+El software de control de versiones viene con las Herramientas de línea de comandos de Xcode.
 
 Verificamos la instalación.
 ```bash
@@ -105,17 +93,13 @@ $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
 ```
-$ ./gradlew jacobitus-libreria:buildForLinux escritorio:clean escritorio:importCA escritorio:addDriversLinux escritorio:importChangePinLinux escritorio:shadowJar
+$ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importCA escritorio:addDriversMacOS escritorio:importChangePinMacOS escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
 ## Generar paquete de instalación
 
-Para la generación de un archivo deb es necesario:
-
-- fakeroot para Debian/Ubuntu Linux.
-
-Ejecutamos el siguiente comando:
+Para la generación de un archivo pkg es necesario ejecutar:
 ```
-$ ./gradlew packageDeb
+$ ./gradlew packagePkg
 ```
