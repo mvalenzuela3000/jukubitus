@@ -407,10 +407,7 @@
               }
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "TokenConnectedDto": {
         "type": "object",
@@ -444,10 +441,7 @@
               }
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "TokenStatusDto": {
         "type": "object",
@@ -463,10 +457,7 @@
               "type": "string"
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "ArchivoDto": {
         "type": "object",
@@ -492,9 +483,6 @@
           "pin",
           "alias",
           "file"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "ArchivoFirmadoDto": {
@@ -504,10 +492,7 @@
             "type": "string",
             "description": "Archivo firmado en formato base64."
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "PdfDto": {
         "type": "object",
@@ -556,9 +541,6 @@
           "pin",
           "alias",
           "pdf"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "PdfFirmadoDto": {
@@ -568,10 +550,7 @@
             "type": "string",
             "description": "Archivo pdf firmado en formato base64."
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "PdfLoteDto": {
         "type": "object",
@@ -618,10 +597,7 @@
           "pin",
           "alias"
         ],
-        "description": "",
-        "x-tags": [
-          "modelos"
-        ]
+        "description": ""
       },
       "PdfLoteFirmadoDto": {
         "type": "object",
@@ -643,10 +619,7 @@
               }
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "XmlDto": {
         "type": "object",
@@ -704,9 +677,6 @@
           "pin",
           "alias",
           "file"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "XmlFirmadoDto": {
@@ -716,10 +686,7 @@
             "type": "string",
             "description": "Archivo xml firmado en formato base64."
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "HashDto": {
         "type": "object",
@@ -745,9 +712,6 @@
           "pin",
           "alias",
           "hash"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "HashFirmadoDto": {
@@ -757,10 +721,7 @@
             "type": "string",
             "description": "Hash firmado."
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "ArregloDto": {
         "type": "object",
@@ -806,9 +767,6 @@
         },
         "required": [
           "ci"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "ArregloFirmadoDto": {
@@ -848,10 +806,7 @@
               }
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "FirmaDto": {
         "type": "object",
@@ -926,10 +881,7 @@
               }
             }
           }
-        },
-        "x-tags": [
-          "modelos"
-        ]
+        }
       },
       "ValidacionArchivoDto": {
         "type": "object",
@@ -941,9 +893,6 @@
         },
         "required": [
           "file"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "ValidacionPdfDto": {
@@ -956,9 +905,6 @@
         },
         "required": [
           "pdf"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "ValidacionXmlDto": {
@@ -971,9 +917,6 @@
         },
         "required": [
           "file"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       },
       "ValidacionJwsDto": {
@@ -986,9 +929,6 @@
         },
         "required": [
           "file"
-        ],
-        "x-tags": [
-          "modelos"
         ]
       }
     },
@@ -1951,12 +1891,6 @@
         "firmador",
         "validador"
       ]
-    },
-    {
-      "name": "Modelos",
-      "tags": [
-        "modelos"
-      ]
     }
   ],
   "tags": [
@@ -1978,11 +1912,6 @@
     {
       "name": "validador",
       "x-displayName": "Validador",
-      "description": ""
-    },
-    {
-      "name": "modelos",
-      "x-displayName": "Objetos de transferencia de datos",
       "description": ""
     }
   ]
