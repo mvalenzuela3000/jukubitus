@@ -99,7 +99,7 @@ Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes coman
 
 
 ```
-$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:importDrivers escritorio:importChangePinWindows escritorio:jar
+$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:addDriversWindows escritorio:importChangePinWindows escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
