@@ -13,5 +13,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ValidacionArchivoDto {
     private String file;
-    private Date fecFirma = null;
+    private Date date = null;
 }

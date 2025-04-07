@@ -143,7 +143,7 @@ public class ValidadorServicio {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             Opciones opciones = new Opciones();
-            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getFecFirma(), opciones);
+            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getDate(), opciones);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (CertDate cert : validar) {
@@ -154,7 +154,9 @@ public class ValidadorServicio {
                 firma.setFirmadoAntesRevocacion(cert.isOCSP());
                 firma.setVersionado(cert.isValidAlerted());
                 firma.setTimeStamp(cert.getTimeStamp() != null);
-                firma.setFechaFirma(dateFormat.format(cert.getSignDate()));
+                if (objetoDto.getDate() != null) {
+                    firma.setFechaFirma(dateFormat.format(cert.getSignDate()));
+                }
                 CertificadoDto certificado = new CertificadoDto();
                 if (cert.getDatos().getComplementoSubject() != null && !cert.getDatos().getComplementoSubject().equals("")) {
                     certificado.setCi(cert.getDatos().getNumeroDocumentoSubject() + "-" + cert.getDatos().getComplementoSubject());
@@ -170,7 +172,7 @@ public class ValidadorServicio {
                 certificado.setDescripcionECA(cert.getDatos().getDescripcionSubject());
                 certificado.setInicioValidez(dateFormat.format(cert.getDatos().getInicioValidez()));
                 certificado.setFinValidez(dateFormat.format(cert.getDatos().getFinValidez()));
-                if (cert.getOCSP().getDate() != null) {
+                if (cert.getOCSP() != null && cert.getOCSP().getDate() != null) {
                     certificado.setRevocado(dateFormat.format(cert.getOCSP().getDate()));
                 }
 
@@ -199,7 +201,7 @@ public class ValidadorServicio {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             Opciones opciones = new Opciones();
-            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getFecFirma(), opciones);
+            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getDate(), opciones);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             CertDate cert = (CertDate) validar.iterator().next(); {
@@ -210,7 +212,9 @@ public class ValidadorServicio {
                 firma.setFirmadoAntesRevocacion(cert.isOCSP());
                 firma.setVersionado(cert.isValidAlerted());
                 firma.setTimeStamp(cert.getTimeStamp() != null);
-                firma.setFechaFirma(dateFormat.format(cert.getSignDate()));
+                if (objetoDto.getDate() != null) {
+                    firma.setFechaFirma(dateFormat.format(cert.getSignDate()));
+                }
                 CertificadoDto certificado = new CertificadoDto();
                 if (cert.getDatos().getComplementoSubject() != null && !cert.getDatos().getComplementoSubject().equals("")) {
                     certificado.setCi(cert.getDatos().getNumeroDocumentoSubject() + "-" + cert.getDatos().getComplementoSubject());
@@ -226,7 +230,7 @@ public class ValidadorServicio {
                 certificado.setDescripcionECA(cert.getDatos().getDescripcionSubject());
                 certificado.setInicioValidez(dateFormat.format(cert.getDatos().getInicioValidez()));
                 certificado.setFinValidez(dateFormat.format(cert.getDatos().getFinValidez()));
-                if (cert.getOCSP().getDate() != null) {
+                if (cert.getOCSP() != null && cert.getOCSP().getDate() != null) {
                     certificado.setRevocado(dateFormat.format(cert.getOCSP().getDate()));
                 }
 
