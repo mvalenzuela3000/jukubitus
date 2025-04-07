@@ -143,7 +143,7 @@ public class ValidadorServicio {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             Opciones opciones = new Opciones();
-            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), opciones);
+            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getFecFirma(), opciones);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (CertDate cert : validar) {
@@ -199,7 +199,7 @@ public class ValidadorServicio {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             Opciones opciones = new Opciones();
-            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), opciones);
+            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getFecFirma(), opciones);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             CertDate cert = (CertDate) validar.iterator().next(); {

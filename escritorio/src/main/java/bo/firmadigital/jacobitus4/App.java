@@ -455,12 +455,14 @@ public class App extends Application {
 
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
+            String versionLibreria = bo.firmadigital.jacobitus.Version.VERSION;
             String javaVersion = System.getProperty("java.version");
             String javafxVersion = System.getProperty("javafx.version");
             String changePinVersion = new ChangePinJNI().version();
             ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
             StringBuilder sb = new StringBuilder();
-            sb.append("Jacobitus Total " + version + "\n");
+            sb.append("Jacobitus Escritorio " + version + "\n");
+            sb.append("Jacobitus Librería " + versionLibreria + "\n");
             sb.append("ChangePin Library " + changePinVersion + "\n");
             sb.append("JavaFX " + javafxVersion + "\n");
             sb.append("Java " + javaVersion);
@@ -733,9 +735,9 @@ public class App extends Application {
                         certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
                     // TODO: Ajustar los mensajes de validacion de documentos xml y json, considerando que no se puede determinar si fueron firmados dentro del periodo de vigencia del certificado
                     } else if (files.get(i).getName().endsWith(".xml")) {
-                        certs.add(new ValidadorXml(files.get(i), getOpcionesValidador()));
+                        certs.add(new ValidadorXml(files.get(i), null, getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".jws")) {
-                        certs.add(new ValidadorJws(files.get(i), getOpcionesValidador()));
+                        certs.add(new ValidadorJws(files.get(i), null, getOpcionesValidador()));
                     } else {
                         certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                     }
@@ -838,13 +840,13 @@ public class App extends Application {
                         certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
                     } else {
                         if (MagicBytes.XML.is(files.get(i))) {
-                            certs.add(new ValidadorXml(files.get(i), getOpcionesValidador()));
+                            certs.add(new ValidadorXml(files.get(i), null, getOpcionesValidador()));
                         } else {
                             if (MagicBytes.P7S.is(files.get(i))) {
                                 certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                             } else {
                                 if (MagicBytes.isJWS(files.get(i))) {
-                                    certs.add(new ValidadorJws(files.get(i), getOpcionesValidador()));
+                                    certs.add(new ValidadorJws(files.get(i), null, getOpcionesValidador()));
                                 } else {
                                     certs.add(new ValidadorPKCS7(files.get(i), getOpcionesValidador()));
                                 }
@@ -953,7 +955,7 @@ public class App extends Application {
                             firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorXml(out, getOpcionesValidador()));
+                        tableFile.getItems().set(i, new ValidadorXml(out, null, getOpcionesValidador()));
                     }
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
@@ -1007,7 +1009,7 @@ public class App extends Application {
                             firmar.firmar(is, os, false, false);
                         }
                         updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorJws(out, getOpcionesValidador()));
+                        tableFile.getItems().set(i, new ValidadorJws(out, null, getOpcionesValidador()));
                     }
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
