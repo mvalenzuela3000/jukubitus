@@ -106,7 +106,7 @@ public class CertInformation extends GridPane {
 
         Label label11 = new Label("Detalle");
         this.add(label11, 0, 16, 1, 1);
-        Label data11 = new Label(certDate.getOCSP().getDate() != null ? "Revocado el " + df.format(certDate.getOCSP().getDate()) : certDate.isOCSP() ? "No revocado" : "No se pudo consultar");
+        Label data11 = new Label(certDate.getOCSP() != null && certDate.getOCSP().getDate() != null ? "Revocado el " + df.format(certDate.getOCSP().getDate()) : certDate.isOCSP() ? "No revocado" : "No se pudo consultar");
         this.add(data11, 1, 16, 1, 1);
 
         Label subTitle5 = new Label("Usos");
