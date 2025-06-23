@@ -1,6 +1,7 @@
-3b9f958131fe9f006646530501001171df000006000015 /epass2003/2020/libcastle.so.1.0.0 0 0 https://firmadigital.bo/herramientas/descargas/driver_epass/linux_64.zip
-3b9f958131fe9f006646530501001171df000003900080 /epass2003/2020/libcastle.so.1.0.0 0 0 https://firmadigital.bo/herramientas/descargas/driver_epass/linux_64.zip
+3b9f958131fe9f006646530501001171df000006000015 /epass2003/2020/libcastle.so.1.0.0 0 0 -
+3b9f958131fe9f006646530501001171df000003900080 /epass2003/2020/libcastle.so.1.0.0 0 0 -
 3b9f958131fe9f006646530501001171df000000000013 /epass2003/2021/libcastle.so.1.0.0 0 0 -
-3b9f958131fe9f006646530510113171df000000000033 /epass2003/2021/libcastle.so.1.0.0 0 0 https://firmadigital.bo/jacobitus4/descargas/ePass2003.deb
-3bdc18ff8191fe1fc38073c8211366010b0352000538 /athena/libASEP11.so 0 0 https://firmadigital.bo/herramientas/descargas/driver_athena/idprotectclient_637.01-0_amd64.zip
-3bd518008131fe7d8073c82110f4 /safenet/libeToken.so.9.1.7 0 0 https://firmadigital.bo/herramientas/descargas/driver_safenet/SafenetAuthenticationClient-9.1.7-0_amd64.zip
+3b9f958131fe9f006646530510113171df000000000033 /epass2003/2021/libcastle.so.1.0.0 0 0 -
+3b9f958131fe9f006646530523002571df000000000005 /epass2003/2021/libcastle.so.1.0.0 0 0 -
+3bdc18ff8191fe1fc38073c8211366010b0352000538 /athena/libASEP11.so 0 0 -
+3bd518008131fe7d8073c82110f4 /safenet/libeToken.so.9.1.7 0 0 -
