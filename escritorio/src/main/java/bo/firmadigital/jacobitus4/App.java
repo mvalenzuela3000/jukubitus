@@ -689,6 +689,7 @@ public class App extends Application {
                 } catch (RuntimeException ex) {
                     updateProgress(100, 100);
                     table.getItems().clear();
+                    App.stage.getScene().setCursor(Cursor.DEFAULT);
                     throw ex;
                 }
             }
