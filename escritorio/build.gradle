@@ -44,7 +44,7 @@ dependencies {
 }
 
 group = 'bo.firmadigital.jacobitus4'
-version = '1.3.2'
+version = '1.3.3'
 description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
 
@@ -84,12 +84,16 @@ shadowJar {
     mergeServiceFiles()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-tasks.withType(Javadoc) {
+tasks.withType(Javadoc).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '-Dfile.encoding=UTF-8'
 }
 
 tasks.register('importCA', Copy) {
@@ -145,7 +149,10 @@ def jpackageCommand = [
     '--name', appName,
     '--app-version', version.replace('-1', ''),
     '--description', appName,
+    '--file-associations', 'FAjws.properties',
+    '--file-associations', 'FAp7s.properties',
     '--file-associations', 'FApdf.properties',
+    '--java-options', '-Dfile.encoding=UTF-8',
     '--license-file', 'license.txt',
     //'--temp', 'tmp'
 ]
