@@ -188,18 +188,18 @@
         ]
       }
     },
-    "/api/token/sign": {
+    "/api/token/firmar_modo_seguro": {
       "post": {
         "summary": "Firmar un documento pdf/json (modo seguro)",
-        "operationId": "post-api-token-sign",
+        "operationId": "post-api-token-firmar-modo-seguro",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/TokenSign"
+            "$ref": "#/components/responses/TokenModoSeguro"
           }
         },
         "parameters": [],
         "requestBody": {
-          "$ref": "#/components/requestBodies/TokenSign"
+          "$ref": "#/components/requestBodies/TokenModoSeguro"
         },
         "description": "Permite firmar un lote de archivos en formato pdf y/o json.",
         "tags": [
@@ -1336,7 +1336,7 @@
           }
         }
       },
-      "TokenSign": {
+      "TokenModoSeguro": {
         "description": "",
         "content": {
           "application/json": {
@@ -1800,7 +1800,7 @@
           }
         }
       },
-      "TokenSign": {
+      "TokenModoSeguro": {
         "content": {
           "application/json": {
             "schema": {

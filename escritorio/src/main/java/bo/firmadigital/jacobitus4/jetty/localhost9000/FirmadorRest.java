@@ -968,6 +968,7 @@ public class FirmadorRest {
     @Path("/sign")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated(forRemoval=true)
     public String sign(String body) {
         // JSONObject json = new JSONObject();
         // GestorSlot gestorSlot = GestorSlot.getInstance();
@@ -1043,6 +1044,21 @@ public class FirmadorRest {
         //     }
         // }
         // return json.toString();
+        FirmadorServicio servicio = new FirmadorServicio();
+        ObjectMapper om = new ObjectMapper();
+        try {
+            FirmaModoSeguroDto objetoDto = om.readValue(body, FirmaModoSeguroDto.class);
+            return om.writeValueAsString(servicio.firmarModoSeguro(objetoDto));
+        } catch (Exception e) {
+            return JettyHelper.generarRespuesta(e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/firmar_modo_seguro")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String firmarModoSeguro(String body) {
         FirmadorServicio servicio = new FirmadorServicio();
         ObjectMapper om = new ObjectMapper();
         try {
