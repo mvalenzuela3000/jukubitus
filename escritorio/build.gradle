@@ -179,7 +179,7 @@ tasks.register('packageDeb', Exec) {
     commandLine(jpackageCommand + [
         '--type', 'deb',
         '--icon', './iconos/icon.png',
-        '--linux-package-name', 'jacobitus-total',
+        '--linux-package-name', 'jacobitus-escritorio',
         '--linux-deb-maintainer', 'desarrollo@firmadigital.bo',
         '--linux-package-deps', 'libnss3-tools, pcscd, pcsc-tools, libnss3, libpcsclite1',
         '--linux-shortcut'
