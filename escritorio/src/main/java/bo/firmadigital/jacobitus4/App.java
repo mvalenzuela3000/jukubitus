@@ -156,7 +156,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
         String version = Constantes.VERSION;
-        stage.setTitle("ADSIB - Jacobitus Total - " + version);
+        stage.setTitle("Jacobitus - " + version);
         if (!servicio) {
             // Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
             Alert alert = new Alert(AlertType.ERROR, WebServer.mensaje, ButtonType.OK);
@@ -164,7 +164,7 @@ public class App extends Application {
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Jacobitus");
             alert.showAndWait();
-            stage.setTitle("ADSIB - Jacobitus Total - " + version + " (Servicio detenido)");
+            stage.setTitle("Jacobitus - " + version + " (Servicio detenido)");
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
 
@@ -459,7 +459,7 @@ public class App extends Application {
             String javaVersion = System.getProperty("java.version");
             String javafxVersion = System.getProperty("javafx.version");
             String changePinVersion = new ChangePinJNI().version();
-            ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
+            ImageView logo = new ImageView(new Image(this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
             StringBuilder sb = new StringBuilder();
             sb.append("Jacobitus Escritorio " + version + "\n");
             sb.append("Jacobitus Librería " + versionLibreria + "\n");
@@ -472,8 +472,8 @@ public class App extends Application {
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setTitle("Acerca de ...");
             alert.setHeaderText(sb.toString());
-            alert.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
-            alert.setGraphic(adsib);
+            alert.setContentText("Agencia de Gobierno Electrónico y Tecnologías de Información y Comunicación");
+            alert.setGraphic(logo);
             alert.showAndWait();
         });
 
@@ -604,8 +604,8 @@ public class App extends Application {
         
         root.setCenter(middle);
         middle.setTop(progressBar);
-        Label adsib = new Label("ADSIB - firmadigital.bo");
-        root.setBottom(new StackPane(adsib));
+        Label pie = new Label("AGETIC - https://firmadigital.bo");
+        root.setBottom(new StackPane(pie));
         ((StackPane)root.getBottom()).setAlignment(Pos.BOTTOM_RIGHT);
         Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);
@@ -776,7 +776,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
-                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                    throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
                 StringBuilder errores = new StringBuilder();
@@ -888,7 +888,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
-                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                    throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
                 List<Validador> files = tableFile.getItems();
@@ -936,7 +936,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
-                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                    throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
                 List<Validador> files = tableFile.getItems();
@@ -990,7 +990,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
-                    throw new RuntimeException("Certificado no emitido por la ECP-ADSIB.");
+                    throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
                 List<Validador> files = tableFile.getItems();
@@ -1130,9 +1130,9 @@ public class App extends Application {
                         errorCertificadoServicioLocalInstalado = true;
                     }
                     
-                    ImageView adsib = new ImageView(new Image(this.getClass().getClassLoader().getResource("adsib.png").toExternalForm()));
+                    ImageView logo = new ImageView(new Image(this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
                     StringBuilder sb = new StringBuilder();
-                    sb.append("Jacobitus Total " + version + "\n");
+                    sb.append("Jacobitus " + version + "\n");
                     sb.append(certificadoServicioLocal);
                     
                     Alert verificarServicioAlerta = new Alert(AlertType.INFORMATION);
@@ -1141,7 +1141,7 @@ public class App extends Application {
                     verificarServicioAlerta.setTitle("Verificar servicio");
                     verificarServicioAlerta.setHeaderText(sb.toString());
                     verificarServicioAlerta.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
-                    verificarServicioAlerta.setGraphic(adsib);
+                    verificarServicioAlerta.setGraphic(logo);
     
                     VBox vbox = new VBox();
                     vbox.setSpacing(5);

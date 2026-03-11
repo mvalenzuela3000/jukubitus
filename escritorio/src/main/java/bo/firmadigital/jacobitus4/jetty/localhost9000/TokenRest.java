@@ -183,7 +183,6 @@ public class TokenRest {
      *                 {
      *                     "tipo": "X509_CERTIFICATE",
      *                     "tipo_desc": "Certificado",
-     *                     "adsib": false,
      *                     "serialNumber": "27cbd28f79876b40",
      *                     "alias": "355409121073",
      *                     "id": "355409121073",
@@ -200,8 +199,8 @@ public class TokenRest {
      *                         "uidNumber": "12345678"
      *                     },
      *                     "emisor": {
-     *                         "CN": "ADSIB",
-     *                         "O": "ADSIB"
+     *                         "CN": "AGETIC",
+     *                         "O": "AGETIC"
      *                     }
      *                 }
      *             ],
@@ -257,15 +256,6 @@ public class TokenRest {
         //                     JSONObject x509 = new JSONObject();
         //                     x509.put("tipo", "X509_CERTIFICATE");
         //                     x509.put("tipo_desc", "Certificado");
-        //                     x509.put("adsib", false);
-        //                     for (X509Certificate intermediate : intermediates) {
-        //                         try {
-        //                             cert.verify(intermediate.getPublicKey());
-        //                             x509.put("adsib", true);
-        //                             break;
-        //                         } catch (GeneralSecurityException ex) {
-        //                         }
-        //                     }
         //                     x509.put("serialNumber", cert.getSerialNumber().toString(16));
         //                     x509.put("alias", llaves.get(i));
         //                     x509.put("id", llaves.get(i));

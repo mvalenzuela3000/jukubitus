@@ -159,17 +159,6 @@ public class TokenServicio {
                                 TokenPublicCertificateDto x509 = new TokenPublicCertificateDto();
                                 x509.setTipo("X509_CERTIFICATE");
                                 x509.setTipo_desc("Certificado");
-                                x509.setAdsib(false);
-    
-                                for (X509Certificate intermediate : intermediates) {
-                                    try {
-                                        cert.verify(intermediate.getPublicKey());
-                                        x509.setAdsib(true);
-                                        break;
-                                    } catch (GeneralSecurityException ex) {
-                                    }
-                                }
-    
                                 x509.setSerialNumber(cert.getSerialNumber().toString(16));
                                 x509.setAlias((String) llaves.get(i));
                                 x509.setId((String) llaves.get(i));

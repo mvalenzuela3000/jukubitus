@@ -59,8 +59,8 @@ public class ValidadorRest {
      *                     "cargoSignatario": "Director Ejecutivo",
      *                     "organizacionSignatario": "Perez S.A.",
      *                     "emailSignatario": "jperez@mail.com",
-     *                     "nombreECA": "ADSIB",
-     *                     "descripcionECA": "Entidad Certificadora Publica ADSIB",
+     *                     "nombreECA": "AGETIC",
+     *                     "descripcionECA": "Entidad Certificadora Publica AGETIC",
      *                     "inicioValidez": "2017-08-04T22:46:42.000Z",
      *                     "finValidez": "2018-08-04T22:46:42.000Z",
      *                     "revocado": "2018-06-01T12:30:02.000Z"
@@ -203,8 +203,8 @@ public class ValidadorRest {
      *                     "cargoSignatario": "Director Ejecutivo",
      *                     "organizacionSignatario": "Perez S.A.",
      *                     "emailSignatario": "jperez@mail.com",
-     *                     "nombreECA": "ADSIB",
-     *                     "descripcionECA": "Entidad Certificadora Publica ADSIB",
+     *                     "nombreECA": "AGETIC",
+     *                     "descripcionECA": "Entidad Certificadora Publica AGETIC",
      *                     "inicioValidez": "2017-08-04T22:46:42.000Z",
      *                     "finValidez": "2018-08-04T22:46:42.000Z",
      *                     "revocado": "2018-06-01T12:30:02.000Z"
@@ -346,8 +346,8 @@ public class ValidadorRest {
      *                     "cargoSignatario": "Director Ejecutivo",
      *                     "organizacionSignatario": "Perez S.A.",
      *                     "emailSignatario": "jperez@mail.com",
-     *                     "nombreECA": "ADSIB",
-     *                     "descripcionECA": "Entidad Certificadora Publica ADSIB",
+     *                     "nombreECA": "AGETIC",
+     *                     "descripcionECA": "Entidad Certificadora Publica AGETIC",
      *                     "inicioValidez": "2017-08-04T22:46:42.000Z",
      *                     "finValidez": "2018-08-04T22:46:42.000Z",
      *                     "revocado": "2018-06-01T12:30:02.000Z"
@@ -487,8 +487,8 @@ public class ValidadorRest {
      *                     "cargoSignatario": "Director Ejecutivo",
      *                     "organizacionSignatario": "Perez S.A.",
      *                     "emailSignatario": "jperez@mail.com",
-     *                     "nombreECA": "ADSIB",
-     *                     "descripcionECA": "Entidad Certificadora Publica ADSIB",
+     *                     "nombreECA": "AGETIC",
+     *                     "descripcionECA": "Entidad Certificadora Publica AGETIC",
      *                     "inicioValidez": "2017-08-04T22:46:42.000Z",
      *                     "finValidez": "2018-08-04T22:46:42.000Z",
      *                     "revocado": "2018-06-01T12:30:02.000Z"
