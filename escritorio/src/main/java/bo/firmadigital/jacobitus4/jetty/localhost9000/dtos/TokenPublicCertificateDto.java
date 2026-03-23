@@ -13,7 +13,6 @@ import lombok.Setter;
 public class TokenPublicCertificateDto implements ITokenCertificateDto {
     private String tipo;
     private String tipo_desc;
-    private Boolean adsib;
     private String serialNumber;
     private String alias;
     private String id;
