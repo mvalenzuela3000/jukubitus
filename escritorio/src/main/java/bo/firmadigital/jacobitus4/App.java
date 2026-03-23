@@ -1140,7 +1140,7 @@ public class App extends Application {
                     verificarServicioAlerta.initModality(Modality.APPLICATION_MODAL);
                     verificarServicioAlerta.setTitle("Verificar servicio");
                     verificarServicioAlerta.setHeaderText(sb.toString());
-                    verificarServicioAlerta.setContentText("Agencia para el Desarrollo de la Sociedad de la Información en Bolivia");
+                    verificarServicioAlerta.setContentText("Agencia de Gobierno Electrónico y Tecnologías de Información y Comunicación");
                     verificarServicioAlerta.setGraphic(logo);
     
                     VBox vbox = new VBox();
