@@ -39,19 +39,18 @@ public class WebServer {
                 "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
         filterHolder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE");
         filterHolder.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-        ServletContextHandler servletContextHandler9000 = new ServletContextHandler(NO_SESSIONS);
-
-        servletContextHandler9000.setContextPath("/");
-        servletContextHandler9000.setVirtualHosts(new String[]{"@localhost9000"});
-        servletContextHandler9000.addFilter(filterHolder, "/*", null);
 
         // Sitio web
         ServletHolder staticResource = new ServletHolder("default", DefaultServlet.class);
         staticResource.setInitParameter("resourceBase", jettyServer.getClass().getClassLoader().getResource("web").toExternalForm());
         staticResource.setInitParameter("dirAllowed", "false");
-        servletContextHandler9000.addServlet(staticResource, "/");
 
         // https://localhost:9000
+        ServletContextHandler servletContextHandler9000 = new ServletContextHandler(NO_SESSIONS);
+        servletContextHandler9000.setContextPath("/");
+        servletContextHandler9000.setVirtualHosts(new String[]{"@localhost9000"});
+        servletContextHandler9000.addFilter(filterHolder, "/*", null);
+        servletContextHandler9000.addServlet(staticResource, "/");
         ServletHolder servletHolder9000 = servletContextHandler9000.addServlet(ServletContainer.class, "/api/*");
         servletHolder9000.setInitOrder(0);
         servletHolder9000.setInitParameter("jersey.config.server.provider.packages",
@@ -64,11 +63,12 @@ public class WebServer {
         servletContextHandler4637.setContextPath("/");
         servletContextHandler4637.setVirtualHosts(new String[]{"@localhost4637"});
         servletContextHandler4637.addFilter(filterHolder, "/*", null);
+        servletContextHandler4637.addServlet(staticResource, "/");
         if (config.isSecondaryPortEnabled()) {
-            ServletHolder servletHolder4637 = servletContextHandler4637.addServlet(ServletContainer.class, "/*");
+            ServletHolder servletHolder4637 = servletContextHandler4637.addServlet(ServletContainer.class, "/sign");
             servletHolder4637.setInitOrder(1);
-            servletHolder4637.setInitParameter("jersey.config.server.provider.packages",
-                    "bo.firmadigital.jacobitus4.jetty.localhost4637");
+            servletHolder4637.setInitParameter("jersey.config.server.provider.classnames",
+                    "bo.firmadigital.jacobitus4.jetty.localhost4637.FirmadorRest");
         }
 
         // https://localhost:3200
