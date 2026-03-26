@@ -46,7 +46,6 @@ public class FirmadorRest {
      * }
      */
     @POST
-    @Path("/sign")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String sign(String body) {
