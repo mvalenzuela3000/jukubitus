@@ -27,28 +27,6 @@ Verificamos la instalación.
 $ java -version
 ```
 
-### Instalación gradle
-
-```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo wget https://services.gradle.org/distributions/gradle-7.6.2-bin.zip
-```
-
-```bash
-$ mkdir /opt/gradle
-$ unzip -d /opt/gradle gradle-7.6.2-bin.zip
-$ ls /opt/gradle/gradle-7.6.2
-```
-
-```bash
-$ export PATH=$PATH:/opt/gradle/gradle-7.6.2/bin
-```
-
-Verificamos la instalación de Gradle.
-```bash
-$ gradle --version
-```
-
 ### Instalación de Herramientas de línea de comandos de Xcode
 ```bash
 $ xcode-select --install
@@ -85,14 +63,14 @@ $ git config --global credential.helper cache
 ## Compilación del proyecto
 
 Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
-```
+```bash
 $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
 ### Gradle
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
-```
+```bash
 $ ./gradlew jacobitus-libreria:buildForMacOS escritorio:clean escritorio:importCA escritorio:addDriversMacOS escritorio:importChangePinMacOS escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
@@ -100,6 +78,6 @@ $ ./gradlew escritorio:run
 ## Generar paquete de instalación
 
 Para la generación de un archivo pkg es necesario ejecutar:
-```
+```bash
 $ ./gradlew packagePkg
 ```
