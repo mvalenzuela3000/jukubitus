@@ -36,7 +36,7 @@ public class Main {
                 WebServer.iniciar();
                 if (java.awt.SystemTray.isSupported()) {
                     java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
-                    java.awt.Image image = ImageIO.read(Main.class.getClassLoader().getResource("sicon.png"));
+                    java.awt.Image image = ImageIO.read(Main.class.getClassLoader().getResource("icon.png"));
                     java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
                     trayIcon.setImageAutoSize(true);
                     trayIcon.addActionListener((ActionEvent e) -> {
