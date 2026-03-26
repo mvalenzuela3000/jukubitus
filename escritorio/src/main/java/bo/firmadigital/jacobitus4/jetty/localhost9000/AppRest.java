@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4.jetty.localhost9000;
 
 import bo.firmadigital.jacobitus4.App;
@@ -17,10 +12,6 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-/**
- *
- * @author ADSIB
- */
 @Path("/app")
 public class AppRest {
     @POST
