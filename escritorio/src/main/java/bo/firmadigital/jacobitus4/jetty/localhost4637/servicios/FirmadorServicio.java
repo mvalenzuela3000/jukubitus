@@ -1,6 +1,7 @@
 package bo.firmadigital.jacobitus4.jetty.localhost4637.servicios;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -78,10 +79,12 @@ public class FirmadorServicio {
                 return respuesta;
             } else {
                 respuesta.setMessage("Se canceló la firma del documento");
+                respuesta.setFiles(Collections.emptyList());
                 return respuesta;
             }
         } catch (JSONException | RuntimeException ex) {
-            respuesta.setMessage(ex.getMessage());
+            respuesta.setMessage("No se pudo firmar el documento");
+            respuesta.setError(ex.getMessage());
             return respuesta;
         }
     }
