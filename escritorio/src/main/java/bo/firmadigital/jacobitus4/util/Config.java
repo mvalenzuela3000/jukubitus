@@ -269,6 +269,14 @@ public class Config {
         return Controlador.obtenerDispositivosCompatibles();
     }
 
+    public String getEnlaceInstaladores() {
+        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/instaladores";
+    }
+
+    public String getEnlaceVersion() {
+        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/version";
+    }
+
     public void save() {
         try {
             if (!user.exists()) {
