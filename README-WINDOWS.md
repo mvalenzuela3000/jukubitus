@@ -12,6 +12,7 @@ Descargamos el JDK desde el sitio web https://jdk.java.net/archive/
 
 - Versión para [Windows](https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_windows-x64_bin.zip).
 
+
 Descomprimmos el archivo **openjdk-15.0.2_windows-x64_bin.zip** en la carpeta **C:\Java**
 
 Creamos la variable de entorno **JAVA_HOME** con el valor **C:\Java\jdk-15.0.2**
@@ -21,6 +22,23 @@ Actualizamos la variable de entorno **PATH** con el valor **%JAVA_HOME%\bin**
 Verificamos la instalación.
 ```bash
 java -version
+```
+
+### Instalación gradle
+
+Descargamos gradle desde el siguiente enlace:
+
+- https://services.gradle.org/distributions/gradle-7.6.2-bin.zip
+
+Descomprimimos el archivo **gradle-7.6.2-bin.zip** en la carpeta **C:\Gradle**
+
+Creamos la variable de entorno **GRADLE_HOME** con el valor **C:\Gradle\gradle-7.6.2**
+
+Actualizamos la variable de entorno **PATH** con el valor **%GRADLE_HOME%\bin**
+
+Verificamos la instalación.
+```bash
+gradle --version
 ```
 
 ### Instalación g++
@@ -79,9 +97,8 @@ $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-
 ### Gradle
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
-
 ```bash
-$ ./gradlew jacobitus-libreria:buildForWindows escritorio:clean escritorio:importCA escritorio:addDriversWindows escritorio:importChangePinWindows escritorio:shadowJar
+$ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA escritorio:addDrivers escritorio:importChangePin escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
@@ -93,5 +110,5 @@ Para la generación de un archivo msi/exe es necesario:
 
 Para la generación de un archivo msi es necesario ejecutar:
 ```bash
-$ ./gradlew packageMsi
+$ ./gradlew packageApp
 ```
