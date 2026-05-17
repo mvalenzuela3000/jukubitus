@@ -43,28 +43,6 @@ Verificamos la instalación.
 $ java -version
 ```
 
-### Instalación gradle
-
-```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo wget https://services.gradle.org/distributions/gradle-7.6.2-bin.zip
-```
-
-```bash
-$ mkdir /opt/gradle
-$ unzip -d /opt/gradle gradle-7.6.2-bin.zip
-$ ls /opt/gradle/gradle-7.6.2
-```
-
-```bash
-$ export PATH=$PATH:/opt/gradle/gradle-7.6.2/bin
-```
-
-Verificamos la instalación.
-```bash
-$ gradle --version
-```
-
 ### Instalación g++
 
 ```bash
@@ -101,7 +79,7 @@ Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
-### Gradle
+### Ejecución de la aplicación
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
 ```bash
@@ -109,7 +87,7 @@ $ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA 
 $ ./gradlew escritorio:run
 ```
 
-## Generar paquete de instalación
+## Generación del paquete de instalación
 
 Para la generación de un archivo deb es necesario:
 
