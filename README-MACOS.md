@@ -8,11 +8,16 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 
 ### Instalación de Java 15
 
-Descargamos el JDK desde el sitio web https://jdk.java.net/archive/
+Instalamos dependencias necesarias.
 ```bash
 $ sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 $ sudo brew install wget
+```
 
+#### Procesadores Intel
+
+Descargamos el JDK desde el sitio web https://jdk.java.net/archive/
+```bash
 $ sudo wget https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_osx-x64_bin.tar.gz
 ```
 
@@ -27,26 +32,35 @@ Verificamos la instalación.
 $ java -version
 ```
 
-### Instalación gradle
+#### Procesadores Apple
 
+Descargamos el JDK desde el sitio web https://bell-sw.com/pages/downloads/?version=java-15&os=macos&architecture=arm
 ```bash
-$ sudo apt update && sudo apt -y upgrade
-$ sudo wget https://services.gradle.org/distributions/gradle-7.6.2-bin.zip
+$ sudo wget https://download.bell-sw.com/java/15.0.2+10/bellsoft-jdk15.0.2+10-macos-aarch64-full.zip
+```
+
+Descomprimimos el archivo **openjdk-15.0.2_osx-x64_bin.tar.gz** en la carpeta **/Library/Java/JavaVirtualMachines/**.
+```bash
+$ sudo unzip ./bellsoft-jdk15.0.2+10-macos-aarch64-full.zip -d /Library/Java/JavaVirtualMachines/
+```
+
+Agregamos la versión de java al PATH.
+```bash
+$ nano ~/.zshrc
 ```
 
 ```bash
-$ mkdir /opt/gradle
-$ unzip -d /opt/gradle gradle-7.6.2-bin.zip
-$ ls /opt/gradle/gradle-7.6.2
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-15.0.2-full.jdk
+export PATH=$JAVA_HOME/bin:$PATH
 ```
 
 ```bash
-$ export PATH=$PATH:/opt/gradle/gradle-7.6.2/bin
+$ source ~/.zshrc
 ```
 
-Verificamos la instalación de Gradle.
+Verificamos la instalación.
 ```bash
-$ gradle --version
+$ java -version
 ```
 
 ### Instalación de Herramientas de línea de comandos de Xcode
@@ -89,7 +103,7 @@ Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
-### Gradle
+### Ejecución de la aplicación
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
 ```bash
@@ -97,7 +111,7 @@ $ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA 
 $ ./gradlew escritorio:run
 ```
 
-## Generar paquete de instalación
+## Generación del paquete de instalación
 
 Para la generación de un archivo pkg es necesario ejecutar:
 ```bash
