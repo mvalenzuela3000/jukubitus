@@ -50,12 +50,12 @@ public class ActualizacionDisponible extends Stage {
         ultimaVersion.setStyle("-fx-font-size: 14px;");
 
         Label tipo = new Label(
-                result.isEsNecesaria()
+                result.esNecesaria()
                         ? "Actualización NECESARIA"
                         : "Se recomienda actualizar");
 
         tipo.setStyle(
-                result.isEsNecesaria()
+                result.esNecesaria()
                         ? "-fx-font-size: 14px; -fx-text-fill: #c0392b; -fx-font-weight: bold;"
                         : "-fx-font-size: 14px; -fx-text-fill: #2c3e50;");
 
