@@ -10,11 +10,13 @@ plugins {
 
 group = 'bo.firmadigital.jacobitus4'
 version = '1.4.0'
-description = 'Jacobitus4'
 mainClassName = 'bo.firmadigital.jacobitus4.Main'
 
 def appName = 'Jacobitus Escritorio'
+def appDescription = 'Solución completa para la administración de tu dispositivo criptográfico y firma digital'
 def jarName = "jacobitus-escritorio"
+def vendorName = 'AGETIC'
+def maintainer = 'desarrollo@firmadigital.bo'
 
 def os = OperatingSystem.current()
 def arch = System.getProperty("os.arch").toLowerCase()
@@ -140,12 +142,12 @@ def jpackageCmd = [
     '--verbose',
     '--input', 'build/libs',
     '--main-class', mainClassName,
-    '--main-jar', "${jarName}-${version}.jar",
-    '--vendor', 'AGETIC',
+    '--main-jar', "${jarName}-${version.replace('-1', '')}.jar",
+    '--vendor', vendorName,
     '--dest', 'dist',
     '--name', appName,
     '--app-version', version.replace('-1', ''),
-    '--description', appName,
+    '--description', appDescription,
     '--file-associations', 'FAjws.properties',
     '--file-associations', 'FAp7s.properties',
     '--file-associations', 'FApdf.properties',
@@ -154,6 +156,7 @@ def jpackageCmd = [
 ]
 
 tasks.register('packageApp', Exec) {
+
     group = 'distribution'
 
     dependsOn clean
@@ -169,8 +172,8 @@ tasks.register('packageApp', Exec) {
         osArgs = [
             '--type', 'deb',
             '--icon', 'iconos/icon.png',
-            '--linux-package-name', 'jacobitus-escritorio',
-            '--linux-deb-maintainer', 'desarrollo@firmadigital.bo',
+            '--linux-package-name', jarName,
+            '--linux-deb-maintainer', maintainer,
             '--linux-package-deps', 'libnss3-tools, pcscd, pcsc-tools, libnss3, libpcsclite1',
             '--linux-shortcut'
         ]
@@ -206,10 +209,171 @@ tasks.register('packageApp', Exec) {
     }
 
     project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
-    tasks.findByName('importCA').mustRunAfter 'clean'
-    tasks.findByName('addDrivers').mustRunAfter 'clean', ':jacobitus-libreria:buildNative'
-    tasks.findByName('importChangePin').mustRunAfter 'clean', ':jacobitus-libreria:buildNative'
-    tasks.findByName('shadowJar').mustRunAfter ':jacobitus-libreria:buildNative', 'importChangePin', 'importCA'
+    tasks.findByName('importCA').mustRunAfter('clean')
+    tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
 
     commandLine(jpackageCmd + osArgs)
+}
+
+tasks.register('packageRpm') {
+
+    group = 'distribution'
+
+    def appCategory = 'Utility;'
+    def mimeTypes = 'application/jose;application/pkcs7-signature;application/pdf'
+
+    def rpmRoot = file("${buildDir}/rpm")
+    def tempAppImageDir = file("${buildDir}/tmp/app-image")
+    def appImageDir = file("${tempAppImageDir}/${appName}")
+    def specTemplate = file("${projectDir}/plantillas/rpm/${jarName}.spec")
+    def desktopTemplate = file("${projectDir}/plantillas/rpm/resources/${jarName}-${appName.replace(' ', '')}.desktop")
+
+    dependsOn clean
+    dependsOn ':jacobitus-libreria:buildNative'
+    dependsOn shadowJar
+    dependsOn importCA
+    dependsOn addDrivers
+    dependsOn importChangePin
+
+    project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('importCA').mustRunAfter('clean')
+    tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
+
+    doFirst {
+        if (tempAppImageDir.exists()) {
+            logger.lifecycle("Eliminando app-image previo...")
+            delete tempAppImageDir
+        }
+
+        tempAppImageDir.mkdirs()
+
+        delete rpmRoot
+
+        ['BUILD', 'RPMS', 'SOURCES', 'SPECS', 'SRPMS'].each {
+            file("${rpmRoot}/${it}").mkdirs()
+        }
+    }
+
+    doLast {
+        exec {
+            workingDir './'
+            commandLine([
+                    "${System.getProperty("java.home")}/bin/jpackage",
+                    '--verbose',
+                    '--input', 'build/libs',
+                    '--main-class', mainClassName,
+                    '--main-jar', "${jarName}-${version.replace('-1', '')}.jar",
+                    '--vendor', vendorName,
+                    '--dest', tempAppImageDir.absolutePath,
+                    '--name', appName,
+                    '--app-version', version.replace('-1', ''),
+                    '--description', appDescription,
+                    '--java-options', '-Dfile.encoding=UTF-8',
+
+                    '--type', 'app-image',
+                    '--icon', './iconos/icon.png',
+            ])
+        }
+
+        appImageDir = tempAppImageDir.listFiles()?.find {
+            it.isDirectory()
+        }
+
+        if (appImageDir == null || !appImageDir.exists()) {
+            throw new GradleException("No se encontró el app-image en ${tempAppImageDir}")
+        }
+
+        def sourceDir = file("${rpmRoot}/SOURCES/opt/${jarName}")
+
+        copy {
+            from appImageDir
+            into sourceDir
+        }
+
+        copy {
+            from(appImageDir) {
+                include '**/*.png'
+                eachFile { file ->
+                    if (file.name.contains(' ')) {
+                        file.name = file.name.replaceAll(/\s+/, '_')
+                    }
+                }
+                includeEmptyDirs = false
+            }
+            into sourceDir
+        }
+
+        def desktopFile = file("${sourceDir}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
+
+        def desktopContent = desktopTemplate.text
+                .replace('@APP_NAME@', appName)
+                .replace('@DESCRIPTION@', appDescription)
+                .replace('@INSTALL_DIR@', "/opt/${jarName}")
+                .replace('@EXECUTABLE_NAME@', appName)
+                .replace('@ICON_NAME@', "${appName.replace(' ', '_')}.png")
+                .replace('@CATEGORY@', appCategory)
+                .replace('@MIME_TYPES@', mimeTypes)
+
+        desktopFile.text = desktopContent
+
+        logger.lifecycle("Desktop file generado: ${desktopFile.absolutePath}")
+
+        copy {
+            from ("${projectDir}/plantillas/rpm/resources") {
+                exclude '*.desktop'
+            }
+            into "${sourceDir}/lib"
+        }
+
+        def specFile = file("${rpmRoot}/SPECS/${jarName}.spec")
+
+        def specContent = specTemplate.text
+                .replace('@SUMMARY@', appName)
+                .replace('@NAME@', jarName)
+                .replace('@VERSION@', version)
+                .replace('@RELEASE@', '1')
+                .replace('@LICENSE@', 'LPG-Bolivia')
+                .replace('@VENDOR@', vendorName)
+                .replace('@PREFIX@', '/opt')
+                .replace('@PROVIDES@', jarName)
+                .replace('@GROUP@', 'Utility')
+                .replace('@REQUIRES@', ', nss-tools, pcsc-lite, pcsc-lite-ccid, pcsc-tools, nss, pcsc-lite-libs')
+                .replace('@DESCRIPTION@', appDescription)
+                .replace('@SOURCE_DIR@', "/opt/${jarName}")
+                .replace('@INSTALL_DIR@', "/opt/${jarName}")
+                .replace('@LICENSE_FILE@', "${projectDir}/license.txt")
+                .replace('@DESKTOP_FILE@', "/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
+                .replace('@MIME_FILE@', "/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}-MimeInfo.xml")
+                .replace('@UNINSTALL_MIME@', "${jarName}-${appName.replace(' ', '')}.desktop application/jose application/pkcs7-signature application/pdf")
+
+        specFile.text = specContent
+
+        logger.lifecycle("SPEC generado: ${specFile.absolutePath}")
+
+        exec {
+            environment 'HOME', rpmRoot.absolutePath
+            commandLine('rpmbuild', '--define', "_topdir ${rpmRoot.absolutePath}", '-bb', specFile.absolutePath)
+        }
+
+        def rpmFiles = fileTree("${rpmRoot}/RPMS").matching {
+            include '**/*.rpm'
+        }.files
+
+        if (rpmFiles.empty) {
+            throw new GradleException("No se generó el RPM")
+        }
+
+        def rpmOutput = rpmFiles.first()
+
+        copy {
+            from rpmOutput
+            into "${projectDir}/dist"
+        }
+
+        logger.lifecycle("RPM generado: ${rpmOutput.name}")
+    }
 }
