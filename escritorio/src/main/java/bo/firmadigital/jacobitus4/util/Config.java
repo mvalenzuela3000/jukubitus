@@ -274,7 +274,7 @@ public class Config {
     }
 
     public String getEnlaceVersion() {
-        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/version";
+        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/version.json";
     }
 
     public void save() {
