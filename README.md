@@ -9,6 +9,7 @@
 ## Sistema Operativo
 
 - [Debian](README-DEBIAN.md)
+- [Fedora](README-FEDORA.md)
 - [Windows x64](README-WINDOWS-X64.md)
 - [Windows x32](README-WINDOWS-X32.md)
 - [MacOS procesador Intel](README-MACOS-X64.md)

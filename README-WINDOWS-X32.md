@@ -1,24 +1,29 @@
 # Jacobitus Escritorio
+
 Es una aplicación desarrollada con JavaFX para firma y validación de firma digital en diferentes documentos.
 
 ## Requerimientos
+
 - OpenJDK **15.0.2**
 - Gradle 7.6.2
 - g++ 10.x.x o superior
 
 ### Instalación de Java 15
 
-Descargamos el JDK desde el Repositorio Estatal de Software Libre
+Descargamos el JDK desde el Repositorio Estatal de Software Libre:
 
+[OpenJDK](https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/openjdk)
+
+Descargamos OpenJDK 15.0.2:
 - Versión para [Windows de 32 bits](https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/openjdk/openjdk-15-windows-x86-32/-/blob/master/jdk15u-full-x86-32.zip).
 
-Descomprimmos el archivo **jdk15u-full-x86-32.zip** en la carpeta **C:\Java**
+Descomprimmos el archivo **jdk15u-full-x86-32.zip** en la carpeta **C:\Java**.
 
-Creamos la variable de entorno **JAVA_HOME** con el valor **C:\Java\jdk15u-full-x86-32.zip**
+Creamos la variable de entorno **JAVA_HOME** con el valor **C:\Java\jdk15u-full-x86-32.zip**.
 
-Actualizamos la variable de entorno **PATH** con el valor **%JAVA_HOME%\bin**
+Actualizamos la variable de entorno **PATH** con el valor **%JAVA_HOME%\bin**.
 
-Verificamos la instalación.
+Verificamos la instalación:
 ```bash
 java -version
 ```
@@ -29,7 +34,7 @@ Descargamos el instalador de **MSYS2** (https://www.msys2.org/) desde el siguien
 
 - https://github.com/msys2/msys2-installer/releases/download/2024-07-27/msys2-x86_64-20240727.exe
 
-Ejecutamos el instalador **msys2-x86_64-20240727.exe**, el directorio de instalacion por defecto es **C:\msys64**
+Ejecutamos el instalador **msys2-x86_64-20240727.exe**, el directorio de instalacion por defecto es **C:\msys64**.
 
 Ejecutamos **MSYS64** al terminar la instalación.
 
@@ -41,13 +46,11 @@ pacman -S --needed base-devel mingw-w64-i686-toolchain
 
 Seleccionamos la opción por defecto y procedemos con la instalación.
 
-Actualizamos la variable de entorno **PATH** con el valor **C:\msys64\mingw32\bin**
+Actualizamos la variable de entorno **PATH** con el valor **C:\msys64\mingw32\bin**.
 
-Verificamos la instalación.
+Verificamos la instalación:
 ```bash
-gcc --version
 g++ --version
-gdb --version
 ```
 
 ### Instalación git
@@ -58,12 +61,12 @@ Descargamos en instalador desde la dirección:
 
 Ejecutamos el instalador.
 
-Verificamos la instalación.
+Verificamos la instalación:
 ```bash
 git --version
 ```
 
-Habilitamos el cache de credenciales para facilitar el manejo de submódulos
+Habilitamos el cache de credenciales:
 ```bash
 $ git config --global credential.helper cache
 ```
@@ -75,11 +78,20 @@ Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
-### Ejecución de la aplicación
-Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
+Ingresamos al directorio:
+```bash
+$ cd jacobitus-escritorio
+```
 
+### Ejecución de la aplicación
+
+Compilamos:
 ```bash
 $ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA escritorio:addDrivers escritorio:importChangePin escritorio:shadowJar
+```
+
+Ejecutamos:
+```bash
 $ ./gradlew escritorio:run
 ```
 
@@ -89,7 +101,7 @@ Para la generación de un archivo msi/exe es necesario:
 
 - WiX 3.11.x
 
-Para la generación de un archivo msi es necesario ejecutar:
+Generamos el instalador:
 ```bash
 $ ./gradlew packageApp
 ```
