@@ -56,6 +56,10 @@ import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.ECA;
 import bo.firmadigital.jacobitus4.util.UrlFileName;
+import bo.firmadigital.jacobitus4.util.actualizacion.ActualizacionHelper;
+import bo.firmadigital.jacobitus4.util.actualizacion.ActualizacionInfo;
+import bo.firmadigital.jacobitus4.util.plataforma.PlataformaHelper;
+import bo.firmadigital.jacobitus4.util.plataforma.PlataformaInfo;
 import bo.firmadigital.utiles.CertUtil;
 import bo.firmadigital.utiles.Conversor;
 import javafx.application.Application;
@@ -66,7 +70,6 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -92,7 +95,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -154,11 +156,12 @@ public class App extends Application {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void start(Stage stage) throws IOException, URISyntaxException {
-        String version = Constantes.VERSION;
+    public void start(Stage stage) throws IOException, URISyntaxException, InterruptedException {
+        String version = Informacion.VERSION;
         stage.setTitle("Jacobitus - " + version);
         if (!servicio) {
-            // Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá interactuar con aplicaciones web.", ButtonType.OK);
+            // Alert alert = new Alert(AlertType.ERROR, "Servicio detenido, no podrá
+            // interactuar con aplicaciones web.", ButtonType.OK);
             Alert alert = new Alert(AlertType.ERROR, WebServer.mensaje, ButtonType.OK);
             alert.initOwner(stage);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -168,9 +171,24 @@ public class App extends Application {
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
 
+        Config config = Config.getInstance();
+        PlataformaInfo plataformaInfo = PlataformaHelper.identificar();
+        ActualizacionHelper actualizacionHelper = new ActualizacionHelper(
+                config.getEnlaceInstaladores());
+
+        ActualizacionInfo actualizacionInfo = actualizacionHelper.verificarActualizacion(
+                config.getEnlaceVersion(),
+                Informacion.VERSION,
+                plataformaInfo
+                        .getSistemaOperativo()
+                        .getValor(),
+                plataformaInfo
+                        .getArquitectura()
+                        .getValor());
+
         BorderPane root = new BorderPane();
         MenuBar menuBar = new MenuBar();
-        
+
         Menu mainMenu = new Menu("Archivo");
         MenuItem actualizarItem = new MenuItem("Actualizar Tokens");
         actualizarItem.setOnAction((ActionEvent e) -> {
@@ -182,7 +200,8 @@ public class App extends Application {
             fileChooser.setTitle("Abrir PDF");
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
             fileChooser.getExtensionFilters().add(extFilter);
-            FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Documentos", "*.odt", "*.docx");
+            FileChooser.ExtensionFilter extFilterDocs = new FileChooser.ExtensionFilter("Documentos", "*.odt",
+                    "*.docx");
             fileChooser.getExtensionFilters().add(extFilterDocs);
             List<File> files = fileChooser.showOpenMultipleDialog(stage);
             if (files != null && files.size() > 0) {
@@ -276,7 +295,8 @@ public class App extends Application {
                 stage.close();
             }
         });
-        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, convertiAPdf, limpiarItem, opcionesItem, abrirCrt, closeItem);
+        mainMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, convertiAPdf, limpiarItem, opcionesItem,
+                abrirCrt, closeItem);
         menuBar.getMenus().add(mainMenu);
 
         Menu firmaMenu = new Menu("Firma");
@@ -289,7 +309,7 @@ public class App extends Application {
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
-                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO) table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
                     alert.initOwner(stage);
@@ -297,7 +317,7 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    if (((Validador)tableFile.getItems().get(0)).isRemoto()) {
+                    if (((Validador) tableFile.getItems().get(0)).isRemoto()) {
                         destino = new File(System.getProperty("java.io.tmpdir"));
                     } else {
                         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -305,7 +325,8 @@ public class App extends Application {
                         destino = directoryChooser.showDialog(stage);
                     }
                     if (destino == null) {
-                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        Alert alert = new Alert(AlertType.INFORMATION,
+                                "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.initOwner(stage);
                         alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
@@ -314,7 +335,8 @@ public class App extends Application {
                         Firmante firmante = new Firmante(stage, item.getSlot(), Constants.PDF);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
-                            new Thread(firmarPdf(firmante.isBloquea(), item.getSlot(), firmante.getLabel(), firmante.getPass())).start();
+                            new Thread(firmarPdf(firmante.isBloquea(), item.getSlot(), firmante.getLabel(),
+                                    firmante.getPass())).start();
                         }
                     }
                 }
@@ -329,7 +351,7 @@ public class App extends Application {
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
-                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO) table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
                     alert.initOwner(stage);
@@ -337,7 +359,7 @@ public class App extends Application {
                     alert.setTitle("Jacobitus");
                     alert.showAndWait();
                 } else {
-                    if (((Validador)tableFile.getItems().get(0)).isRemoto()) {
+                    if (((Validador) tableFile.getItems().get(0)).isRemoto()) {
                         destino = new File(System.getProperty("java.io.tmpdir"));
                     } else {
                         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -345,7 +367,8 @@ public class App extends Application {
                         destino = directoryChooser.showDialog(stage);
                     }
                     if (destino == null) {
-                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        Alert alert = new Alert(AlertType.INFORMATION,
+                                "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.initOwner(stage);
                         alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
@@ -369,7 +392,7 @@ public class App extends Application {
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
-                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO) table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
                     alert.initOwner(stage);
@@ -381,7 +404,8 @@ public class App extends Application {
                     directoryChooser.setTitle("Seleccione directorio de destino");
                     destino = directoryChooser.showDialog(stage);
                     if (destino == null) {
-                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        Alert alert = new Alert(AlertType.INFORMATION,
+                                "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.initOwner(stage);
                         alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
@@ -390,7 +414,9 @@ public class App extends Application {
                         Firmante firmante = new Firmante(stage, item.getSlot(), Constants.DSIG);
                         firmante.showAndWait();
                         if (firmante.getLabel() != null) {
-                            new Thread(firmarXml(item.getSlot(), firmante.getLabel(), firmante.getPass(), firmante.getNode(), firmante.getForzarEnveloped(), firmante.getUsarPrefijo())).start();
+                            new Thread(firmarXml(item.getSlot(), firmante.getLabel(), firmante.getPass(),
+                                    firmante.getNode(), firmante.getForzarEnveloped(), firmante.getUsarPrefijo()))
+                                    .start();
                         }
                     }
                 }
@@ -405,7 +431,7 @@ public class App extends Application {
                 alert.setTitle("Jacobitus");
                 alert.showAndWait();
             } else {
-                CK_TOKEN_INFO item = (CK_TOKEN_INFO)table.getSelectionModel().getSelectedItem();
+                CK_TOKEN_INFO item = (CK_TOKEN_INFO) table.getSelectionModel().getSelectedItem();
                 if (item == null) {
                     Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione un Token.", ButtonType.OK);
                     alert.initOwner(stage);
@@ -417,7 +443,8 @@ public class App extends Application {
                     directoryChooser.setTitle("Seleccione directorio de destino");
                     destino = directoryChooser.showDialog(stage);
                     if (destino == null) {
-                        Alert alert = new Alert(AlertType.INFORMATION, "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
+                        Alert alert = new Alert(AlertType.INFORMATION,
+                                "Por favor seleccione la ruta para el documento firmado.", ButtonType.OK);
                         alert.initOwner(stage);
                         alert.initModality(Modality.APPLICATION_MODAL);
                         alert.setTitle("Jacobitus");
@@ -434,7 +461,7 @@ public class App extends Application {
         });
         firmaMenu.getItems().addAll(firmarItem, firmarPKCS7Item, firmarXmlItem, firmarJwsItem);
         menuBar.getMenus().add(firmaMenu);
-        
+
         Menu pdfMenu = new Menu("PDF");
         MenuItem nuevoItem = new MenuItem("Nuevo");
         nuevoItem.setOnAction((ActionEvent e) -> {
@@ -446,7 +473,7 @@ public class App extends Application {
         });
         pdfMenu.getItems().addAll(nuevoItem);
         menuBar.getMenus().add(pdfMenu);
-        
+
         Menu helpMenu = new Menu("Ayuda");
         MenuItem servicioItem = new MenuItem("Verificar servicio");
         servicioItem.setOnAction((ActionEvent e) -> {
@@ -455,18 +482,19 @@ public class App extends Application {
 
         MenuItem aboutItem = new MenuItem("Acerca de ...");
         aboutItem.setOnAction((ActionEvent e) -> {
-            String versionLibreria = bo.firmadigital.jacobitus.Version.VERSION;
+            String versionLibreria = bo.firmadigital.jacobitus.Informacion.VERSION;
             String javaVersion = System.getProperty("java.version");
             String javafxVersion = System.getProperty("javafx.version");
             String changePinVersion = new ChangePinJNI().version();
-            ImageView logo = new ImageView(new Image(this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
+            ImageView logo = new ImageView(
+                    new Image(this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
             StringBuilder sb = new StringBuilder();
             sb.append("Jacobitus Escritorio " + version + "\n");
             sb.append("Jacobitus Librería " + versionLibreria + "\n");
             sb.append("ChangePin Library " + changePinVersion + "\n");
             sb.append("JavaFX " + javafxVersion + "\n");
             sb.append("Java " + javaVersion);
-            
+
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.initOwner(stage);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -499,9 +527,9 @@ public class App extends Application {
             directoryChooser.setTitle("Seleccione directorio de destino");
             File destino = directoryChooser.showDialog(stage);
             if (destino != null) {
-                Config config = Config.getInstance();
                 try {
-                    Files.copy(config.getToken().toPath(), new File(destino, "softoken.p12").toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+                    Files.copy(config.getToken().toPath(), new File(destino, "softoken.p12").toPath(),
+                            StandardCopyOption.COPY_ATTRIBUTES);
                     Alert alert = new Alert(AlertType.INFORMATION, "El softoken se exportó correctamente.");
                     alert.initOwner(stage);
                     alert.initModality(Modality.APPLICATION_MODAL);
@@ -601,12 +629,32 @@ public class App extends Application {
         progressBar.prefWidthProperty().bind(middle.widthProperty());
 
         tables.setTop(table);
-        
+
         root.setCenter(middle);
         middle.setTop(progressBar);
+
+        BorderPane footer = new BorderPane();
+        footer.setPadding(new Insets(5, 10, 5, 10));
+
         Label pie = new Label("AGETIC - https://firmadigital.bo");
-        root.setBottom(new StackPane(pie));
-        ((StackPane)root.getBottom()).setAlignment(Pos.BOTTOM_RIGHT);
+        pie.setPadding(new Insets(5, 5, 5, 5));
+        footer.setRight(pie);
+
+        Platform.runLater(() -> {
+            if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
+                Hyperlink linkUpdate = new Hyperlink("Hay una actualización disponible");
+                linkUpdate.setStyle(
+                        "-fx-text-fill: #2a7ae2; -fx-underline: true;");
+                linkUpdate.setOnAction(e -> new ActualizacionDisponible(stage, actualizacionInfo).showAndWait());
+                footer.setLeft(linkUpdate);
+            }
+        });
+
+        footer.setStyle(
+                "-fx-border-color: #e0e0e0; " +
+                        "-fx-border-width: 1 0 0 0;");
+        root.setBottom(footer);
+
         Scene scene = new Scene(root, 640, 480);
         stage.setScene(scene);
         stage.show();
@@ -617,7 +665,12 @@ public class App extends Application {
             }
         } else {
             Platform.runLater(() -> {
-                new Thread(listarTokens()).start();
+                if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
+                    new ActualizacionDisponible(stage, actualizacionInfo).showAndWait();
+                    new Thread(listarTokens()).start();
+                } else {
+                    new Thread(listarTokens()).start();
+                }
             });
         }
         stage.setOnCloseRequest((WindowEvent e) -> {
@@ -648,9 +701,16 @@ public class App extends Application {
             new Thread(download(url, token, urlPost)).start();
         }
         stage.setOnShown((WindowEvent e) -> {
-            if (taskBar) {
-                new Thread(listarTokens()).start();
-            }
+            Platform.runLater(() -> {
+                if (taskBar) {
+                    if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
+                        new ActualizacionDisponible(stage, actualizacionInfo).showAndWait();
+                        new Thread(listarTokens()).start();
+                    } else {
+                        new Thread(listarTokens()).start();
+                    }
+                }
+            });
         });
         App.stage = stage;
         App.app = this;
@@ -666,7 +726,7 @@ public class App extends Application {
         };
         return task;
     }
-    
+
     public Task<Boolean> listarTokens() {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
@@ -711,7 +771,8 @@ public class App extends Application {
                     getHostServices().showDocument(err);
                 });
                 pane.setCenter(link);
-                label.setText("No se encontro el controlador del token, por favor descargue e instale del siguiente link.");
+                label.setText(
+                        "No se encontro el controlador del token, por favor descargue e instale del siguiente link.");
             }
             alert.showAndWait();
             stage.getScene().setCursor(Cursor.DEFAULT);
@@ -734,7 +795,9 @@ public class App extends Application {
                         certs.add(new ValidadorPdf(Conversor.docxAPdf(files.get(i)), getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".pdf")) {
                         certs.add(new ValidadorPdf(files.get(i), getOpcionesValidador()));
-                    // TODO: Ajustar los mensajes de validacion de documentos xml y json, considerando que no se puede determinar si fueron firmados dentro del periodo de vigencia del certificado
+                        // TODO: Ajustar los mensajes de validacion de documentos xml y json,
+                        // considerando que no se puede determinar si fueron firmados dentro del periodo
+                        // de vigencia del certificado
                     } else if (files.get(i).getName().endsWith(".xml")) {
                         certs.add(new ValidadorXml(files.get(i), null, getOpcionesValidador()));
                     } else if (files.get(i).getName().endsWith(".jws")) {
@@ -794,17 +857,20 @@ public class App extends Application {
                                 name = name.replace(".pdf", ".firmado.pdf");
                             }
                             File out = new File(destino, name);
-                            try (InputStream is = new FileInputStream(files.get(i).getAbsolutePath()); OutputStream os = new FileOutputStream(out)) {
+                            try (InputStream is = new FileInputStream(files.get(i).getAbsolutePath());
+                                    OutputStream os = new FileOutputStream(out)) {
                                 firmar.firmar(is, os, bloquear, false);
                             }
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidadorPdf(out, getOpcionesValidador()));
                         } catch (IOException ex) {
                             updateProgress(i + 1, files.size());
-                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage()).append("\n");
+                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage())
+                                    .append("\n");
                         } catch (PdfException ex) {
                             updateProgress(i + 1, files.size());
-                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getCause().getMessage()).append("\n");
+                            errores.append(files.get(i).getAbsolutePath()).append(":")
+                                    .append(ex.getCause().getMessage()).append("\n");
                         }
                     }
                 }
@@ -898,7 +964,8 @@ public class App extends Application {
                     IFirmador firmar = FirmadorPKCS7.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
                         File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                FileOutputStream os = new FileOutputStream(out)) {
                             firmar.firmar(is, os);
                         }
                         updateProgress(i + 1, files.size());
@@ -921,7 +988,8 @@ public class App extends Application {
         return task;
     }
 
-    public Task<Boolean> firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped, Boolean usarPrefijo) {
+    public Task<Boolean> firmarXml(long slot, String label, String pass, String node, Boolean forzarEnveloped,
+            Boolean usarPrefijo) {
         progressBar.progressProperty().unbind();
         Task<Boolean> task = new Task<Boolean>() {
             @SuppressWarnings("unchecked")
@@ -952,7 +1020,8 @@ public class App extends Application {
                             name = name.replace(".xml", ".firmado.xml");
                         }
                         File out = new File(destino, name);
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                FileOutputStream os = new FileOutputStream(out)) {
                             firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
                         }
                         updateProgress(i + 1, files.size());
@@ -1006,7 +1075,8 @@ public class App extends Application {
                             name = name + ".jws";
                         }
                         File out = new File(destino, name);
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile())); FileOutputStream os = new FileOutputStream(out)) {
+                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                FileOutputStream os = new FileOutputStream(out)) {
                             firmar.firmar(is, os, false, false);
                         }
                         updateProgress(i + 1, files.size());
@@ -1116,7 +1186,8 @@ public class App extends Application {
                             App.contraseniaMacOS = null;
                         }
                         if (OS.isMac()) {
-                            certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal(App.contraseniaMacOS);
+                            certificadoServicioLocalInstalado = CertUtil
+                                    .verificarCertificadoServicioLocal(App.contraseniaMacOS);
                         } else {
                             certificadoServicioLocalInstalado = CertUtil.verificarCertificadoServicioLocal();
                         }
@@ -1129,23 +1200,25 @@ public class App extends Application {
                         certificadoServicioLocal = "Problemas al verificar certificado de servicio local";
                         errorCertificadoServicioLocalInstalado = true;
                     }
-                    
-                    ImageView logo = new ImageView(new Image(this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
+
+                    ImageView logo = new ImageView(new Image(
+                            this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
                     StringBuilder sb = new StringBuilder();
                     sb.append("Jacobitus " + version + "\n");
                     sb.append(certificadoServicioLocal);
-                    
+
                     Alert verificarServicioAlerta = new Alert(AlertType.INFORMATION);
                     verificarServicioAlerta.initOwner(stage);
                     verificarServicioAlerta.initModality(Modality.APPLICATION_MODAL);
                     verificarServicioAlerta.setTitle("Verificar servicio");
                     verificarServicioAlerta.setHeaderText(sb.toString());
-                    verificarServicioAlerta.setContentText("Agencia de Gobierno Electrónico y Tecnologías de Información y Comunicación");
+                    verificarServicioAlerta.setContentText(
+                            "Agencia de Gobierno Electrónico y Tecnologías de Información y Comunicación");
                     verificarServicioAlerta.setGraphic(logo);
-    
+
                     VBox vbox = new VBox();
                     vbox.setSpacing(5);
-    
+
                     FlowPane fpCertificadoServicioLocal = new FlowPane();
                     Label lblCertificadoServicioLocal = new Label("Certificado de servicio local ->");
                     Hyperlink instalarCertificadoServicioLocal = new Hyperlink("Instalar");
@@ -1159,7 +1232,7 @@ public class App extends Application {
                                 confirmacion.setHeaderText(null);
                                 confirmacion.setTitle("Confirmación");
                                 confirmacion.setContentText("¿Está seguro de desinstalar el certificado?");
-    
+
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
@@ -1176,7 +1249,8 @@ public class App extends Application {
                         if (errorCertificadoServicioLocalInstalado) {
                             fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal);
                         } else {
-                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, desinstalarCertificadoServicioLocal);
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal,
+                                    desinstalarCertificadoServicioLocal);
                         }
                     } else {
                         instalarCertificadoServicioLocal.setOnAction((e1) -> {
@@ -1187,7 +1261,7 @@ public class App extends Application {
                                 confirmacion.setHeaderText(null);
                                 confirmacion.setTitle("Confirmación");
                                 confirmacion.setContentText("¿Está seguro de instalar el certificado?");
-    
+
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
                                     if (OS.isMac()) {
@@ -1204,12 +1278,13 @@ public class App extends Application {
                         if (errorCertificadoServicioLocalInstalado) {
                             fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal);
                         } else {
-                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal, instalarCertificadoServicioLocal);
+                            fpCertificadoServicioLocal.getChildren().addAll(lblCertificadoServicioLocal,
+                                    instalarCertificadoServicioLocal);
                         }
                     }
 
                     vbox.getChildren().addAll(fpCertificadoServicioLocal);
-    
+
                     verificarServicioAlerta.getDialogPane().contentProperty().set(vbox);
                     verificarServicioAlerta.showAndWait();
                     stage.getScene().setCursor(Cursor.DEFAULT);
@@ -1279,7 +1354,7 @@ public class App extends Application {
             new Thread(app.download(url, token, urlPost)).start();
         });
     }
-    
+
     public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated) {
         App.servicio = servicio;
         App.taskBar = taskBar;
@@ -1301,7 +1376,8 @@ public class App extends Application {
         }
     }
 
-    public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String url, String token, String urlPost) {
+    public static void run(boolean servicio, boolean taskBar, boolean taskBarEmulated, String url, String token,
+            String urlPost) {
         App.servicio = servicio;
         App.taskBar = taskBar;
         App.taskBarEmulated = taskBarEmulated;
@@ -1325,7 +1401,7 @@ public class App extends Application {
             tokenSelected.setFilesJson(null);
             Service service = new Service(stage, tokenSelected, "pades");
             service.showAndWait();
-            synchronized(tokenSelected) {
+            synchronized (tokenSelected) {
                 tokenSelected.notify();
             }
         });
@@ -1344,7 +1420,7 @@ public class App extends Application {
             tokenSelected.setFilesJson(null);
             Service service = new Service(stage, tokenSelected, "jws");
             service.showAndWait();
-            synchronized(tokenSelected) {
+            synchronized (tokenSelected) {
                 tokenSelected.notify();
             }
         });
@@ -1364,7 +1440,7 @@ public class App extends Application {
             tokenSelected.setFilesJson(jsons);
             Service service = new Service(stage, tokenSelected, "both");
             service.showAndWait();
-            synchronized(tokenSelected) {
+            synchronized (tokenSelected) {
                 tokenSelected.notify();
             }
         });

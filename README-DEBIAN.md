@@ -79,22 +79,21 @@ Clonamos el proyecto desde el Repositorio Estatal de Software Libre.
 $ git clone https://gitlab.softwarelibre.gob.bo/adsib/jacobitus-total/jacobitus-escritorio.git --recursive
 ```
 
-### Gradle
+### Ejecución de la aplicación
 Ingresamos a la carpeta **jacobitus-escritorio** y ejecutar los siguientes comandos:
 
 ```bash
-$ ./gradlew jacobitus-libreria:buildForLinux escritorio:clean escritorio:importCA escritorio:addDriversLinux escritorio:importChangePinLinux escritorio:shadowJar
+$ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA escritorio:addDrivers escritorio:importChangePin escritorio:shadowJar
 $ ./gradlew escritorio:run
 ```
 
-## Generar paquete de instalación
+## Generación del paquete de instalación
 
 Para la generación de un archivo deb es necesario:
-```bash
-$ sudo apt -y install fakeroot
-```
+
+- fakeroot para Debian/Ubuntu Linux.
 
 Ejecutamos el siguiente comando:
 ```bash
-$ ./gradlew packageDeb
+$ ./gradlew packageApp
 ```

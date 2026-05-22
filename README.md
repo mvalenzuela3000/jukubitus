@@ -9,8 +9,10 @@
 ## Sistema Operativo
 
 - [Debian](README-DEBIAN.md)
-- [Windows](README-WINDOWS.md)
-- [MacOS](README-MACOS.md)
+- [Windows x64](README-WINDOWS-X64.md)
+- [Windows x32](README-WINDOWS-X32.md)
+- [MacOS procesador Intel](README-MACOS-X64.md)
+- [MacOS procesador Apple](README-MACOS-ARM64.md)
 
 ## Licencia
 
