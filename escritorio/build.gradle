@@ -17,6 +17,8 @@ def appName = 'Jacobitus Escritorio'
 def jarName = "jacobitus-escritorio"
 
 def os = OperatingSystem.current()
+def arch = System.getProperty("os.arch").toLowerCase()
+def is64Bits = arch.contains("64")
 
 repositories {
     mavenLocal()
@@ -83,17 +85,17 @@ shadowJar {
     mergeServiceFiles()
 }
 
-// tasks.withType(JavaCompile).configureEach {
-//     options.encoding = 'UTF-8'
-// }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
 
-// tasks.withType(Javadoc).configureEach {
-//     options.encoding = 'UTF-8'
-// }
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
 
-// tasks.withType(JavaExec).configureEach {
-//     jvmArgs += '-Dfile.encoding=UTF-8'
-// }
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '-Dfile.encoding=UTF-8'
+}
 
 tasks.register('importCA', Copy) {
     from 'ca'
@@ -178,14 +180,27 @@ tasks.register('packageApp', Exec) {
             '--icon', 'iconos/icon.icns'
         ]
     } else if (os.isWindows()) {
-        osArgs = [
-            '--type', 'msi',
-            '--icon', 'iconos/icon.ico',
-            '--win-shortcut',
-            '--win-menu',
-            '--win-menu-group', 'AGETIC',
-            '--win-upgrade-uuid', "47fdae43-82ca-40ca-887f-8e6459366643"
-        ]
+        if (is64Bits) {
+            println "Generando instalador Windows MSI 64 bits"
+            osArgs = [
+                '--type', 'msi',
+                '--icon', 'iconos/icon.ico',
+                '--win-shortcut',
+                '--win-menu',
+                '--win-menu-group', 'AGETIC',
+                '--win-upgrade-uuid', "47fdae43-82ca-40ca-887f-8e6459366643"
+            ]
+        } else {
+            println "Generando instalador Windows MSI 32 bits"
+            osArgs = [
+                '--type', 'msi',
+                '--icon', 'iconos/icon.ico',
+                '--win-shortcut',
+                '--win-menu',
+                '--win-menu-group', 'AGETIC',
+                '--win-upgrade-uuid', "47fdae43-82ca-40ca-887f-8e6459366643"
+            ]
+        }
     } else {
         throw new GradleException("Sistema operativo no soportado")
     }
