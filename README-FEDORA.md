@@ -11,7 +11,7 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 
 Actualizamos el sistema operativo:
 ```bash
-$ sudo apt update && sudo apt -y upgrade
+$ sudo dnf update -y
 ```
 
 ### Instalación de Java 15
@@ -37,7 +37,7 @@ $ sudo mkdir -p /usr/lib/jvm
 
 Descomprimimos el archivo **openjdk-15.0.2_linux-x64_bin.tar.gz** en la carpeta **/usr/lib/jvm**:
 ```bash
-$ sudo tar -zxf ./openjdk-15.0.2_linux-x64_bin.tar.gz -C /usr/lib/jvm
+$ sudo tar -zxf openjdk-15.0.2_linux-x64_bin.tar.gz -C /usr/lib/jvm
 ```
 
 Registramos la versión de **java**:
@@ -65,7 +65,7 @@ $ java -version
 ### Instalación g++
 
 ```bash
-$ sudo apt -y install build-essential
+$ sudo dnf groupinstall -y "Development Tools"
 ```
 
 Verificamos la instalación:
@@ -76,7 +76,7 @@ $ g++ --version
 ### Instalación git
 
 ```bash
-$ sudo apt -y install git
+$ sudo dnf install -y git
 ```
 
 Verificamos la instalación:
@@ -115,12 +115,12 @@ $ ./gradlew escritorio:run
 
 ## Generación del paquete de instalación
 
-Instalamos fakeroot:
+Instalamos rpmbuild:
 ```bash
-$ sudo apt install -y fakeroot
+$ sudo dnf install -y rpm-build rpmdevtools
 ```
 
 Generamos el paquete:
 ```bash
-$ ./gradlew packageApp
+$ ./gradlew packageRpm
 ```
