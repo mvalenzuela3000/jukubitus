@@ -172,6 +172,7 @@ tasks.register('packageApp', Exec) {
         osArgs = [
             '--type', 'deb',
             '--icon', 'iconos/icon.png',
+            '--resource-dir', 'plantillas/deb',
             '--linux-package-name', jarName,
             '--linux-deb-maintainer', maintainer,
             '--linux-package-deps', 'libnss3-tools, pcscd, pcsc-tools, libnss3, libpcsclite1',
