@@ -189,6 +189,7 @@ tasks.register('packageApp', Exec) {
             osArgs = [
                 '--type', 'msi',
                 '--icon', 'iconos/icon.ico',
+                '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
                 '--win-menu-group', 'AGETIC',
@@ -199,6 +200,7 @@ tasks.register('packageApp', Exec) {
             osArgs = [
                 '--type', 'msi',
                 '--icon', 'iconos/icon.ico',
+                '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
                 '--win-menu-group', 'AGETIC',
