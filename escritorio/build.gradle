@@ -172,6 +172,7 @@ tasks.register('packageApp', Exec) {
         osArgs = [
             '--type', 'deb',
             '--icon', 'iconos/icon.png',
+            '--resource-dir', 'plantillas/deb',
             '--linux-package-name', jarName,
             '--linux-deb-maintainer', maintainer,
             '--linux-package-deps', 'libnss3-tools, pcscd, pcsc-tools, libnss3, libpcsclite1',
@@ -188,6 +189,7 @@ tasks.register('packageApp', Exec) {
             osArgs = [
                 '--type', 'msi',
                 '--icon', 'iconos/icon.ico',
+                '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
                 '--win-menu-group', 'AGETIC',
@@ -198,6 +200,7 @@ tasks.register('packageApp', Exec) {
             osArgs = [
                 '--type', 'msi',
                 '--icon', 'iconos/icon.ico',
+                '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
                 '--win-menu-group', 'AGETIC',
