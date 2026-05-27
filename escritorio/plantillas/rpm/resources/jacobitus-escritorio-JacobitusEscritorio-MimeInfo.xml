@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/jose">
+    <comment>JSON Web Signature</comment>
+    <glob pattern="*.kws"></glob>
+  </mime-type>
+  <mime-type type="application/pkcs7-signature">
+    <comment>PKCS-7 Signature</comment>
+    <glob pattern="*.p7s"></glob>
+  </mime-type>
+  <mime-type type="application/pdf">
+    <comment>Portable Document Format</comment>
+    <glob pattern="*.pdf"></glob>
+  </mime-type>
+</mime-info>

@@ -227,7 +227,7 @@ public class Configuracion extends Stage {
         // vbox2.setPadding(new Insets(10));
         // vbox2.setSpacing(8);
         // vbox2.setMinWidth(210);
-        // Label titleHsm = new Label("Opciones HSM ADSIB");
+        // Label titleHsm = new Label("Opciones HSM");
         // titleHsm.setStyle("-fx-font-weight: bold");
         // vbox2.getChildren().add(titleHsm);
         // checkBoxHsm = new CheckBox("Utilizar HSM");

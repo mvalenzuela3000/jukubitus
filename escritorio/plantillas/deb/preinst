@@ -1,0 +1,44 @@
+#!/bin/sh
+# preinst script for APPLICATION_PACKAGE
+#
+# see: dh_installdeb(1)
+
+set -e
+
+# summary of how this script can be called:
+#        * <new-preinst> `install'
+#        * <new-preinst> `install' <old-version>
+#        * <new-preinst> `upgrade' <old-version>
+#        * <old-preinst> `abort-upgrade' <new-version>
+# for details, see https://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+case "$1" in
+    install|upgrade)
+        for old_package in jacobitus-total jacobitus; do
+            old_status=$(dpkg-query -W -f='${Status}' "$old_package" 2>/dev/null || true)
+            case "$old_status" in
+                "install ok installed")
+                    echo "" >&2
+                    echo "ERROR: Existe una version anterior de Jacobitus instalada." >&2
+                    echo "CAUSA: Jacobitus Escritorio no puede instalarse mientras exista $old_package." >&2
+                    echo "ACCION REQUERIDA: desinstale manualmente la version anterior antes de continuar:" >&2
+                    echo "  sudo apt remove $old_package" >&2
+                    echo "Luego vuelva a instalar Jacobitus Escritorio." >&2
+                    echo "" >&2
+                    exit 1
+                ;;
+            esac
+        done
+    ;;
+
+    abort-upgrade)
+    ;;
+
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

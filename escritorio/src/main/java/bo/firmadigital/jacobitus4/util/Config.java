@@ -172,7 +172,7 @@ public class Config {
         if (options.containsKey("hsmCloud")) {
             return options.getProperty("hsmCloud");
         } else {
-            return "https://desarrollo.adsib.gob.bo/cloud_hsm/services/api/v1/hsm";
+            return "https://firmadigital.bo/cloud_hsm/services/api/v1/hsm";
         }
     }
 
@@ -217,7 +217,7 @@ public class Config {
         if (options.containsKey("TS")) {
             return options.getProperty("TS");
         } else {
-            return "https://desarrollo.adsib.gob.bo/sellado_tiempo/timestamp/api/v1/sellado";
+            return "https://firmadigital.bo/sellado_tiempo/timestamp/api/v1/sellado";
         }
     }
 
@@ -269,6 +269,14 @@ public class Config {
         return Controlador.obtenerDispositivosCompatibles();
     }
 
+    public String getEnlaceInstaladores() {
+        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/instaladores";
+    }
+
+    public String getEnlaceVersion() {
+        return "https://firmadigital.bo/herramientas/jacobitus-escritorio/version.json";
+    }
+
     public void save() {
         try {
             if (!user.exists()) {
@@ -276,7 +284,7 @@ public class Config {
                     throw new RuntimeException("No se pudo crear el directorio " + user);
                 }
             }
-            options.store(new FileWriter(fileOptions), "ADSIB - Jacobitus options");
+            options.store(new FileWriter(fileOptions), "AGETIC - Jacobitus options");
         } catch (IOException ex) {
             throw new RuntimeException(ex.getMessage());
         }

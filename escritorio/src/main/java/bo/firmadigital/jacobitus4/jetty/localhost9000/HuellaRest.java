@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4.jetty.localhost9000;
 
 import java.io.IOException;
@@ -18,10 +13,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.HuellaServicio;
 
-/**
- *
- * @author ADSIB
- */
 @Path("/huella")
 public class HuellaRest {
     @GET
@@ -29,47 +20,6 @@ public class HuellaRest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String capturar() {
-        // JSONObject json = new JSONObject();
-        // try {
-        //     if (OS.isWindows()) {
-        //         Capturar.capturar((byte[] image) -> {
-        //             try {
-        //                 JSONObject datos = new JSONObject();
-        //                 datos.put("image", Base64.getEncoder().encodeToString(image));
-        //                 datos.put("wsq", Base64.getEncoder().encodeToString(Capturar.toWSQ(image)));
-        //                 json.put("datos", datos);
-        //                 json.put("finalizado", true);
-        //                 json.put("mensaje", "Huella capturada");
-        //                 response.resume(json.toString());
-        //             } catch (JSONException ex) {
-        //                 Logger.getLogger(EstadoRest.class.getName()).log(Level.SEVERE, null, ex);
-        //             }
-        //         });
-        //     } else {
-        //         Capturar.capturarLinux((byte[] image) -> {
-        //             try {
-        //                 JSONObject datos = new JSONObject();
-        //                 datos.put("image", Base64.getEncoder().encodeToString(image));
-        //                 datos.put("wsq", Base64.getEncoder().encodeToString(Capturar.toWSQ(image)));
-        //                 json.put("datos", datos);
-        //                 json.put("finalizado", true);
-        //                 json.put("mensaje", "Huella capturada");
-        //                 response.resume(json.toString());
-        //             } catch (JSONException ex) {
-        //                 Logger.getLogger(EstadoRest.class.getName()).log(Level.SEVERE, null, ex);
-        //             }
-        //         });
-        //     }
-        // } catch (RuntimeException e) {
-        //     try {
-        //         json.put("datos", JSONObject.NULL);
-        //         json.put("finalizado", false);
-        //         json.put("mensaje", e.getMessage());
-        //     } catch (JSONException ex) {
-        //         Logger.getLogger(EstadoRest.class.getName()).log(Level.SEVERE, null, ex);
-        //     }
-        //     response.resume(json.toString());
-        // }
         HuellaServicio servicio = new HuellaServicio();
         ObjectMapper om = new ObjectMapper();
         try {

@@ -128,7 +128,7 @@ public class FirmadorServicio {
             // token.salir();
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
             FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
@@ -205,7 +205,7 @@ public class FirmadorServicio {
             // token.salir();
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
             FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
@@ -281,7 +281,7 @@ public class FirmadorServicio {
             // token.salir();
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
             FirmaXmlRespuestaDto datos = new FirmaXmlRespuestaDto();
@@ -392,7 +392,7 @@ public class FirmadorServicio {
             // token.salir();
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
 
@@ -520,7 +520,7 @@ public class FirmadorServicio {
             // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
             FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
@@ -606,7 +606,7 @@ public class FirmadorServicio {
             // token.salir();
             // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
             //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP-ADSIB.");
+            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
             //     return respuesta;
             // }
             Slot oSlot = gestorSlot.obtenerSlot(objetoDto.getSlot());
