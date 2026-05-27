@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4.jetty.localhost9000;
 
 import java.io.IOException;
@@ -18,48 +13,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 import bo.firmadigital.jacobitus4.jetty.JettyHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.EstadoServicio;
 
-/**
- *
- * @author ADSIB
- */
 @Path("/status")
 public class EstadoRest {
-    /**
-     * @api {get} /api/status Verifica el estado del servicio.
-     * @apiGroup Estado
-     * @apiVersion 1.0.0
-     *
-     * @apiHeader {String} [Content-Type=application/json] Tipo de contenido
-     *
-     * @apiSuccessExample {json} Success-Response:
-     * {
-     *     "datos": {
-     *         "compilacion": 3100,
-     *         "api_version": "1.0.0"
-     *     },
-     *     "finalizado": true,
-     *     "mensaje": "Servicio ejecutandose correctamente"
-     * }
-     */
     @GET
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String status() {
-        // JSONObject json = new JSONObject();
-        // String r = "{}";
-        // try {
-        //     JSONObject datos = new JSONObject();
-        //     datos.put("compilacion", 3100);
-        //     datos.put("api_version", Constantes.VERSION);
-        //     json.put("datos", datos);
-        //     json.put("finalizado", true);
-        //     json.put("mensaje", "Servicio ejecutandose correctamente");
-        //     r = json.toString();
-        // } catch (JSONException ex) {
-        //     Logger.getLogger(EstadoRest.class.getName()).log(Level.SEVERE, null, ex);
-        // }
-        // return r;
         EstadoServicio servicio = new EstadoServicio();
         ObjectMapper om = new ObjectMapper();
         try {

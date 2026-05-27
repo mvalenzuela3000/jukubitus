@@ -14,5 +14,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FirmaModoSeguroRespuestaDto {
     private String message;
+    private String error;
     private List<FirmaPdfItemRespuestaDto> files;
 }

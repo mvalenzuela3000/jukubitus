@@ -322,7 +322,7 @@ public class Service extends Stage {
                         buttonFirmar.setDisable(true);
                     }
                 } else {
-                    message.setText("Certificado no emitido por la ECP-ADSIB.");
+                    message.setText("Certificado no emitido por la ECP.");
                     buttonFirmar.setDisable(true);
                 }
             }

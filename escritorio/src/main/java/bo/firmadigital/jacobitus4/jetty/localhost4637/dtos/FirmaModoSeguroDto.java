@@ -16,5 +16,6 @@ public class FirmaModoSeguroDto {
     private String ci;
     private String format;
     private String language;
+    private Boolean getcertificate = true;
     private List<FirmaPdfItemDto> archivo;
 }
