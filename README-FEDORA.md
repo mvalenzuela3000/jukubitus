@@ -65,7 +65,7 @@ $ java -version
 ### Instalación g++
 
 ```bash
-$ sudo dnf groupinstall -y "Development Tools"
+$ sudo dnf5 install -y gcc-c++
 ```
 
 Verificamos la instalación:
