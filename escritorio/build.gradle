@@ -380,3 +380,167 @@ tasks.register('packageRpm') {
         logger.lifecycle("RPM generado: ${rpmOutput.name}")
     }
 }
+
+tasks.register('packageArch') {
+    group = 'distribution'
+
+    def appCategory = 'Utility'
+    def mimeTypes = 'application/jose;application/pkcs7-signature;application/pdf'
+
+    // Definición de directorios
+    def archRoot = file("${buildDir}/arch")
+    def tempAppImageDir = file("${buildDir}/tmp/app-image")
+
+    dependsOn clean
+    dependsOn ':jacobitus-libreria:buildNative'
+    dependsOn shadowJar
+    dependsOn importCA
+    dependsOn addDrivers
+    dependsOn importChangePin
+
+    doFirst {
+        if (tempAppImageDir.exists()) {
+            logger.lifecycle("Eliminando app-image previo...")
+            delete tempAppImageDir
+        }
+        delete archRoot
+
+        tempAppImageDir.mkdirs()
+        archRoot.mkdirs()
+    }
+
+    doLast {
+        // Ejecutar jpackage
+        exec {
+            workingDir './'
+            commandLine([
+                    "${System.getProperty("java.home")}/bin/jpackage",
+                    '--verbose',
+                    '--input', 'build/libs',
+                    '--main-class', mainClassName,
+                    '--main-jar', "${jarName}-${version.replace('-1', '')}.jar",
+                    '--vendor', vendorName,
+                    '--dest', tempAppImageDir.absolutePath,
+                    '--name', appName,
+                    '--app-version', version.replace('-1', ''),
+                    '--description', appDescription,
+                    '--java-options', '-Dfile.encoding=UTF-8',
+                    '--type', 'app-image',
+                    '--icon', './iconos/icon.png',
+            ])
+        }
+
+        // Asignación dinámica después de que jpackage creara las carpetas
+        def appImageDir = tempAppImageDir.listFiles()?.find { it.isDirectory() }
+
+        if (appImageDir == null || !appImageDir.exists()) {
+            throw new GradleException("No se encontró el app-image generado por jpackage")
+        }
+
+        def packageDir = file("${archRoot}/${jarName}")
+
+        // Copiar app-image a la estructura de destino
+        copy {
+            from appImageDir
+            into "${packageDir}/opt/${jarName}"
+        }
+
+        copy {
+            from(appImageDir) {
+                include '**/*.png'
+                eachFile { file ->
+                    if (file.name.contains(' ')) {
+                        file.name = file.name.replaceAll(/\s+/, '_')
+                    }
+                }
+                includeEmptyDirs = false
+            }
+            into "${packageDir}/opt/${jarName}"
+        }
+
+        // Copiar recursos extra excluyendo el template original .desktop
+        copy {
+            from("${projectDir}/plantillas/arch/resources") {
+                exclude '*.desktop'
+            }
+            into "${packageDir}/opt/${jarName}/lib"
+        }
+
+        // Generar archivo Desktop corregido internamente
+        def desktopTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.desktop")
+        def desktopFile = file("${packageDir}/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
+
+        if (desktopTemplate.exists()) {
+            def desktopContent = desktopTemplate.text
+                    .replace('@APP_NAME@', appName)
+                    .replace('@DESCRIPTION@', appDescription)
+                    .replace('@INSTALL_DIR@', "/opt/${jarName}")
+                    .replace('@EXECUTABLE_NAME@', appName)
+                    .replace('@ICON_NAME@', "${appName.replace(' ', '_')}.png")
+                    .replace('@CATEGORY@', appCategory)
+                    .replace('@MIME_TYPES@', mimeTypes)
+            desktopFile.text = desktopContent
+            logger.lifecycle("Desktop file generado: ${desktopFile.absolutePath}")
+        }
+
+        // --- FIX PARA EL MIME XML ---
+        // Tu PKGBUILD busca un archivo @JAR_NAME@.xml. Nos aseguramos de crearlo o copiarlo aquí:
+        def mimeSource = file("${projectDir}/plantillas/arch/${jarName}.xml")
+        if (mimeSource.exists()) {
+            copy {
+                from mimeSource
+                into archRoot
+            }
+        } else {
+            // Si no existe, creamos uno básico vacío para que no rompa el PKGBUILD
+            file("${archRoot}/${jarName}.xml").text = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\"></mime-info>"
+        }
+
+        // PKGBUILD generación
+        def pkgbuildTemplate = file("${projectDir}/plantillas/arch/PKGBUILD")
+        def pkgbuildFile = file("${archRoot}/PKGBUILD")
+        def ARCH_DEPENDS = "'nss' 'pcsclite' 'ccid'"
+        def ARCH_OPTDEPENDS = "'pcsc-tools'"
+        
+        def pkgbuildContent = pkgbuildTemplate.text
+                .replace('@PKGNAME@', jarName.toLowerCase())
+                .replace('@PKGVER@', version.replace('-1', ''))
+                .replace('@PKGREL@', '1')
+                .replace('@PKGDESC@', appDescription)
+                .replace('@ARCH@', 'x86_64')
+                .replace('@URL@', 'https://firmadigital.bo/herramientas/jacobitus-escritorio')
+                .replace('@LICENSE@', 'LPG-Bolivia')
+                .replace("@REQUIRES@", ARCH_DEPENDS)
+                .replace("@OPTREQUIRES@", ARCH_OPTDEPENDS)
+                .replace('@VENDOR@', vendorName)
+                .replace('@APP_NAME@', appName.replace(' ', ''))
+                .replace('@JAR_NAME@', jarName)
+
+        pkgbuildFile.text = pkgbuildContent
+        logger.lifecycle("PKGBUILD generado: ${pkgbuildFile.absolutePath}")
+
+        // Ejecutar makepkg
+        exec {
+            workingDir archRoot
+            commandLine 'makepkg', '-f', '--nodeps', '--noextract'
+        }
+
+        // Recolectar y mover el resultado
+        def pkgFiles = fileTree(archRoot).matching {
+            include '*.pkg.tar.zst'
+        }.files
+
+        if (pkgFiles.empty) {
+            throw new GradleException("No se generó el paquete ArchLinux (.pkg.tar.zst)")
+        }
+
+        def pkgOutput = pkgFiles.first()
+
+        copy {
+            from pkgOutput
+            into "${projectDir}/dist"
+        }
+
+        logger.lifecycle("Paquete Arch compilado con éxito: ${pkgOutput.name} en dist/")
+    }
+}
