@@ -22,7 +22,7 @@ import javax.imageio.ImageIO;
 
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
@@ -35,7 +35,7 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.property.AreaBreakType;
+import com.itextpdf.layout.properties.AreaBreakType;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;

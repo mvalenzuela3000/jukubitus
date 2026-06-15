@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import org.codehaus.jettison.json.JSONArray;
 
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 
 import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;

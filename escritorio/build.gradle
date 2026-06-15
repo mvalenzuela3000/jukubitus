@@ -43,7 +43,7 @@ dependencies {
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.43'
 
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.78'
-    implementation 'com.itextpdf:sign:7.1.15'
+    implementation 'com.itextpdf:sign:7.2.6'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
     implementation 'org.codehaus.jettison:jettison:1.5.1'
     implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
