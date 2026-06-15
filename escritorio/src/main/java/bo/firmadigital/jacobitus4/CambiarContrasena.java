@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import com.itextpdf.io.IOException;
+import com.itextpdf.io.exceptions.IOException;
 
 import bo.firmadigital.jacobitus.firmador.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
