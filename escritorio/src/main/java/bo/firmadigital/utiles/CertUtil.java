@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import bo.firmadigital.jacobitus.utilidades.OS;
@@ -16,11 +17,11 @@ import bo.firmadigital.jacobitus.utilidades.OS;
 public class CertUtil {
     public static String obtenerDirectorio() {
         try {
-            String ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            String ruta = new File(CertUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
             String rutaBase = new File(ruta).getParentFile().getAbsolutePath();
             String directorio = rutaBase + "/ca";
             if (directorio.contains("build/classes/java") || directorio.contains("build\\classes\\java")) {
-                ruta = new File(Controlador.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getPath();
+                ruta = new File(CertUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getPath();
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/ca";
             }
@@ -43,11 +44,22 @@ public class CertUtil {
 
     private static String obtenerDistribucion() {
         if (OS.isUnix()) {
-            if (OS.isDebian()) {
-                return "DEBIAN";
-            } else {
-                return "RHEL";
+            File osRelease = new File("/etc/os-release");
+            if (osRelease.exists()) {
+                try (Stream<String> lines = Files.lines(osRelease.toPath())) {
+                    String content = lines.collect(Collectors.joining("\n")).toLowerCase();
+                    if (content.contains("arch")) {
+                        return "ARCH";
+                    } else if (content.contains("fedora") || content.contains("rhel") || content.contains("centos")) {
+                        return "RHEL";
+                    } else if (content.contains("ubuntu") || content.contains("debian") || content.contains("mint")) {
+                        return "DEBIAN";
+                    }
+                } catch (IOException e) {
+                    // Fallback si falla la lectura del archivo
+                }
             }
+            return OS.isDebian() ? "DEBIAN" : "RHEL";
         }
         if (OS.isWindows()) {
             return "WINDOWS";
@@ -64,13 +76,16 @@ public class CertUtil {
 
     public static boolean verificarCertificadoServicioLocal(String contrasenia) throws IOException {
         Process p;
-        switch (CertUtil.obtenerDistribucion()) {
+        String distro = CertUtil.obtenerDistribucion();
+        switch (distro) {
             case "DEBIAN":
+            case "RHEL":
+            case "ARCH":
                 boolean respuesta = true;
                 File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
                 boolean chromiumInstalado = false;
                 if (chromiumBD.exists()) {
-                    p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-L", "-d", chromiumBD.getParent() });
+                    p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + chromiumBD.getParent() });
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                         String s;
                         while ((s = in.readLine()) != null) {
@@ -81,21 +96,33 @@ public class CertUtil {
                     }
                     respuesta = respuesta && chromiumInstalado;
                 }
-                File mozilla = new File(System.getProperty("user.home") + "/.mozilla/firefox/");
+
+                String rutaFirefox = "ARCH".equals(distro) 
+                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
+                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+                
+                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                    walkStream.filter(x -> x.toFile().isFile())
-                        .forEach(f -> {
-                            if (f.toString().endsWith("cert9.db")) {
-                                encontrados.add(f.toFile());
-                            }
-                        });
+                if (mozilla.exists()) {
+                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                        walkStream.filter(x -> x.toFile().isFile())
+                            .forEach(f -> {
+                                if (f.toString().endsWith("cert9.db")) {
+                                    encontrados.add(f.toFile());
+                                }
+                            });
+                    }
                 }
-                if (encontrados.size() > 0) {
+
+                if (!chromiumBD.exists() && encontrados.isEmpty()) {
+                    return false;
+                }
+
+                if (!encontrados.isEmpty()) {
                     for (int i = 0; i < encontrados.size(); i++) {
                         File mozillaBD = encontrados.get(i);
                         boolean mozillaInstalado = false;
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-L", "-d", mozillaBD.getParent() });
+                        p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + mozillaBD.getParent() });
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
@@ -106,10 +133,10 @@ public class CertUtil {
                         }
                         respuesta = respuesta && mozillaInstalado;
                     }
+                    return respuesta;
                 }
-                return respuesta;
-            case "RHEL":
-                return false;
+                return chromiumInstalado;
+
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-user", "-store", "root" });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -121,6 +148,7 @@ public class CertUtil {
                     }
                 }
                 return false;
+
             case "MACOS":
                 p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security verify-cert -c " + CertUtil.obtenerRutaCertificadoServicioLocal() + " -v" });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -152,8 +180,8 @@ public class CertUtil {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
-                return null;
             case "RHEL":
+            case "ARCH":
                 return null;
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", CertUtil.obtenerRutaCertificadoServicioLocal() });
@@ -179,13 +207,16 @@ public class CertUtil {
 
     public static boolean instalarCertificadoServicioLocal(String contrasenia) throws IOException, InterruptedException {
         Process p;
-        switch (CertUtil.obtenerDistribucion()) {
+        String distro = CertUtil.obtenerDistribucion();
+        switch (distro) {
             case "DEBIAN":
+            case "RHEL":
+            case "ARCH":
                 boolean respuesta = true;
                 File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
                 boolean chromiumInstalado = false;
                 if (chromiumBD.exists()) {
-                    p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-L", "-d", chromiumBD.getParent() });
+                    p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + chromiumBD.getParent() });
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                         String s;
                         while ((s = in.readLine()) != null) {
@@ -195,7 +226,7 @@ public class CertUtil {
                         }
                     }
                     if (!chromiumInstalado) {
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", chromiumBD.getParent() });
+                        p = Runtime.getRuntime().exec(new String[] { "certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", "sql:" + chromiumBD.getParent() });
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
@@ -207,21 +238,33 @@ public class CertUtil {
                     }
                     respuesta = respuesta && chromiumInstalado;
                 }
-                File mozilla = new File(System.getProperty("user.home") + "/.mozilla/firefox/");
+
+                String rutaFirefox = "ARCH".equals(distro) 
+                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
+                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+
+                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                    walkStream.filter(x -> x.toFile().isFile())
-                        .forEach(f -> {
-                            if (f.toString().endsWith("cert9.db")) {
-                                encontrados.add(f.toFile());
-                            }
-                        });
+                if (mozilla.exists()) {
+                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                        walkStream.filter(x -> x.toFile().isFile())
+                            .forEach(f -> {
+                                if (f.toString().endsWith("cert9.db")) {
+                                    encontrados.add(f.toFile());
+                                }
+                            });
+                    }
                 }
-                if (encontrados.size() > 0) {
+
+                if (!chromiumBD.exists() && encontrados.isEmpty()) {
+                    return false;
+                }
+
+                if (!encontrados.isEmpty()) {
                     for (int i = 0; i < encontrados.size(); i++) {
                         File mozillaBD = encontrados.get(i);
                         boolean mozillaInstalado = false;
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-L", "-d", mozillaBD.getParent() });
+                        p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + mozillaBD.getParent() });
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
@@ -231,7 +274,7 @@ public class CertUtil {
                             }
                         }
                         if (!mozillaInstalado) {
-                            p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", mozillaBD.getParent() });
+                            p = Runtime.getRuntime().exec(new String[] { "certutil", "-A", "-n", "adsib.gob.bo", "-i", CertUtil.obtenerRutaCertificadoServicioLocal(), "-t", "cTC,cTC,cTC", "-d", "sql:" + mozillaBD.getParent() });
                             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                                 String s;
                                 while ((s = in.readLine()) != null) {
@@ -243,10 +286,10 @@ public class CertUtil {
                         }
                         respuesta = respuesta && mozillaInstalado;
                     }
+                    return respuesta;
                 }
-                return respuesta;
-            case "RHEL":
-                return false;
+                return chromiumInstalado;
+
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", CertUtil.obtenerRutaCertificadoServicioLocal() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -258,6 +301,7 @@ public class CertUtil {
                     }
                 }
                 return false;
+
             case "MACOS":
                 p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain " + CertUtil.obtenerRutaCertificadoServicioLocal() });
                 return true;
@@ -272,31 +316,39 @@ public class CertUtil {
 
     public static boolean desinstalarCertificadoServicioLocal(String contrasenia) throws IOException {
         Process p;
-        switch (CertUtil.obtenerDistribucion()) {
+        String distro = CertUtil.obtenerDistribucion();
+        switch (distro) {
             case "DEBIAN":
+            case "RHEL":
+            case "ARCH":
                 File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
                 if (chromiumBD.exists()) {
-                    p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-D", "-n", "adsib.gob.bo", "-d", chromiumBD.getParent() });
+                    p = Runtime.getRuntime().exec(new String[] { "certutil", "-D", "-n", "adsib.gob.bo", "-d", "sql:" + chromiumBD.getParent() });
                 }
-                File mozilla = new File(System.getProperty("user.home") + "/.mozilla/firefox/");
+
+                String rutaFirefox = "ARCH".equals(distro) 
+                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
+                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+
+                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                    walkStream.filter(x -> x.toFile().isFile())
-                        .forEach(f -> {
-                            if (f.toString().endsWith("cert9.db")) {
-                                encontrados.add(f.toFile());
-                            }
-                        });
+                if (mozilla.exists()) {
+                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                        walkStream.filter(x -> x.toFile().isFile())
+                            .forEach(f -> {
+                                if (f.toString().endsWith("cert9.db")) {
+                                    encontrados.add(f.toFile());
+                                }
+                            });
+                    }
                 }
                 if (encontrados.size() > 0) {
                     for (int i = 0; i < encontrados.size(); i++) {
                         File mozillaBD = encontrados.get(i);
-                        p = Runtime.getRuntime().exec(new String[] { "/usr/bin/certutil", "-D", "-n", "adsib.gob.bo", "-d", mozillaBD.getParent() });
+                        p = Runtime.getRuntime().exec(new String[] { "certutil", "-D", "-n", "adsib.gob.bo", "-d", "sql:" + mozillaBD.getParent() });
                     }
                 }
                 return true;
-            case "RHEL":
-                return false;
             case "WINDOWS":
                 String hashCertificado = CertUtil.obtenerHashCertificadoServicioLocal();
                 if (hashCertificado != null) {
@@ -328,17 +380,13 @@ public class CertUtil {
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
                 p = Runtime.getRuntime().exec(new String[] { "ls", "/usr/local/share/ca-certificates" });
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                    String s;
-                    while ((s = in.readLine()) != null) {
-                        if (s.contains("ecrb")) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+                return analizarSalidaECRB(p);
             case "RHEL":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "ls", "/etc/pki/ca-trust/source/anchors" });
+                return analizarSalidaECRB(p);
+            case "ARCH":
+                p = Runtime.getRuntime().exec(new String[] { "ls", "/etc/ca-certificates/trust-source/anchors" });
+                return analizarSalidaECRB(p);
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-user", "-store", "root" });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -377,12 +425,24 @@ public class CertUtil {
         }
     }
     
+    private static boolean analizarSalidaECRB(Process p) throws IOException {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String s;
+            while ((s = in.readLine()) != null) {
+                if (s.contains("ecrb")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static String obtenerHashCertificadoECRB() throws IOException {
         Process p;
         switch (CertUtil.obtenerDistribucion()) {
             case "DEBIAN":
-                return null;
             case "RHEL":
+            case "ARCH":
                 return null;
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-dump", CertUtil.obtenerRutaCertificadoECRB() });
@@ -416,7 +476,17 @@ public class CertUtil {
                 }
                 return true;
             case "RHEL":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "sudo", "cp", CertUtil.obtenerRutaCertificadoECRB(), "/etc/pki/ca-trust/source/anchors" });
+                if (CertUtil.verificarCertificadoECRB()) {
+                    p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-trust" });
+                }
+                return true;
+            case "ARCH":
+                p = Runtime.getRuntime().exec(new String[] { "sudo", "cp", CertUtil.obtenerRutaCertificadoECRB(), "/etc/ca-certificates/trust-source/anchors" });
+                if (CertUtil.verificarCertificadoECRB()) {
+                    p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-trust" });
+                }
+                return true;
             case "WINDOWS":
                 p = Runtime.getRuntime().exec(new String[] { "certutil.exe", "-addstore", "-f", "-user", "root", CertUtil.obtenerRutaCertificadoECRB() });
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -449,8 +519,21 @@ public class CertUtil {
                     p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-certificates", "--fresh" });
                 }
                 return true;
+
             case "RHEL":
-                return false;
+                p = Runtime.getRuntime().exec(new String[] { "sudo", "rm", "/etc/pki/ca-trust/source/anchors/ecrb.crt" });
+                if (CertUtil.verificarCertificadoECRB()) {
+                    p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-trust" });
+                }
+                return true;
+
+            case "ARCH":
+                p = Runtime.getRuntime().exec(new String[] { "sudo", "rm", "/etc/ca-certificates/trust-source/anchors/ecrb.crt" });
+                if (CertUtil.verificarCertificadoECRB()) {
+                    p = Runtime.getRuntime().exec(new String[] { "sudo", "update-ca-trust" });
+                }
+                return true;
+
             case "WINDOWS":
                 String hashCertificado = CertUtil.obtenerHashCertificadoECRB();
                 if (hashCertificado != null) {
@@ -460,10 +543,12 @@ public class CertUtil {
                     }
                 }
                 return false;
+
             case "MACOS":
                 p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoECRB() + " && sudo -S security delete-certificate -c \"Entidad Certificadora Raiz de Bolivia\"" });
                 return true;
-        default:
+
+            default:
                 return false;
         }
     }
