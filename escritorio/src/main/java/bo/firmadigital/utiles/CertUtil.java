@@ -97,20 +97,26 @@ public class CertUtil {
                     respuesta = respuesta && chromiumInstalado;
                 }
 
-                String rutaFirefox = "ARCH".equals(distro) 
-                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
-                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+                List<String> rutasFirefox = new ArrayList<>();
+                if ("ARCH".equals(distro)) {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.config/mozilla/firefox/");
+                } else {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.mozilla/firefox/");
+                    rutasFirefox.add(System.getProperty("user.home") + "/snap/firefox/common/.mozilla/firefox/");
+                }
                 
-                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                if (mozilla.exists()) {
-                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                        walkStream.filter(x -> x.toFile().isFile())
-                            .forEach(f -> {
-                                if (f.toString().endsWith("cert9.db")) {
-                                    encontrados.add(f.toFile());
-                                }
-                            });
+                for (String ruta : rutasFirefox) {
+                    File mozilla = new File(ruta);
+                    if (mozilla.exists()) {
+                        try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                            walkStream.filter(x -> x.toFile().isFile())
+                                .forEach(f -> {
+                                    if (f.toString().endsWith("cert9.db")) {
+                                        encontrados.add(f.toFile());
+                                    }
+                                });
+                        }
                     }
                 }
 
@@ -239,20 +245,26 @@ public class CertUtil {
                     respuesta = respuesta && chromiumInstalado;
                 }
 
-                String rutaFirefox = "ARCH".equals(distro) 
-                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
-                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+                List<String> rutasFirefox = new ArrayList<>();
+                if ("ARCH".equals(distro)) {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.config/mozilla/firefox/");
+                } else {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.mozilla/firefox/");
+                    rutasFirefox.add(System.getProperty("user.home") + "/snap/firefox/common/.mozilla/firefox/");
+                }
 
-                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                if (mozilla.exists()) {
-                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                        walkStream.filter(x -> x.toFile().isFile())
-                            .forEach(f -> {
-                                if (f.toString().endsWith("cert9.db")) {
-                                    encontrados.add(f.toFile());
-                                }
-                            });
+                for (String ruta : rutasFirefox) {
+                    File mozilla = new File(ruta);
+                    if (mozilla.exists()) {
+                        try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                            walkStream.filter(x -> x.toFile().isFile())
+                                .forEach(f -> {
+                                    if (f.toString().endsWith("cert9.db")) {
+                                        encontrados.add(f.toFile());
+                                    }
+                                });
+                        }
                     }
                 }
 
@@ -326,22 +338,29 @@ public class CertUtil {
                     p = Runtime.getRuntime().exec(new String[] { "certutil", "-D", "-n", "adsib.gob.bo", "-d", "sql:" + chromiumBD.getParent() });
                 }
 
-                String rutaFirefox = "ARCH".equals(distro) 
-                    ? System.getProperty("user.home") + "/.config/mozilla/firefox/"
-                    : System.getProperty("user.home") + "/.mozilla/firefox/";
+                List<String> rutasFirefox = new ArrayList<>();
+                if ("ARCH".equals(distro)) {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.config/mozilla/firefox/");
+                } else {
+                    rutasFirefox.add(System.getProperty("user.home") + "/.mozilla/firefox/");
+                    rutasFirefox.add(System.getProperty("user.home") + "/snap/firefox/common/.mozilla/firefox/");
+                }
 
-                File mozilla = new File(rutaFirefox);
                 final List<File> encontrados = new ArrayList<>();
-                if (mozilla.exists()) {
-                    try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
-                        walkStream.filter(x -> x.toFile().isFile())
-                            .forEach(f -> {
-                                if (f.toString().endsWith("cert9.db")) {
-                                    encontrados.add(f.toFile());
-                                }
-                            });
+                for (String ruta : rutasFirefox) {
+                    File mozilla = new File(ruta);
+                    if (mozilla.exists()) {
+                        try (Stream<Path> walkStream = Files.walk(mozilla.toPath())) {
+                            walkStream.filter(x -> x.toFile().isFile())
+                                .forEach(f -> {
+                                    if (f.toString().endsWith("cert9.db")) {
+                                        encontrados.add(f.toFile());
+                                    }
+                                });
+                        }
                     }
                 }
+                
                 if (encontrados.size() > 0) {
                     for (int i = 0; i < encontrados.size(); i++) {
                         File mozillaBD = encontrados.get(i);
