@@ -656,6 +656,7 @@ public class App extends Application {
         root.setBottom(footer);
 
         Scene scene = new Scene(root, 640, 480);
+        scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
         if (taskBar && !OS.isDebian()) {
