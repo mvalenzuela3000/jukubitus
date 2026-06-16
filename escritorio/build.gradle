@@ -3,7 +3,6 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'bo.firmadigital.jacobitus4.java-conventions'
 }
@@ -30,7 +29,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: '*.jar')
-    implementation project(path: ':jacobitus-libreria', configuration: 'shadow')
+    implementation project(':jacobitus-libreria')
 
     implementation 'org.openjfx:javafx-controls:17.0.10'
     implementation 'org.openjfx:javafx-fxml:17.0.10'
@@ -76,15 +75,16 @@ jar {
     archiveBaseName = jarName
     archiveVersion = version
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes(
+            'Main-Class': mainClassName,
+            'Class-Path': configurations.runtimeClasspath.files.collect { file ->
+                if (file.name.contains("jacobitus-libreria")) {
+                    return file.name
+                }
+                return "dependencias/${file.name}"
+            }.join(' ')
+        )
     }
-}
-
-shadowJar {
-    archiveBaseName = jarName
-    archiveVersion = version
-    archiveClassifier = ''
-    mergeServiceFiles()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -155,13 +155,43 @@ def jpackageCmd = [
     '--license-file', 'license.txt'
 ]
 
+tasks.register('copyAllDependencies') {
+    group = 'build'
+
+    dependsOn configurations.runtimeClasspath
+    dependsOn ':jacobitus-libreria:jar'
+
+    doLast {
+        copy {
+            from configurations.runtimeClasspath
+            from project(':jacobitus-libreria').file("build/dependencies")
+            into layout.buildDirectory.dir('libs/dependencias')
+            
+            exclude { element -> element.file.name.contains("jacobitus-libreria") }
+            exclude '*.so', '*.dylib', '*.dll'
+            
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+
+        copy {
+            from project(':jacobitus-libreria').layout.buildDirectory.dir('libs')
+            into layout.buildDirectory.dir('libs')
+            include '*.jar'
+            exclude '*.so', '*.dylib', '*.dll'
+            
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
+
 tasks.register('packageApp', Exec) {
 
     group = 'distribution'
 
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildNative'
-    dependsOn shadowJar
+    dependsOn jar
+    dependsOn copyAllDependencies
     dependsOn importCA
     dependsOn addDrivers
     dependsOn importChangePin
@@ -212,10 +242,11 @@ tasks.register('packageApp', Exec) {
     }
 
     project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
     tasks.findByName('importCA').mustRunAfter('clean')
     tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
     tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
-    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
 
     commandLine(jpackageCmd + osArgs)
 }
@@ -235,16 +266,18 @@ tasks.register('packageRpm') {
 
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildNative'
-    dependsOn shadowJar
+    dependsOn jar
+    dependsOn copyAllDependencies
     dependsOn importCA
     dependsOn addDrivers
     dependsOn importChangePin
 
     project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
     tasks.findByName('importCA').mustRunAfter('clean')
     tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
     tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
-    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
 
     doFirst {
         if (tempAppImageDir.exists()) {
@@ -387,13 +420,13 @@ tasks.register('packageArch') {
     def appCategory = 'Utility'
     def mimeTypes = 'application/jose;application/pkcs7-signature;application/pdf'
 
-    // Definición de directorios
     def archRoot = file("${buildDir}/arch")
     def tempAppImageDir = file("${buildDir}/tmp/app-image")
 
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildNative'
-    dependsOn shadowJar
+    dependsOn jar
+    dependsOn copyAllDependencies
     dependsOn importCA
     dependsOn addDrivers
     dependsOn importChangePin
@@ -416,7 +449,6 @@ tasks.register('packageArch') {
     }
 
     doLast {
-        // Ejecutar jpackage
         exec {
             workingDir './'
             commandLine([
@@ -436,7 +468,6 @@ tasks.register('packageArch') {
             ])
         }
 
-        // Asignación dinámica después de que jpackage creara las carpetas
         def appImageDir = tempAppImageDir.listFiles()?.find { it.isDirectory() }
 
         if (appImageDir == null || !appImageDir.exists()) {
@@ -445,7 +476,6 @@ tasks.register('packageArch') {
 
         def packageDir = file("${archRoot}/${jarName}")
 
-        // Copiar app-image a la estructura de destino
         copy {
             from appImageDir
             into "${packageDir}/opt/${jarName}"
@@ -464,7 +494,6 @@ tasks.register('packageArch') {
             into "${packageDir}/opt/${jarName}"
         }
 
-        // Copiar recursos extra excluyendo el template original .desktop
         copy {
             from("${projectDir}/plantillas/arch/resources") {
                 exclude '*.desktop'
@@ -472,7 +501,6 @@ tasks.register('packageArch') {
             into "${packageDir}/opt/${jarName}/lib"
         }
 
-        // Generar archivo Desktop corregido internamente
         def desktopTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.desktop")
         def desktopFile = file("${packageDir}/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
 
@@ -489,8 +517,6 @@ tasks.register('packageArch') {
             logger.lifecycle("Desktop file generado: ${desktopFile.absolutePath}")
         }
 
-        // --- FIX PARA EL MIME XML ---
-        // Tu PKGBUILD busca un archivo @JAR_NAME@.xml. Nos aseguramos de crearlo o copiarlo aquí:
         def mimeSource = file("${projectDir}/plantillas/arch/${jarName}.xml")
         if (mimeSource.exists()) {
             copy {
@@ -498,11 +524,9 @@ tasks.register('packageArch') {
                 into archRoot
             }
         } else {
-            // Si no existe, creamos uno básico vacío para que no rompa el PKGBUILD
             file("${archRoot}/${jarName}.xml").text = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\"></mime-info>"
         }
 
-        // PKGBUILD generación
         def pkgbuildTemplate = file("${projectDir}/plantillas/arch/PKGBUILD")
         def pkgbuildFile = file("${archRoot}/PKGBUILD")
         def ARCH_DEPENDS = "'nss' 'pcsclite' 'ccid'"
@@ -525,13 +549,11 @@ tasks.register('packageArch') {
         pkgbuildFile.text = pkgbuildContent
         logger.lifecycle("PKGBUILD generado: ${pkgbuildFile.absolutePath}")
 
-        // Ejecutar makepkg
         exec {
             workingDir archRoot
             commandLine 'makepkg', '-f', '--nodeps', '--noextract'
         }
 
-        // Recolectar y mover el resultado
         def pkgFiles = fileTree(archRoot).matching {
             include "${jarName}-*.pkg.tar.zst"
             exclude '*-debug-*.pkg.tar.zst'
