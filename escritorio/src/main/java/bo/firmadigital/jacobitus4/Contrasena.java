@@ -17,7 +17,6 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -91,13 +90,13 @@ public class Contrasena extends Stage {
         root.setCenter(vBox);
 
         Button buttonAceptar = new Button("Aceptar");
-        buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonAceptar.setOnAction(t -> {
             pass = passwordField.getText();
             close();
         });
 
         Button buttonCancelar = new Button("Cancelar");
-        buttonCancelar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonCancelar.setOnAction(t -> {
             close();
         });
         HBox hBox = new HBox();

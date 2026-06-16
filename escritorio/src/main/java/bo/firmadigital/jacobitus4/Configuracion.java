@@ -27,7 +27,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -107,7 +106,7 @@ public class Configuracion extends Stage {
         textFieldPort = new TextField("3128");
         vbox1.getChildren().add(textFieldPort);
         Button buttonGuardar = new Button("Guardar Proxy");
-        buttonGuardar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonGuardar.setOnAction(t -> {
             config.setProxyEnabled(checkBox.isSelected());
             config.setProxyIP(textFieldIP.getText());
             config.setProxyPort(textFieldPort.getText());
@@ -187,7 +186,7 @@ public class Configuracion extends Stage {
             buttonControlador = new Button("Remover");
         }
         vbox2.getChildren().add(buttonControlador);
-        buttonControlador.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonControlador.setOnAction(t -> {
             buttonControlador.setDisable(true);
             if (config.getDriver() == null) {
                 FileChooser fileChooser = new FileChooser();
@@ -273,7 +272,7 @@ public class Configuracion extends Stage {
         vbox2.getChildren().add(textFieldToken);
         Button buttonCrear = new Button("Crear Token");
         Button btnAbrirUbicacion = new Button("Abrir ubicación");
-        buttonCrear.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonCrear.setOnAction(t -> {
             ContrasenaNueva contrasena = new ContrasenaNueva(parent);
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
@@ -294,7 +293,7 @@ public class Configuracion extends Stage {
             }
         });
         vbox2.getChildren().add(buttonCrear);
-        btnAbrirUbicacion.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        btnAbrirUbicacion.setOnAction(t -> {
             try {
                 if (OS.isUnix()) {
                     Runtime.getRuntime().exec(new String[] { "sh", "-c", "/usr/bin/xdg-open '" + config.getToken().getParentFile().getPath() + "'" });
