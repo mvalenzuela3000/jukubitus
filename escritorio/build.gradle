@@ -398,6 +398,12 @@ tasks.register('packageArch') {
     dependsOn addDrivers
     dependsOn importChangePin
 
+    project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('importCA').mustRunAfter('clean')
+    tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
+
     doFirst {
         if (tempAppImageDir.exists()) {
             logger.lifecycle("Eliminando app-image previo...")
@@ -527,7 +533,8 @@ tasks.register('packageArch') {
 
         // Recolectar y mover el resultado
         def pkgFiles = fileTree(archRoot).matching {
-            include '*.pkg.tar.zst'
+            include "${jarName}-*.pkg.tar.zst"
+            exclude '*-debug-*.pkg.tar.zst'
         }.files
 
         if (pkgFiles.empty) {
