@@ -99,7 +99,7 @@ $ cd jacobitus-escritorio
 
 Compilamos:
 ```bash
-$ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA escritorio:addDrivers escritorio:importChangePin escritorio:shadowJar
+$ ./gradlew clean jacobitus-libreria:buildNative escritorio:jar escritorio:copyAllDependencies escritorio:importCA escritorio:addDrivers escritorio:importChangePin
 ```
 
 Ejecutamos:
