@@ -8,6 +8,7 @@ Es una aplicación desarrollada con JavaFX para firma y validación de firma dig
 - Gradle 7.6.2
 - g++ 10.x.x o superior
 - Git
+- PC/SC para detección de tokens USB
 
 Actualizamos el sistema operativo:
 ```bash
@@ -79,6 +80,29 @@ Habilitamos el cache de credenciales:
 ```bash
 $ git config --global credential.helper cache
 ```
+
+### Instalación y activación de PC/SC
+
+Para utilizar tokens USB como ePass2003, instalamos el servicio PC/SC y el controlador CCID:
+
+```bash
+$ sudo pacman -S --needed pcsclite ccid pcsc-tools opensc usbutils
+```
+
+Habilitamos el socket de PC/SC para que se inicie automáticamente cuando la aplicación lo requiera:
+
+```bash
+$ sudo systemctl enable --now pcscd.socket
+```
+
+Verificamos que el servicio esté disponible:
+
+```bash
+$ systemctl status pcscd.socket
+$ pcsc_scan
+```
+
+Si al ejecutar la aplicación aparece el error `SCARD_E_NO_SERVICE`, significa que `pcscd` no está activo o no está instalado.
 
 ## Compilación del proyecto
 
