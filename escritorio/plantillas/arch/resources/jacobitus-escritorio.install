@@ -1,0 +1,21 @@
+post_install() {
+  echo "=> [ @APP_NAME@ ] Actualizando base de datos de aplicaciones y tipos MIME..."
+  update-desktop-database -q >/dev/null 2>&1 || true
+  update-mime-database /usr/share/mime >/dev/null 2>&1 || true
+  
+  echo "=> [ @APP_NAME@ ] Activando el socket de pcscd para el soporte de tarjetas inteligentes..."
+  systemctl enable --now pcscd.socket >/dev/null 2>&1 || true
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  echo "=> [ @APP_NAME@ ] Limpiando base de datos de aplicaciones y tipos MIME..."
+  update-desktop-database -q >/dev/null 2>&1 || true
+  update-mime-database /usr/share/mime >/dev/null 2>&1 || true
+  
+  echo "=> [ @APP_NAME@ ] Desactivando el socket de pcscd..."
+  systemctl disable --now pcscd.socket >/dev/null 2>&1 || true
+}

@@ -7,39 +7,22 @@ license=('@LICENSE@')
 depends=(@REQUIRES@)
 optdepends=(@OPTREQUIRES@)
 
-# Evita que makepkg intente buscar archivos fuente que no existen en la web
+install=@PKGNAME@.install
+
 source=() 
 
 package() {
-  # 1. Crear directorios base en el destino
   install -d "$pkgdir/opt/@JAR_NAME@"
   install -d "$pkgdir/usr/share/applications"
   install -d "$pkgdir/usr/share/mime/packages"
 
-  # 2. Copiar la App (Usando $startdir para asegurar la ruta absoluta del build de Gradle)
   cp -r "$startdir/@JAR_NAME@/opt/@JAR_NAME@"/* "$pkgdir/opt/@JAR_NAME@/"
 
-  # 3. Copiar el Desktop entry
   install -m 644 \
     "$startdir/@JAR_NAME@/opt/@JAR_NAME@/lib/@JAR_NAME@-@APP_NAME@.desktop" \
     "$pkgdir/usr/share/applications/@JAR_NAME@.desktop"
 
-  # 4. Copiar definición MIME
   if [ -f "$startdir/@JAR_NAME@.xml" ]; then
     install -m 644 "$startdir/@JAR_NAME@.xml" "$pkgdir/usr/share/mime/packages/@JAR_NAME@.xml"
   fi
-}
-
-post_install() {
-  update-desktop-database >/dev/null 2>&1 || true
-  update-mime-database /usr/share/mime >/dev/null 2>&1 || true
-}
-
-post_upgrade() {
-  post_install
-}
-
-post_remove() {
-  update-desktop-database >/dev/null 2>&1 || true
-  update-mime-database /usr/share/mime >/dev/null 2>&1 || true
 }
