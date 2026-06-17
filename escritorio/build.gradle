@@ -502,7 +502,7 @@ tasks.register('packageArch') {
             into "${packageDir}/opt/${jarName}/lib"
         }
 
-        def installTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.install")
+        def installTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}.install")
         def installFile = file("${archRoot}/${jarName.toLowerCase()}.install")
 
         if (installTemplate.exists()) {
