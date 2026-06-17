@@ -431,6 +431,13 @@ tasks.register('packageArch') {
     dependsOn addDrivers
     dependsOn importChangePin
 
+    project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
+    tasks.findByName('importCA').mustRunAfter('clean')
+    tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+
     doFirst {
         if (tempAppImageDir.exists()) {
             logger.lifecycle("Eliminando app-image previo...")
@@ -495,6 +502,19 @@ tasks.register('packageArch') {
             into "${packageDir}/opt/${jarName}/lib"
         }
 
+        def installTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.install")
+        def installFile = file("${archRoot}/${jarName.toLowerCase()}.install")
+
+        if (installTemplate.exists()) {
+            def installContent = installTemplate.text
+                    .replace('@APP_NAME@', appName)
+            
+            installFile.text = installContent
+            logger.lifecycle(".install file generado: ${installFile.absolutePath}")
+        } else {
+            throw new GradleException("No se encontró la plantilla app.install en ${installTemplate.absolutePath}")
+        }
+
         def desktopTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.desktop")
         def desktopFile = file("${packageDir}/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
 
@@ -523,8 +543,8 @@ tasks.register('packageArch') {
 
         def pkgbuildTemplate = file("${projectDir}/plantillas/arch/PKGBUILD")
         def pkgbuildFile = file("${archRoot}/PKGBUILD")
-        def ARCH_DEPENDS = "'nss' 'pcsclite' 'ccid'"
-        def ARCH_OPTDEPENDS = "'pcsc-tools'"
+        def ARCH_DEPENDS = "'nss' 'pcsclite' 'ccid' 'pcsc-tools'"
+        def ARCH_OPTDEPENDS = ""        
         
         def pkgbuildContent = pkgbuildTemplate.text
                 .replace('@PKGNAME@', jarName.toLowerCase())
