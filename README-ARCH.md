@@ -99,6 +99,16 @@ Compilamos:
 $ ./gradlew clean jacobitus-libreria:buildNative escritorio:jar escritorio:copyAllDependencies escritorio:importCA escritorio:addDrivers escritorio:importChangePin
 ```
 
+Instalamos dependencias necesarias:
+```bash
+$ sudo pacman -S nss pcsclite ccid pcsc-tools
+```
+
+Activamos el socket de pcscd para el soporte de tarjetas inteligentes:
+```bash
+$ systemctl enable --now pcscd.socket
+```
+
 Ejecutamos:
 ```bash
 $ ./gradlew escritorio:run
