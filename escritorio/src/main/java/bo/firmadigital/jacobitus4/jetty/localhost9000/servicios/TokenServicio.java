@@ -129,7 +129,7 @@ public class TokenServicio {
             GestorSlot gestorSlot = GestorSlot.getInstance();
             gestorSlot.setOpciones(getOpciones());
 
-            if (objetoDto != null) {
+            if (objetoDto.getSlot() != null && objetoDto.getPin() != null) {
                 Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
                 if (slot != null) {
                     IToken token = slot.getToken();
