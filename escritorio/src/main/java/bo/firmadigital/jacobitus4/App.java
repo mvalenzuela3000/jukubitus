@@ -685,6 +685,12 @@ public class App extends Application {
             }
         });
 
+        App.stage = stage;
+        App.app = this;
+        if (taskBar && OS.isUnix()) {
+            Main.iniciarTrayDorkbox();
+        }
+
         new Thread(registrarCertificado()).start();
 
         if (url == null) {
@@ -713,8 +719,6 @@ public class App extends Application {
                 }
             });
         });
-        App.stage = stage;
-        App.app = this;
     }
 
     public Task<Boolean> registrarCertificado() {

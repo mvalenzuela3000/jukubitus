@@ -34,6 +34,7 @@ dependencies {
     implementation 'org.openjfx:javafx-controls:15.0.1'
     implementation 'org.openjfx:javafx-fxml:15.0.1'
     implementation 'org.openjfx:javafx-swing:15.0.1'
+    implementation 'com.dorkbox:SystemTray:4.4'
 
     implementation 'org.eclipse.jetty:jetty-server:10.0.21'
     implementation 'org.eclipse.jetty:jetty-servlet:10.0.21'
