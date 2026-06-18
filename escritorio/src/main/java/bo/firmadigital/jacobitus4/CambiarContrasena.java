@@ -22,7 +22,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -91,11 +90,11 @@ public class CambiarContrasena extends Stage {
         });
         root.getChildren().add(passwordField2);
         Button buttonAceptar = new Button("Aceptar");
-        buttonAceptar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonAceptar.setOnAction(t -> {
             cambiarContrasenia(slot, oldPasswordField.getText(), passwordField.getText(), passwordField2.getText());
         });
         Button buttonCancelar = new Button("Cancelar");
-        buttonCancelar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonCancelar.setOnAction(t -> {
             close();
         });
         HBox hBox = new HBox();

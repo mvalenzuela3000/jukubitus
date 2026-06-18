@@ -44,7 +44,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -151,15 +150,10 @@ public class Service extends Stage {
                 this.mostrarCertificados();
             }
         });
-        button.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        button.setOnAction(t -> {
             this.mostrarCertificados();
         });
-        buttonFirmar.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
-            if (ev.getCode() == KeyCode.ENTER) {
-                this.aplicarFirma();
-            }
-        });
-        buttonFirmar.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonFirmar.setOnAction(t -> {
             this.aplicarFirma();
         });
         Service window = this;

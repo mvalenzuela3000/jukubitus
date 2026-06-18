@@ -48,7 +48,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -191,7 +190,7 @@ public class TokenInfo extends Stage {
         });
         root.setCenter(table);
         buttonClave = new Button("Agregar Clave");
-        buttonClave.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent t) -> {
+        buttonClave.setOnAction(t -> {
             buttonClave.setDisable(true);
             new Thread(crearClave()).start();
         });
