@@ -127,7 +127,7 @@ public class Firmante extends Stage {
                 forzarEnveloped = contrasena.getForzarEnveloped();
                 usarPrefijo = contrasena.getUsarPrefijo();
                 node = contrasena.getNode();
-                new Thread(listarCertificados(contrasena.getPass())).start();
+                new Thread(listarCertificados(pass)).start();
             }
         });
     }
@@ -179,7 +179,6 @@ public class Firmante extends Stage {
                     }
                     token.salir();
                     table.setItems(FXCollections.observableList(certificados));
-                    updateProgress(100, 100);
                     return true;
                 } catch (GeneralSecurityException | IOException ex) {
                     if (ex.getCause() instanceof IOException) {
@@ -204,6 +203,8 @@ public class Firmante extends Stage {
                         }
                     }
                     throw new RuntimeException(ex.getMessage());
+                } finally {
+                    updateProgress(100, 100);
                 }
             }
         };
@@ -214,13 +215,19 @@ public class Firmante extends Stage {
             alert.initOwner(this);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.showAndWait();
+
+            this.pass = null;
+
             Contrasena contrasena = new Contrasena(Firmante.this, tipo);
             contrasena.showAndWait();
             if (contrasena.getPass() == null) {
                 close();
             } else {
                 this.pass = contrasena.getPass();
-                new Thread(listarCertificados(this.pass)).start();
+                this.forzarEnveloped = contrasena.getForzarEnveloped();
+                this.usarPrefijo = contrasena.getUsarPrefijo();
+                this.node = contrasena.getNode();
+                new Thread(listarCertificados(pass)).start();
             }
         });
         return task;
