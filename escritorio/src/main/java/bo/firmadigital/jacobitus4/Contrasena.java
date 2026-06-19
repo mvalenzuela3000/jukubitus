@@ -40,8 +40,13 @@ public class Contrasena extends Stage {
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
         BorderPane root = new BorderPane();
+        root.setPadding(new Insets(4));
+        VBox vBoxTop = new VBox();
+        vBoxTop.setPadding(new Insets(4));
+        vBoxTop.setSpacing(4);
         Label label = new Label("Introduzca su pin:");
-        root.setTop(label);
+        vBoxTop.getChildren().add(label);
+        root.setTop(vBoxTop);
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(4));
         vBox.setSpacing(4);
@@ -106,6 +111,12 @@ public class Contrasena extends Stage {
         root.setBottom(hBox);
         Scene scene = new Scene(root, 300, height);
         setScene(scene);
+
+        javafx.application.Platform.runLater(() -> {
+            this.sizeToScene();
+            this.setWidth(300);
+            this.setHeight(height + 60.0);
+        });
     }
 
     public String getPass() {

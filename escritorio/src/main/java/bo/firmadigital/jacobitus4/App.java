@@ -840,6 +840,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
@@ -864,19 +865,20 @@ public class App extends Application {
                             }
                             updateProgress(i + 1, files.size());
                             tableFile.getItems().set(i, new ValidadorPdf(out, getOpcionesValidador()));
-                        } catch (IOException ex) {
-                            updateProgress(i + 1, files.size());
-                            errores.append(files.get(i).getAbsolutePath()).append(":").append(ex.getMessage())
-                                    .append("\n");
                         } catch (PdfException ex) {
                             updateProgress(i + 1, files.size());
-                            errores.append(files.get(i).getAbsolutePath()).append(":")
+                            errores.append(files.get(i).getAbsolutePath()).append(": ")
                                     .append(ex.getCause().getMessage()).append("\n");
+                        } catch (Exception ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
+                                    .append("\n");
                         }
                     }
+                    updateProgress(100, 100);
                 }
+                stage.getScene().setCursor(Cursor.DEFAULT);
                 if (errores.length() == 0) {
-                    stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } else {
                     throw new RuntimeException(errores.toString());
@@ -955,26 +957,39 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
+                StringBuilder errores = new StringBuilder();
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
                     IFirmador firmar = FirmadorPKCS7.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
-                        File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
-                                FileOutputStream os = new FileOutputStream(out)) {
-                            firmar.firmar(is, os);
+                        try {
+                            File out = new File(destino, files.get(i).getFile().getName() + ".p7s");
+                            try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                    FileOutputStream os = new FileOutputStream(out)) {
+                                firmar.firmar(is, os);
+                            }
+                            updateProgress(i + 1, files.size());
+                            tableFile.getItems().set(i, new ValidadorPKCS7(out, getOpcionesValidador()));
+                        } catch (Exception ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
+                                    .append("\n");
                         }
-                        updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorPKCS7(out, getOpcionesValidador()));
                     }
+                    updateProgress(100, 100);
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
-                return true;
+                if (errores.length() == 0) {
+                    return true;
+                } else {
+                    throw new RuntimeException(errores.toString());
+                }
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
@@ -1005,32 +1020,45 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
+                StringBuilder errores = new StringBuilder();
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
                     IFirmador firmar = FirmadorXml.getInstance(slot, label, pass, node, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
-                        String name = new File(files.get(i).getAbsolutePath()).getName();
-                        if (!name.endsWith(".xml")) {
-                            name += ".firmado.xml";
-                        } else {
-                            name = name.replace(".xml", ".firmado.xml");
+                        try {
+                            String name = new File(files.get(i).getAbsolutePath()).getName();
+                            if (!name.endsWith(".xml")) {
+                                name += ".firmado.xml";
+                            } else {
+                                name = name.replace(".xml", ".firmado.xml");
+                            }
+                            File out = new File(destino, name);
+                            try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                    FileOutputStream os = new FileOutputStream(out)) {
+                                firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
+                            }
+                            updateProgress(i + 1, files.size());
+                            tableFile.getItems().set(i, new ValidadorXml(out, null, getOpcionesValidador()));
+                        } catch (Exception ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
+                                    .append("\n");
                         }
-                        File out = new File(destino, name);
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
-                                FileOutputStream os = new FileOutputStream(out)) {
-                            firmar.firmar(is, os, forzarEnveloped, usarPrefijo);
-                        }
-                        updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorXml(out, null, getOpcionesValidador()));
                     }
+                    updateProgress(100, 100);
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
-                return true;
+                if (errores.length() == 0) {
+                    return true;
+                } else {
+                    throw new RuntimeException(errores.toString());
+                }
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
@@ -1060,32 +1088,45 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
+                StringBuilder errores = new StringBuilder();
                 List<Validador> files = tableFile.getItems();
                 if (files.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
                     IFirmador firmar = FirmadorJws.getInstance(slot, label, pass, getOpcionesFirmador());
                     for (int i = 0; i < files.size(); i++) {
-                        String name = new File(files.get(i).getAbsolutePath()).getName();
-                        if (name.endsWith(".json")) {
-                            name = name.replace(".json", ".jws");
-                        } else {
-                            name = name + ".jws";
+                        try {
+                            String name = new File(files.get(i).getAbsolutePath()).getName();
+                            if (name.endsWith(".json")) {
+                                name = name.replace(".json", ".jws");
+                            } else {
+                                name = name + ".jws";
+                            }
+                            File out = new File(destino, name);
+                            try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
+                                    FileOutputStream os = new FileOutputStream(out)) {
+                                firmar.firmar(is, os, false, false);
+                            }
+                            updateProgress(i + 1, files.size());
+                            tableFile.getItems().set(i, new ValidadorJws(out, null, getOpcionesValidador()));
+                        } catch (Exception ex) {
+                            updateProgress(i + 1, files.size());
+                            errores.append(files.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
+                                    .append("\n");
                         }
-                        File out = new File(destino, name);
-                        try (InputStream is = new BufferedInputStream(new FileInputStream(files.get(i).getFile()));
-                                FileOutputStream os = new FileOutputStream(out)) {
-                            firmar.firmar(is, os, false, false);
-                        }
-                        updateProgress(i + 1, files.size());
-                        tableFile.getItems().set(i, new ValidadorJws(out, null, getOpcionesValidador()));
                     }
+                    updateProgress(100, 100);
                 }
                 stage.getScene().setCursor(Cursor.DEFAULT);
-                return true;
+                if (errores.length() == 0) {
+                    return true;
+                } else {
+                    throw new RuntimeException(errores.toString());
+                }
             }
         };
         progressBar.progressProperty().bind(task.progressProperty());
