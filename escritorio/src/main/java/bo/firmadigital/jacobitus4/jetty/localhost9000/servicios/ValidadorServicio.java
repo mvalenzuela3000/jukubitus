@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import bo.firmadigital.jacobitus.validador.CertDate;
-import bo.firmadigital.jacobitus.validador.Opciones;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
+import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.comun.CertDate;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoDto;

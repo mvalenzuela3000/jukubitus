@@ -11,7 +11,7 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.utilidades.OS;

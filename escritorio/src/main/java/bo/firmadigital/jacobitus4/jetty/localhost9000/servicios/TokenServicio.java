@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import bo.firmadigital.jacobitus.comun.SmartCard;
-import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.SmartCard;
+import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateEmisorDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateTitularDto;

@@ -5,9 +5,9 @@
  */
 package bo.firmadigital.jacobitus4;
 
-import bo.firmadigital.jacobitus.validador.CertDate;
-import bo.firmadigital.jacobitus.validador.DetalleValidacion;
-import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.base.Validador;
+import bo.firmadigital.jacobitus.validador.comun.CertDate;
+import bo.firmadigital.jacobitus.validador.comun.DetalleValidacion;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
 import javafx.application.HostServices;

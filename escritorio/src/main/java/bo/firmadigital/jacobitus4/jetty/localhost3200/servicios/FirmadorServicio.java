@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 
 import org.codehaus.jettison.json.JSONObject;
 
-import bo.firmadigital.jacobitus.comun.SmartCard;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.base.SmartCard;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.base.Validador;
+import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfRespuestaDto;
@@ -35,9 +35,9 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
+    private bo.firmadigital.jacobitus.firmador.base.Opciones getOpcionesFirmador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        bo.firmadigital.jacobitus.firmador.base.Opciones opciones = new bo.firmadigital.jacobitus.firmador.base.Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
         opciones.setDirectorioControladores(config.getDirectorioControladores());
@@ -52,9 +52,9 @@ public class FirmadorServicio {
         return opciones;
     }
     
-    private bo.firmadigital.jacobitus.validador.Opciones getOpcionesValidador() {
+    private bo.firmadigital.jacobitus.validador.base.Opciones getOpcionesValidador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.validador.Opciones opciones = new bo.firmadigital.jacobitus.validador.Opciones();
+        bo.firmadigital.jacobitus.validador.base.Opciones opciones = new bo.firmadigital.jacobitus.validador.base.Opciones();
         opciones.setProxyHabilitado(config.isProxyEnabled());
         opciones.setServidorProxy(config.getProxyIP());
         opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));

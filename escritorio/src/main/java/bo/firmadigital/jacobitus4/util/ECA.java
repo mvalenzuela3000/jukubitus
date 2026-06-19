@@ -2,7 +2,7 @@ package bo.firmadigital.jacobitus4.util;
 
 import java.util.Set;
 
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 
 public class ECA {
     private static final Set<String> ECAS_VALIDAS = Set.of(

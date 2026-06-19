@@ -10,11 +10,11 @@ import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import java.util.List;
 
-import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
+import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;

@@ -30,28 +30,28 @@ import org.codehaus.jettison.json.JSONArray;
 
 import com.itextpdf.kernel.exceptions.PdfException;
 
-import bo.firmadigital.jacobitus.comun.SmartCard;
-import bo.firmadigital.jacobitus.comun.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
-import bo.firmadigital.jacobitus.firmador.IFirmador;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.firmador.base.IFirmador;
+import bo.firmadigital.jacobitus.firmador.base.SmartCard;
+import bo.firmadigital.jacobitus.firmador.comun.MagicBytes;
+import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.utilidades.Certificate;
 import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus.validador.Certificate;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.MagicBytes;
-import bo.firmadigital.jacobitus.validador.Validador;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
+import bo.firmadigital.jacobitus.validador.base.Validador;
+import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.ECA;
@@ -128,9 +128,9 @@ public class App extends Application {
     private static String contraseniaMacOS = null;
     private static boolean isLaunched = false;
 
-    private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
+    private bo.firmadigital.jacobitus.firmador.base.Opciones getOpcionesFirmador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
+        bo.firmadigital.jacobitus.firmador.base.Opciones opciones = new bo.firmadigital.jacobitus.firmador.base.Opciones();
         opciones.setControlador(config.getDriver());
         opciones.setToken(config.getToken());
         opciones.setDirectorioControladores(config.getDirectorioControladores());
@@ -145,9 +145,9 @@ public class App extends Application {
         return opciones;
     }
 
-    private bo.firmadigital.jacobitus.validador.Opciones getOpcionesValidador() {
+    private bo.firmadigital.jacobitus.validador.base.Opciones getOpcionesValidador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.validador.Opciones opciones = new bo.firmadigital.jacobitus.validador.Opciones();
+        bo.firmadigital.jacobitus.validador.base.Opciones opciones = new bo.firmadigital.jacobitus.validador.base.Opciones();
         opciones.setProxyHabilitado(config.isProxyEnabled());
         opciones.setServidorProxy(config.getProxyIP());
         opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
