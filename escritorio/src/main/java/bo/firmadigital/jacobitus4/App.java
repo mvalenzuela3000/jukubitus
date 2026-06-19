@@ -840,6 +840,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
@@ -956,6 +957,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
@@ -1018,6 +1020,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
@@ -1085,6 +1088,7 @@ public class App extends Application {
                 DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
                 token.salir();
                 if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                    updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
 
