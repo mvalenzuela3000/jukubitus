@@ -18,10 +18,12 @@ import org.codehaus.jettison.json.JSONObject;
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.base.SmartCard;
+import bo.firmadigital.jacobitus.revocacion.CrlHelper;
+import bo.firmadigital.jacobitus.revocacion.EstadoRevocacion;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.base.Validador;
+import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfRespuestaDto;
@@ -139,7 +141,7 @@ public class FirmadorServicio {
                     for (String alias : listaAlias) {
                         InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
                         CertificadoDto certificadoDto = new CertificadoDto();
-                        certificadoDto.setEsFirmaBolivia(Validador.verificarPKI(infoCertificado.getX509certificado()));
+                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.verificarPKI(infoCertificado.getX509certificado()));
                         certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                         certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                         certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
@@ -152,8 +154,8 @@ public class FirmadorServicio {
                         certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
                         certificadoDto.setAlias(alias);
                         certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
-                        Validador.OCSPState state = Validador.verificarOcsp(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getState();
-                        if (state == Validador.OCSPState.OK) {
+                        EstadoRevocacion.Estado state = CrlHelper.verificar(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getEstado();
+                        if (state == EstadoRevocacion.Estado.NO_REVOCADO) {
                             certificadoDto.setOCSP("no revocado");
                         } else {
                             certificadoDto.setOCSP(state.toString());
@@ -197,7 +199,7 @@ public class FirmadorServicio {
                         } else {
                             InfoCertificado infoCertificado = new InfoCertificado(objetoDto.getAlias(), certificate);
                             CertificadoDto certificadoDto = new CertificadoDto();
-                            certificadoDto.setEsFirmaBolivia(Validador.verificarPKI(infoCertificado.getX509certificado()));
+                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.verificarPKI(infoCertificado.getX509certificado()));
                             certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                             certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                             certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
@@ -210,8 +212,8 @@ public class FirmadorServicio {
                             certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
                             certificadoDto.setAlias(objetoDto.getAlias());
                             certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
-                            Validador.OCSPState state = Validador.verificarOcsp(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getState();
-                            if (state == Validador.OCSPState.OK) {
+                            EstadoRevocacion.Estado state = CrlHelper.verificar(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getEstado();
+                            if (state == EstadoRevocacion.Estado.NO_REVOCADO) {
                                 certificadoDto.setOCSP("no revocado");
                             } else {
                                 certificadoDto.setOCSP(state.toString());

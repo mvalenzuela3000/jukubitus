@@ -58,8 +58,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP().getDate() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getDate()));
+                if (firma.getOCSP().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -114,8 +114,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP().getDate() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getDate()));
+                if (firma.getOCSP().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -172,8 +172,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP() != null && firma.getOCSP().getDate() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getDate()));
+                if (firma.getOCSP() != null && firma.getOCSP().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -230,8 +230,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP() != null && firma.getOCSP().getDate() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getDate()));
+                if (firma.getOCSP() != null && firma.getOCSP().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
