@@ -21,13 +21,13 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
-import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.utilidades.Certificate;
 import bo.firmadigital.jacobitus4.components.CertInformation;
+import bo.firmadigital.jacobitus4.comun.Constants;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;

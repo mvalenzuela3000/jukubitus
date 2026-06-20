@@ -8,11 +8,11 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 
-import bo.firmadigital.jacobitus.firmador.TokenSelected;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus4.comun.TokenSelected;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaPdfItemRespuestaDto;
