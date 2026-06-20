@@ -15,6 +15,7 @@ import java.util.List;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.TokenSelected;
@@ -23,7 +24,6 @@ import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.ECA;
 import javafx.application.Platform;
@@ -55,12 +55,12 @@ import javafx.stage.WindowEvent;
  * @author ADSIB
  */
 public class Service extends Stage {
-    private final ObservableList<DatosCertificado> certificates;
+    private final ObservableList<InfoCertificado> listaInfoCertificado;
     private final TokenSelected tokenSelected;
     private final String format;
     private final PasswordField passwordField;
     private final Button button;
-    private final ChoiceBox<DatosCertificado> aliasChoiceBox;
+    private final ChoiceBox<InfoCertificado> cbInfoCertificado;
     private final Label estado;
     private final ProgressBar progressBar;
     private final Button buttonFirmar;
@@ -127,11 +127,11 @@ public class Service extends Stage {
         AnchorPane.setRightAnchor(button, 0d);
         anchorPane.getChildren().add(button);
         root.add(anchorPane, 1, 0 + r, 1, 1);
-        certificates = FXCollections.observableArrayList();
-        aliasChoiceBox = new ChoiceBox<DatosCertificado>(certificates);
-        aliasChoiceBox.prefWidthProperty().bind(root.widthProperty());
-        aliasChoiceBox.setPrefHeight(55);
-        root.add(aliasChoiceBox, 0, 1 + r, 2, 1);
+        listaInfoCertificado = FXCollections.observableArrayList();
+        cbInfoCertificado = new ChoiceBox<InfoCertificado>(listaInfoCertificado);
+        cbInfoCertificado.prefWidthProperty().bind(root.widthProperty());
+        cbInfoCertificado.setPrefHeight(55);
+        root.add(cbInfoCertificado, 0, 1 + r, 2, 1);
         estado = new Label("Archivos: 0 de " + (tokenSelected.getFiles().length()
                 + (tokenSelected.getFilesJson() == null ? 0 : tokenSelected.getFilesJson().length())));
         root.add(estado, 0, 2 + r, 2, 1);
@@ -299,17 +299,17 @@ public class Service extends Stage {
         IToken token = tokenSelected.getSlot().getToken();
         try {
             token.iniciar(passwordField.getText());
-            List<String> list = token.listarIdentificadorClaves();
-            certificates.clear();
-            for (String clave : list) {
-                DatosCertificado cert = new DatosCertificado(clave, token.obtenerCertificado(clave));
-                String doc = cert.getNumeroDocumentoSubject();
-                if (!cert.getComplementoSubject().equals("")) {
-                    doc += "-" + cert.getComplementoSubject();
+            List<String> listaAlias = token.listarIdentificadorClaves();
+            listaInfoCertificado.clear();
+            for (String alias : listaAlias) {
+                InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
+                String numDocumento = infoCertificado.getInfoSujeto().getNumeroDocumento();
+                if (!infoCertificado.getInfoSujeto().getComplemento().equals("")) {
+                    numDocumento += "-" + infoCertificado.getInfoSujeto().getComplemento();
                 }
-                if (ECA.esValida(cert) && ECA.esPublica(cert)) {
-                    if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(doc)) {
-                        certificates.add(cert);
+                if (ECA.esValida(infoCertificado) && ECA.esPublica(infoCertificado)) {
+                    if (tokenSelected.getCI() == null || tokenSelected.getCI().equals(numDocumento)) {
+                        listaInfoCertificado.add(infoCertificado);
                     }
                     else {
                         message.setText("No se encontró ningún certificado para el ci: " + tokenSelected.getCI());
@@ -321,8 +321,8 @@ public class Service extends Stage {
                 }
             }
             token.salir();
-            if (certificates.size() > 0) {
-                aliasChoiceBox.getSelectionModel().selectFirst();
+            if (listaInfoCertificado.size() > 0) {
+                cbInfoCertificado.getSelectionModel().selectFirst();
                 message.setText("");
                 buttonFirmar.setDisable(false);
                 buttonFirmar.requestFocus();
@@ -359,9 +359,9 @@ public class Service extends Stage {
     }
 
     private void aplicarFirma() {
-        if (aliasChoiceBox.getValue() instanceof DatosCertificado) {
+        if (cbInfoCertificado.getValue() instanceof InfoCertificado) {
             tokenSelected.setPin(passwordField.getText());
-            tokenSelected.setAlias(((DatosCertificado) aliasChoiceBox.getValue()).getLabel());
+            tokenSelected.setAlias(((InfoCertificado) cbInfoCertificado.getValue()).getAlias());
             new Thread(firmar()).start();
         }
     }

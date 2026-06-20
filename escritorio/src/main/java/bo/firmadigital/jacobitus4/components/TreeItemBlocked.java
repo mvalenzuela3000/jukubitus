@@ -5,7 +5,7 @@
  */
 package bo.firmadigital.jacobitus4.components;
 
-import bo.firmadigital.jacobitus.validador.comun.CertDate;
+import bo.firmadigital.jacobitus.validador.comun.Firma;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 
@@ -16,15 +16,15 @@ import javafx.scene.control.TreeItem;
  */
 @SuppressWarnings("rawtypes")
 public class TreeItemBlocked<T extends Object> extends TreeItem {
-    protected CertDate cert;
+    protected Firma firma;
 
     @SuppressWarnings("unchecked")
-    public TreeItemBlocked(T t, Node node, CertDate cert) {
+    public TreeItemBlocked(T t, Node node, Firma firma) {
         super(t, node);
-        this.cert = cert;
+        this.firma = firma;
     }
 
-    public CertDate getCertDate() {
-        return cert;
+    public Firma getCertDate() {
+        return firma;
     }
 }

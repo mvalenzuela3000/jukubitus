@@ -2,7 +2,7 @@ package bo.firmadigital.jacobitus4.util;
 
 import java.util.Set;
 
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 
 public class ECA {
     private static final Set<String> ECAS_VALIDAS = Set.of(
@@ -14,11 +14,11 @@ public class ECA {
         "Entidad Certificadora Publica ADSIB"
     );
 
-    public static boolean esValida(DatosCertificado datos) {
-        return ECAS_VALIDAS.contains(datos.getNombreComunIssuer());
+    public static boolean esValida(InfoCertificado infoCertificado) {
+        return ECAS_VALIDAS.contains(infoCertificado.getInfoEmisor().getNombreComun());
     }
 
-    public static boolean esPublica(DatosCertificado datos) {
-        return ECAS_PUBLICAS.contains(datos.getNombreComunIssuer());
+    public static boolean esPublica(InfoCertificado infoCertificado) {
+        return ECAS_PUBLICAS.contains(infoCertificado.getInfoEmisor().getNombreComun());
     }
 }

@@ -30,6 +30,7 @@ import org.codehaus.jettison.json.JSONArray;
 
 import com.itextpdf.kernel.exceptions.PdfException;
 
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
@@ -51,7 +52,6 @@ import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
 import bo.firmadigital.jacobitus.validador.base.Validador;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import bo.firmadigital.jacobitus4.util.ECA;
@@ -263,8 +263,8 @@ public class App extends Application {
                         byte[] cert = is.readAllBytes();
                         certificate = Certificate.getCert(cert);
                     }
-                    DatosCertificado datosCertificado = new DatosCertificado(file.getName(), certificate);
-                    CertInformation information = new CertInformation(datosCertificado, true);
+                    InfoCertificado infoCertificado = new InfoCertificado(file.getName(), certificate);
+                    CertInformation information = new CertInformation(infoCertificado, true);
                     VBox vBox = new VBox();
                     vBox.setPadding(new Insets(10));
                     vBox.setSpacing(4);
@@ -837,9 +837,9 @@ public class App extends Application {
                 gestorSlot.setOpciones(getOpcionesFirmador());
                 IToken token = gestorSlot.obtenerSlot(slot).getToken();
                 token.iniciar(pass);
-                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                InfoCertificado infoCertificado = new InfoCertificado(label, token.obtenerCertificado(label));
                 token.salir();
-                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
@@ -954,9 +954,9 @@ public class App extends Application {
                 gestorSlot.setOpciones(getOpcionesFirmador());
                 IToken token = gestorSlot.obtenerSlot(slot).getToken();
                 token.iniciar(pass);
-                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                InfoCertificado infoCertificado = new InfoCertificado(label, token.obtenerCertificado(label));
                 token.salir();
-                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
@@ -1017,9 +1017,9 @@ public class App extends Application {
                 gestorSlot.setOpciones(getOpcionesFirmador());
                 IToken token = gestorSlot.obtenerSlot(slot).getToken();
                 token.iniciar(pass);
-                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                InfoCertificado infoCertificado = new InfoCertificado(label, token.obtenerCertificado(label));
                 token.salir();
-                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }
@@ -1085,9 +1085,9 @@ public class App extends Application {
                 gestorSlot.setOpciones(getOpcionesFirmador());
                 IToken token = gestorSlot.obtenerSlot(slot).getToken();
                 token.iniciar(pass);
-                DatosCertificado datos = new DatosCertificado(label, token.obtenerCertificado(label));
+                InfoCertificado infoCertificado = new InfoCertificado(label, token.obtenerCertificado(label));
                 token.salir();
-                if (!ECA.esValida(datos) || !ECA.esPublica(datos)) {
+                if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
                     throw new RuntimeException("Certificado no emitido por la ECP.");
                 }

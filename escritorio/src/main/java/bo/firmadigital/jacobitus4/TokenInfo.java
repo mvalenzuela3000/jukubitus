@@ -20,13 +20,13 @@ import java.util.List;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.Constants;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.utilidades.Certificate;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;
@@ -165,12 +165,12 @@ public class TokenInfo extends Stage {
         table.getColumns().setAll(tokenCol, nombreCol, descCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setRowFactory(tv -> {
-            TableRow<DatosCertificado> row = new TableRow<DatosCertificado>() {
+            TableRow<InfoCertificado> row = new TableRow<InfoCertificado>() {
                 @Override
-                public void updateItem(DatosCertificado datos, boolean empty) {
-                    super.updateItem(datos, empty);
-                    if (datos != null) {
-                        CertInformation pane = new CertInformation(datos, true);
+                public void updateItem(InfoCertificado infoCertificado, boolean empty) {
+                    super.updateItem(infoCertificado, empty);
+                    if (infoCertificado != null) {
+                        CertInformation pane = new CertInformation(infoCertificado, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                         tooltip.setGraphic(pane);
@@ -182,7 +182,7 @@ public class TokenInfo extends Stage {
             };
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.SECONDARY) {
-                    label = row.getItem().getLabel();
+                    label = row.getItem().getAlias();
                     contextMenu.show(table, event.getScreenX(), event.getScreenY());
                 }
             });
@@ -225,14 +225,14 @@ public class TokenInfo extends Stage {
                     }
                     IToken token = oSlot.getToken();
                     token.iniciar(pass);
-                    List<String> labels = token.listarIdentificadorClaves();
-                    List<DatosCertificado> certificados = new LinkedList<>();
-                    for (String label : labels) {
-                        DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        certificados.add(entry);
+                    List<String> listaAlias = token.listarIdentificadorClaves();
+                    List<InfoCertificado> listaInfoCertificado = new LinkedList<>();
+                    for (String alias : listaAlias) {
+                        InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
+                        listaInfoCertificado.add(infoCertificado);
                     }
                     token.salir();
-                    table.setItems(FXCollections.observableList(certificados));
+                    table.setItems(FXCollections.observableList(listaInfoCertificado));
                     updateProgress(100, 100);
                     return true;
                 } catch (GeneralSecurityException | IOException ex) {
@@ -381,9 +381,9 @@ public class TokenInfo extends Stage {
                     IToken token = oSlot.getToken();
                     token.iniciar(pass);
                     try {
-                        DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
-                        String pem = Certificate.getPem(cert.getCert().getEncoded());
-                        File file = new File(destino, "certificado_" + cert.getNombreComunSubject().replace(" ", "_") + ".pem");
+                        InfoCertificado infoCertificado = new InfoCertificado(token.obtenerCertificado(label));
+                        String pem = Certificate.getPem(infoCertificado.getX509certificado().getEncoded());
+                        File file = new File(destino, "certificado_" + infoCertificado.getInfoSujeto().getNombreComun().replace(" ", "_") + ".pem");
                         try (FileOutputStream os = new FileOutputStream(file)) {
                             os.write(pem.getBytes());
                             os.flush();
@@ -431,9 +431,9 @@ public class TokenInfo extends Stage {
                     IToken token = oSlot.getToken();
                     token.iniciar(pass);
                     try {
-                        DatosCertificado cert = new DatosCertificado(token.obtenerCertificado(label));
+                        InfoCertificado infoCertificado = new InfoCertificado(token.obtenerCertificado(label));
                         PrivateKey pk = token.obtenerClavePrivada(label);
-                        File file = new File(destino, "clave_" + cert.getNombreComunSubject().replace(" ", "_") + ".pem");
+                        File file = new File(destino, "clave_" + infoCertificado.getInfoSujeto().getNombreComun().replace(" ", "_") + ".pem");
                         try (PemWriter pemWriter = new PemWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
                             pemWriter.writeObject(new PemObject("RSA PRIVATE KEY", pk.getEncoded()));
                         }

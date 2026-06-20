@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.firmador.base.SmartCard;
 import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateEmisorDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateTitularDto;
@@ -151,7 +151,7 @@ public class TokenServicio {
                             key.setAlias((String) llaves.get(i));
                             key.setId((String) llaves.get(i));
                             X509Certificate cert = token.obtenerCertificado((String) llaves.get(i));
-                            DatosCertificado datos = new DatosCertificado(cert);
+                            InfoCertificado infoCertificado = new InfoCertificado(cert);
                             key.setTiene_certificado(cert != null);
                             data.getData().add(key);
     
@@ -167,23 +167,23 @@ public class TokenServicio {
                                 pem = pem + "\n-----END CERTIFICATE-----";
                                 x509.setPem(pem);
                                 x509.setValidez(new TokenCertificateValidezDto());
-                                x509.getValidez().setDesde(dateFormat.format(datos.getInicioValidez()));
-                                x509.getValidez().setHasta(dateFormat.format(datos.getFinValidez()));
+                                x509.getValidez().setDesde(dateFormat.format(infoCertificado.getInicioValidez()));
+                                x509.getValidez().setHasta(dateFormat.format(infoCertificado.getFinValidez()));
                                 TokenCertificateTitularDto titular = new TokenCertificateTitularDto();
-                                titular.setDnQualifier(datos.getTipoDocumentoSubject());
-                                titular.setUidNumber(datos.getNumeroDocumentoSubject());
-                                titular.setUID(datos.getComplementoSubject());
-                                titular.setCN(datos.getNombreComunSubject());
-                                titular.setT(datos.getCargoSubject());
-                                titular.setO(datos.getOrganizacionSubject());
-                                titular.setOU(datos.getUnidadOrganizacionalSubject());
-                                titular.setEmailAddress(datos.getCorreoSubject());
-                                titular.setDescription(datos.getDescripcionSubject());
+                                titular.setDnQualifier(infoCertificado.getInfoSujeto().getTipoDocumento());
+                                titular.setUidNumber(infoCertificado.getInfoSujeto().getNumeroDocumento());
+                                titular.setUID(infoCertificado.getInfoSujeto().getComplemento());
+                                titular.setCN(infoCertificado.getInfoSujeto().getNombreComun());
+                                titular.setT(infoCertificado.getInfoSujeto().getCargo());
+                                titular.setO(infoCertificado.getInfoSujeto().getOrganizacion());
+                                titular.setOU(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
+                                titular.setEmailAddress(infoCertificado.getInfoSujeto().getCorreoElectronico());
+                                titular.setDescription(infoCertificado.getInfoSujeto().getDescripcion());
                                 x509.setTitular(titular);
-                                x509.setCommon_name(datos.getNombreComunSubject());
+                                x509.setCommon_name(infoCertificado.getInfoSujeto().getNombreComun());
                                 x509.setEmisor(new TokenCertificateEmisorDto());
-                                x509.getEmisor().setCN(datos.getNombreComunIssuer());
-                                x509.getEmisor().setO(datos.getOrganizacionIssuer());
+                                x509.getEmisor().setCN(infoCertificado.getInfoEmisor().getNombreComun());
+                                x509.getEmisor().setO(infoCertificado.getInfoEmisor().getOrganizacion());
                                 data.getData().add(x509);
                             }
                         }

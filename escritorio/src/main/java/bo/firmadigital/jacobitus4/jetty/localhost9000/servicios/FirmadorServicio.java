@@ -51,7 +51,6 @@ import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.App;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
@@ -74,7 +73,6 @@ import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.CompleteSign;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.Signs;
 import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.ECA;
 
 public class FirmadorServicio {
 

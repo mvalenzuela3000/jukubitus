@@ -6,7 +6,7 @@
 package bo.firmadigital.jacobitus4;
 
 import bo.firmadigital.jacobitus.validador.base.Validador;
-import bo.firmadigital.jacobitus.validador.comun.CertDate;
+import bo.firmadigital.jacobitus.validador.comun.Firma;
 import bo.firmadigital.jacobitus.validador.comun.DetalleValidacion;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
@@ -42,11 +42,11 @@ public class Detalle extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         TreeItem<String> rootItem = new TreeItem<>(validar.getAbsolutePath());
         rootItem.setExpanded(true);
-        for (CertDate cert : validar) {
-            DetalleValidacion detalleValidacion = new DetalleValidacion(cert, validar.getExtension());
+        for (Firma firma : validar) {
+            DetalleValidacion detalleValidacion = new DetalleValidacion(firma, validar.getExtension());
             // Validacion de certificado
             TreeItem<String> item;
-            item = new TreeItemBlocked<>(detalleValidacion.getCertificadoTitular() + detalleValidacion.getCertificadoSelladoTiempo(), new ImageView(this.obtenerIcono(detalleValidacion.getCertificadoValidacion(), "NORMAL")), cert);
+            item = new TreeItemBlocked<>(detalleValidacion.getCertificadoTitular() + detalleValidacion.getCertificadoSelladoTiempo(), new ImageView(this.obtenerIcono(detalleValidacion.getCertificadoValidacion(), "NORMAL")), firma);
             // Validacion de integridad
             TreeItem<String> intItem, intItemDetalle;
             intItem = new TreeItem<>(detalleValidacion.getDocumentoEstado(), new ImageView(this.obtenerIcono(detalleValidacion.getDocumentoValidacion(), "PEQUENIO")));
@@ -83,21 +83,21 @@ public class Detalle extends Stage {
                 if (!empty) {
                     setText(item);
                     if (getTreeItem() instanceof TreeItemBlocked) {
-                        CertDate certDate = ((TreeItemBlocked)getTreeItem()).getCertDate();
-                        if (certDate.isBloquea()) {
+                        Firma firma = ((TreeItemBlocked)getTreeItem()).getCertDate();
+                        if (firma.isBloquea()) {
                             setTextFill(Color.BLUE);
                             //setStyle("-fx-text-fill: blue;");
                         } else {
                             setTextFill(Color.BLACK);
                         }
-                        CertInformation pane = new CertInformation(certDate);
+                        CertInformation pane = new CertInformation(firma);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                         tooltip.setGraphic(pane);
                         setTooltip(tooltip);
                         setOnMouseClicked(event -> {
                             if (event.getClickCount() == 2) {
-                                hostServices.showDocument(validar.getRevisionPath(certDate.getName()));
+                                hostServices.showDocument(validar.getRevisionPath(firma.getName()));
                             }
                         });
                     } else {

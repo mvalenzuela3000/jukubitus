@@ -10,11 +10,11 @@ import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import java.util.List;
 
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.comun.DatosCertificado;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.collections.FXCollections;
@@ -91,12 +91,12 @@ public class Firmante extends Stage {
         table.getColumns().setAll(tokenCol, nombreCol, descCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setRowFactory(tv -> {
-            TableRow<DatosCertificado> row = new TableRow<DatosCertificado>() {
+            TableRow<InfoCertificado> row = new TableRow<InfoCertificado>() {
                 @Override
-                public void updateItem(DatosCertificado datos, boolean empty) {
-                    super.updateItem(datos, empty);
-                    if (datos != null) {
-                        CertInformation pane = new CertInformation(datos, true);
+                public void updateItem(InfoCertificado infoCertificado, boolean empty) {
+                    super.updateItem(infoCertificado, empty);
+                    if (infoCertificado != null) {
+                        CertInformation pane = new CertInformation(infoCertificado, true);
                         Tooltip tooltip = new Tooltip();
                         tooltip.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                         tooltip.setGraphic(pane);
@@ -113,7 +113,7 @@ public class Firmante extends Stage {
         setScene(scene);
 
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            label = ((DatosCertificado)newSelection).getLabel();
+            label = ((InfoCertificado)newSelection).getAlias();
             close();
         });
 
@@ -171,14 +171,14 @@ public class Firmante extends Stage {
                     }
                     IToken token = oSlot.getToken();
                     token.iniciar(pass);
-                    List<String> labels = token.listarIdentificadorClaves();
-                    List<DatosCertificado> certificados = new LinkedList<>();
-                    for (String label : labels) {
-                        DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        certificados.add(entry);
+                    List<String> listaAlias = token.listarIdentificadorClaves();
+                    List<InfoCertificado> listaInfoCertificado = new LinkedList<>();
+                    for (String alias : listaAlias) {
+                        InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
+                        listaInfoCertificado.add(infoCertificado);
                     }
                     token.salir();
-                    table.setItems(FXCollections.observableList(certificados));
+                    table.setItems(FXCollections.observableList(listaInfoCertificado));
                     return true;
                 } catch (GeneralSecurityException | IOException ex) {
                     if (ex.getCause() instanceof IOException) {
