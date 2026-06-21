@@ -112,7 +112,7 @@ public class WebServer {
             } catch (Exception ex2) {
                 Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
             }
-            App.run(false, false, false);
+            FormAplicacion.run(false, false, false);
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }

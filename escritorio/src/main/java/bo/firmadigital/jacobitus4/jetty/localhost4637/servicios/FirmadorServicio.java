@@ -11,7 +11,7 @@ import org.codehaus.jettison.json.JSONException;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus4.FormAplicacion;
 import bo.firmadigital.jacobitus4.comun.TokenSelected;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
 import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
@@ -61,15 +61,15 @@ public class FirmadorServicio {
             TokenSelected dt;
             if (ci != null) {
                 if (format.equals("jws")) {
-                    dt = App.serviceJWS(slots[0], ci, archivo);
+                    dt = FormAplicacion.serviceJWS(slots[0], ci, archivo);
                 } else {
-                    dt = App.service(slots[0], ci, archivo);
+                    dt = FormAplicacion.service(slots[0], ci, archivo);
                 }
             } else {
                 if (format.equals("jws")) {
-                    dt = App.serviceJWS(slots[0], null, archivo);
+                    dt = FormAplicacion.serviceJWS(slots[0], null, archivo);
                 } else {
-                    dt = App.service(slots[0], null, archivo);
+                    dt = FormAplicacion.service(slots[0], null, archivo);
                 }
             }
             if (dt.getAlias() != null && dt.getPin() != null) {

@@ -50,7 +50,7 @@ import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus4.FormAplicacion;
 import bo.firmadigital.jacobitus4.comun.TokenSelected;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
@@ -687,9 +687,9 @@ public class FirmadorServicio {
                     throw new RuntimeException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
                 }
                 if (objetoDto.getCi() != null) {
-                    tokenSelected = App.service(slots, objetoDto.getCi(), pdfs, jsons);
+                    tokenSelected = FormAplicacion.service(slots, objetoDto.getCi(), pdfs, jsons);
                 } else {
-                    tokenSelected = App.service(slots, null, pdfs, jsons);
+                    tokenSelected = FormAplicacion.service(slots, null, pdfs, jsons);
                 }
                 if (tokenSelected.getAlias() != null && tokenSelected.getPin() != null) {
                     List<FirmaPdfItemRespuestaDto> listaPdf = Arrays.asList(om.readValue(tokenSelected.getFiles().toString(), FirmaPdfItemRespuestaDto[].class));

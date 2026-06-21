@@ -69,7 +69,7 @@ import javafx.stage.Stage;
  *
  * @author ADSIB
  */
-public class Pdf extends Stage {
+public class FormPdf extends Stage {
     private static int WIDTH = 800;
     private static int HEIGHT = 1035;
     private ProgressBar progressBar;
@@ -121,7 +121,7 @@ public class Pdf extends Stage {
                     getListView().setItems(list);
                     new File(file).delete();
                 } catch (IOException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(FormPdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
         }
@@ -139,7 +139,7 @@ public class Pdf extends Stage {
         }
     }
     
-    public Pdf(Stage parent) {
+    public FormPdf(Stage parent) {
         setTitle("Paginas del PDF");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
@@ -152,7 +152,7 @@ public class Pdf extends Stage {
             fileChooser.setTitle("Abrir PDF");
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PDF (*.pdf)", "*.pdf");
             fileChooser.getExtensionFilters().add(extFilter);
-            File file = fileChooser.showOpenDialog(Pdf.this);
+            File file = fileChooser.showOpenDialog(FormPdf.this);
             if (file != null) {
                 new Thread(insertarPdf(file)).start();
             }
@@ -222,7 +222,7 @@ public class Pdf extends Stage {
             document = new Document(pdfDocument, new PageSize(WIDTH, HEIGHT));
             document.setMargins(0, 0, 0, 0);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FormPdf.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -283,7 +283,7 @@ public class Pdf extends Stage {
                         });
                     }
                 } catch (IOException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(FormPdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return true;
             }
@@ -317,7 +317,7 @@ public class Pdf extends Stage {
                         lv.getItems().add("Página " + (lv.getItems().size() + 1));
                     });
                 } catch (IOException ex) {
-                    Logger.getLogger(Pdf.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(FormPdf.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return true;
             }

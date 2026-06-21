@@ -27,7 +27,7 @@ import javafx.stage.Stage;
  *
  * @author ADSIB
  */
-public class Contrasena extends Stage {
+public class FormContrasena extends Stage {
     private String pass;
     private boolean bloquea = false;
     private boolean forzarEnveloped = false;
@@ -35,7 +35,7 @@ public class Contrasena extends Stage {
     private int height = 120;
     private TextField  nodeField;
 
-    public Contrasena(Stage parent, int tipo) {
+    public FormContrasena(Stage parent, int tipo) {
         setTitle("Pin del token");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);

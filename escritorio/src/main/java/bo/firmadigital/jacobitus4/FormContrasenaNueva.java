@@ -24,7 +24,7 @@ import javafx.stage.Stage;
  *
  * @author ADSIB
  */
-public class ContrasenaNueva extends Stage {
+public class FormContrasenaNueva extends Stage {
     private Stage stage;
     private String pass;
 
@@ -32,7 +32,7 @@ public class ContrasenaNueva extends Stage {
         return pass;
     }
     
-    public ContrasenaNueva(Stage parent) {
+    public FormContrasenaNueva(Stage parent) {
         stage = parent;
         setTitle("Pin del token");
         initOwner(parent);

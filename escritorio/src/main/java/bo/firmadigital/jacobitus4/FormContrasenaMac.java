@@ -24,10 +24,10 @@ import javafx.stage.Stage;
  *
  * @author ADSIB
  */
-public class ContrasenaMac extends Stage {
+public class FormContrasenaMac extends Stage {
     private String pass;
 
-    public ContrasenaMac(Stage parent) {
+    public FormContrasenaMac(Stage parent) {
         setTitle("Seguridad MacOS");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
