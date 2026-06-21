@@ -102,10 +102,6 @@ import javafx.stage.WindowEvent;
 
 @SuppressWarnings("rawtypes")
 public class FormAplicacion extends Application {
-    private ContextMenu tokenContextMenu;
-    private ContextMenu contextMenu;
-    private MenuItem exportarItem;
-
     private ProgressBar progressBar;
     private TableView<CK_TOKEN_INFO> tbvDispositivos;
     private TableView<ValidadorExtendido> tbvArchivos;
@@ -160,6 +156,9 @@ public class FormAplicacion extends Application {
     @SuppressWarnings("unchecked")
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException, InterruptedException {
+        MenuItem exportarItem;
+        ContextMenu contextMenu;
+        ContextMenu tokenContextMenu;
         String version = Informacion.VERSION;
         stage.setTitle("Jacobitus - " + version);
         if (!servicio) {
@@ -207,7 +206,7 @@ public class FormAplicacion extends Application {
                     "*.docx");
             fileChooser.getExtensionFilters().add(extFilterDocs);
             List<File> archivosSeleccionados = fileChooser.showOpenMultipleDialog(stage);
-            if (archivosSeleccionados != null && archivosSeleccionados.size() > 0) {
+            if (archivosSeleccionados != null && !archivosSeleccionados.isEmpty()) {
                 new Thread(validar(archivosSeleccionados)).start();
             }
         });
@@ -226,7 +225,7 @@ public class FormAplicacion extends Application {
             extFilter = new FileChooser.ExtensionFilter("Todos los archivos (*)", "*");
             fileChooser.getExtensionFilters().add(extFilter);
             List<File> archivosSeleccionados = fileChooser.showOpenMultipleDialog(stage);
-            if (archivosSeleccionados != null && archivosSeleccionados.size() > 0) {
+            if (archivosSeleccionados != null && !archivosSeleccionados.isEmpty()) {
                 new Thread(validarPKCS7(archivosSeleccionados)).start();
             }
         });
@@ -239,7 +238,7 @@ public class FormAplicacion extends Application {
             extFilter = new FileChooser.ExtensionFilter("Archivos DOCX (*.docx)", "*.docx");
             fileChooser.getExtensionFilters().add(extFilter);
             List<File> archivosSeleccionados = fileChooser.showOpenMultipleDialog(stage);
-            if (archivosSeleccionados != null && archivosSeleccionados.size() > 0) {
+            if (archivosSeleccionados != null && !archivosSeleccionados.isEmpty()) {
                 new Thread(validar(archivosSeleccionados)).start();
             }
         });
