@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 
 import org.codehaus.jettison.json.JSONObject;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 import javafx.application.Platform;
 
 /**
@@ -82,7 +82,7 @@ public class Main {
                             App.run(true, false, false, args[0]);
                         }
                     } else {
-                        App.run(true, OS.isDebian(), OS.isDebian());
+                        App.run(true, SistemaOperativoHelper.esDebian(), SistemaOperativoHelper.esDebian());
                     }
                 }
             } catch (Exception ex) {

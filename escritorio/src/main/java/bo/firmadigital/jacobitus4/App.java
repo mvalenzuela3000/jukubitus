@@ -43,8 +43,8 @@ import bo.firmadigital.jacobitus.token.ChangePinJNI;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.utilidades.Certificate;
-import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
@@ -261,7 +261,7 @@ public class App extends Application {
                     X509Certificate certificate;
                     try (FileInputStream is = new FileInputStream(file)) {
                         byte[] cert = is.readAllBytes();
-                        certificate = Certificate.getCert(cert);
+                        certificate = CertificadoHelper.obtenerCertificado(cert);
                     }
                     InfoCertificado infoCertificado = new InfoCertificado(file.getName(), certificate);
                     CertInformation information = new CertInformation(infoCertificado, true);
@@ -659,7 +659,7 @@ public class App extends Application {
         scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-        if (taskBar && !OS.isDebian()) {
+        if (taskBar && !SistemaOperativoHelper.esDebian()) {
             Platform.setImplicitExit(false);
             if (url == null && param == null) {
                 stage.hide();
@@ -1217,7 +1217,7 @@ public class App extends Application {
                     boolean certificadoServicioLocalInstalado = false;
                     boolean errorCertificadoServicioLocalInstalado = false;
                     try {
-                        if (OS.isMac()) {
+                        if (SistemaOperativoHelper.esMacOS()) {
                             ContrasenaMac contrasena = new ContrasenaMac(stage);
                             contrasena.showAndWait();
                             App.contraseniaMacOS = contrasena.getPass();
@@ -1227,7 +1227,7 @@ public class App extends Application {
                         } else {
                             App.contraseniaMacOS = null;
                         }
-                        if (OS.isMac()) {
+                        if (SistemaOperativoHelper.esMacOS()) {
                             certificadoServicioLocalInstalado = CertUtil
                                     .verificarCertificadoServicioLocal(App.contraseniaMacOS);
                         } else {
@@ -1277,7 +1277,7 @@ public class App extends Application {
 
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
-                                    if (OS.isMac()) {
+                                    if (SistemaOperativoHelper.esMacOS()) {
                                         CertUtil.desinstalarCertificadoServicioLocal(App.contraseniaMacOS);
                                     } else {
                                         CertUtil.desinstalarCertificadoServicioLocal();
@@ -1306,7 +1306,7 @@ public class App extends Application {
 
                                 Optional<ButtonType> action = confirmacion.showAndWait();
                                 if (action.get() == ButtonType.OK) {
-                                    if (OS.isMac()) {
+                                    if (SistemaOperativoHelper.esMacOS()) {
                                         CertUtil.instalarCertificadoServicioLocal(App.contraseniaMacOS);
                                     } else {
                                         CertUtil.instalarCertificadoServicioLocal();

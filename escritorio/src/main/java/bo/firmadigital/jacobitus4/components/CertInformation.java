@@ -9,7 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
-import bo.firmadigital.jacobitus.utilidades.Certificate;
+import bo.firmadigital.jacobitus.revocacion.OcspHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 import javafx.geometry.HPos;
 import javafx.scene.control.Label;
@@ -204,7 +204,7 @@ public class CertInformation extends GridPane {
 
             Label label11 = new Label("Detalle");
             this.add(label11, 0, 16, 1, 1);
-            Label data11 = new Label(Certificate.getOCSP(infoCertificado.getX509certificado()));
+            Label data11 = new Label(OcspHelper.validarOCSP(infoCertificado.getX509certificado()));
             this.add(data11, 1, 16, 1, 1);
         }
 

@@ -25,7 +25,7 @@ import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.utilidades.Certificate;
+import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.comun.Constants;
 import bo.firmadigital.jacobitus4.util.Config;
@@ -329,7 +329,7 @@ public class TokenInfo extends Stage {
                     String pem;
                     try (FileInputStream is = new FileInputStream(file)) {
                         byte[] cert = is.readAllBytes();
-                        pem = Certificate.getPem(cert);
+                        pem = CertificadoHelper.obtenerPem(cert);
                     }
                     GestorSlot gestorSlot = GestorSlot.getInstance();
                     gestorSlot.setOpciones(getOpciones());
@@ -382,7 +382,7 @@ public class TokenInfo extends Stage {
                     token.iniciar(pass);
                     try {
                         InfoCertificado infoCertificado = new InfoCertificado(token.obtenerCertificado(label));
-                        String pem = Certificate.getPem(infoCertificado.getX509certificado().getEncoded());
+                        String pem = CertificadoHelper.obtenerPem(infoCertificado.getX509certificado().getEncoded());
                         File file = new File(destino, "certificado_" + infoCertificado.getInfoSujeto().getNombreComun().replace(" ", "_") + ".pem");
                         try (FileOutputStream os = new FileOutputStream(file)) {
                             os.write(pem.getBytes());

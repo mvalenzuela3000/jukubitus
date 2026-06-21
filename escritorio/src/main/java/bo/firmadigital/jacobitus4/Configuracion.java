@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.token.TokenPKCS12;
-import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 import bo.firmadigital.jacobitus4.util.Config;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -191,11 +191,11 @@ public class Configuracion extends Stage {
             if (config.getDriver() == null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Abrir Controlador");
-                if (OS.isWindows()) {
+                if (SistemaOperativoHelper.esWindows()) {
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.dll)",
                             "*.dll");
                     fileChooser.getExtensionFilters().add(extFilter);
-                } else if (OS.isUnix()) {
+                } else if (SistemaOperativoHelper.esUnix()) {
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Controlador (*.so)",
                             "*.so");
                     fileChooser.getExtensionFilters().add(extFilter);
@@ -295,13 +295,13 @@ public class Configuracion extends Stage {
         vbox2.getChildren().add(buttonCrear);
         btnAbrirUbicacion.setOnAction(t -> {
             try {
-                if (OS.isUnix()) {
+                if (SistemaOperativoHelper.esUnix()) {
                     Runtime.getRuntime().exec(new String[] { "sh", "-c", "/usr/bin/xdg-open '" + config.getToken().getParentFile().getPath() + "'" });
                 }
-                if (OS.isWindows()) {
+                if (SistemaOperativoHelper.esWindows()) {
                     Runtime.getRuntime().exec("explorer " + config.getToken().getParentFile().getPath());
                 }
-                if (OS.isMac()) {
+                if (SistemaOperativoHelper.esMacOS()) {
                     Runtime.getRuntime().exec(new String[]{"/usr/bin/open", config.getToken().getParentFile().getPath()});
                 }
             } catch (IOException ex) {
