@@ -141,7 +141,7 @@ public class FirmadorServicio {
                     for (String alias : listaAlias) {
                         InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
                         CertificadoDto certificadoDto = new CertificadoDto();
-                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.verificarPKI(infoCertificado.getX509certificado()));
+                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado()));
                         certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                         certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                         certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
@@ -199,7 +199,7 @@ public class FirmadorServicio {
                         } else {
                             InfoCertificado infoCertificado = new InfoCertificado(objetoDto.getAlias(), certificate);
                             CertificadoDto certificadoDto = new CertificadoDto();
-                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.verificarPKI(infoCertificado.getX509certificado()));
+                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado()));
                             certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                             certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                             certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());

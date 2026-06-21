@@ -36,13 +36,13 @@ public class ValidadorServicio {
 
             for (Firma firma : validar) {
                 FirmaDto firmaDto = new FirmaDto();
-                firmaDto.setNoModificado(firma.isValid());
-                firmaDto.setCadenaConfianza(firma.isPKI());
-                firmaDto.setFirmadoDuranteVigencia(firma.isActive());
-                firmaDto.setFirmadoAntesRevocacion(firma.isOCSP());
-                firmaDto.setVersionado(firma.isValidAlerted());
-                firmaDto.setTimeStamp(firma.getTimeStamp() != null);
-                firmaDto.setFechaFirma(dateFormat.format(firma.getSignDate()));
+                firmaDto.setNoModificado(firma.getIntegridad());
+                firmaDto.setCadenaConfianza(firma.getCadenaConfianza());
+                firmaDto.setFirmadoDuranteVigencia(firma.getCertVigente());
+                firmaDto.setFirmadoAntesRevocacion(firma.getCertNoRevocado());
+                firmaDto.setVersionado(firma.getIntegridadConObservaciones());
+                firmaDto.setTimeStamp(firma.getSelloTiempo() != null);
+                firmaDto.setFechaFirma(dateFormat.format(firma.getFecFirma()));
                 CertificadoDto certificadoDto = new CertificadoDto();
                 if (firma.getInfoCertificado().getInfoSujeto().getComplemento() != null && !firma.getInfoCertificado().getInfoSujeto().getComplemento().equals("")) {
                     certificadoDto.setCi(firma.getInfoCertificado().getInfoSujeto().getNumeroDocumento() + "-" + firma.getInfoCertificado().getInfoSujeto().getComplemento());
@@ -58,8 +58,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP().getFecha() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
+                if (firma.getRevocacion().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -92,13 +92,13 @@ public class ValidadorServicio {
 
             for (Firma firma : validar) {
                 FirmaDto firmaDto = new FirmaDto();
-                firmaDto.setNoModificado(firma.isValid());
-                firmaDto.setCadenaConfianza(firma.isPKI());
-                firmaDto.setFirmadoDuranteVigencia(firma.isActive());
-                firmaDto.setFirmadoAntesRevocacion(firma.isOCSP());
-                firmaDto.setVersionado(firma.isValidAlerted());
-                firmaDto.setTimeStamp(firma.getTimeStamp() != null);
-                firmaDto.setFechaFirma(dateFormat.format(firma.getSignDate()));
+                firmaDto.setNoModificado(firma.getIntegridad());
+                firmaDto.setCadenaConfianza(firma.getCadenaConfianza());
+                firmaDto.setFirmadoDuranteVigencia(firma.getCertVigente());
+                firmaDto.setFirmadoAntesRevocacion(firma.getCertNoRevocado());
+                firmaDto.setVersionado(firma.getIntegridadConObservaciones());
+                firmaDto.setTimeStamp(firma.getSelloTiempo() != null);
+                firmaDto.setFechaFirma(dateFormat.format(firma.getFecFirma()));
                 CertificadoDto certificadoDto = new CertificadoDto();
                 if (firma.getInfoCertificado().getInfoSujeto().getComplemento() != null && !firma.getInfoCertificado().getInfoSujeto().getComplemento().equals("")) {
                     certificadoDto.setCi(firma.getInfoCertificado().getInfoSujeto().getNumeroDocumento() + "-" + firma.getInfoCertificado().getInfoSujeto().getComplemento());
@@ -114,8 +114,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP().getFecha() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
+                if (firma.getRevocacion().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -125,7 +125,7 @@ public class ValidadorServicio {
 
             ValidacionArchivoRespuestaDto validacion = new ValidacionArchivoRespuestaDto();
             validacion.setFirmas(firmas);
-            validacion.setFile(validar.exportB64(new ByteArrayInputStream(file)));
+            validacion.setFile(validar.obtenerContenidoBase64());
             respuesta.setFinalizado(true);
             respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
@@ -148,14 +148,14 @@ public class ValidadorServicio {
 
             for (Firma firma : validar) {
                 FirmaDto firmaDto = new FirmaDto();
-                firmaDto.setNoModificado(firma.isValid());
-                firmaDto.setCadenaConfianza(firma.isPKI());
-                firmaDto.setFirmadoDuranteVigencia(firma.isActive());
-                firmaDto.setFirmadoAntesRevocacion(firma.isOCSP());
-                firmaDto.setVersionado(firma.isValidAlerted());
-                firmaDto.setTimeStamp(firma.getTimeStamp() != null);
+                firmaDto.setNoModificado(firma.getIntegridad());
+                firmaDto.setCadenaConfianza(firma.getCadenaConfianza());
+                firmaDto.setFirmadoDuranteVigencia(firma.getCertVigente());
+                firmaDto.setFirmadoAntesRevocacion(firma.getCertNoRevocado());
+                firmaDto.setVersionado(firma.getIntegridadConObservaciones());
+                firmaDto.setTimeStamp(firma.getSelloTiempo() != null);
                 if (objetoDto.getDate() != null) {
-                    firmaDto.setFechaFirma(dateFormat.format(firma.getSignDate()));
+                    firmaDto.setFechaFirma(dateFormat.format(firma.getFecFirma()));
                 }
                 CertificadoDto certificadoDto = new CertificadoDto();
                 if (firma.getInfoCertificado().getInfoSujeto().getComplemento() != null && !firma.getInfoCertificado().getInfoSujeto().getComplemento().equals("")) {
@@ -172,8 +172,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP() != null && firma.getOCSP().getFecha() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
+                if (firma.getRevocacion() != null && firma.getRevocacion().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -206,14 +206,14 @@ public class ValidadorServicio {
 
             Firma firma = (Firma) validar.iterator().next(); {
                 FirmaDto firmaDto = new FirmaDto();
-                firmaDto.setNoModificado(firma.isValid());
-                firmaDto.setCadenaConfianza(firma.isPKI());
-                firmaDto.setFirmadoDuranteVigencia(firma.isActive());
-                firmaDto.setFirmadoAntesRevocacion(firma.isOCSP());
-                firmaDto.setVersionado(firma.isValidAlerted());
-                firmaDto.setTimeStamp(firma.getTimeStamp() != null);
+                firmaDto.setNoModificado(firma.getIntegridad());
+                firmaDto.setCadenaConfianza(firma.getCadenaConfianza());
+                firmaDto.setFirmadoDuranteVigencia(firma.getCertVigente());
+                firmaDto.setFirmadoAntesRevocacion(firma.getCertNoRevocado());
+                firmaDto.setVersionado(firma.getIntegridadConObservaciones());
+                firmaDto.setTimeStamp(firma.getSelloTiempo() != null);
                 if (objetoDto.getDate() != null) {
-                    firmaDto.setFechaFirma(dateFormat.format(firma.getSignDate()));
+                    firmaDto.setFechaFirma(dateFormat.format(firma.getFecFirma()));
                 }
                 CertificadoDto certificadoDto = new CertificadoDto();
                 if (firma.getInfoCertificado().getInfoSujeto().getComplemento() != null && !firma.getInfoCertificado().getInfoSujeto().getComplemento().equals("")) {
@@ -230,8 +230,8 @@ public class ValidadorServicio {
                 certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
                 certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
                 certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-                if (firma.getOCSP() != null && firma.getOCSP().getFecha() != null) {
-                    certificadoDto.setRevocado(dateFormat.format(firma.getOCSP().getFecha()));
+                if (firma.getRevocacion() != null && firma.getRevocacion().getFecha() != null) {
+                    certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
                 }
 
                 certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));
@@ -241,7 +241,7 @@ public class ValidadorServicio {
 
             ValidacionArchivoRespuestaDto validacion = new ValidacionArchivoRespuestaDto();
             validacion.setFirmas(firmas);
-            validacion.setFile(validar.exportB64(new ByteArrayInputStream(file)));
+            validacion.setFile(validar.obtenerContenidoBase64());
             respuesta.setFinalizado(true);
             respuesta.setMensaje("Se validó las firmas correctamente!");
             respuesta.setDatos(validacion);
