@@ -38,6 +38,8 @@ import javax.net.ssl.X509TrustManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
+
 public class Request {
     X509TrustManager trustManager;
     X509Certificate server;
@@ -166,10 +168,10 @@ public class Request {
             body.put("base64", Base64.getEncoder().encodeToString(b));
             JSONObject res = request(post, "POST", body.toString(), token);
             if (res.getInt("code") != 201) {
-                throw new RuntimeException("No fue posible enviar el archivo firmado.");
+                throw new JacobitusException("No fue posible enviar el archivo firmado.");
             }
         } catch (IOException | JSONException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 

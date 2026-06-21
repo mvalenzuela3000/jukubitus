@@ -42,6 +42,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
@@ -426,7 +427,7 @@ public class FirmadorServicio {
             try {
                 jwsObject.sign(signer);
             } catch (JOSEException ex) {
-                throw new RuntimeException("Error al firmar: " + ex.getMessage());
+                throw new JacobitusException("Error al firmar: " + ex.getMessage());
             }
 
             X509Certificate cert = token.obtenerCertificado(alias);
@@ -524,7 +525,7 @@ public class FirmadorServicio {
             FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
             try {
                 if (token.obtenerCertificado(alias) == null) {
-                    throw new RuntimeException("No se encontró un certificado con el alias proporcionado.");
+                    throw new JacobitusException("No se encontró un certificado con el alias proporcionado.");
                 }
                 List<FirmaPdfItemRespuestaDto> pdfsFirmados = new ArrayList<FirmaPdfItemRespuestaDto>();
                 for (int i = 0; i < pdfs.size(); i++) {
@@ -684,7 +685,7 @@ public class FirmadorServicio {
                     jsons = new JSONArray();
                 }
                 if (pdfs.length() + jsons.length() == 0) {
-                    throw new RuntimeException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
+                    throw new JacobitusException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
                 }
                 if (objetoDto.getCi() != null) {
                     tokenSelected = FormAplicacion.service(slots, objetoDto.getCi(), pdfs, jsons);

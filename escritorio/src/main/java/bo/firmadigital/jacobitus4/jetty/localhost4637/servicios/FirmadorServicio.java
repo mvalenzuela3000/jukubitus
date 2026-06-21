@@ -8,6 +8,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.Slot;
@@ -56,7 +57,7 @@ public class FirmadorServicio {
             gestorSlot.setOpciones(this.getOpciones());
             Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
-                throw new RuntimeException("Por favor conecte solo un token.");
+                throw new JacobitusException("Por favor conecte solo un token.");
             }
             TokenSelected dt;
             if (ci != null) {

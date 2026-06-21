@@ -22,6 +22,7 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.validador.base.Opciones;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
@@ -84,7 +85,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
                 os.write(payload);
             }
         } catch (IOException | ParseException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 
@@ -94,7 +95,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
             JWSObject jwsObject = JWSObject.parse(new String(is.readAllBytes()));
             return Base64.getEncoder().encodeToString(jwsObject.getPayload().toBytes());
         }   catch (IOException | ParseException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 

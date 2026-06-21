@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
@@ -175,26 +176,26 @@ public class FormFirmante extends Stage {
                 } catch (GeneralSecurityException | IOException ex) {
                     if (ex.getCause() instanceof IOException) {
                         if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                            throw new RuntimeException("Pin incorrecto, intente nuevamente.");
+                            throw new JacobitusException("Pin incorrecto, intente nuevamente.");
                         }
                     }
                     if (ex instanceof java.security.cert.CertificateExpiredException) {
-                        throw new RuntimeException("El certificado se encuentra expirado.");
+                        throw new JacobitusException("El certificado se encuentra expirado.");
                     }
                     if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                        throw new RuntimeException("El certificado aún no está vigente.");
+                        throw new JacobitusException("El certificado aún no está vigente.");
                     }
                     if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
                         if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                            throw new RuntimeException("Por favor verifique el pin.");
+                            throw new JacobitusException("Por favor verifique el pin.");
                         }
                     }
                     if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
                         if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                            throw new RuntimeException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
+                            throw new JacobitusException("El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.");
                         }
                     }
-                    throw new RuntimeException(ex.getMessage());
+                    throw new JacobitusException(ex.getMessage());
                 } finally {
                     updateProgress(100, 100);
                 }

@@ -32,6 +32,7 @@ import com.itextpdf.kernel.pdf.ReaderProperties;
 import com.itextpdf.signatures.PdfPKCS7;
 import com.itextpdf.signatures.SignatureUtil;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.utilidades.PdfHelper;
 import bo.firmadigital.jacobitus.validador.base.Opciones;
@@ -90,9 +91,9 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
             firmas = listarCertificados(is);
         } catch (BadPasswordException ex) {
             if (this.contrasenia == null) {
-                throw new RuntimeException("Documento protegido, se esperaba una contraseña.");
+                throw new JacobitusException("Documento protegido, se esperaba una contraseña.");
             } else {
-                throw new RuntimeException("Contraseña inválida.");
+                throw new JacobitusException("Contraseña inválida.");
             }
         } catch (Exception ignore) {
         }
@@ -108,9 +109,9 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
             firmas = listarCertificados(is);
         } catch (BadPasswordException ex) {
             if (this.contrasenia == null) {
-                throw new RuntimeException("Documento protegido, se esperaba una contraseña.");
+                throw new JacobitusException("Documento protegido, se esperaba una contraseña.");
             } else {
-                throw new RuntimeException("Contraseña inválida.");
+                throw new JacobitusException("Contraseña inválida.");
             }
         } catch (Exception ignore) {
         }
@@ -152,7 +153,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
             }
             return out.getAbsolutePath();
         } catch (IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 

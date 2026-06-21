@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import javax.swing.filechooser.FileSystemView;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.utiles.Controlador;
 
 public class Config {
@@ -35,7 +36,7 @@ public class Config {
                 token = null;
             }
         } catch (IOException ex) {
-            throw new RuntimeException("No se pudo obtener las opciones.");
+            throw new JacobitusException("No se pudo obtener las opciones.");
         }
     }
 
@@ -120,7 +121,7 @@ public class Config {
     public String getTokenToCreate() {
         if (!user.exists()) {
             if (!user.mkdir()) {
-                throw new RuntimeException("No se pudo crear el directorio " + user);
+                throw new JacobitusException("No se pudo crear el directorio " + user);
             }
         }
         token = new File(user, "softoken.p12");
@@ -272,12 +273,12 @@ public class Config {
         try {
             if (!user.exists()) {
                 if (!user.mkdir()) {
-                    throw new RuntimeException("No se pudo crear el directorio " + user);
+                    throw new JacobitusException("No se pudo crear el directorio " + user);
                 }
             }
             options.store(new FileWriter(fileOptions), "AGETIC - Jacobitus options");
         } catch (IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 }

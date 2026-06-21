@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.base.Opciones;
@@ -240,7 +241,7 @@ public class FormService extends Stage {
                                                 tokenSelected.getAlias());
                                         break;
                                     default:
-                                        throw new Exception(String.format("Formato %s no admitido.", format));
+                                        throw new JacobitusException(String.format("Formato %s no admitido.", format));
                                 }
                                 JSONObject obj = new JSONObject();
                                 if (!files.getJSONObject(i).isNull("base64")) {

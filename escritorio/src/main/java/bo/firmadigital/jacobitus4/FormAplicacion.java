@@ -26,6 +26,7 @@ import org.codehaus.jettison.json.JSONArray;
 import com.itextpdf.kernel.exceptions.PdfException;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
@@ -277,7 +278,7 @@ public class FormAplicacion extends Application {
                     certificadoStage.setScene(scene);
                     certificadoStage.showAndWait();
                 } catch (IOException | CertificateEncodingException ex) {
-                    throw new RuntimeException(ex.getMessage());
+                    throw new JacobitusException(ex.getMessage());
                 }
             }
         });
@@ -827,7 +828,7 @@ public class FormAplicacion extends Application {
                 token.salir();
                 if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
-                    throw new RuntimeException("Certificado no emitido por la ECP.");
+                    throw new JacobitusException("Certificado no emitido por la ECP.");
                 }
 
                 StringBuilder errores = new StringBuilder();
@@ -837,7 +838,7 @@ public class FormAplicacion extends Application {
                 } else {
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
-                            IFirmador firmar = FirmadorPdf.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
+                            IFirmador firmador = FirmadorPdf.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
                             String nomArchivo = new File(archivos.get(i).getAbsolutePath()).getName();
                             if (!nomArchivo.endsWith(".pdf")) {
                                 nomArchivo += ".firmado.pdf";
@@ -847,7 +848,7 @@ public class FormAplicacion extends Application {
                             File archivoFirmado = new File(rutaDestino, nomArchivo);
                             try (InputStream is = new FileInputStream(archivos.get(i).getAbsolutePath());
                                     OutputStream os = new FileOutputStream(archivoFirmado)) {
-                                firmar.firmar(is, os, bloquear, false);
+                                firmador.firmar(is, os, bloquear, false);
                             }
                             updateProgress(i + 1, archivos.size());
                             tbvArchivos.getItems().set(i, new ValidadorExtendidoPdf(archivoFirmado, getOpcionesValidador()));
@@ -867,7 +868,7 @@ public class FormAplicacion extends Application {
                 if (errores.length() == 0) {
                     return true;
                 } else {
-                    throw new RuntimeException(errores.toString());
+                    throw new JacobitusException(errores.toString());
                 }
             }
         };
@@ -943,7 +944,7 @@ public class FormAplicacion extends Application {
                 token.salir();
                 if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
-                    throw new RuntimeException("Certificado no emitido por la ECP.");
+                    throw new JacobitusException("Certificado no emitido por la ECP.");
                 }
 
                 StringBuilder errores = new StringBuilder();
@@ -951,13 +952,13 @@ public class FormAplicacion extends Application {
                 if (archivos.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    IFirmador firmar = FirmadorPKCS7.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
+                    IFirmador firmador = FirmadorPKCS7.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
                             File archivoFirmado = new File(rutaDestino, archivos.get(i).getFile().getName() + ".p7s");
                             try (InputStream is = new BufferedInputStream(new FileInputStream(archivos.get(i).getFile()));
                                     FileOutputStream os = new FileOutputStream(archivoFirmado)) {
-                                firmar.firmar(is, os);
+                                firmador.firmar(is, os);
                             }
                             updateProgress(i + 1, archivos.size());
                             tbvArchivos.getItems().set(i, new ValidadorExtendidoPKCS7(archivoFirmado, getOpcionesValidador()));
@@ -973,7 +974,7 @@ public class FormAplicacion extends Application {
                 if (errores.length() == 0) {
                     return true;
                 } else {
-                    throw new RuntimeException(errores.toString());
+                    throw new JacobitusException(errores.toString());
                 }
             }
         };
@@ -1005,7 +1006,7 @@ public class FormAplicacion extends Application {
                 token.salir();
                 if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
-                    throw new RuntimeException("Certificado no emitido por la ECP.");
+                    throw new JacobitusException("Certificado no emitido por la ECP.");
                 }
 
                 StringBuilder errores = new StringBuilder();
@@ -1041,7 +1042,7 @@ public class FormAplicacion extends Application {
                 if (errores.length() == 0) {
                     return true;
                 } else {
-                    throw new RuntimeException(errores.toString());
+                    throw new JacobitusException(errores.toString());
                 }
             }
         };
@@ -1072,7 +1073,7 @@ public class FormAplicacion extends Application {
                 token.salir();
                 if (!ECA.esValida(infoCertificado) || !ECA.esPublica(infoCertificado)) {
                     updateProgress(100, 100);
-                    throw new RuntimeException("Certificado no emitido por la ECP.");
+                    throw new JacobitusException("Certificado no emitido por la ECP.");
                 }
 
                 StringBuilder errores = new StringBuilder();
@@ -1108,7 +1109,7 @@ public class FormAplicacion extends Application {
                 if (errores.length() == 0) {
                     return true;
                 } else {
-                    throw new RuntimeException(errores.toString());
+                    throw new JacobitusException(errores.toString());
                 }
             }
         };
@@ -1174,7 +1175,7 @@ public class FormAplicacion extends Application {
                     stage.getScene().setCursor(Cursor.DEFAULT);
                     return true;
                 } else {
-                    throw new RuntimeException("No se pudo descargar el archivo.");
+                    throw new JacobitusException("No se pudo descargar el archivo.");
                 }
             }
         };
@@ -1417,7 +1418,7 @@ public class FormAplicacion extends Application {
 
     public static TokenSelected service(Slot slot, String ci, JSONArray files) {
         if (tokenSelected.isShown()) {
-            throw new RuntimeException("Ya se tiene una solicitud de firma pendiente.");
+            throw new JacobitusException("Ya se tiene una solicitud de firma pendiente.");
         }
         Platform.runLater(() -> {
             tokenSelected.setSlot(slot);
@@ -1436,7 +1437,7 @@ public class FormAplicacion extends Application {
 
     public static TokenSelected serviceJWS(Slot slot, String ci, JSONArray files) {
         if (tokenSelected.isShown()) {
-            throw new RuntimeException("Ya se tiene una solicitud de firma pendiente.");
+            throw new JacobitusException("Ya se tiene una solicitud de firma pendiente.");
         }
         Platform.runLater(() -> {
             tokenSelected.setSlot(slot);
@@ -1455,7 +1456,7 @@ public class FormAplicacion extends Application {
 
     public static TokenSelected service(Slot[] slots, String ci, JSONArray pdfs, JSONArray jsons) {
         if (tokenSelected.isShown()) {
-            throw new RuntimeException("Ya se tiene una solicitud de firma pendiente.");
+            throw new JacobitusException("Ya se tiene una solicitud de firma pendiente.");
         }
         Platform.runLater(() -> {
             tokenSelected.setSlot(null);

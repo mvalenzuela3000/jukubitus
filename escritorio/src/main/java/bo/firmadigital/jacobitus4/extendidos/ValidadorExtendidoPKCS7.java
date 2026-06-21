@@ -30,6 +30,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Store;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.validador.base.Opciones;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
@@ -116,7 +117,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
                 sc.write(os);
             }
         } catch (CMSException | IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 
@@ -132,7 +133,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
             }
             return b64;
         } catch (CMSException | IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 
