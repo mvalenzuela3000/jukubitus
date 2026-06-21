@@ -27,10 +27,6 @@ import bo.firmadigital.jacobitus.validador.base.Opciones;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
-/**
- *
- * @author ADSIB
- */
 public class ValidadorExtendidoJws extends ValidadorExtendido {
     protected Opciones opciones = null;
 

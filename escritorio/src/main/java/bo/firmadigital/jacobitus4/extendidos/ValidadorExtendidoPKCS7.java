@@ -35,10 +35,6 @@ import bo.firmadigital.jacobitus.validador.base.Opciones;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
-/**
- *
- * @author ADSIB
- */
 public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
     protected String urlPost = null;
     protected String token = null;

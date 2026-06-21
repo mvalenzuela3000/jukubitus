@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import java.awt.event.ActionEvent;
@@ -16,10 +11,6 @@ import org.codehaus.jettison.json.JSONObject;
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 import javafx.application.Platform;
 
-/**
- *
- * @author ADSIB
- */
 public class Main {
     // public static Server jettyServer = new Server();
 

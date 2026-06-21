@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import javafx.beans.value.ObservableValue;
@@ -23,10 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- *
- * @author ADSIB
- */
 public class FormContrasena extends Stage {
     private String pass;
     private boolean bloquea = false;

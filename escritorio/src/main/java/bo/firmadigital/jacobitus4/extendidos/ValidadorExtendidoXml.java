@@ -9,7 +9,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.xml.crypto.AlgorithmMethod;
@@ -41,15 +40,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
-import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
 import bo.firmadigital.jacobitus.validador.base.Opciones;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
-/**
- *
- * @author ADSIB
- */
 public class ValidadorExtendidoXml extends ValidadorExtendido {
     protected Opciones opciones = null;
 

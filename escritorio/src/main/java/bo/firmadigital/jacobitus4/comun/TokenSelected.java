@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4.comun;
 
 import java.util.logging.Level;
@@ -12,10 +7,6 @@ import org.codehaus.jettison.json.JSONArray;
 
 import bo.firmadigital.jacobitus.token.Slot;
 
-/**
- *
- * @author ADSIB
- */
 public class TokenSelected {
     private Slot[] slots;
     private Slot slot;

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.utiles.fingerprint;
 
 import java.awt.Image;
@@ -30,10 +25,6 @@ import com.digitalpersona.onetouch.capture.DPFPCapturePriority;
 import com.digitalpersona.onetouch.capture.event.DPFPDataEvent;
 import com.digitalpersona.onetouch.readers.DPFPReadersCollection;
 
-/**
- *
- * @author ADSIB
- */
 public class Capturar {
     public static void capturar(Fingerprint fingerprint) {
         DPFPReadersCollection readers = DPFPGlobal.getReadersFactory().getReaders();

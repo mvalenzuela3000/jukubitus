@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import java.io.File;
@@ -56,10 +51,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-/**
- *
- * @author ADSIB
- */
 @SuppressWarnings("rawtypes")
 public class FormTokenInfo extends Stage {
     private final ProgressBar progressBar;

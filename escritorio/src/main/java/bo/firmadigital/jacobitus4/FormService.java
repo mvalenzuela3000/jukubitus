@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import java.io.ByteArrayInputStream;
@@ -50,10 +45,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-/**
- *
- * @author ADSIB
- */
 public class FormService extends Stage {
     private final ObservableList<InfoCertificado> listaInfoCertificado;
     private final TokenSelected tokenSelected;

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import java.io.BufferedReader;
@@ -43,10 +38,6 @@ import javax.net.ssl.X509TrustManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-/**
- *
- * @author ADSIB
- */
 public class Request {
     X509TrustManager trustManager;
     X509Certificate server;
