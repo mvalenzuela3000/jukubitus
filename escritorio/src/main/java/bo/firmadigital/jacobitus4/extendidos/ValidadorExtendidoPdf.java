@@ -35,40 +35,40 @@ import com.itextpdf.signatures.SignatureUtil;
 import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.utilidades.PdfHelper;
-import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoPdf extends ValidadorExtendido {
-    protected String urlPost = null;
-    protected String token = null;
+    protected String urlRespuesta = null;
+    protected String tokenAutorizacion = null;
 
-    protected Opciones opciones = null;
+    protected ConfiguracionValidador configValidador = null;
     private String contrasenia = null;
 
-    public ValidadorExtendidoPdf(File file, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPdf(File archivo, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
-            super.file = file;
+            super.file = archivo;
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
             }
-            try (InputStream is = new FileInputStream(file)) {
+            try (InputStream is = new FileInputStream(archivo)) {
                 firmas = listarCertificados(is);
             }
         } catch (Exception ignore) {
         }
     }
 
-    public ValidadorExtendidoPdf(File file, String contrasenia, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPdf(File archivo, String contrasenia, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         this.contrasenia = contrasenia;
         try {
-            super.file = file;
+            super.file = archivo;
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
             }
-            try (InputStream is = new FileInputStream(file)) {
+            try (InputStream is = new FileInputStream(archivo)) {
                 firmas = listarCertificados(is);
             }
         } catch (Exception ignore) {
@@ -76,14 +76,14 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
         }
     }
 
-    public ValidadorExtendidoPdf(File file, String urlPost, String token, Opciones opciones) {
-        this(file, opciones);
-        this.urlPost = urlPost;
-        this.token = token;
+    public ValidadorExtendidoPdf(File archivo, String urlRespuesta, String tokenAutorizacion, ConfiguracionValidador configValidador) {
+        this(archivo, configValidador);
+        this.urlRespuesta = urlRespuesta;
+        this.tokenAutorizacion = tokenAutorizacion;
     }
     
-    public ValidadorExtendidoPdf(InputStream is, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPdf(InputStream is, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
@@ -99,8 +99,8 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
         }
     }
 
-    public ValidadorExtendidoPdf(InputStream is, String contrasenia, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPdf(InputStream is, String contrasenia, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         this.contrasenia = contrasenia;
         try {
             if (Security.getProvider("BC") == null) {
@@ -119,17 +119,17 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
 
     @Override
     public boolean isRemoto() {
-        return urlPost != null;
+        return urlRespuesta != null;
     }
 
     @Override
-    public String getPost() {
-        return urlPost;
+    public String getUrlRespuesta() {
+        return urlRespuesta;
     }
 
     @Override
-    public String getToken() {
-        return token;
+    public String getTokenAutorizacion() {
+        return tokenAutorizacion;
     }
 
     @Override
@@ -239,7 +239,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
             firma.setIntegridad(pkcs7.verifySignatureIntegrityAndAuthenticity());
             firma.setObjetoPdf(pdfHelper.checkElementAdded(dict));
             firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.opciones));
+            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
             firmas.add(firma);
         }
         return firmas;

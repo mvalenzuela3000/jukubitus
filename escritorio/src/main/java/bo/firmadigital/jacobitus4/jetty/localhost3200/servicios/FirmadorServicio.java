@@ -17,12 +17,14 @@ import org.codehaus.jettison.json.JSONObject;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.firmador.base.SmartCard;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.revocacion.EstadoRevocacion;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
@@ -37,30 +39,30 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private bo.firmadigital.jacobitus.firmador.base.Opciones getOpcionesFirmador() {
+    private ConfiguracionFirmador getOpcionesFirmador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.base.Opciones opciones = new bo.firmadigital.jacobitus.firmador.base.Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setToken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
     
-    private bo.firmadigital.jacobitus.validador.base.Opciones getOpcionesValidador() {
+    private ConfiguracionValidador getOpcionesValidador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.validador.base.Opciones opciones = new bo.firmadigital.jacobitus.validador.base.Opciones();
-        opciones.setProxyHabilitado(config.isProxyEnabled());
-        opciones.setServidorProxy(config.getProxyIP());
-        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-        return opciones;
+        ConfiguracionValidador configValidador = new ConfiguracionValidador();
+        configValidador.setProxyHabilitado(config.isProxyEnabled());
+        configValidador.setServidorProxy(config.getProxyIP());
+        configValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        return configValidador;
     }
 
     public String inicio() {
@@ -103,7 +105,7 @@ public class FirmadorServicio {
                     slots = null;
                 }
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(this.getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(this.getOpcionesFirmador());
                 slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slots[0].getToken().iniciar(pin);

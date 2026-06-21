@@ -19,11 +19,11 @@ public abstract class ValidadorExtendido extends Validador {
         return false;
     }
 
-    public String getPost() {
+    public String getUrlRespuesta() {
         throw new UnsupportedOperationException("Not supported in " + this.getClass() + ".");
     }
 
-    public String getToken() {
+    public String getTokenAutorizacion() {
         throw new UnsupportedOperationException("No implementado..");
     }
 

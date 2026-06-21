@@ -32,37 +32,37 @@ import org.bouncycastle.util.Store;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
-import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
-    protected String urlPost = null;
-    protected String token = null;
+    protected String urlRespuesta = null;
+    protected String tokenAutorizacion = null;
 
-    protected Opciones opciones = null;
+    protected ConfiguracionValidador configValidador = null;
 
-    public ValidadorExtendidoPKCS7(File file, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPKCS7(File archivo, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
-            super.file = file;
+            super.file = archivo;
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
             }
-            firmas = listarCertificados(new FileInputStream(file));
+            firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
             //
         }
     }
 
-    public ValidadorExtendidoPKCS7(File file, String urlPost, String token, Opciones opciones) {
-        this(file, opciones);
-        this.urlPost = urlPost;
-        this.token = token;
+    public ValidadorExtendidoPKCS7(File archivo, String urlRespuesta, String tokenAutorizacion, ConfiguracionValidador configValidador) {
+        this(archivo, configValidador);
+        this.urlRespuesta = urlRespuesta;
+        this.tokenAutorizacion = tokenAutorizacion;
     }
 
-    public ValidadorExtendidoPKCS7(InputStream is, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoPKCS7(InputStream is, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
             if (Security.getProvider("BC") == null) {
                 Security.addProvider(new BouncyCastleProvider());
@@ -75,17 +75,17 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
 
     @Override
     public boolean isRemoto() {
-        return urlPost != null;
+        return urlRespuesta != null;
     }
 
     @Override
-    public String getPost() {
-        return urlPost;
+    public String getUrlRespuesta() {
+        return urlRespuesta;
     }
 
     @Override
-    public String getToken() {
-        return token;
+    public String getTokenAutorizacion() {
+        return tokenAutorizacion;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
                 Firma firma = new Firma(numFirma.toString(), x509Certificate, fecha, null, false);
                 firma.setIntegridad(integridad);
                 firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.opciones));
+                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
                 certs.add(firma);
                 numFirma++;
             }

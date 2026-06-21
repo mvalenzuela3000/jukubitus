@@ -40,12 +40,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
-import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoXml extends ValidadorExtendido {
-    protected Opciones opciones = null;
+    protected ConfiguracionValidador configValidador = null;
 
     private Calendar fecFirmaPresunta = null;
 
@@ -53,21 +53,21 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
         Init.init();
     }
 
-    public ValidadorExtendidoXml(File file, Date fecFirmaPresunta, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoXml(File archivo, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
-            super.file = file;
+            super.file = archivo;
             Calendar calendario = Calendar.getInstance();
             calendario.setTime(fecFirmaPresunta);
             this.fecFirmaPresunta = calendario;
-            firmas = listarCertificados(new FileInputStream(file));
+            firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
             //
         }
     }
 
-    public ValidadorExtendidoXml(InputStream is, Date fecFirmaPresunta, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoXml(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador opciones) {
+        this.configValidador = opciones;
         try {
             Calendar calendario = Calendar.getInstance();
             calendario.setTime(fecFirmaPresunta);
@@ -125,7 +125,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
                 firma.setIntegridad(integridad);
                 firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
                 if (this.fecFirmaPresunta != null) {
-                    firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.opciones));
+                    firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
                 } else {
                     firma.setRevocacion(null);
                 }
@@ -165,7 +165,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
                 Firma firma = new Firma(numFirma.toString(), x509Certificate, null, null, false);
                 firma.setIntegridad(integridad);
                 firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.opciones));
+                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
                 firmas.add(firma);
                 numFirma++;
             }

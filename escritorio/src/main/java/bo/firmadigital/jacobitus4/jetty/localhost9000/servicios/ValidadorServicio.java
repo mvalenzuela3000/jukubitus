@@ -11,7 +11,7 @@ import bo.firmadigital.jacobitus.validador.ValidadorJws;
 import bo.firmadigital.jacobitus.validador.ValidadorPKCS7;
 import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
-import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaDto;
@@ -30,8 +30,8 @@ public class ValidadorServicio {
         try {
             byte[] file = Base64.getDecoder().decode(objetoDto.getPdf().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            Opciones opciones = new Opciones();
-            ValidadorPdf validar = new ValidadorPdf(new ByteArrayInputStream(file), opciones);
+            ConfiguracionValidador configValidador = new ConfiguracionValidador();
+            ValidadorPdf validar = new ValidadorPdf(new ByteArrayInputStream(file), configValidador);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (Firma firma : validar) {
@@ -86,8 +86,8 @@ public class ValidadorServicio {
         try {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            Opciones opciones = new Opciones();
-            ValidadorPKCS7 validar = new ValidadorPKCS7(new ByteArrayInputStream(file), opciones);
+            ConfiguracionValidador configValidador = new ConfiguracionValidador();
+            ValidadorPKCS7 validar = new ValidadorPKCS7(new ByteArrayInputStream(file), configValidador);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (Firma firma : validar) {
@@ -142,8 +142,8 @@ public class ValidadorServicio {
         try {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            Opciones opciones = new Opciones();
-            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getDate(), opciones);
+            ConfiguracionValidador configValidador = new ConfiguracionValidador();
+            ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getDate(), configValidador);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (Firma firma : validar) {
@@ -200,11 +200,11 @@ public class ValidadorServicio {
         try {
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            Opciones opciones = new Opciones();
-            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getDate(), opciones);
+            ConfiguracionValidador configValidador = new ConfiguracionValidador();
+            ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getDate(), configValidador);
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
-            Firma firma = (Firma) validar.iterator().next(); {
+            Firma firma = validar.iterator().next(); {
                 FirmaDto firmaDto = new FirmaDto();
                 firmaDto.setNoModificado(firma.getIntegridad());
                 firmaDto.setCadenaConfianza(firma.getCadenaConfianza());

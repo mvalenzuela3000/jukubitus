@@ -47,7 +47,7 @@ import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
 import bo.firmadigital.jacobitus.firmador.base.IFirmador;
-import bo.firmadigital.jacobitus.firmador.base.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
@@ -80,21 +80,21 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private Opciones getOpciones() {
+    private ConfiguracionFirmador getOpciones() {
         Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        // opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setToken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
     public RespuestaDto<FirmaPdfRespuestaDto> firmarPdf(FirmaPdfDto objetoDto) throws Exception {
@@ -110,7 +110,7 @@ public class FirmadorServicio {
             Integer y = objetoDto.getPoint() != null ? objetoDto.getPoint().getY() : null;
             String image = objetoDto.getImage() != null ? objetoDto.getImage() : null;
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -187,7 +187,7 @@ public class FirmadorServicio {
             Boolean detached = objetoDto.getDetached();
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -263,7 +263,7 @@ public class FirmadorServicio {
             Boolean enveloped = objetoDto.getEnveloped();
             Boolean prefix = objetoDto.getPrefix();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -373,7 +373,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             byte[] data = Base64.getDecoder().decode(objetoDto.getData().getBytes("UTF-8"));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -503,7 +503,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             List<FirmaPdfItemDto> pdfs = objetoDto.getPdfs();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -588,7 +588,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             String hash = objetoDto.getHash();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -666,7 +666,7 @@ public class FirmadorServicio {
     public RespuestaDto<FirmaModoSeguroRespuestaDto> firmarModoSeguro(FirmaModoSeguroDto objetoDto) throws Exception {
         RespuestaDto<FirmaModoSeguroRespuestaDto> respuesta = new RespuestaDto<FirmaModoSeguroRespuestaDto>();
         GestorSlot gestorSlot = GestorSlot.getInstance();
-        gestorSlot.setOpciones(this.getOpciones());
+        gestorSlot.setConfigFirmador(this.getOpciones());
         Slot[] slots = gestorSlot.listarSlots(true);
         TokenSelected tokenSelected;
         try {

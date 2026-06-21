@@ -31,6 +31,7 @@ import bo.firmadigital.jacobitus.firmador.FirmadorJws;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.firmador.base.IFirmador;
 import bo.firmadigital.jacobitus.firmador.base.SmartCard;
 import bo.firmadigital.jacobitus.firmador.comun.MagicBytes;
@@ -41,6 +42,7 @@ import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus4.components.CertInformation;
 import bo.firmadigital.jacobitus4.comun.Constants;
 import bo.firmadigital.jacobitus4.comun.TokenSelected;
@@ -129,30 +131,30 @@ public class FormAplicacion extends Application {
     
     private static FormAplicacion app;
 
-    private bo.firmadigital.jacobitus.firmador.base.Opciones getOpcionesFirmador() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.base.Opciones opciones = new bo.firmadigital.jacobitus.firmador.base.Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        opciones.setApiSelloTiempo(config.getTS());
-        opciones.setJwtSelloTiempo(config.getTSJWT());
-        opciones.setHsmHabilitado(config.isHsmEnabled());
-        opciones.setTipoHsm(config.getHsmType());
-        opciones.setApiHsm(config.getHsmCloud());
-        opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setToken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        configFirmador.setApiSelloTiempo(config.getTS());
+        configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        configFirmador.setTipoHsm(config.getHsmType());
+        configFirmador.setApiHsm(config.getHsmCloud());
+        configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
-    private bo.firmadigital.jacobitus.validador.base.Opciones getOpcionesValidador() {
+    private ConfiguracionValidador getConfigValidador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.validador.base.Opciones opciones = new bo.firmadigital.jacobitus.validador.base.Opciones();
-        opciones.setProxyHabilitado(config.isProxyEnabled());
-        opciones.setServidorProxy(config.getProxyIP());
-        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-        return opciones;
+        ConfiguracionValidador configValidador = new ConfiguracionValidador();
+        configValidador.setProxyHabilitado(config.isProxyEnabled());
+        configValidador.setServidorProxy(config.getProxyIP());
+        configValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        return configValidador;
     }
 
     @SuppressWarnings("unchecked")
@@ -469,7 +471,7 @@ public class FormAplicacion extends Application {
             FormPdf formPdf = new FormPdf(stage);
             formPdf.showAndWait();
             if (formPdf.getPath() != null) {
-                tbvArchivos.getItems().add(new ValidadorExtendidoPdf(new File(formPdf.getPath()), this.getOpcionesValidador()));
+                tbvArchivos.getItems().add(new ValidadorExtendidoPdf(new File(formPdf.getPath()), this.getConfigValidador()));
             }
         });
         pdfMenu.getItems().addAll(nuevoItem);
@@ -689,7 +691,7 @@ public class FormAplicacion extends Application {
         if (urlArchivo == null) {
             if (urlParametro == null) {
                 if (taskBar) {
-                    SmartCard.cards(this.getOpcionesFirmador());
+                    SmartCard.cards(this.getConfigFirmador());
                 } else {
                     // new Thread(listarTokens()).start();
                 }
@@ -725,7 +727,7 @@ public class FormAplicacion extends Application {
                 FormAplicacion.stage.getScene().setCursor(Cursor.WAIT);
                 try {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    gestorSlot.setOpciones(getOpcionesFirmador());
+                    gestorSlot.setConfigFirmador(getConfigFirmador());
                     Slot[] slots = gestorSlot.listarSlots();
                     List<CK_TOKEN_INFO> listaInfoToken = new LinkedList();
                     for (Slot slot : slots) {
@@ -779,20 +781,20 @@ public class FormAplicacion extends Application {
                 List<ValidadorExtendido> archivosProcesados = new LinkedList();
                 for (int i = 0; i < archivos.size(); i++) {
                     if (archivos.get(i).getName().endsWith(".odt")) {
-                        archivosProcesados.add(new ValidadorExtendidoPdf(Conversor.odtAPdf(archivos.get(i)), getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoPdf(Conversor.odtAPdf(archivos.get(i)), getConfigValidador()));
                     } else if (archivos.get(i).getName().endsWith(".docx")) {
-                        archivosProcesados.add(new ValidadorExtendidoPdf(Conversor.docxAPdf(archivos.get(i)), getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoPdf(Conversor.docxAPdf(archivos.get(i)), getConfigValidador()));
                     } else if (archivos.get(i).getName().endsWith(".pdf")) {
-                        archivosProcesados.add(new ValidadorExtendidoPdf(archivos.get(i), getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoPdf(archivos.get(i), getConfigValidador()));
                         // TODO: Ajustar los mensajes de validacion de documentos xml y json,
                         // considerando que no se puede determinar si fueron firmados dentro del periodo
                         // de vigencia del certificado
                     } else if (archivos.get(i).getName().endsWith(".xml")) {
-                        archivosProcesados.add(new ValidadorExtendidoXml(archivos.get(i), null, getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoXml(archivos.get(i), null, getConfigValidador()));
                     } else if (archivos.get(i).getName().endsWith(".jws")) {
-                        archivosProcesados.add(new ValidadorExtendidoJws(archivos.get(i), null, getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoJws(archivos.get(i), null, getConfigValidador()));
                     } else {
-                        archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getConfigValidador()));
                     }
                     updateProgress(i + 1, archivos.size());
                 }
@@ -821,7 +823,7 @@ public class FormAplicacion extends Application {
                 stage.getScene().setCursor(Cursor.WAIT);
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(getConfigFirmador());
                 IToken token = gestorSlot.obtenerSlot(slotID).getToken();
                 token.iniciar(contrasenia);
                 InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
@@ -838,7 +840,7 @@ public class FormAplicacion extends Application {
                 } else {
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
-                            IFirmador firmador = FirmadorPdf.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
+                            IFirmador firmador = FirmadorPdf.getInstance(slotID, alias, contrasenia, getConfigFirmador());
                             String nomArchivo = new File(archivos.get(i).getAbsolutePath()).getName();
                             if (!nomArchivo.endsWith(".pdf")) {
                                 nomArchivo += ".firmado.pdf";
@@ -851,7 +853,7 @@ public class FormAplicacion extends Application {
                                 firmador.firmar(is, os, bloquear, false);
                             }
                             updateProgress(i + 1, archivos.size());
-                            tbvArchivos.getItems().set(i, new ValidadorExtendidoPdf(archivoFirmado, getOpcionesValidador()));
+                            tbvArchivos.getItems().set(i, new ValidadorExtendidoPdf(archivoFirmado, getConfigValidador()));
                         } catch (PdfException ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ")
@@ -894,18 +896,18 @@ public class FormAplicacion extends Application {
                 List<ValidadorExtendido> archivosProcesados = new LinkedList();
                 for (int i = 0; i < archivos.size(); i++) {
                     if (MagicBytes.PDF.is(archivos.get(i))) {
-                        archivosProcesados.add(new ValidadorExtendidoPdf(archivos.get(i), getOpcionesValidador()));
+                        archivosProcesados.add(new ValidadorExtendidoPdf(archivos.get(i), getConfigValidador()));
                     } else {
                         if (MagicBytes.XML.is(archivos.get(i))) {
-                            archivosProcesados.add(new ValidadorExtendidoXml(archivos.get(i), null, getOpcionesValidador()));
+                            archivosProcesados.add(new ValidadorExtendidoXml(archivos.get(i), null, getConfigValidador()));
                         } else {
                             if (MagicBytes.P7S.is(archivos.get(i))) {
-                                archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getOpcionesValidador()));
+                                archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getConfigValidador()));
                             } else {
                                 if (MagicBytes.isJWS(archivos.get(i))) {
-                                    archivosProcesados.add(new ValidadorExtendidoJws(archivos.get(i), null, getOpcionesValidador()));
+                                    archivosProcesados.add(new ValidadorExtendidoJws(archivos.get(i), null, getConfigValidador()));
                                 } else {
-                                    archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getOpcionesValidador()));
+                                    archivosProcesados.add(new ValidadorExtendidoPKCS7(archivos.get(i), getConfigValidador()));
                                 }
                             }
                         }
@@ -937,7 +939,7 @@ public class FormAplicacion extends Application {
                 stage.getScene().setCursor(Cursor.WAIT);
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(getConfigFirmador());
                 IToken token = gestorSlot.obtenerSlot(slotID).getToken();
                 token.iniciar(contrasenia);
                 InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
@@ -952,7 +954,7 @@ public class FormAplicacion extends Application {
                 if (archivos.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    IFirmador firmador = FirmadorPKCS7.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
+                    IFirmador firmador = FirmadorPKCS7.getInstance(slotID, alias, contrasenia, getConfigFirmador());
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
                             File archivoFirmado = new File(rutaDestino, archivos.get(i).getFile().getName() + ".p7s");
@@ -961,7 +963,7 @@ public class FormAplicacion extends Application {
                                 firmador.firmar(is, os);
                             }
                             updateProgress(i + 1, archivos.size());
-                            tbvArchivos.getItems().set(i, new ValidadorExtendidoPKCS7(archivoFirmado, getOpcionesValidador()));
+                            tbvArchivos.getItems().set(i, new ValidadorExtendidoPKCS7(archivoFirmado, getConfigValidador()));
                         } catch (Exception ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
@@ -999,7 +1001,7 @@ public class FormAplicacion extends Application {
                 stage.getScene().setCursor(Cursor.WAIT);
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(getConfigFirmador());
                 IToken token = gestorSlot.obtenerSlot(slotID).getToken();
                 token.iniciar(contrasenia);
                 InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
@@ -1014,7 +1016,7 @@ public class FormAplicacion extends Application {
                 if (archivos.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    IFirmador firmador = FirmadorXml.getInstance(slotID, alias, contrasenia, nodoFirma, getOpcionesFirmador());
+                    IFirmador firmador = FirmadorXml.getInstance(slotID, alias, contrasenia, nodoFirma, getConfigFirmador());
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
                             String nomArchivo = new File(archivos.get(i).getAbsolutePath()).getName();
@@ -1029,7 +1031,7 @@ public class FormAplicacion extends Application {
                                 firmador.firmar(is, os, forzarEnvoltura, usarPrefijo);
                             }
                             updateProgress(i + 1, archivos.size());
-                            tbvArchivos.getItems().set(i, new ValidadorExtendidoXml(archivoFirmado, null, getOpcionesValidador()));
+                            tbvArchivos.getItems().set(i, new ValidadorExtendidoXml(archivoFirmado, null, getConfigValidador()));
                         } catch (Exception ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
@@ -1066,7 +1068,7 @@ public class FormAplicacion extends Application {
                 stage.getScene().setCursor(Cursor.WAIT);
 
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(getConfigFirmador());
                 IToken token = gestorSlot.obtenerSlot(slotID).getToken();
                 token.iniciar(contrasenia);
                 InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
@@ -1081,7 +1083,7 @@ public class FormAplicacion extends Application {
                 if (archivos.isEmpty()) {
                     updateProgress(100, 100);
                 } else {
-                    IFirmador firmador = FirmadorJws.getInstance(slotID, alias, contrasenia, getOpcionesFirmador());
+                    IFirmador firmador = FirmadorJws.getInstance(slotID, alias, contrasenia, getConfigFirmador());
                     for (int i = 0; i < archivos.size(); i++) {
                         try {
                             String nomArchivo = new File(archivos.get(i).getAbsolutePath()).getName();
@@ -1096,7 +1098,7 @@ public class FormAplicacion extends Application {
                                 firmador.firmar(is, os, false, false);
                             }
                             updateProgress(i + 1, archivos.size());
-                            tbvArchivos.getItems().set(i, new ValidadorExtendidoJws(archivoFirmado, null, getOpcionesValidador()));
+                            tbvArchivos.getItems().set(i, new ValidadorExtendidoJws(archivoFirmado, null, getConfigValidador()));
                         } catch (Exception ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
@@ -1164,9 +1166,9 @@ public class FormAplicacion extends Application {
                     }
                     List<ValidadorExtendido> archivosDescargados = new LinkedList();
                     if (MagicBytes.PDF.is(f)) {
-                        archivosDescargados.add(new ValidadorExtendidoPdf(f, urlRespuesta, tokenAutorizacion, getOpcionesValidador()));
+                        archivosDescargados.add(new ValidadorExtendidoPdf(f, urlRespuesta, tokenAutorizacion, getConfigValidador()));
                     } else {
-                        archivosDescargados.add(new ValidadorExtendidoPKCS7(f, urlRespuesta, tokenAutorizacion, getOpcionesValidador()));
+                        archivosDescargados.add(new ValidadorExtendidoPKCS7(f, urlRespuesta, tokenAutorizacion, getConfigValidador()));
                     }
                     tbvArchivos.setItems(FXCollections.observableList(archivosDescargados));
                     if (size == 0) {

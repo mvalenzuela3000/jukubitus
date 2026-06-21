@@ -6,7 +6,7 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bo.firmadigital.jacobitus.firmador.base.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
@@ -45,21 +45,21 @@ public class FormConfiguracion extends Stage {
     // private TextField textFieldTS;
     // private TextField textFieldTSJWT;
 
-    private Opciones getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        opciones.setApiSelloTiempo(config.getTS());
-        opciones.setJwtSelloTiempo(config.getTSJWT());
-        opciones.setHsmHabilitado(config.isHsmEnabled());
-        opciones.setTipoHsm(config.getHsmType());
-        opciones.setApiHsm(config.getHsmCloud());
-        opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setToken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        configFirmador.setApiSelloTiempo(config.getTS());
+        configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        configFirmador.setTipoHsm(config.getHsmType());
+        configFirmador.setApiHsm(config.getHsmCloud());
+        configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
     public FormConfiguracion(Stage parent) {
@@ -267,7 +267,7 @@ public class FormConfiguracion extends Stage {
             FormContrasenaNueva contrasena = new FormContrasenaNueva(parent);
             contrasena.showAndWait();
             if (contrasena.getPass() != null) {
-                Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
+                Slot slot = new Slot(config.getTokenToCreate(), this.getConfigFirmador());
                 TokenPKCS12 token = new TokenPKCS12(slot);
                 try {
                     token.crear(contrasena.getPass());

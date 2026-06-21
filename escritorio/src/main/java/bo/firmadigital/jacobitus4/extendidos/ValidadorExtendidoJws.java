@@ -24,29 +24,29 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.revocacion.CrlHelper;
-import bo.firmadigital.jacobitus.validador.base.Opciones;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoJws extends ValidadorExtendido {
-    protected Opciones opciones = null;
+    protected ConfiguracionValidador configValidador = null;
 
     private Calendar fecFirmaPresunta = null;
 
-    public ValidadorExtendidoJws(File file, Date fecFirmaPresunta, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoJws(File archivo, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
-            super.file = file;
+            super.file = archivo;
             Calendar calendario = Calendar.getInstance();
             calendario.setTime(fecFirmaPresunta);
             this.fecFirmaPresunta = calendario;
-            firmas = listarCertificados(new FileInputStream(file));
+            firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
         }
     }
 
-    public ValidadorExtendidoJws(InputStream is, Date fecFirmaPresunta, Opciones opciones) {
-        this.opciones = opciones;
+    public ValidadorExtendidoJws(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
             Calendar calendario = Calendar.getInstance();
             calendario.setTime(fecFirmaPresunta);
@@ -115,7 +115,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
         firma.setIntegridad(jwsObject.verify(verifier));
         firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
         if (this.fecFirmaPresunta != null) {
-            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.opciones));
+            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
         } else {
             firma.setRevocacion(null);
         }
