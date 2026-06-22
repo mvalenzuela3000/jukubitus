@@ -131,7 +131,7 @@ public class FormAplicacion extends Application {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
-        configFirmador.setToken(config.getToken());
+        configFirmador.setSoftoken(config.getToken());
         configFirmador.setDirectorioControladores(config.getDirectorioControladores());
         configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
         configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
@@ -148,8 +148,8 @@ public class FormAplicacion extends Application {
         Config config = Config.getInstance();
         ConfiguracionValidador configValidador = new ConfiguracionValidador();
         configValidador.setProxyHabilitado(config.isProxyEnabled());
-        configValidador.setServidorProxy(config.getProxyIP());
-        configValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        configValidador.setProxyIp(config.getProxyIP());
+        configValidador.setProxyPuerto(Integer.parseInt(config.getProxyPort()));
         return configValidador;
     }
 

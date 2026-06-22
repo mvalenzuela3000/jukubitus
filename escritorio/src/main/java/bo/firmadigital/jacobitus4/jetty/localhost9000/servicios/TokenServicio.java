@@ -45,7 +45,7 @@ public class TokenServicio {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
-        configFirmador.setToken(config.getToken());
+        configFirmador.setSoftoken(config.getToken());
         configFirmador.setDirectorioControladores(config.getDirectorioControladores());
         configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
         // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
@@ -118,92 +118,84 @@ public class TokenServicio {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public RespuestaDto<TokenDataRespuestaDto> data(TokenAutenticacionDto objetoDto) {
         RespuestaDto<TokenDataRespuestaDto> respuesta = new RespuestaDto<TokenDataRespuestaDto>();
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-            CertificateFactory fact = CertificateFactory.getInstance("X.509");
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("firmadigital_bo.crt");
-            List<X509Certificate> intermediates = (List<X509Certificate>)fact.generateCertificates(is);
-            GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        GestorSlot gestorSlot = GestorSlot.getInstance();
+        gestorSlot.setConfigFirmador(getOpciones());
 
-            if (objetoDto.getSlot() != null && objetoDto.getPin() != null) {
-                Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
-                if (slot != null) {
-                    IToken token = slot.getToken();
-                    respuesta.setDatos(new TokenDataRespuestaDto());
-                    try {
-                        token.iniciar(objetoDto.getPin());
-                        respuesta.setFinalizado(true);
-                        respuesta.setMensaje("Datos de token obtenidos correctamente");
-                        List<String> llaves = token.listarIdentificadorClaves();
-                        TokenDataDto data = new TokenDataDto();
-                        ((TokenDataRespuestaDto) respuesta.getDatos()).setData_token(data);
-                        data.setCertificates(llaves.size());
-                        data.setData(new ArrayList<ITokenCertificateDto>());
-    
-                        for (int i = 0; i < llaves.size(); ++i) {
-                            TokenPrivateCertificateDto key = new TokenPrivateCertificateDto();
-                            key.setTipo("PRIMARY_KEY");
-                            key.setTipo_desc("Clave Privada");
-                            key.setAlias((String) llaves.get(i));
-                            key.setId((String) llaves.get(i));
-                            X509Certificate cert = token.obtenerCertificado((String) llaves.get(i));
-                            InfoCertificado infoCertificado = new InfoCertificado(cert);
-                            key.setTiene_certificado(cert != null);
-                            data.getData().add(key);
-    
-                            if (key.getTiene_certificado()) {
-                                TokenPublicCertificateDto x509 = new TokenPublicCertificateDto();
-                                x509.setTipo("X509_CERTIFICATE");
-                                x509.setTipo_desc("Certificado");
-                                x509.setSerialNumber(cert.getSerialNumber().toString(16));
-                                x509.setAlias((String) llaves.get(i));
-                                x509.setId((String) llaves.get(i));
-                                String pem = "-----BEGIN CERTIFICATE-----\n";
-                                pem = pem + Base64.getEncoder().encodeToString(cert.getEncoded());
-                                pem = pem + "\n-----END CERTIFICATE-----";
-                                x509.setPem(pem);
-                                x509.setValidez(new TokenCertificateValidezDto());
-                                x509.getValidez().setDesde(dateFormat.format(infoCertificado.getInicioValidez()));
-                                x509.getValidez().setHasta(dateFormat.format(infoCertificado.getFinValidez()));
-                                TokenCertificateTitularDto titular = new TokenCertificateTitularDto();
-                                titular.setDnQualifier(infoCertificado.getInfoSujeto().getTipoDocumento());
-                                titular.setUidNumber(infoCertificado.getInfoSujeto().getNumeroDocumento());
-                                titular.setUID(infoCertificado.getInfoSujeto().getComplemento());
-                                titular.setCN(infoCertificado.getInfoSujeto().getNombreComun());
-                                titular.setT(infoCertificado.getInfoSujeto().getCargo());
-                                titular.setO(infoCertificado.getInfoSujeto().getOrganizacion());
-                                titular.setOU(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
-                                titular.setEmailAddress(infoCertificado.getInfoSujeto().getCorreoElectronico());
-                                titular.setDescription(infoCertificado.getInfoSujeto().getDescripcion());
-                                x509.setTitular(titular);
-                                x509.setCommon_name(infoCertificado.getInfoSujeto().getNombreComun());
-                                x509.setEmisor(new TokenCertificateEmisorDto());
-                                x509.getEmisor().setCN(infoCertificado.getInfoEmisor().getNombreComun());
-                                x509.getEmisor().setO(infoCertificado.getInfoEmisor().getOrganizacion());
-                                data.getData().add(x509);
-                            }
+        if (objetoDto.getSlot() != null && objetoDto.getPin() != null) {
+            Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
+            if (slot != null) {
+                IToken token = slot.getToken();
+                respuesta.setDatos(new TokenDataRespuestaDto());
+                try {
+                    token.iniciar(objetoDto.getPin());
+                    respuesta.setFinalizado(true);
+                    respuesta.setMensaje("Datos de token obtenidos correctamente");
+                    List<String> llaves = token.listarIdentificadorClaves();
+                    TokenDataDto data = new TokenDataDto();
+                    ((TokenDataRespuestaDto) respuesta.getDatos()).setData_token(data);
+                    data.setCertificates(llaves.size());
+                    data.setData(new ArrayList<ITokenCertificateDto>());
+   
+                    for (int i = 0; i < llaves.size(); ++i) {
+                        TokenPrivateCertificateDto key = new TokenPrivateCertificateDto();
+                        key.setTipo("PRIMARY_KEY");
+                        key.setTipo_desc("Clave Privada");
+                        key.setAlias((String) llaves.get(i));
+                        key.setId((String) llaves.get(i));
+                        X509Certificate cert = token.obtenerCertificado((String) llaves.get(i));
+                        InfoCertificado infoCertificado = new InfoCertificado(cert);
+                        key.setTiene_certificado(cert != null);
+                        data.getData().add(key);
+   
+                        if (key.getTiene_certificado()) {
+                            TokenPublicCertificateDto x509 = new TokenPublicCertificateDto();
+                            x509.setTipo("X509_CERTIFICATE");
+                            x509.setTipo_desc("Certificado");
+                            x509.setSerialNumber(cert.getSerialNumber().toString(16));
+                            x509.setAlias((String) llaves.get(i));
+                            x509.setId((String) llaves.get(i));
+                            String pem = "-----BEGIN CERTIFICATE-----\n";
+                            pem = pem + Base64.getEncoder().encodeToString(cert.getEncoded());
+                            pem = pem + "\n-----END CERTIFICATE-----";
+                            x509.setPem(pem);
+                            x509.setValidez(new TokenCertificateValidezDto());
+                            x509.getValidez().setDesde(dateFormat.format(infoCertificado.getInicioValidez()));
+                            x509.getValidez().setHasta(dateFormat.format(infoCertificado.getFinValidez()));
+                            TokenCertificateTitularDto titular = new TokenCertificateTitularDto();
+                            titular.setDnQualifier(infoCertificado.getInfoSujeto().getTipoDocumento());
+                            titular.setUidNumber(infoCertificado.getInfoSujeto().getNumeroDocumento());
+                            titular.setUID(infoCertificado.getInfoSujeto().getComplemento());
+                            titular.setCN(infoCertificado.getInfoSujeto().getNombreComun());
+                            titular.setT(infoCertificado.getInfoSujeto().getCargo());
+                            titular.setO(infoCertificado.getInfoSujeto().getOrganizacion());
+                            titular.setOU(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
+                            titular.setEmailAddress(infoCertificado.getInfoSujeto().getCorreoElectronico());
+                            titular.setDescription(infoCertificado.getInfoSujeto().getDescripcion());
+                            x509.setTitular(titular);
+                            x509.setCommon_name(infoCertificado.getInfoSujeto().getNombreComun());
+                            x509.setEmisor(new TokenCertificateEmisorDto());
+                            x509.getEmisor().setCN(infoCertificado.getInfoEmisor().getNombreComun());
+                            x509.getEmisor().setO(infoCertificado.getInfoEmisor().getOrganizacion());
+                            data.getData().add(x509);
                         }
-    
-                        data.setPrivate_keys(llaves.size());
-                    } catch (GeneralSecurityException ex) {
-                        respuesta.setFinalizado(false);
-                        respuesta.setMensaje(ex.getMessage());
                     }
-                    token.salir();
-                } else {
+   
+                    data.setPrivate_keys(llaves.size());
+                } catch (GeneralSecurityException ex) {
                     respuesta.setFinalizado(false);
-                    respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
+                    respuesta.setMensaje(ex.getMessage());
                 }
+                token.salir();
             } else {
                 respuesta.setFinalizado(false);
-                respuesta.setMensaje("Datos requeridos slot y pin.");
+                respuesta.setMensaje("El slot " + objetoDto.getSlot() + " no se encuentra disponible.");
             }
-        } catch (CertificateException ex) {
-            Logger.getLogger(TokenServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        } else {
+            respuesta.setFinalizado(false);
+            respuesta.setMensaje("Datos requeridos slot y pin.");
         }
 
         return respuesta;

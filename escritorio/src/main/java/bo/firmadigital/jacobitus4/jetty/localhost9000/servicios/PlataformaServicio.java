@@ -56,7 +56,7 @@ public class PlataformaServicio {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
-        configFirmador.setToken(config.getToken());
+        configFirmador.setSoftoken(config.getToken());
         configFirmador.setDirectorioControladores(config.getDirectorioControladores());
         configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
         // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
