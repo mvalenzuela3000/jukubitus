@@ -50,7 +50,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
 
     protected ConfiguracionValidador configValidador = null;
 
-    private Calendar fecFirmaPresunta = null;
+    private Date fecFirmaPresunta = null;
 
     static {
         Init.init();
@@ -60,9 +60,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
         this.configValidador = configValidador;
         try {
             super.file = archivo;
-            Calendar calendario = Calendar.getInstance();
-            calendario.setTime(fecFirmaPresunta);
-            this.fecFirmaPresunta = calendario;
+            this.fecFirmaPresunta = fecFirmaPresunta;
             firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
             LOG.severe(ignore.getMessage());
@@ -72,9 +70,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
     public ValidadorExtendidoXml(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador opciones) {
         this.configValidador = opciones;
         try {
-            Calendar calendario = Calendar.getInstance();
-            calendario.setTime(fecFirmaPresunta);
-            this.fecFirmaPresunta = calendario;
+            this.fecFirmaPresunta = fecFirmaPresunta;
             firmas = listarCertificados(is);
         } catch (Exception ignore) {
             LOG.severe(ignore.getMessage());

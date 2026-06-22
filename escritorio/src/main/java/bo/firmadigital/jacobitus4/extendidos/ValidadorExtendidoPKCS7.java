@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -153,9 +154,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
             Integer numFirma = 1;
             for (SignerInformation signerInfo : signers) {
                 Attribute attribute = signerInfo.getSignedAttributes().get(pkcs_9_at_signingTime);
-                Calendar fecha = Calendar.getInstance();
-                fecha.setTime(((ASN1UTCTime)attribute.getAttrValues().getObjectAt(0)).getDate());
-                // Integridad del documento
+                Date fecha = ((ASN1UTCTime)attribute.getAttrValues().getObjectAt(0)).getDate();
                 X509Certificate x509Certificate = null;
                 boolean integridad = false;
                 Store store = signedData.getCertificates();

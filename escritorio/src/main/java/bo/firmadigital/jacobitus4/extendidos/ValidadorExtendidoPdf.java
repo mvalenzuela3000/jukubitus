@@ -239,9 +239,9 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
 
             Firma firma;
             if (tieneSelloTiempo && selloTiempoValido) {
-                firma = new Firma(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate(), pkcs7.getTimeStampDate(), bloqueaDocumento(referenceArray));
+                firma = new Firma(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate().getTime(), pkcs7.getTimeStampToken(), bloqueaDocumento(referenceArray));
             } else {
-                firma = new Firma(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate(), null, bloqueaDocumento(referenceArray));
+                firma = new Firma(nombre, pkcs7.getSigningCertificate(), pkcs7.getSignDate().getTime(), null, bloqueaDocumento(referenceArray));
             }
             firma.setIntegridad(pkcs7.verifySignatureIntegrityAndAuthenticity());
             firma.setObjetoPdf(pdfHelper.checkElementAdded(dict));

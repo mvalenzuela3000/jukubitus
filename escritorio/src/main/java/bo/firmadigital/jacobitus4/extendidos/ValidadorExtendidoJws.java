@@ -13,7 +13,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,15 +34,13 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
 
     protected ConfiguracionValidador configValidador = null;
 
-    private Calendar fecFirmaPresunta = null;
+    private Date fecFirmaPresunta = null;
 
     public ValidadorExtendidoJws(File archivo, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
         this.configValidador = configValidador;
         try {
             super.file = archivo;
-            Calendar calendario = Calendar.getInstance();
-            calendario.setTime(fecFirmaPresunta);
-            this.fecFirmaPresunta = calendario;
+            this.fecFirmaPresunta = fecFirmaPresunta;
             firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
             LOG.severe(ignore.getMessage());
@@ -53,9 +50,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
     public ValidadorExtendidoJws(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
         this.configValidador = configValidador;
         try {
-            Calendar calendario = Calendar.getInstance();
-            calendario.setTime(fecFirmaPresunta);
-            this.fecFirmaPresunta = calendario;
+            this.fecFirmaPresunta = fecFirmaPresunta;
             this.firmas = listarCertificados(is);
         } catch (Exception ignore) {
             LOG.severe(ignore.getMessage());
