@@ -19,8 +19,8 @@ import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.firmador.base.SmartCard;
-import bo.firmadigital.jacobitus.revocacion.CrlHelper;
 import bo.firmadigital.jacobitus.revocacion.EstadoRevocacion;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
@@ -39,11 +39,11 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private ConfiguracionFirmador getOpcionesFirmador() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
-        configFirmador.setToken(config.getToken());
+        configFirmador.setSoftoken(config.getToken());
         configFirmador.setDirectorioControladores(config.getDirectorioControladores());
         configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
         configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
@@ -56,12 +56,12 @@ public class FirmadorServicio {
         return configFirmador;
     }
     
-    private ConfiguracionValidador getOpcionesValidador() {
+    private ConfiguracionValidador getConfigValidador() {
         Config config = Config.getInstance();
         ConfiguracionValidador configValidador = new ConfiguracionValidador();
         configValidador.setProxyHabilitado(config.isProxyEnabled());
-        configValidador.setServidorProxy(config.getProxyIP());
-        configValidador.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
+        configValidador.setProxyIp(config.getProxyIP());
+        configValidador.setProxyPuerto(Integer.parseInt(config.getProxyPort()));
         return configValidador;
     }
 
@@ -74,7 +74,7 @@ public class FirmadorServicio {
         try {
             try {
                 List<String> datos = new ArrayList<String>();
-                List<JSONObject> tokens = SmartCard.cards(this.getOpcionesFirmador());
+                List<JSONObject> tokens = SmartCard.cards(this.getConfigFirmador());
                 for (JSONObject token : tokens) {
                     datos.add(token.getString("name"));
                 }
@@ -105,7 +105,7 @@ public class FirmadorServicio {
                     slots = null;
                 }
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setConfigFirmador(this.getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(this.getConfigFirmador());
                 slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slots[0].getToken().iniciar(pin);
@@ -143,7 +143,7 @@ public class FirmadorServicio {
                     for (String alias : listaAlias) {
                         InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
                         CertificadoDto certificadoDto = new CertificadoDto();
-                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado()));
+                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy()));
                         certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                         certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                         certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
@@ -156,12 +156,8 @@ public class FirmadorServicio {
                         certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
                         certificadoDto.setAlias(alias);
                         certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
-                        EstadoRevocacion.Estado state = CrlHelper.verificar(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getEstado();
-                        if (state == EstadoRevocacion.Estado.NO_REVOCADO) {
-                            certificadoDto.setOCSP("no revocado");
-                        } else {
-                            certificadoDto.setOCSP(state.toString());
-                        }
+                        EstadoRevocacion revocacion = RevocacionHelper.verificar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy(), new Date());
+                        certificadoDto.setOCSP(revocacion.getDescripcion());
                         listaCertificadoDto.add(certificadoDto);
                     }
                     respuesta.setDatos(listaCertificadoDto);
@@ -201,7 +197,7 @@ public class FirmadorServicio {
                         } else {
                             InfoCertificado infoCertificado = new InfoCertificado(objetoDto.getAlias(), certificate);
                             CertificadoDto certificadoDto = new CertificadoDto();
-                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado()));
+                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy()));
                             certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
                             certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
                             certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
@@ -214,12 +210,8 @@ public class FirmadorServicio {
                             certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
                             certificadoDto.setAlias(objetoDto.getAlias());
                             certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
-                            EstadoRevocacion.Estado state = CrlHelper.verificar(infoCertificado.getX509certificado(), new Date(), this.getOpcionesValidador()).getEstado();
-                            if (state == EstadoRevocacion.Estado.NO_REVOCADO) {
-                                certificadoDto.setOCSP("no revocado");
-                            } else {
-                                certificadoDto.setOCSP(state.toString());
-                            }
+                            EstadoRevocacion revocacion = RevocacionHelper.verificar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy(), new Date());
+                            certificadoDto.setOCSP(revocacion.getDescripcion());
                             FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
                             byte[] pdf = Base64.getDecoder().decode(objetoDto.getPdf_base64());
                             ByteArrayOutputStream os = new ByteArrayOutputStream();

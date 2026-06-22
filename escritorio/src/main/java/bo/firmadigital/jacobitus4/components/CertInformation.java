@@ -2,9 +2,11 @@ package bo.firmadigital.jacobitus4.components;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
-import bo.firmadigital.jacobitus.revocacion.OcspHelper;
+import bo.firmadigital.jacobitus.revocacion.EstadoRevocacion;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 import javafx.geometry.HPos;
 import javafx.scene.control.Label;
@@ -195,7 +197,9 @@ public class CertInformation extends GridPane {
 
             Label label11 = new Label("Detalle");
             this.add(label11, 0, 16, 1, 1);
-            Label data11 = new Label(OcspHelper.validarOCSP(infoCertificado.getX509certificado()));
+            // TODO: Recibir configuracion de validacion para obtener configuracion de proxy
+            EstadoRevocacion revocacion = RevocacionHelper.verificar(infoCertificado.getX509certificado(), null, new Date());
+            Label data11 = new Label(revocacion.getDescripcion());
             this.add(data11, 1, 16, 1, 1);
         }
 

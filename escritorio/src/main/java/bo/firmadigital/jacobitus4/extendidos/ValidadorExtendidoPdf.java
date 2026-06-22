@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -33,7 +34,7 @@ import com.itextpdf.signatures.PdfPKCS7;
 import com.itextpdf.signatures.SignatureUtil;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
-import bo.firmadigital.jacobitus.revocacion.CrlHelper;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.utilidades.PdfHelper;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
@@ -141,8 +142,8 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
                 out = new File(System.getProperty("java.io.tmpdir"), "documento" + c + ".pdf");
                 c++;
             }
-            PdfReader pdf = new PdfReader(file);
-            PdfDocument pdfDocument = new PdfDocument(pdf);
+            PdfReader pdfReader = new PdfReader(file);
+            PdfDocument pdfDocument = new PdfDocument(pdfReader);
             SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
             try (InputStream is = signatureUtil.extractRevision(revision);OutputStream os = new FileOutputStream(out)) {
                 byte[] buffer = new byte[8 * 1024];
@@ -196,7 +197,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
         return false;
     }
 
-    public List<Firma> listarCertificados(InputStream is) throws Exception {
+    public List<Firma> listarCertificados(InputStream is) throws IOException, GeneralSecurityException {
         Certificate certificateTSA;
         try (InputStreamReader isr = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("timestamp.crt"))) {
             PemReader reader = new PemReader(isr);
@@ -238,8 +239,8 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
             }
             firma.setIntegridad(pkcs7.verifySignatureIntegrityAndAuthenticity());
             firma.setObjetoPdf(pdfHelper.checkElementAdded(dict));
-            firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
+            firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate(), this.configValidador.getProxy()));
+            firma.setRevocacion(RevocacionHelper.verificar((X509Certificate) firma.getCertificate(), this.configValidador.getProxy(), firma.getFecFirma()));
             firmas.add(firma);
         }
         return firmas;
@@ -249,7 +250,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
         boolean res = false;
         try {
             for (Firma firma : firmas) {
-                if (firma.getBloqueado()) {
+                if (Boolean.TRUE.equals(firma.getBloqueado())) {
                     res = true;
                     break;
                 }

@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import bo.firmadigital.jacobitus.revocacion.CrlHelper;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
@@ -78,7 +78,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
         }
     }
 
-    public List<Firma> listarCertificados(InputStream is) throws Exception {
+    public List<Firma> listarCertificados(InputStream is) {
         List<Firma> firmas = new ArrayList<>();
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -123,9 +123,9 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
                     firma = new Firma(numFirma.toString(), x509Certificate, this.fecFirmaPresunta, null, false);
                 }
                 firma.setIntegridad(integridad);
-                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
+                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate(), this.configValidador.getProxy()));
                 if (this.fecFirmaPresunta != null) {
-                    firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
+                    firma.setRevocacion(RevocacionHelper.verificar((X509Certificate) firma.getCertificate(), this.configValidador.getProxy(), firma.getFecFirma()));
                 } else {
                     firma.setRevocacion(null);
                 }
@@ -164,8 +164,12 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
                 }
                 Firma firma = new Firma(numFirma.toString(), x509Certificate, null, null, false);
                 firma.setIntegridad(integridad);
-                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
+                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate(), this.configValidador.getProxy()));
+                if (this.fecFirmaPresunta != null) {
+                    firma.setRevocacion(RevocacionHelper.verificar((X509Certificate) firma.getCertificate(), this.configValidador.getProxy(), firma.getFecFirma()));
+                } else {
+                    firma.setRevocacion(null);
+                }
                 firmas.add(firma);
                 numFirma++;
             }

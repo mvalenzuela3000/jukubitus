@@ -9,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -28,10 +30,11 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
-import bo.firmadigital.jacobitus.revocacion.CrlHelper;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
@@ -138,7 +141,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public List<Firma> listarCertificados(InputStream is) throws Exception {
+    public List<Firma> listarCertificados(InputStream is) throws ParseException, CertificateException, OperatorCreationException {
         List<Firma> certs = new ArrayList<>();
         try {
             CMSSignedData signedData = new CMSSignedData(is);
@@ -164,8 +167,8 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
                 }
                 Firma firma = new Firma(numFirma.toString(), x509Certificate, fecha, null, false);
                 firma.setIntegridad(integridad);
-                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
-                firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
+                firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate(), this.configValidador.getProxy()));
+                firma.setRevocacion(RevocacionHelper.verificar((X509Certificate) firma.getCertificate(), this.configValidador.getProxy(), firma.getFecFirma()));
                 certs.add(firma);
                 numFirma++;
             }

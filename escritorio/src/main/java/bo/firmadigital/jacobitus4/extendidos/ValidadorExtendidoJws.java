@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -18,12 +19,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
-import bo.firmadigital.jacobitus.revocacion.CrlHelper;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
@@ -99,23 +101,22 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
         }
     }
 
-    public final List<Firma> listarCertificados(InputStream is) throws Exception {
-        X509Certificate cert;
+    public final List<Firma> listarCertificados(InputStream is) throws CertificateException, ParseException, IOException, JOSEException {
         List<Firma> firmas = new ArrayList<>();
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         JWSObject jwsObject = JWSObject.parse(new String(is.readAllBytes()));
         InputStream in = new ByteArrayInputStream(jwsObject.getHeader().getX509CertChain().get(0).decode());
-        cert = (X509Certificate)certFactory.generateCertificate(in);
-        JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)cert.getPublicKey());
+        X509Certificate x509Certificate = (X509Certificate)certFactory.generateCertificate(in);
+        JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)x509Certificate.getPublicKey());
 
-        Firma firma = new Firma("Firma", cert, null, null, false);
+        Firma firma = new Firma("Firma", x509Certificate, null, null, false);
         if (this.fecFirmaPresunta != null) {
-            firma = new Firma("Firma", cert, this.fecFirmaPresunta, null, false);
+            firma = new Firma("Firma", x509Certificate, this.fecFirmaPresunta, null, false);
         }
         firma.setIntegridad(jwsObject.verify(verifier));
-        firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate()));
+        firma.setCadenaConfianza(CadenaConfianzaHelper.validar(firma.getCertificate(), this.configValidador.getProxy()));
         if (this.fecFirmaPresunta != null) {
-            firma.setRevocacion(CrlHelper.verificar((X509Certificate) firma.getCertificate(), firma.getFecFirma(), this.configValidador));
+            firma.setRevocacion(RevocacionHelper.verificar((X509Certificate) firma.getCertificate(), this.configValidador.getProxy(), firma.getFecFirma()));
         } else {
             firma.setRevocacion(null);
         }
