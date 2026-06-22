@@ -40,6 +40,8 @@ import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
+    private static final Logger LOG = Logger.getLogger(ValidadorExtendidoPKCS7.class.getName());
+
     protected String urlRespuesta = null;
     protected String tokenAutorizacion = null;
 
@@ -54,7 +56,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
             }
             firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -72,7 +74,7 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
             }
             firmas = listarCertificados(is);
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -172,7 +174,9 @@ public class ValidadorExtendidoPKCS7 extends ValidadorExtendido {
                 certs.add(firma);
                 numFirma++;
             }
-        } catch (CMSException ignore) { }
+        } catch (CMSException ignore) {
+            LOG.severe(ignore.getMessage());
+        }
         return certs;
     }
 }

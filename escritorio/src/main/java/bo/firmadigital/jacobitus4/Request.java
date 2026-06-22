@@ -41,6 +41,8 @@ import org.codehaus.jettison.json.JSONObject;
 import bo.firmadigital.jacobitus.comun.JacobitusException;
 
 public class Request {
+    private static final Logger LOG = Logger.getLogger(Request.class.getName());
+
     X509TrustManager trustManager;
     X509Certificate server;
 
@@ -156,6 +158,7 @@ public class Request {
                 err.put("code", 402);
                 err.put("message", e.getMessage());
             } catch (JSONException ignore) {
+                LOG.severe(ignore.getMessage());
             }
             return err;
         }

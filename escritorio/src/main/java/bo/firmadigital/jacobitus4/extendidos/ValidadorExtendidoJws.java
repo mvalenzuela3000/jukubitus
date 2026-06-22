@@ -31,6 +31,8 @@ import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoJws extends ValidadorExtendido {
+    private static final Logger LOG = Logger.getLogger(ValidadorExtendidoJws.class.getName());
+
     protected ConfiguracionValidador configValidador = null;
 
     private Calendar fecFirmaPresunta = null;
@@ -44,6 +46,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
             this.fecFirmaPresunta = calendario;
             firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -55,6 +58,7 @@ public class ValidadorExtendidoJws extends ValidadorExtendido {
             this.fecFirmaPresunta = calendario;
             this.firmas = listarCertificados(is);
         } catch (Exception ignore) {
+            LOG.severe(ignore.getMessage());
         }
     }
 

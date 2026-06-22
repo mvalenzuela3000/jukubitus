@@ -15,6 +15,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -41,6 +42,8 @@ import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoPdf extends ValidadorExtendido {
+    private static final Logger LOG = Logger.getLogger(ValidadorExtendidoPdf.class.getName());
+
     protected String urlRespuesta = null;
     protected String tokenAutorizacion = null;
 
@@ -58,6 +61,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
                 firmas = listarCertificados(is);
             }
         } catch (Exception ignore) {
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -73,7 +77,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
                 firmas = listarCertificados(is);
             }
         } catch (Exception ignore) {
-            System.out.println(ignore.getMessage());
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -97,6 +101,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
                 throw new JacobitusException("Contraseña inválida.");
             }
         } catch (Exception ignore) {
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -115,6 +120,7 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
                 throw new JacobitusException("Contraseña inválida.");
             }
         } catch (Exception ignore) {
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -247,17 +253,17 @@ public class ValidadorExtendidoPdf extends ValidadorExtendido {
     }
 
     public boolean getBloqueado() {
-        boolean res = false;
+        boolean respuesta = false;
         try {
             for (Firma firma : firmas) {
                 if (Boolean.TRUE.equals(firma.getBloqueado())) {
-                    res = true;
+                    respuesta = true;
                     break;
                 }
             }
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
-        return res;
+        return respuesta;
     }
 }

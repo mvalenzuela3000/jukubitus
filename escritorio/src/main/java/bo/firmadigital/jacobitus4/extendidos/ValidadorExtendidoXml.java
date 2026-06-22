@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.crypto.AlgorithmMethod;
 import javax.xml.crypto.KeySelector;
@@ -45,6 +46,8 @@ import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 
 public class ValidadorExtendidoXml extends ValidadorExtendido {
+    private static final Logger LOG = Logger.getLogger(ValidadorExtendidoXml.class.getName());
+
     protected ConfiguracionValidador configValidador = null;
 
     private Calendar fecFirmaPresunta = null;
@@ -62,7 +65,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
             this.fecFirmaPresunta = calendario;
             firmas = listarCertificados(new FileInputStream(archivo));
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -74,7 +77,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
             this.fecFirmaPresunta = calendario;
             firmas = listarCertificados(is);
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
     }
 
@@ -174,7 +177,7 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
                 numFirma++;
             }
         } catch (Exception ignore) {
-            //
+            LOG.severe(ignore.getMessage());
         }
         return firmas;
     }
