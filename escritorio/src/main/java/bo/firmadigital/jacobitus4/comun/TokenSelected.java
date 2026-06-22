@@ -6,76 +6,22 @@ import java.util.logging.Logger;
 import org.codehaus.jettison.json.JSONArray;
 
 import bo.firmadigital.jacobitus.token.Slot;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class TokenSelected {
     private Slot[] slots;
     private Slot slot;
     private String alias;
     private String pin;
-    private String ci;
+    private String CI;
     private JSONArray files;
     private JSONArray filesJson;
+    @Setter(AccessLevel.NONE)
     private boolean shown;
-
-    public Slot[] getSlots() {
-        return slots;
-    }
-
-    public void setSlots(Slot[] slots) {
-        this.slots = slots;
-    }
-
-    public Slot getSlot() {
-        return slot;
-    }
-
-    public void setSlot(Slot slot) {
-        this.slot = slot;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getPin() {
-        return pin;
-    }
-
-    public void setPin(String pin) {
-        this.pin = pin;
-    }
-
-    public String getCI() {
-        return ci;
-    }
-
-    public void setCI(String ci) {
-        this.ci = ci;
-    }
-
-    public JSONArray getFiles() {
-        return files;
-    }
-
-    public void setFiles(JSONArray files) {
-        this.files = files;
-    }
-
-    public JSONArray getFilesJson() {
-        return filesJson;
-    }
-
-    public void setFilesJson(JSONArray files) {
-        this.filesJson = files;
-    }
-
-    public boolean isShown() {
-        return shown;
-    }
 
     public synchronized void showAndWait() {
         try {

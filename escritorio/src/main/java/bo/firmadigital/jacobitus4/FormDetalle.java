@@ -74,7 +74,7 @@ public class FormDetalle extends Stage {
                 if (!empty) {
                     setText(item);
                     if (getTreeItem() instanceof TreeItemBlocked) {
-                        Firma firma = ((TreeItemBlocked)getTreeItem()).getCertDate();
+                        Firma firma = ((TreeItemBlocked)getTreeItem()).getFirma();
                         if (firma.getBloqueado()) {
                             setTextFill(Color.BLUE);
                             //setStyle("-fx-text-fill: blue;");
