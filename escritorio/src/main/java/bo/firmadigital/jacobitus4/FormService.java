@@ -45,6 +45,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.StringConverter;
 
 public class FormService extends Stage {
     private final ObservableList<InfoCertificado> listaInfoCertificado;
@@ -62,7 +63,7 @@ public class FormService extends Stage {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
-        configFirmador.setToken(config.getToken());
+        configFirmador.setSoftoken(config.getToken());
         configFirmador.setDirectorioControladores(config.getDirectorioControladores());
         configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
         configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
@@ -121,6 +122,25 @@ public class FormService extends Stage {
         root.add(anchorPane, 1, 0 + r, 1, 1);
         listaInfoCertificado = FXCollections.observableArrayList();
         cbInfoCertificado = new ChoiceBox<InfoCertificado>(listaInfoCertificado);
+        cbInfoCertificado.setConverter(new StringConverter<InfoCertificado>() {
+            @Override
+            public String toString(InfoCertificado infoCertificado) {
+                if (infoCertificado == null) {
+                    return "";
+                }
+
+                if (infoCertificado.getInfoSujeto().getCargo().equals("")) {
+                    return infoCertificado.getInfoSujeto().getNombreComun();
+                } else {
+                    return infoCertificado.getInfoSujeto().getNombreComun() + "\n" + infoCertificado.getInfoSujeto().getCargo();
+                }
+            }
+
+            @Override
+            public InfoCertificado fromString(String string) {
+                return null;
+            }
+        });
         cbInfoCertificado.prefWidthProperty().bind(root.widthProperty());
         cbInfoCertificado.setPrefHeight(55);
         root.add(cbInfoCertificado, 0, 1 + r, 2, 1);
