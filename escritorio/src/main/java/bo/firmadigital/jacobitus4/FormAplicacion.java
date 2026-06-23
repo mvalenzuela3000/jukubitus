@@ -10,6 +10,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.awt.AWTException;
+import java.awt.Graphics2D;
+import java.awt.PopupMenu;
+import java.awt.RenderingHints;
+import java.awt.TrayIcon;
+import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.cert.CertificateEncodingException;
@@ -60,6 +66,11 @@ import bo.firmadigital.jacobitus4.util.plataforma.PlataformaHelper;
 import bo.firmadigital.jacobitus4.util.plataforma.PlataformaInfo;
 import bo.firmadigital.utiles.CertUtil;
 import bo.firmadigital.utiles.Conversor;
+import dorkbox.jna.rendering.ProviderType;
+import dorkbox.jna.rendering.RenderProvider;
+import dorkbox.jna.rendering.Renderer;
+import dorkbox.systemTray.SystemTray;
+import dorkbox.systemTray.util.SizeAndScalingLinux;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -99,6 +110,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.imageio.ImageIO;
 
 @SuppressWarnings("rawtypes")
 public class FormAplicacion extends Application {
@@ -115,6 +127,7 @@ public class FormAplicacion extends Application {
     private static boolean servicio;
     private static boolean taskBar;
     private static boolean taskBarEmulado;
+    private static TrayIcon iconoBandejaAwt;
     
     private static String urlArchivo = null;
     private static String tokenAutorizacion;
@@ -159,6 +172,12 @@ public class FormAplicacion extends Application {
         MenuItem exportarItem;
         ContextMenu contextMenu;
         ContextMenu tokenContextMenu;
+        FormAplicacion.stage = stage;
+        FormAplicacion.app = this;
+        if (taskBar && !iniciarBandejaSistema()) {
+            taskBar = false;
+        }
+
         String version = Informacion.VERSION;
         stage.setTitle("Jacobitus - " + version);
         if (!servicio) {
@@ -661,7 +680,7 @@ public class FormAplicacion extends Application {
         scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-        if (taskBar && !SistemaOperativoHelper.esDebian()) {
+        if (taskBar && !taskBarEmulado) {
             Platform.setImplicitExit(false);
             if (urlArchivo == null && urlParametro == null) {
                 stage.hide();
@@ -713,8 +732,182 @@ public class FormAplicacion extends Application {
                 }
             });
         });
-        FormAplicacion.stage = stage;
-        FormAplicacion.app = this;
+    }
+
+    private boolean iniciarBandejaSistema() {
+        if (SistemaOperativoHelper.esWindows() || SistemaOperativoHelper.esMacOS()) {
+            return iniciarBandejaAwtSeguro();
+        }
+        if (SistemaOperativoHelper.esUnix()) {
+            return iniciarBandejaDorkbox();
+        }
+
+        return iniciarBandejaDorkbox() || iniciarBandejaAwtSeguro();
+    }
+
+    private boolean iniciarBandejaDorkbox() {
+        try {
+            if (SistemaOperativoHelper.esUnix()) {
+                RenderProvider.set(new ProveedorRenderJavaFx());
+                SystemTray.AUTO_SIZE = false;
+                SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator;
+                SizeAndScalingLinux.OVERRIDE_TRAY_SIZE = 24;
+                SizeAndScalingLinux.OVERRIDE_MENU_SIZE = 16;
+            }
+            SystemTray tray = SystemTray.get("Jacobitus");
+            if (tray == null) {
+                return false;
+            }
+            File iconFile = prepararIconoBandeja();
+            if (iconFile == null) {
+                return false;
+            }
+            tray.setTooltip("Jacobitus");
+            tray.setImage(iconFile);
+            tray.getMenu().add(new dorkbox.systemTray.MenuItem("Abrir", event -> FormAplicacion.show()));
+            tray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> {
+                try {
+                    WebServer.detener();
+                } catch (Exception ex) {
+                    Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Platform.exit();
+                tray.shutdown();
+            }));
+            return true;
+        } catch (Throwable ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar Dorkbox SystemTray", ex);
+            return false;
+        }
+    }
+
+    private boolean iniciarBandejaAwtSeguro() {
+        try {
+            return iniciarBandejaAwt();
+        } catch (Throwable ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar AWT SystemTray", ex);
+            return false;
+        }
+    }
+
+    private boolean iniciarBandejaAwt() throws IOException, AWTException {
+        if (!java.awt.SystemTray.isSupported()) {
+            return false;
+        }
+        File iconFile = prepararIconoBandeja();
+        if (iconFile == null) {
+            return false;
+        }
+        BufferedImage iconImage = ImageIO.read(iconFile);
+        if (iconImage == null) {
+            return false;
+        }
+
+        PopupMenu popupMenu = new PopupMenu();
+        java.awt.MenuItem abrirItem = new java.awt.MenuItem("Abrir");
+        abrirItem.addActionListener(event -> FormAplicacion.show());
+        java.awt.MenuItem salirItem = new java.awt.MenuItem("Salir");
+        salirItem.addActionListener(event -> {
+            try {
+                WebServer.detener();
+            } catch (Exception ex) {
+                Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            quitarIconoBandejaAwt();
+            Platform.exit();
+        });
+        popupMenu.add(abrirItem);
+        popupMenu.add(salirItem);
+
+        iconoBandejaAwt = new TrayIcon(iconImage, "Jacobitus", popupMenu);
+        iconoBandejaAwt.setImageAutoSize(true);
+        iconoBandejaAwt.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (event.getButton() == java.awt.event.MouseEvent.BUTTON1) {
+                    FormAplicacion.show();
+                }
+            }
+        });
+        java.awt.SystemTray.getSystemTray().add(iconoBandejaAwt);
+        return true;
+    }
+
+    private static void quitarIconoBandejaAwt() {
+        if (iconoBandejaAwt == null) {
+            return;
+        }
+        try {
+            if (java.awt.SystemTray.isSupported()) {
+                java.awt.SystemTray.getSystemTray().remove(iconoBandejaAwt);
+            }
+        } finally {
+            iconoBandejaAwt = null;
+        }
+    }
+
+    private File prepararIconoBandeja() throws IOException {
+        File cacheDir = new File(System.getProperty("java.io.tmpdir"), "JacobitusCache_" + System.getProperty("user.name"));
+        cacheDir.mkdirs();
+        File iconFile = new File(cacheDir, "jacobitus-tray.png");
+        try (InputStream iconStream = getClass().getClassLoader().getResourceAsStream("icon.png")) {
+            if (iconStream == null) {
+                return null;
+            }
+            BufferedImage source = ImageIO.read(iconStream);
+            if (source == null) {
+                return null;
+            }
+            BufferedImage trayIcon = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = trayIcon.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics.drawImage(source, 0, 0, 24, 24, null);
+            } finally {
+                graphics.dispose();
+            }
+            ImageIO.write(trayIcon, "png", iconFile);
+        }
+        return iconFile;
+    }
+
+    private static class ProveedorRenderJavaFx implements Renderer {
+        @Override
+        public boolean isSupported() {
+            return true;
+        }
+
+        @Override
+        public ProviderType getType() {
+            return ProviderType.JAVAFX;
+        }
+
+        @Override
+        public boolean alreadyRunning() {
+            return true;
+        }
+
+        @Override
+        public boolean isEventThread() {
+            return Platform.isFxApplicationThread();
+        }
+
+        @Override
+        public int getGtkVersion() {
+            return 3;
+        }
+
+        @Override
+        public boolean dispatch(Runnable runnable) {
+            if (Platform.isFxApplicationThread()) {
+                runnable.run();
+            } else {
+                Platform.runLater(runnable);
+            }
+            return true;
+        }
     }
 
     public Task<Boolean> listarTokens() {
@@ -1332,10 +1525,10 @@ public class FormAplicacion extends Application {
 
     public static void show() {
         Platform.runLater(() -> {
-            if (taskBar) {
+            if (stage != null) {
                 stage.show();
-            } else {
                 stage.setIconified(false);
+                stage.toFront();
             }
         });
     }
@@ -1387,8 +1580,8 @@ public class FormAplicacion extends Application {
         FormAplicacion.taskBar = taskBar;
         FormAplicacion.taskBarEmulado = taskBarEmulado;
         if (!FormAplicacion.lanzada) {
-            launch();
             FormAplicacion.lanzada = true;
+            launch();
         }
     }
 
@@ -1398,8 +1591,8 @@ public class FormAplicacion extends Application {
         FormAplicacion.taskBarEmulado = taskBarEmulado;
         FormAplicacion.urlParametro = urlParametro;
         if (!FormAplicacion.lanzada) {
-            launch();
             FormAplicacion.lanzada = true;
+            launch();
         }
     }
 
@@ -1412,8 +1605,8 @@ public class FormAplicacion extends Application {
         FormAplicacion.tokenAutorizacion = tokenAutorizacion;
         FormAplicacion.urlRespuesta = urlRespuesta;
         if (!FormAplicacion.lanzada) {
-            launch();
             FormAplicacion.lanzada = true;
+            launch();
         }
     }
 
