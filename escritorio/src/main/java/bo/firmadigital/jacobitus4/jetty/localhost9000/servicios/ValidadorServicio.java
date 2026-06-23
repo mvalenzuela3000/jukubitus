@@ -1,6 +1,7 @@
 package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class ValidadorServicio {
     public RespuestaDto<ValidacionPdfRespuestaDto> validarPdf(ValidacionPdfDto objetoDto) {
         RespuestaDto<ValidacionPdfRespuestaDto> respuesta = new RespuestaDto<ValidacionPdfRespuestaDto>();
         try {
-            byte[] file = Base64.getDecoder().decode(objetoDto.getPdf().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getPdf().getBytes(StandardCharsets.UTF_8));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             ConfiguracionValidador configValidador = new ConfiguracionValidador();
             ValidadorPdf validar = new ValidadorPdf(new ByteArrayInputStream(file), configValidador);
@@ -84,7 +85,7 @@ public class ValidadorServicio {
     public RespuestaDto<ValidacionArchivoRespuestaDto> validarPkcs7(ValidacionArchivoDto objetoDto) {
         RespuestaDto<ValidacionArchivoRespuestaDto> respuesta = new RespuestaDto<ValidacionArchivoRespuestaDto>();
         try {
-            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             ConfiguracionValidador configValidador = new ConfiguracionValidador();
             ValidadorPKCS7 validar = new ValidadorPKCS7(new ByteArrayInputStream(file), configValidador);
@@ -140,7 +141,7 @@ public class ValidadorServicio {
     public RespuestaDto<ValidacionArchivoRespuestaDto> validarXml(ValidacionArchivoDto objetoDto) {
         RespuestaDto<ValidacionArchivoRespuestaDto> respuesta = new RespuestaDto<ValidacionArchivoRespuestaDto>();
         try {
-            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             ConfiguracionValidador configValidador = new ConfiguracionValidador();
             ValidadorXml validar = new ValidadorXml(new ByteArrayInputStream(file), objetoDto.getDate(), configValidador);
@@ -198,7 +199,7 @@ public class ValidadorServicio {
     public RespuestaDto<ValidacionArchivoRespuestaDto> validarJws(ValidacionArchivoDto objetoDto) {
         RespuestaDto<ValidacionArchivoRespuestaDto> respuesta = new RespuestaDto<ValidacionArchivoRespuestaDto>();
         try {
-            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
             ConfiguracionValidador configValidador = new ConfiguracionValidador();
             ValidadorJws validar = new ValidadorJws(new ByteArrayInputStream(file), objetoDto.getDate(), configValidador);
