@@ -208,7 +208,7 @@
       },
       "parameters": []
     },
-    "/api/validar-pkcs7": {
+    "/api/validar_pkcs7": {
       "post": {
         "summary": "Validar firma de un documento p7s",
         "operationId": "post-api-validar-pkcs7",
@@ -265,7 +265,7 @@
         ]
       }
     },
-    "/api/validar-jws": {
+    "/api/validar_jws": {
       "post": {
         "summary": "Validar firma de un documento jws",
         "operationId": "post-api-validar-jws",
@@ -1677,6 +1677,7 @@
                 }
               },
               "required": [
+                "slot",
                 "pin"
               ]
             },
