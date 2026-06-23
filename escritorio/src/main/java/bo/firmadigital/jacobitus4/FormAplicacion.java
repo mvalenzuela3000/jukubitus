@@ -10,6 +10,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.cert.CertificateEncodingException;
@@ -60,6 +63,11 @@ import bo.firmadigital.jacobitus4.util.plataforma.PlataformaHelper;
 import bo.firmadigital.jacobitus4.util.plataforma.PlataformaInfo;
 import bo.firmadigital.utiles.CertUtil;
 import bo.firmadigital.utiles.Conversor;
+import dorkbox.jna.rendering.ProviderType;
+import dorkbox.jna.rendering.RenderProvider;
+import dorkbox.jna.rendering.Renderer;
+import dorkbox.systemTray.SystemTray;
+import dorkbox.systemTray.util.SizeAndScalingLinux;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -99,6 +107,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.imageio.ImageIO;
 
 @SuppressWarnings("rawtypes")
 public class FormAplicacion extends Application {
@@ -723,11 +732,23 @@ public class FormAplicacion extends Application {
 
     private boolean initializeSystemTray() {
         try {
-            dorkbox.systemTray.SystemTray tray = dorkbox.systemTray.SystemTray.get();
+            if (SistemaOperativoHelper.esUnix()) {
+                RenderProvider.set(new JavaFxRenderProvider());
+                SystemTray.AUTO_SIZE = false;
+                SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator;
+                SizeAndScalingLinux.OVERRIDE_TRAY_SIZE = 24;
+                SizeAndScalingLinux.OVERRIDE_MENU_SIZE = 16;
+            }
+            SystemTray tray = SystemTray.get("Jacobitus");
             if (tray == null) {
                 return false;
             }
-            tray.setImage(getClass().getClassLoader().getResource("icon.png"));
+            File iconFile = prepareTrayIcon();
+            if (iconFile == null) {
+                return false;
+            }
+            tray.setTooltip("Jacobitus");
+            tray.setImage(iconFile);
             tray.getMenu().add(new dorkbox.systemTray.MenuItem("Abrir", event -> FormAplicacion.show()));
             tray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> {
                 try {
@@ -739,8 +760,73 @@ public class FormAplicacion extends Application {
                 tray.shutdown();
             }));
             return true;
-        } catch (RuntimeException | LinkageError ex) {
+        } catch (Throwable ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar SystemTray", ex);
             return false;
+        }
+    }
+
+    private File prepareTrayIcon() throws IOException {
+        File cacheDir = new File(System.getProperty("java.io.tmpdir"), "JacobitusCache_" + System.getProperty("user.name"));
+        cacheDir.mkdirs();
+        File iconFile = new File(cacheDir, "jacobitus-tray.png");
+        try (InputStream iconStream = getClass().getClassLoader().getResourceAsStream("icon.png")) {
+            if (iconStream == null) {
+                return null;
+            }
+            BufferedImage source = ImageIO.read(iconStream);
+            if (source == null) {
+                return null;
+            }
+            BufferedImage trayIcon = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = trayIcon.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics.drawImage(source, 0, 0, 24, 24, null);
+            } finally {
+                graphics.dispose();
+            }
+            ImageIO.write(trayIcon, "png", iconFile);
+        }
+        return iconFile;
+    }
+
+    private static class JavaFxRenderProvider implements Renderer {
+        @Override
+        public boolean isSupported() {
+            return true;
+        }
+
+        @Override
+        public ProviderType getType() {
+            return ProviderType.JAVAFX;
+        }
+
+        @Override
+        public boolean alreadyRunning() {
+            return true;
+        }
+
+        @Override
+        public boolean isEventThread() {
+            return Platform.isFxApplicationThread();
+        }
+
+        @Override
+        public int getGtkVersion() {
+            return 3;
+        }
+
+        @Override
+        public boolean dispatch(Runnable runnable) {
+            if (Platform.isFxApplicationThread()) {
+                runnable.run();
+            } else {
+                Platform.runLater(runnable);
+            }
+            return true;
         }
     }
 
