@@ -10,8 +10,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.awt.AWTException;
 import java.awt.Graphics2D;
+import java.awt.PopupMenu;
 import java.awt.RenderingHints;
+import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -124,6 +127,7 @@ public class FormAplicacion extends Application {
     private static boolean servicio;
     private static boolean taskBar;
     private static boolean taskBarEmulado;
+    private static TrayIcon iconoBandejaAwt;
     
     private static String urlArchivo = null;
     private static String tokenAutorizacion;
@@ -170,7 +174,7 @@ public class FormAplicacion extends Application {
         ContextMenu tokenContextMenu;
         FormAplicacion.stage = stage;
         FormAplicacion.app = this;
-        if (taskBar && !initializeSystemTray()) {
+        if (taskBar && !iniciarBandejaSistema()) {
             taskBar = false;
         }
 
@@ -730,10 +734,21 @@ public class FormAplicacion extends Application {
         });
     }
 
-    private boolean initializeSystemTray() {
+    private boolean iniciarBandejaSistema() {
+        if (SistemaOperativoHelper.esWindows() || SistemaOperativoHelper.esMacOS()) {
+            return iniciarBandejaAwtSeguro();
+        }
+        if (SistemaOperativoHelper.esUnix()) {
+            return iniciarBandejaDorkbox();
+        }
+
+        return iniciarBandejaDorkbox() || iniciarBandejaAwtSeguro();
+    }
+
+    private boolean iniciarBandejaDorkbox() {
         try {
             if (SistemaOperativoHelper.esUnix()) {
-                RenderProvider.set(new JavaFxRenderProvider());
+                RenderProvider.set(new ProveedorRenderJavaFx());
                 SystemTray.AUTO_SIZE = false;
                 SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator;
                 SizeAndScalingLinux.OVERRIDE_TRAY_SIZE = 24;
@@ -743,7 +758,7 @@ public class FormAplicacion extends Application {
             if (tray == null) {
                 return false;
             }
-            File iconFile = prepareTrayIcon();
+            File iconFile = prepararIconoBandeja();
             if (iconFile == null) {
                 return false;
             }
@@ -761,12 +776,77 @@ public class FormAplicacion extends Application {
             }));
             return true;
         } catch (Throwable ex) {
-            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar SystemTray", ex);
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar Dorkbox SystemTray", ex);
             return false;
         }
     }
 
-    private File prepareTrayIcon() throws IOException {
+    private boolean iniciarBandejaAwtSeguro() {
+        try {
+            return iniciarBandejaAwt();
+        } catch (Throwable ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar AWT SystemTray", ex);
+            return false;
+        }
+    }
+
+    private boolean iniciarBandejaAwt() throws IOException, AWTException {
+        if (!java.awt.SystemTray.isSupported()) {
+            return false;
+        }
+        File iconFile = prepararIconoBandeja();
+        if (iconFile == null) {
+            return false;
+        }
+        BufferedImage iconImage = ImageIO.read(iconFile);
+        if (iconImage == null) {
+            return false;
+        }
+
+        PopupMenu popupMenu = new PopupMenu();
+        java.awt.MenuItem abrirItem = new java.awt.MenuItem("Abrir");
+        abrirItem.addActionListener(event -> FormAplicacion.show());
+        java.awt.MenuItem salirItem = new java.awt.MenuItem("Salir");
+        salirItem.addActionListener(event -> {
+            try {
+                WebServer.detener();
+            } catch (Exception ex) {
+                Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            quitarIconoBandejaAwt();
+            Platform.exit();
+        });
+        popupMenu.add(abrirItem);
+        popupMenu.add(salirItem);
+
+        iconoBandejaAwt = new TrayIcon(iconImage, "Jacobitus", popupMenu);
+        iconoBandejaAwt.setImageAutoSize(true);
+        iconoBandejaAwt.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (event.getButton() == java.awt.event.MouseEvent.BUTTON1) {
+                    FormAplicacion.show();
+                }
+            }
+        });
+        java.awt.SystemTray.getSystemTray().add(iconoBandejaAwt);
+        return true;
+    }
+
+    private static void quitarIconoBandejaAwt() {
+        if (iconoBandejaAwt == null) {
+            return;
+        }
+        try {
+            if (java.awt.SystemTray.isSupported()) {
+                java.awt.SystemTray.getSystemTray().remove(iconoBandejaAwt);
+            }
+        } finally {
+            iconoBandejaAwt = null;
+        }
+    }
+
+    private File prepararIconoBandeja() throws IOException {
         File cacheDir = new File(System.getProperty("java.io.tmpdir"), "JacobitusCache_" + System.getProperty("user.name"));
         cacheDir.mkdirs();
         File iconFile = new File(cacheDir, "jacobitus-tray.png");
@@ -793,7 +873,7 @@ public class FormAplicacion extends Application {
         return iconFile;
     }
 
-    private static class JavaFxRenderProvider implements Renderer {
+    private static class ProveedorRenderJavaFx implements Renderer {
         @Override
         public boolean isSupported() {
             return true;
