@@ -157,6 +157,12 @@ public class App extends Application {
     @SuppressWarnings("unchecked")
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException, InterruptedException {
+        App.stage = stage;
+        App.app = this;
+        if (taskBar && !initializeSystemTray()) {
+            taskBar = false;
+        }
+
         String version = Informacion.VERSION;
         stage.setTitle("Jacobitus - " + version);
         if (!servicio) {
@@ -659,7 +665,7 @@ public class App extends Application {
         scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-        if (taskBar && !OS.isDebian()) {
+        if (taskBar && !taskBarEmulated) {
             Platform.setImplicitExit(false);
             if (url == null && param == null) {
                 stage.hide();
@@ -684,12 +690,6 @@ public class App extends Application {
                 }
             }
         });
-
-        App.stage = stage;
-        App.app = this;
-        if (taskBar && OS.isUnix()) {
-            Main.iniciarTrayDorkbox();
-        }
 
         new Thread(registrarCertificado()).start();
 
@@ -719,6 +719,29 @@ public class App extends Application {
                 }
             });
         });
+    }
+
+    private boolean initializeSystemTray() {
+        try {
+            dorkbox.systemTray.SystemTray tray = dorkbox.systemTray.SystemTray.get();
+            if (tray == null) {
+                return false;
+            }
+            tray.setImage(getClass().getClassLoader().getResource("icon.png"));
+            tray.getMenu().add(new dorkbox.systemTray.MenuItem("Abrir", event -> App.show()));
+            tray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> {
+                try {
+                    WebServer.detener();
+                } catch (Exception ex) {
+                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Platform.exit();
+                tray.shutdown();
+            }));
+            return true;
+        } catch (RuntimeException | LinkageError ex) {
+            return false;
+        }
     }
 
     public Task<Boolean> registrarCertificado() {
@@ -1310,10 +1333,10 @@ public class App extends Application {
 
     public static void show() {
         Platform.runLater(() -> {
-            if (taskBar) {
+            if (stage != null) {
                 stage.show();
-            } else {
                 stage.setIconified(false);
+                stage.toFront();
             }
         });
     }
@@ -1365,8 +1388,8 @@ public class App extends Application {
         App.taskBar = taskBar;
         App.taskBarEmulated = taskBarEmulated;
         if (!App.isLaunched) {
-            launch();
             App.isLaunched = true;
+            launch();
         }
     }
 
@@ -1376,8 +1399,8 @@ public class App extends Application {
         App.taskBarEmulated = taskBarEmulated;
         App.param = file;
         if (!App.isLaunched) {
-            launch();
             App.isLaunched = true;
+            launch();
         }
     }
 
@@ -1390,8 +1413,8 @@ public class App extends Application {
         App.token = token;
         App.urlPost = urlPost;
         if (!App.isLaunched) {
-            launch();
             App.isLaunched = true;
+            launch();
         }
     }
 
