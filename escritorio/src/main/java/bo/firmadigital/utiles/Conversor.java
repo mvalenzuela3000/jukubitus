@@ -10,6 +10,8 @@ import org.apache.poi.xwpf.converter.core.XWPFConverterException;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.odftoolkit.odfdom.doc.OdfDocument;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
+
 public class Conversor {
     protected final static File TMP = new File(System.getProperty("java.io.tmpdir"), "jacobitus");
 
@@ -29,8 +31,8 @@ public class Conversor {
             org.apache.poi.xwpf.converter.pdf.PdfConverter.getInstance().convert(document, pdf, options);
             return out;
         } catch (IOException | XWPFConverterException ex) {
-            // throw new RuntimeException(ex.getMessage());
-            throw new RuntimeException("El documento no pudo ser convertido a pdf.");
+            // throw new JacobitusException(ex.getMessage());
+            throw new JacobitusException("El documento no pudo ser convertido a pdf.");
         }
     }
 
@@ -44,8 +46,8 @@ public class Conversor {
             org.odftoolkit.odfdom.converter.pdf.PdfConverter.getInstance().convert(document, pdf, options);
             return out;
         } catch(Exception ex) {
-            // throw new RuntimeException(ex.getMessage());
-            throw new RuntimeException("El documento no pudo ser convertido a pdf.");
+            // throw new JacobitusException(ex.getMessage());
+            throw new JacobitusException("El documento no pudo ser convertido a pdf.");
         }
     }
 }

@@ -15,13 +15,17 @@ import java.util.logging.Logger;
 
 import org.codehaus.jettison.json.JSONObject;
 
-import bo.firmadigital.jacobitus.comun.SmartCard;
+import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
+import bo.firmadigital.jacobitus.firmador.base.SmartCard;
+import bo.firmadigital.jacobitus.revocacion.EstadoRevocacion;
+import bo.firmadigital.jacobitus.revocacion.RevocacionHelper;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus.validador.Validador;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
+import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.CertificadoDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
 import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfRespuestaDto;
@@ -35,30 +39,30 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private bo.firmadigital.jacobitus.firmador.Opciones getOpcionesFirmador() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.firmador.Opciones opciones = new bo.firmadigital.jacobitus.firmador.Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setSoftoken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
     
-    private bo.firmadigital.jacobitus.validador.Opciones getOpcionesValidador() {
+    private ConfiguracionValidador getConfigValidador() {
         Config config = Config.getInstance();
-        bo.firmadigital.jacobitus.validador.Opciones opciones = new bo.firmadigital.jacobitus.validador.Opciones();
-        opciones.setProxyHabilitado(config.isProxyEnabled());
-        opciones.setServidorProxy(config.getProxyIP());
-        opciones.setPuertoServidorProxy(Integer.parseInt(config.getProxyPort()));
-        return opciones;
+        ConfiguracionValidador configValidador = new ConfiguracionValidador();
+        configValidador.setProxyHabilitado(config.isProxyEnabled());
+        configValidador.setProxyIp(config.getProxyIP());
+        configValidador.setProxyPuerto(Integer.parseInt(config.getProxyPort()));
+        return configValidador;
     }
 
     public String inicio() {
@@ -70,7 +74,7 @@ public class FirmadorServicio {
         try {
             try {
                 List<String> datos = new ArrayList<String>();
-                List<JSONObject> tokens = SmartCard.cards(this.getOpcionesFirmador());
+                List<JSONObject> tokens = SmartCard.cards(this.getConfigFirmador());
                 for (JSONObject token : tokens) {
                     datos.add(token.getString("name"));
                 }
@@ -101,7 +105,7 @@ public class FirmadorServicio {
                     slots = null;
                 }
                 GestorSlot gestorSlot = GestorSlot.getInstance();
-                gestorSlot.setOpciones(this.getOpcionesFirmador());
+                gestorSlot.setConfigFirmador(this.getConfigFirmador());
                 slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
                     slots[0].getToken().iniciar(pin);
@@ -134,33 +138,29 @@ public class FirmadorServicio {
                 if (slots.length == 1) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                     IToken token = slots[0].getToken();
-                    List<String> labels = token.listarIdentificadorClaves();
-                    List<CertificadoDto> datos = new ArrayList<CertificadoDto>();
-                    for (String label : labels) {
-                        DatosCertificado entry = new DatosCertificado(label, token.obtenerCertificado(label));
-                        CertificadoDto cert = new CertificadoDto();
-                        cert.setEsFirmaBolivia(Validador.verificarPKI(entry.getCert()));
-                        cert.setNumeroSerie(entry.getCert().getSerialNumber());
-                        cert.setNombreComunIssuer(entry.getNombreComunIssuer());
-                        cert.setOrganizacionIssuer(entry.getOrganizacionIssuer());
-                        cert.setNombreComunSubject(entry.getNombreComunSubject());
-                        cert.setCi(entry.getNumeroDocumentoSubject());
-                        cert.setComplemento(entry.getComplementoSubject());
-                        cert.setOrganizacionSubject(entry.getOrganizacionSubject());
-                        cert.setUnidadOrganizacionalSubject(entry.getUnidadOrganizacionalSubject());
-                        cert.setInicioValidez(dateFormat.format(entry.getInicioValidez()));
-                        cert.setFinValidez(dateFormat.format(entry.getFinValidez()));
-                        cert.setAlias(label);
-                        cert.setEsValido(entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                        Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), this.getOpcionesValidador()).getState();
-                        if (state == Validador.OCSPState.OK) {
-                            cert.setOCSP("no revocado");
-                        } else {
-                            cert.setOCSP(state.toString());
-                        }
-                        datos.add(cert);
+                    List<String> listaAlias = token.listarIdentificadorClaves();
+                    List<CertificadoDto> listaCertificadoDto = new ArrayList<CertificadoDto>();
+                    for (String alias : listaAlias) {
+                        InfoCertificado infoCertificado = new InfoCertificado(alias, token.obtenerCertificado(alias));
+                        CertificadoDto certificadoDto = new CertificadoDto();
+                        certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy()));
+                        certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
+                        certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
+                        certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
+                        certificadoDto.setNombreComunSubject(infoCertificado.getInfoSujeto().getNombreComun());
+                        certificadoDto.setCi(infoCertificado.getInfoSujeto().getNumeroDocumento());
+                        certificadoDto.setComplemento(infoCertificado.getInfoSujeto().getComplemento());
+                        certificadoDto.setOrganizacionSubject(infoCertificado.getInfoSujeto().getOrganizacion());
+                        certificadoDto.setUnidadOrganizacionalSubject(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
+                        certificadoDto.setInicioValidez(dateFormat.format(infoCertificado.getInicioValidez()));
+                        certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
+                        certificadoDto.setAlias(alias);
+                        certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
+                        EstadoRevocacion revocacion = RevocacionHelper.verificar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy(), new Date());
+                        certificadoDto.setOCSP(revocacion.getDescripcion());
+                        listaCertificadoDto.add(certificadoDto);
                     }
-                    respuesta.setDatos(datos);
+                    respuesta.setDatos(listaCertificadoDto);
                     respuesta.setFinalizado(true);
                     respuesta.setMensaje("Certificados obtenidos correctamente");
                 } else {
@@ -195,34 +195,30 @@ public class FirmadorServicio {
                             respuesta.setFinalizado(false);
                             respuesta.setMensaje("No se encontró un certificado con el alias solicitado.");
                         } else {
-                            DatosCertificado entry = new DatosCertificado(objetoDto.getAlias(), certificate);
-                            CertificadoDto cert = new CertificadoDto();
-                            cert.setEsFirmaBolivia(Validador.verificarPKI(entry.getCert()));
-                            cert.setNumeroSerie(entry.getCert().getSerialNumber());
-                            cert.setNombreComunIssuer(entry.getNombreComunIssuer());
-                            cert.setOrganizacionIssuer(entry.getOrganizacionIssuer());
-                            cert.setNombreComunSubject(entry.getNombreComunSubject());
-                            cert.setCi(entry.getNumeroDocumentoSubject());
-                            cert.setComplemento(entry.getComplementoSubject());
-                            cert.setOrganizacionSubject(entry.getOrganizacionSubject());
-                            cert.setUnidadOrganizacionalSubject(entry.getUnidadOrganizacionalSubject());
-                            cert.setInicioValidez(dateFormat.format(entry.getInicioValidez()));
-                            cert.setFinValidez(dateFormat.format(entry.getFinValidez()));
-                            cert.setAlias(objetoDto.getAlias());
-                            cert.setEsValido(entry.getInicioValidez().compareTo(new Date()) < 0 && entry.getFinValidez().compareTo(new Date()) > 0);
-                            Validador.OCSPState state = Validador.verificarOcsp(entry.getCert(), new Date(), this.getOpcionesValidador()).getState();
-                            if (state == Validador.OCSPState.OK) {
-                                cert.setOCSP("no revocado");
-                            } else {
-                                cert.setOCSP(state.toString());
-                            }
+                            InfoCertificado infoCertificado = new InfoCertificado(objetoDto.getAlias(), certificate);
+                            CertificadoDto certificadoDto = new CertificadoDto();
+                            certificadoDto.setEsFirmaBolivia(CadenaConfianzaHelper.validar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy()));
+                            certificadoDto.setNumeroSerie(infoCertificado.getX509certificado().getSerialNumber());
+                            certificadoDto.setNombreComunIssuer(infoCertificado.getInfoEmisor().getNombreComun());
+                            certificadoDto.setOrganizacionIssuer(infoCertificado.getInfoEmisor().getOrganizacion());
+                            certificadoDto.setNombreComunSubject(infoCertificado.getInfoSujeto().getNombreComun());
+                            certificadoDto.setCi(infoCertificado.getInfoSujeto().getNumeroDocumento());
+                            certificadoDto.setComplemento(infoCertificado.getInfoSujeto().getComplemento());
+                            certificadoDto.setOrganizacionSubject(infoCertificado.getInfoSujeto().getOrganizacion());
+                            certificadoDto.setUnidadOrganizacionalSubject(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
+                            certificadoDto.setInicioValidez(dateFormat.format(infoCertificado.getInicioValidez()));
+                            certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
+                            certificadoDto.setAlias(objetoDto.getAlias());
+                            certificadoDto.setEsValido(infoCertificado.getInicioValidez().compareTo(new Date()) < 0 && infoCertificado.getFinValidez().compareTo(new Date()) > 0);
+                            EstadoRevocacion revocacion = RevocacionHelper.verificar(infoCertificado.getX509certificado(), this.getConfigValidador().getProxy(), new Date());
+                            certificadoDto.setOCSP(revocacion.getDescripcion());
                             FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
                             byte[] pdf = Base64.getDecoder().decode(objetoDto.getPdf_base64());
                             ByteArrayOutputStream os = new ByteArrayOutputStream();
                             FirmadorPdf.firmar(new ByteArrayInputStream(pdf), os, false, token, objetoDto.getAlias());
                             datos.setPdf_base64(Base64.getEncoder().encodeToString(os.toByteArray()));
                             datos.setNombre_archivo(objetoDto.getNombre_archivo());
-                            datos.setCertificado(cert);
+                            datos.setCertificado(certificadoDto);
                             respuesta.setDatos(datos);
                             respuesta.setFinalizado(true);
                             respuesta.setMensaje("Certificados obtenidos correctamente");

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4;
 
 import javafx.geometry.Insets;
@@ -20,14 +15,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- *
- * @author ADSIB
- */
-public class ContrasenaMac extends Stage {
+public class FormContrasenaMac extends Stage {
     private String pass;
 
-    public ContrasenaMac(Stage parent) {
+    public FormContrasenaMac(Stage parent) {
         setTitle("Seguridad MacOS");
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);

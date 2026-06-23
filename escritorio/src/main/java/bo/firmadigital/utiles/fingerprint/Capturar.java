@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.utiles.fingerprint;
 
 import java.awt.Image;
@@ -30,15 +25,13 @@ import com.digitalpersona.onetouch.capture.DPFPCapturePriority;
 import com.digitalpersona.onetouch.capture.event.DPFPDataEvent;
 import com.digitalpersona.onetouch.readers.DPFPReadersCollection;
 
-/**
- *
- * @author ADSIB
- */
+import bo.firmadigital.jacobitus.comun.JacobitusException;
+
 public class Capturar {
     public static void capturar(Fingerprint fingerprint) {
         DPFPReadersCollection readers = DPFPGlobal.getReadersFactory().getReaders();
         if (readers.size() != 1) {
-            throw new RuntimeException("No se econtró el lector de huellas.");
+            throw new JacobitusException("No se econtró el lector de huellas.");
         }
         DPFPCapture capture = DPFPGlobal.getCaptureFactory().createCapture();
         capture.setReaderSerialNumber(readers.get(0).getSerialNumber());
@@ -53,7 +46,7 @@ public class Capturar {
                     ImageIO.write(ajusted, "bmp", baos);
                     fingerprint.fingerprintCaptured(baos.toByteArray());
                 } catch (IOException ex) {
-                    throw new RuntimeException(ex.getMessage());
+                    throw new JacobitusException(ex.getMessage());
                 }
             }
         });
@@ -81,7 +74,7 @@ public class Capturar {
                     InputStream is = new FileInputStream(file);
                     long length = file.length();
                     if (length > Integer.MAX_VALUE) {
-                        throw new RuntimeException("La longitud del archivo es demasiado largo");
+                        throw new JacobitusException("La longitud del archivo es demasiado largo");
                     }
                     byte[] bytes = new byte[(int) length];
                     int offset = 0;
@@ -90,16 +83,16 @@ public class Capturar {
                         offset += numRead;
                     }
                     if (offset < bytes.length) {
-                        throw new RuntimeException("No se pudo completar la lectura del archivo " + file.getName());
+                        throw new JacobitusException("No se pudo completar la lectura del archivo " + file.getName());
                     }
                     is.close();
                     fingerprint.fingerprintCaptured(bytes);
                 } else {
-                    throw new RuntimeException("No se pudo capturar la huella");
+                    throw new JacobitusException("No se pudo capturar la huella");
                 }
             }
         } catch (IOException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 

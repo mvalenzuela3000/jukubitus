@@ -1,30 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bo.firmadigital.jacobitus4.components;
 
-import bo.firmadigital.jacobitus.validador.CertDate;
+import bo.firmadigital.jacobitus.validador.comun.Firma;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
+import lombok.Getter;
 
-/**
- *
- * @author ADSIB
- * @param <T>
- */
 @SuppressWarnings("rawtypes")
+@Getter
 public class TreeItemBlocked<T extends Object> extends TreeItem {
-    protected CertDate cert;
+    protected Firma firma;
 
     @SuppressWarnings("unchecked")
-    public TreeItemBlocked(T t, Node node, CertDate cert) {
+    public TreeItemBlocked(T t, Node node, Firma firma) {
         super(t, node);
-        this.cert = cert;
-    }
-
-    public CertDate getCertDate() {
-        return cert;
+        this.firma = firma;
     }
 }

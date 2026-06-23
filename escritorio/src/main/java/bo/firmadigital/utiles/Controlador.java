@@ -3,7 +3,7 @@ package bo.firmadigital.utiles;
 import java.io.File;
 import java.net.URISyntaxException;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 
 public class Controlador {
     public static String obtenerDirectorio() {
@@ -16,7 +16,7 @@ public class Controlador {
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/controladores";
             }
-            if (OS.is32Bits()) {
+            if (SistemaOperativoHelper.es32Bits()) {
                 directorio = directorio + "/x86";
             } else {
                 directorio = directorio + "/x64";

@@ -21,12 +21,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ActualizacionDisponible extends Stage {
+public class FormActualizacionDisponible extends Stage {
 
     private final Stage parent;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public ActualizacionDisponible(Stage parent, ActualizacionInfo result) {
+    public FormActualizacionDisponible(Stage parent, ActualizacionInfo result) {
 
         this.parent = parent;
 
