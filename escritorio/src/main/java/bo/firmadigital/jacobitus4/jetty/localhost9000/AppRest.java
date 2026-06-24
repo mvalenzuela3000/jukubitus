@@ -1,6 +1,6 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000;
 
-import bo.firmadigital.jacobitus4.App;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,15 +29,15 @@ public class AppRest {
                 if (json.has("urlpost")) {
                     urlpost = json.getString("urlpost");
                 }
-                App.show(url, token, urlpost);
+                FormAplicacion.show(url, token, urlpost);
             } else {
                 if (json.has("file")) {
                     File file = new File(json.getString("file"));
-                    App.show(file);
+                    FormAplicacion.show(file);
                 } else if (json.has("error")) {
-                    App.show(json.getString("error"));
+                    FormAplicacion.show(json.getString("error"));
                 } else {
-                    App.show();
+                    FormAplicacion.show();
                 }
             }
         } catch (JSONException ex) {

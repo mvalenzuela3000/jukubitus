@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 
 public class CertUtil {
     public static String obtenerDirectorio() {
@@ -25,7 +25,7 @@ public class CertUtil {
                 rutaBase = new File(ruta).getParentFile().getAbsolutePath();
                 directorio = rutaBase + "/libs/ca";
             }
-            if (OS.isMac()) {
+            if (SistemaOperativoHelper.esMacOS()) {
                 directorio = directorio.replace(" ", "\\ ");
             }
             return directorio;
@@ -43,7 +43,7 @@ public class CertUtil {
     }
 
     private static String obtenerDistribucion() {
-        if (OS.isUnix()) {
+        if (SistemaOperativoHelper.esUnix()) {
             File osRelease = new File("/etc/os-release");
             if (osRelease.exists()) {
                 try (Stream<String> lines = Files.lines(osRelease.toPath())) {
@@ -59,12 +59,12 @@ public class CertUtil {
                     // Fallback si falla la lectura del archivo
                 }
             }
-            return OS.isDebian() ? "DEBIAN" : "RHEL";
+            return SistemaOperativoHelper.esDebian() ? "DEBIAN" : "RHEL";
         }
-        if (OS.isWindows()) {
+        if (SistemaOperativoHelper.esWindows()) {
             return "WINDOWS";
         }
-        if (OS.isMac()) {
+        if (SistemaOperativoHelper.esMacOS()) {
             return "MACOS";
         }
         return null;

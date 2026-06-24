@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost4637;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost4637;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -8,9 +8,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import bo.firmadigital.jacobitus4.jetty.JettyHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.servicios.FirmadorServicio;
+import bo.firmadigital.jacobitus.escritorio.jetty.JettyHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaModoSeguroDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.servicios.FirmadorServicio;
 
 @Path("/")
 public class FirmadorRest {

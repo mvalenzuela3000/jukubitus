@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost4637.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.servicios;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,36 +8,37 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 
-import bo.firmadigital.jacobitus.firmador.Opciones;
-import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.comun.JacobitusException;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.App;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaPdfItemRespuestaDto;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
+import bo.firmadigital.jacobitus.escritorio.comun.TokenSelected;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaModoSeguroDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaPdfItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class FirmadorServicio {
 
     public FirmadorServicio() {
     }
 
-    private Opciones getOpciones() {
+    private ConfiguracionFirmador getOpciones() {
         Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        // opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setSoftoken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
     public FirmaModoSeguroRespuestaDto firmarModoSeguro(FirmaModoSeguroDto objetoDto) throws Exception {
@@ -53,23 +54,23 @@ public class FirmadorServicio {
                 software = objetoDto.getSoftware();
             }
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(this.getOpciones());
+            gestorSlot.setConfigFirmador(this.getOpciones());
             Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
-                throw new RuntimeException("Por favor conecte solo un token.");
+                throw new JacobitusException("Por favor conecte solo un token.");
             }
             TokenSelected dt;
             if (ci != null) {
                 if (format.equals("jws")) {
-                    dt = App.serviceJWS(slots[0], ci, archivo);
+                    dt = FormAplicacion.serviceJWS(slots[0], ci, archivo);
                 } else {
-                    dt = App.service(slots[0], ci, archivo);
+                    dt = FormAplicacion.service(slots[0], ci, archivo);
                 }
             } else {
                 if (format.equals("jws")) {
-                    dt = App.serviceJWS(slots[0], null, archivo);
+                    dt = FormAplicacion.serviceJWS(slots[0], null, archivo);
                 } else {
-                    dt = App.service(slots[0], null, archivo);
+                    dt = FormAplicacion.service(slots[0], null, archivo);
                 }
             }
             if (dt.getAlias() != null && dt.getPin() != null) {

@@ -1,12 +1,12 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.HuellaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.HuellaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
 import bo.firmadigital.utiles.fingerprint.Capturar;
 
 public class HuellaServicio {
@@ -17,7 +17,7 @@ public class HuellaServicio {
     public RespuestaDto<HuellaDto> capturar() {
         RespuestaDto<HuellaDto> respuesta = new RespuestaDto<HuellaDto>();
         try {
-            if (OS.isWindows()) {
+            if (SistemaOperativoHelper.esWindows()) {
                 Capturar.capturar((byte[] image) -> {
                     HuellaDto datos = new HuellaDto();
                     datos.setImage(Base64.getEncoder().encodeToString(image));

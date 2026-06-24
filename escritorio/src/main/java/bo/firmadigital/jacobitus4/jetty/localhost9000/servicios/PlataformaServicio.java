@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,47 +26,47 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 
-import bo.firmadigital.jacobitus.firmador.Opciones;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.token.TokenPKCS12;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenChangePinDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCreacionCsrDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCreacionCsrSubjectItemDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCreacionDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCsrDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenDataDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenDataRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenPemDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenPrivateCertificateDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenSolicitudDetalleDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenSolicitudDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenSolicitudRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenAutenticacionDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenChangePinDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCreacionCsrDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCreacionCsrSubjectItemDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCreacionDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCsrDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenDataDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenDataRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenPemDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenPrivateCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenSolicitudDetalleDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenSolicitudDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenSolicitudRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class PlataformaServicio {
     public PlataformaServicio() {
     }
 
-    private Opciones getOpciones() {
+    private ConfiguracionFirmador getOpciones() {
         Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        // opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setSoftoken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
     public RespuestaDto<String> create(TokenCreacionDto objetoDto) {
@@ -122,7 +122,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -163,7 +163,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -202,7 +202,7 @@ public class PlataformaServicio {
         RespuestaDto<String> respuesta = new RespuestaDto<String>();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -234,7 +234,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -262,7 +262,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -290,7 +290,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -317,7 +317,7 @@ public class PlataformaServicio {
         RespuestaDto<List<TokenSolicitudRespuestaDto>> respuesta = new RespuestaDto<List<TokenSolicitudRespuestaDto>>();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(this.getOpciones());
+            gestorSlot.setConfigFirmador(this.getOpciones());
             gestorSlot.listarSlots();
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {

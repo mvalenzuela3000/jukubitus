@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost3200;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost3200;
 
 import java.io.IOException;
 
@@ -14,9 +14,9 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import bo.firmadigital.jacobitus4.jetty.JettyHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost3200.servicios.FirmadorServicio;
+import bo.firmadigital.jacobitus.escritorio.jetty.JettyHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos.FirmaPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.servicios.FirmadorServicio;
 
 @Path("/")
 public class FirmadorRest {

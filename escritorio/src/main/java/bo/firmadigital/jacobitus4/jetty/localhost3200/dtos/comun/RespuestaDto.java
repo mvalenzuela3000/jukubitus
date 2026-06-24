@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.comun;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos.comun;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

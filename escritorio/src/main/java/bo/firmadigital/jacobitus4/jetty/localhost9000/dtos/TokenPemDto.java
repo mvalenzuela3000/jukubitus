@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.dtos;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos;
 
 import javax.validation.constraints.NotBlank;
 

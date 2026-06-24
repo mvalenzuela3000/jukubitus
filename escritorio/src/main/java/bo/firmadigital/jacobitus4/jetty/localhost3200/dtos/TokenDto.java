@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost3200.dtos;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos;
 
 import java.util.List;
 

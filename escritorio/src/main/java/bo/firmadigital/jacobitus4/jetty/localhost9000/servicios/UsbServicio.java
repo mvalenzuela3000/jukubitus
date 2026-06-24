@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,10 +8,10 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ListaUsbDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.UsbDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ListaUsbDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.UsbDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
 
 public class UsbServicio {
 
@@ -21,7 +21,7 @@ public class UsbServicio {
     public RespuestaDto<ListaUsbDto> serial() {
         RespuestaDto<ListaUsbDto> respuesta = new RespuestaDto<ListaUsbDto>();
         try {
-            if (OS.isUnix()) {
+            if (SistemaOperativoHelper.esUnix()) {
                 Process p = Runtime.getRuntime().exec("lsblk --nodeps -o name,serial,type,tran");
                 List<UsbDto> listaUsb = new ArrayList<UsbDto>();
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));

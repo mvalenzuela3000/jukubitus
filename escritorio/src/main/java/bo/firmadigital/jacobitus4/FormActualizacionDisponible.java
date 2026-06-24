@@ -1,11 +1,11 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import bo.firmadigital.jacobitus4.util.actualizacion.ActualizacionInfo;
+import bo.firmadigital.jacobitus.escritorio.util.actualizacion.ActualizacionInfo;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,12 +21,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ActualizacionDisponible extends Stage {
+public class FormActualizacionDisponible extends Stage {
 
     private final Stage parent;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public ActualizacionDisponible(Stage parent, ActualizacionInfo result) {
+    public FormActualizacionDisponible(Stage parent, ActualizacionInfo result) {
 
         this.parent = parent;
 

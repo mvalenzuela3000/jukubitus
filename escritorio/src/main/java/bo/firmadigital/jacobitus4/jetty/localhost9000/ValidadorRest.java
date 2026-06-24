@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +11,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import bo.firmadigital.jacobitus4.jetty.JettyHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.ValidadorServicio;
+import bo.firmadigital.jacobitus.escritorio.jetty.JettyHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionArchivoDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios.ValidadorServicio;
 
 @Path("/")
 public class ValidadorRest {

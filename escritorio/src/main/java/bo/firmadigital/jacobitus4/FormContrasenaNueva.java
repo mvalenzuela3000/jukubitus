@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -20,11 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- *
- * @author ADSIB
- */
-public class ContrasenaNueva extends Stage {
+public class FormContrasenaNueva extends Stage {
     private Stage stage;
     private String pass;
 
@@ -32,7 +23,7 @@ public class ContrasenaNueva extends Stage {
         return pass;
     }
     
-    public ContrasenaNueva(Stage parent) {
+    public FormContrasenaNueva(Stage parent) {
         stage = parent;
         setTitle("Pin del token");
         initOwner(parent);

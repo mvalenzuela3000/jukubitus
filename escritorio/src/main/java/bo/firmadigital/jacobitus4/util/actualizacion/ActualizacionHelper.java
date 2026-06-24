@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.util.actualizacion;
+package bo.firmadigital.jacobitus.escritorio.util.actualizacion;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -11,6 +11,8 @@ import java.time.Duration;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.vdurmont.semver4j.Semver;
+
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 
 public class ActualizacionHelper {
 
@@ -45,7 +47,7 @@ public class ActualizacionHelper {
                     request,
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                throw new RuntimeException(
+                throw new JacobitusException(
                         "Error consultando versión: HTTP "
                                 + response.statusCode());
             }
@@ -105,13 +107,13 @@ public class ActualizacionHelper {
     public void abrirPaginaDescarga(String enlaceDescarga) {
         try {
             if (!Desktop.isDesktopSupported()) {
-                throw new RuntimeException(
+                throw new JacobitusException(
                         "Desktop no soportado");
             }
             Desktop.getDesktop().browse(
                     URI.create(enlaceDescarga));
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new JacobitusException(
                     "No fue posible abrir la URL de descarga",
                     e);
         }

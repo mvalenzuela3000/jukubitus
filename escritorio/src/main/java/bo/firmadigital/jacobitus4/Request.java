@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,11 +38,11 @@ import javax.net.ssl.X509TrustManager;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-/**
- *
- * @author ADSIB
- */
+import bo.firmadigital.jacobitus.comun.JacobitusException;
+
 public class Request {
+    private static final Logger LOG = Logger.getLogger(Request.class.getName());
+
     X509TrustManager trustManager;
     X509Certificate server;
 
@@ -163,6 +158,7 @@ public class Request {
                 err.put("code", 402);
                 err.put("message", e.getMessage());
             } catch (JSONException ignore) {
+                LOG.severe(ignore.getMessage());
             }
             return err;
         }
@@ -175,10 +171,10 @@ public class Request {
             body.put("base64", Base64.getEncoder().encodeToString(b));
             JSONObject res = request(post, "POST", body.toString(), token);
             if (res.getInt("code") != 201) {
-                throw new RuntimeException("No fue posible enviar el archivo firmado.");
+                throw new JacobitusException("No fue posible enviar el archivo firmado.");
             }
         } catch (IOException | JSONException ex) {
-            throw new RuntimeException(ex.getMessage());
+            throw new JacobitusException(ex.getMessage());
         }
     }
 

@@ -1,25 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
-import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
 import org.codehaus.jettison.json.JSONObject;
 
-import bo.firmadigital.jacobitus.utilidades.OS;
-import javafx.application.Platform;
-
-/**
- *
- * @author ADSIB
- */
 public class Main {
     // public static Server jettyServer = new Server();
 
@@ -34,56 +19,17 @@ public class Main {
         } else {
             try {
                 WebServer.iniciar();
-                if (java.awt.SystemTray.isSupported()) {
-                    java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
-                    java.awt.Image image = ImageIO.read(Main.class.getClassLoader().getResource("icon.png"));
-                    java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image);
-                    trayIcon.setImageAutoSize(true);
-                    trayIcon.addActionListener((ActionEvent e) -> {
-                        App.show();
-                    });
-                    java.awt.MenuItem showItem = new java.awt.MenuItem("Abrir");
-                    showItem.addActionListener(event -> {
-                        App.show();
-                    });
-                    java.awt.MenuItem exitItem = new java.awt.MenuItem("Salir");
-                    exitItem.addActionListener(event -> {
-                        try {
-                            WebServer.detener();
-                        } catch (Exception ex) {
-                            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        Platform.exit();
-                        tray.remove(trayIcon);
-                    });
-                    final java.awt.PopupMenu popup = new java.awt.PopupMenu();
-                    popup.add(showItem);
-                    popup.add(exitItem);
-                    trayIcon.setPopupMenu(popup);
-                    tray.add(trayIcon);
-                    if (args.length == 1) {
-                        String[] parts = args[0].split("\\?");
-                        if (parts.length == 2) {
-                            JSONObject body = Request.splitQuery(parts[1]);
-                            App.run(true, true, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
-                        } else {
-                            App.run(true, true, false, args[0]);
-                        }
+                if (args.length == 1) {
+                    String[] parts = args[0].split("\\?");
+                    if (parts.length == 2) {
+                        JSONObject body = Request.splitQuery(parts[1]);
+                        FormAplicacion.run(true, true, false, body.getString("url"), body.getString("token"),
+                                body.getString("urlpost"));
                     } else {
-                        App.run(true, true, false);
+                        FormAplicacion.run(true, true, false, args[0]);
                     }
                 } else {
-                    if (args.length == 1) {
-                        String[] parts = args[0].split("\\?");
-                        if (parts.length == 2) {
-                            JSONObject body = Request.splitQuery(parts[1]);
-                            App.run(true, false, false, body.getString("url"), body.getString("token"), body.getString("urlpost"));
-                        } else {
-                            App.run(true, false, false, args[0]);
-                        }
-                    } else {
-                        App.run(true, OS.isDebian(), OS.isDebian());
-                    }
+                    FormAplicacion.run(true, true, false);
                 }
             } catch (Exception ex) {
                 try {
@@ -91,7 +37,7 @@ public class Main {
                 } catch (Exception ex2) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
                 }
-                App.run(false, false, false);
+                FormAplicacion.run(false, false, false);
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }

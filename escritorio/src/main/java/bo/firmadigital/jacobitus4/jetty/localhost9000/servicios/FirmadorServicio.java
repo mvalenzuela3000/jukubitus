@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -42,60 +42,59 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
 import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
 import bo.firmadigital.jacobitus.firmador.FirmadorXml;
-import bo.firmadigital.jacobitus.firmador.IFirmador;
-import bo.firmadigital.jacobitus.firmador.Opciones;
-import bo.firmadigital.jacobitus.firmador.TokenSelected;
+import bo.firmadigital.jacobitus.firmador.base.IFirmador;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.validador.DatosCertificado;
-import bo.firmadigital.jacobitus4.App;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonItemRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaLotePdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaLotePdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaModoSeguroDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaModoSeguroRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfItemDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfItemRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPkcs7Dto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPkcs7RespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.CompleteSign;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.Signs;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.ECA;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
+import bo.firmadigital.jacobitus.escritorio.comun.TokenSelected;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaHashDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaLotePdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaLotePdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaModoSeguroDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaModoSeguroRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfItemDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPkcs7Dto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPkcs7RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaXmlDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaXmlRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.pojos.CompleteSign;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.pojos.Signs;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class FirmadorServicio {
 
     public FirmadorServicio() {
     }
 
-    private Opciones getOpciones() {
+    private ConfiguracionFirmador getOpciones() {
         Config config = Config.getInstance();
-        Opciones opciones = new Opciones();
-        opciones.setControlador(config.getDriver());
-        opciones.setToken(config.getToken());
-        opciones.setDirectorioControladores(config.getDirectorioControladores());
-        opciones.setDispositivosCompatibles(config.getDispositivosCompatibles());
-        // opciones.setSelloTiempoHabilitado(config.isTSEnabled());
-        // opciones.setApiSelloTiempo(config.getTS());
-        // opciones.setJwtSelloTiempo(config.getTSJWT());
-        // opciones.setHsmHabilitado(config.isHsmEnabled());
-        // opciones.setTipoHsm(config.getHsmType());
-        // opciones.setApiHsm(config.getHsmCloud());
-        // opciones.setJwtHsm(config.getHsmJWT());
-        return opciones;
+        ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
+        configFirmador.setControlador(config.getDriver());
+        configFirmador.setSoftoken(config.getToken());
+        configFirmador.setDirectorioControladores(config.getDirectorioControladores());
+        configFirmador.setDispositivosCompatibles(config.getDispositivosCompatibles());
+        // configFirmador.setSelloTiempoHabilitado(config.isTSEnabled());
+        // configFirmador.setApiSelloTiempo(config.getTS());
+        // configFirmador.setJwtSelloTiempo(config.getTSJWT());
+        // configFirmador.setHsmHabilitado(config.isHsmEnabled());
+        // configFirmador.setTipoHsm(config.getHsmType());
+        // configFirmador.setApiHsm(config.getHsmCloud());
+        // configFirmador.setJwtHsm(config.getHsmJWT());
+        return configFirmador;
     }
 
     public RespuestaDto<FirmaPdfRespuestaDto> firmarPdf(FirmaPdfDto objetoDto) throws Exception {
@@ -106,12 +105,12 @@ public class FirmadorServicio {
             String pin = objetoDto.getPin();
             String alias = objetoDto.getAlias();
             boolean bloquear = objetoDto.getBloquear();
-            byte[] file = Base64.getDecoder().decode(objetoDto.getPdf().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getPdf().getBytes(StandardCharsets.UTF_8));
             Integer x = objetoDto.getPoint() != null ? objetoDto.getPoint().getX() : null;
             Integer y = objetoDto.getPoint() != null ? objetoDto.getPoint().getY() : null;
             String image = objetoDto.getImage() != null ? objetoDto.getImage() : null;
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -122,15 +121,6 @@ public class FirmadorServicio {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot, pin, alias y pdf.");
             }
-            // IToken token = gestorSlot.obtenerSlot(slot).getToken();
-            // token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // token.salir();
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
             FirmaPdfRespuestaDto datos = new FirmaPdfRespuestaDto();
             respuesta.setDatos(datos);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -144,35 +134,18 @@ public class FirmadorServicio {
             datos.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
             respuesta.setFinalizado(true);
             respuesta.setMensaje("Se firmo el pdf correctamente!");
-        } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
+        } catch (GeneralSecurityException | IOException ex) {
             try {
-                String mensaje = ex.getMessage();
-                if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                        mensaje = "Pin incorrecto, intente nuevamente.";
-                    }
-                }
-                if (ex instanceof java.security.cert.CertificateExpiredException) {
-                    mensaje = "El certificado se encuentra expirado.";
-                }
-                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                    mensaje = "El certificado aún no está vigente.";
-                }
-                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                        mensaje = "Por favor verifique el pin.";
-                    }
-                }
-                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                    }
-                }
+                String mensaje = this.procesarExcepcion(ex);
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(mensaje);
             } catch (Exception ex1) {
                 Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, ex1.getMessage(), ex1);
             }
+        } catch (OutOfMemoryError err) {
+            Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, "Error crítico de memoria", err);
+            respuesta.setFinalizado(false);
+            respuesta.setMensaje("Error interno del servidor (Memoria insuficiente).");
         }
 
         return respuesta;
@@ -186,9 +159,9 @@ public class FirmadorServicio {
             String pin = objetoDto.getPin();
             String alias = objetoDto.getAlias();
             Boolean detached = objetoDto.getDetached();
-            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -199,15 +172,6 @@ public class FirmadorServicio {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
             }
-            // IToken token = gestorSlot.obtenerSlot(slot).getToken();
-            // token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // token.salir();
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
             FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
             respuesta.setDatos(datos);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -216,35 +180,18 @@ public class FirmadorServicio {
             datos.setPkcs7(Base64.getEncoder().encodeToString(out.toByteArray()));
             respuesta.setFinalizado(true);
             respuesta.setMensaje("Se firmo el archivo correctamente!");
-        } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
+        } catch (GeneralSecurityException | IOException ex) {
             try {
-                String mensaje = ex.getMessage();
-                if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                        mensaje = "Pin incorrecto, intente nuevamente.";
-                    }
-                }
-                if (ex instanceof java.security.cert.CertificateExpiredException) {
-                    mensaje = "El certificado se encuentra expirado.";
-                }
-                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                    mensaje = "El certificado aún no está vigente.";
-                }
-                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                        mensaje = "Por favor verifique el pin.";
-                    }
-                }
-                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                    }
-                }
+                String mensaje = this.procesarExcepcion(ex);
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(mensaje);
             } catch (Exception ex1) {
                 Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, ex.getMessage(), ex1);
             }
+        } catch (OutOfMemoryError err) {
+            Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, "Error crítico de memoria", err);
+            respuesta.setFinalizado(false);
+            respuesta.setMensaje("Error interno del servidor (Memoria insuficiente).");
         }
 
         return respuesta;
@@ -257,14 +204,14 @@ public class FirmadorServicio {
             Long slot = objetoDto.getSlot();
             String pin = objetoDto.getPin();
             String alias = objetoDto.getAlias();
-            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes("UTF-8"));
+            byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             String node = objetoDto.getNode();
             String digest = objetoDto.getDigest();
             String signatureAlgorithm = objetoDto.getSignatureAlgorithm();
             Boolean enveloped = objetoDto.getEnveloped();
             Boolean prefix = objetoDto.getPrefix();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -275,15 +222,6 @@ public class FirmadorServicio {
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje("Datos requeridos slot, pin, alias y file.");
             }
-            // IToken token = gestorSlot.obtenerSlot(slot).getToken();
-            // token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // token.salir();
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
             FirmaXmlRespuestaDto datos = new FirmaXmlRespuestaDto();
             respuesta.setDatos(datos);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -331,35 +269,18 @@ public class FirmadorServicio {
             respuesta.setFinalizado(true);
             respuesta.setMensaje("Se firmo el archivo correctamente!");
             return respuesta;
-        } catch (GeneralSecurityException | OutOfMemoryError | IOException ex) {
+        } catch (GeneralSecurityException | IOException ex) {
             try {
-                String mensaje = ex.getMessage();
-                if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                        mensaje = "Pin incorrecto, intente nuevamente.";
-                    }
-                }
-                if (ex instanceof java.security.cert.CertificateExpiredException) {
-                    mensaje = "El certificado se encuentra expirado.";
-                }
-                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                    mensaje = "El certificado aún no está vigente.";
-                }
-                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                        mensaje = "Por favor verifique el pin.";
-                    }
-                }
-                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                    }
-                }
+                String mensaje = this.procesarExcepcion(ex);
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(mensaje);
             } catch (Exception ex1) {
                 Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, ex1.getMessage(), ex1);
             }
+        } catch (OutOfMemoryError err) {
+            Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, "Error crítico de memoria", err);
+            respuesta.setFinalizado(false);
+            respuesta.setMensaje("Error interno del servidor (Memoria insuficiente).");
         }
 
         return respuesta;
@@ -372,9 +293,9 @@ public class FirmadorServicio {
             Long slot = objetoDto.getSlot();
             String pin = objetoDto.getPin();
             String alias = objetoDto.getAlias();
-            byte[] data = Base64.getDecoder().decode(objetoDto.getData().getBytes("UTF-8"));
+            byte[] data = Base64.getDecoder().decode(objetoDto.getData().getBytes(StandardCharsets.UTF_8));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -388,13 +309,6 @@ public class FirmadorServicio {
             Slot oSlot = gestorSlot.obtenerSlot(slot);
             IToken token = oSlot.getToken();
             token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // token.salir();
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
 
             PrivateKey pk = token.obtenerClavePrivada(alias);
             if (pk == null) {
@@ -428,7 +342,7 @@ public class FirmadorServicio {
             try {
                 jwsObject.sign(signer);
             } catch (JOSEException ex) {
-                throw new RuntimeException("Error al firmar: " + ex.getMessage());
+                throw new JacobitusException("Error al firmar: " + ex.getMessage());
             }
 
             X509Certificate cert = token.obtenerCertificado(alias);
@@ -464,28 +378,7 @@ public class FirmadorServicio {
             respuesta.setDatos(datos);
         } catch (IOException | GeneralSecurityException ex) {
             try {
-                String mensaje = ex.getMessage();
-                if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                        mensaje = "Pin incorrecto, intente nuevamente.";
-                    }
-                }
-                if (ex instanceof java.security.cert.CertificateExpiredException) {
-                    mensaje = "El certificado se encuentra expirado.";
-                }
-                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                    mensaje = "El certificado aún no está vigente.";
-                }
-                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                        mensaje = "Por favor verifique el pin.";
-                    }
-                }
-                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                    }
-                }
+                String mensaje = this.procesarExcepcion(ex);
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(mensaje);
             } catch (Exception ex1) {
@@ -504,7 +397,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             List<FirmaPdfItemDto> pdfs = objetoDto.getPdfs();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -517,21 +410,15 @@ public class FirmadorServicio {
             }
             IToken token = gestorSlot.obtenerSlot(slot).getToken();
             token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
             FirmaLotePdfRespuestaDto datos = new FirmaLotePdfRespuestaDto();
             try {
                 if (token.obtenerCertificado(alias) == null) {
-                    throw new RuntimeException("No se encontró un certificado con el alias proporcionado.");
+                    throw new JacobitusException("No se encontró un certificado con el alias proporcionado.");
                 }
                 List<FirmaPdfItemRespuestaDto> pdfsFirmados = new ArrayList<FirmaPdfItemRespuestaDto>();
                 for (int i = 0; i < pdfs.size(); i++) {
                     boolean bloquear = pdfs.get(i).getBloquear() != null && pdfs.get(i).getBloquear();
-                    byte[] file = Base64.getDecoder().decode(pdfs.get(i).getPdf().getBytes("UTF-8"));
+                    byte[] file = Base64.getDecoder().decode(pdfs.get(i).getPdf().getBytes(StandardCharsets.UTF_8));
 
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     FirmadorPdf.firmar(new ByteArrayInputStream(file), out, bloquear, token, alias);
@@ -551,32 +438,16 @@ public class FirmadorServicio {
                 respuesta.setMensaje(ex.getMessage());
             }
             token.salir();
-        } catch (IOException | GeneralSecurityException | OutOfMemoryError ex) {
-            String mensaje = ex.getMessage();
-            if (ex.getCause() instanceof IOException) {
-                if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                    mensaje = "Pin incorrecto, intente nuevamente.";
-                }
-            }
-            if (ex instanceof java.security.cert.CertificateExpiredException) {
-                mensaje = "El certificado se encuentra expirado.";
-            }
-            if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                mensaje = "El certificado aún no está vigente.";
-            }
-            if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                    mensaje = "Por favor verifique el pin.";
-                }
-            }
-            if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                    mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                }
-            }
+        } catch (IOException | GeneralSecurityException ex) {
+            String mensaje = this.procesarExcepcion(ex);
             respuesta.setFinalizado(false);
             respuesta.setMensaje(mensaje);
+        } catch (OutOfMemoryError err) {
+            Logger.getLogger(FirmadorServicio.class.getName()).log(Level.SEVERE, "Error crítico de memoria", err);
+            respuesta.setFinalizado(false);
+            respuesta.setMensaje("Error interno del servidor (Memoria insuficiente).");
         }
+
         return respuesta;
         
     }
@@ -589,7 +460,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             String hash = objetoDto.getHash();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setOpciones(getOpciones());
+            gestorSlot.setConfigFirmador(getOpciones());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -602,13 +473,6 @@ public class FirmadorServicio {
             }
             IToken token = gestorSlot.obtenerSlot(slot).getToken();
             token.iniciar(pin);
-            // DatosCertificado datosCertificado = new DatosCertificado(alias, token.obtenerCertificado(alias));
-            // token.salir();
-            // if (!ECA.esValida(datosCertificado) || !ECA.esPublica(datosCertificado)) {
-            //     respuesta.setFinalizado(false);
-            //     respuesta.setMensaje("Certificado no emitido por la ECP.");
-            //     return respuesta;
-            // }
             Slot oSlot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (oSlot != null) {
                 FirmaHashRespuestaDto datos = new FirmaHashRespuestaDto();
@@ -632,28 +496,7 @@ public class FirmadorServicio {
             } 
         } catch (GeneralSecurityException ex) {
             try {
-                String mensaje = ex.getMessage();
-                if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
-                        mensaje = "Pin incorrecto, intente nuevamente.";
-                    }
-                }
-                if (ex instanceof java.security.cert.CertificateExpiredException) {
-                    mensaje = "El certificado se encuentra expirado.";
-                }
-                if (ex instanceof java.security.cert.CertificateNotYetValidException) {
-                    mensaje = "El certificado aún no está vigente.";
-                }
-                if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
-                    if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
-                        mensaje = "Por favor verifique el pin.";
-                    }
-                }
-                if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
-                        mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
-                    }
-                }
+                String mensaje = this.procesarExcepcion(ex);
                 respuesta.setFinalizado(false);
                 respuesta.setMensaje(mensaje);
             } catch (Exception ex1) {
@@ -667,7 +510,7 @@ public class FirmadorServicio {
     public RespuestaDto<FirmaModoSeguroRespuestaDto> firmarModoSeguro(FirmaModoSeguroDto objetoDto) throws Exception {
         RespuestaDto<FirmaModoSeguroRespuestaDto> respuesta = new RespuestaDto<FirmaModoSeguroRespuestaDto>();
         GestorSlot gestorSlot = GestorSlot.getInstance();
-        gestorSlot.setOpciones(this.getOpciones());
+        gestorSlot.setConfigFirmador(this.getOpciones());
         Slot[] slots = gestorSlot.listarSlots(true);
         TokenSelected tokenSelected;
         try {
@@ -686,12 +529,12 @@ public class FirmadorServicio {
                     jsons = new JSONArray();
                 }
                 if (pdfs.length() + jsons.length() == 0) {
-                    throw new RuntimeException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
+                    throw new JacobitusException("Por favor debe proveer al menos un archivo pdf o un archivo json.");
                 }
                 if (objetoDto.getCi() != null) {
-                    tokenSelected = App.service(slots, objetoDto.getCi(), pdfs, jsons);
+                    tokenSelected = FormAplicacion.service(slots, objetoDto.getCi(), pdfs, jsons);
                 } else {
-                    tokenSelected = App.service(slots, null, pdfs, jsons);
+                    tokenSelected = FormAplicacion.service(slots, null, pdfs, jsons);
                 }
                 if (tokenSelected.getAlias() != null && tokenSelected.getPin() != null) {
                     List<FirmaPdfItemRespuestaDto> listaPdf = Arrays.asList(om.readValue(tokenSelected.getFiles().toString(), FirmaPdfItemRespuestaDto[].class));
@@ -736,5 +579,31 @@ public class FirmadorServicio {
             respuesta.setMensaje(mensaje);
         }
         return respuesta;
+    }
+
+    private String procesarExcepcion(Exception ex) {
+        String mensaje = ex.getMessage();
+        if (ex.getCause() instanceof IOException) {
+            if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                mensaje = "Pin incorrecto, intente nuevamente.";
+            }
+        }
+        if (ex instanceof java.security.cert.CertificateExpiredException) {
+            mensaje = "El certificado se encuentra expirado.";
+        }
+        if (ex instanceof java.security.cert.CertificateNotYetValidException) {
+            mensaje = "El certificado aún no está vigente.";
+        }
+        if (ex.getCause() instanceof java.security.UnrecoverableKeyException) {
+            if (ex.getCause().getCause() instanceof javax.security.auth.login.FailedLoginException) {
+                mensaje = "Por favor verifique el pin.";
+            }
+        }
+        if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
+            if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
+            }
+        }
+        return mensaje;
     }
 }
