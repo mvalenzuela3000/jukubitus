@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;

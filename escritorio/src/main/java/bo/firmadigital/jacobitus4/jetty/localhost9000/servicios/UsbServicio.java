@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,9 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ListaUsbDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.UsbDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ListaUsbDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.UsbDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
 
 public class UsbServicio {
 

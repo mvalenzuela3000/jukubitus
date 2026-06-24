@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.util.plataforma;
+package bo.firmadigital.jacobitus.escritorio.util.plataforma;
 
 public enum SistemaOperativoEnum {
 

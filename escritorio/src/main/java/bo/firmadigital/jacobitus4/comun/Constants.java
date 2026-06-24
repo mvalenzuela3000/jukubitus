@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.comun;
+package bo.firmadigital.jacobitus.escritorio.comun;
 
 public final class Constants {
     public static final int INFO = 0;

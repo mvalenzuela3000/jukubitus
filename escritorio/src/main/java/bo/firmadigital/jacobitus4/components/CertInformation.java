@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.components;
+package bo.firmadigital.jacobitus.escritorio.components;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.components;
+package bo.firmadigital.jacobitus.escritorio.components;
 
 import bo.firmadigital.jacobitus.validador.comun.Firma;
 import javafx.scene.Node;

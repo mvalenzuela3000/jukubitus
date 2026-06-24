@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.util;
+package bo.firmadigital.jacobitus.escritorio.util;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;

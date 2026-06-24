@@ -1,6 +1,6 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000;
 
-import bo.firmadigital.jacobitus4.FormAplicacion;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;

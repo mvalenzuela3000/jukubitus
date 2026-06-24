@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.util;
+package bo.firmadigital.jacobitus.escritorio.util;
 
 import java.io.File;
 import java.io.FileInputStream;

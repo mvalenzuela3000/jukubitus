@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,10 +22,10 @@ import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.comun.Constants;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.TableViewHelper;
+import bo.firmadigital.jacobitus.escritorio.components.CertInformation;
+import bo.firmadigital.jacobitus.escritorio.comun.Constants;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
+import bo.firmadigital.jacobitus.escritorio.util.TableViewHelper;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;

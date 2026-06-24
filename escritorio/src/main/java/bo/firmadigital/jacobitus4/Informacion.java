@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 public class Informacion {
     public static final String NOMBRE = "jacobitus-escritorio";

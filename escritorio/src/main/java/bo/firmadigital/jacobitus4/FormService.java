@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,9 +19,9 @@ import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.comun.TokenSelected;
-import bo.firmadigital.jacobitus4.util.Config;
-import bo.firmadigital.jacobitus4.util.ECA;
+import bo.firmadigital.jacobitus.escritorio.comun.TokenSelected;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
+import bo.firmadigital.jacobitus.escritorio.util.ECA;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;

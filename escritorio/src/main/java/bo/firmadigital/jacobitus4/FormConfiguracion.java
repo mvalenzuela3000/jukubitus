@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.token.TokenPKCS12;
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;

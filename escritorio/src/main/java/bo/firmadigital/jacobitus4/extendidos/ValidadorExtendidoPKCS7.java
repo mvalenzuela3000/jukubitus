@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.extendidos;
+package bo.firmadigital.jacobitus.escritorio.extendidos;
 
 import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_signingTime;
 

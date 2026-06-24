@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;

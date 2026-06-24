@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.pojos;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.pojos;
 
 import java.util.Map;
 

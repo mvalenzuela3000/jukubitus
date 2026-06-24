@@ -1,6 +1,6 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.dtos;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos;
 
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

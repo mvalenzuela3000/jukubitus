@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000;
 
 import java.io.IOException;
 
@@ -11,9 +11,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import bo.firmadigital.jacobitus4.jetty.JettyHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.servicios.TokenServicio;
+import bo.firmadigital.jacobitus.escritorio.jetty.JettyHelper;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenAutenticacionDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios.TokenServicio;
 
 @Path("/token")
 public class TokenRest {

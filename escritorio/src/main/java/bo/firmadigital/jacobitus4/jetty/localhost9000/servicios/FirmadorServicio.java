@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -51,29 +51,29 @@ import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.FormAplicacion;
-import bo.firmadigital.jacobitus4.comun.TokenSelected;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonItemRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaJsonRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaLotePdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaLotePdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaModoSeguroDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaModoSeguroRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfItemDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfItemRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPkcs7Dto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaPkcs7RespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaXmlRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.CompleteSign;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.pojos.Signs;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
+import bo.firmadigital.jacobitus.escritorio.comun.TokenSelected;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaHashDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaHashRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaJsonRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaLotePdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaLotePdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaModoSeguroDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaModoSeguroRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfItemDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPkcs7Dto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaPkcs7RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaXmlDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaXmlRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.pojos.CompleteSign;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.pojos.Signs;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class FirmadorServicio {
 

@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost4637.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.servicios;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,12 +12,12 @@ import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.FormAplicacion;
-import bo.firmadigital.jacobitus4.comun.TokenSelected;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.FirmaPdfItemRespuestaDto;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
+import bo.firmadigital.jacobitus.escritorio.comun.TokenSelected;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaModoSeguroDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaModoSeguroRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.FirmaPdfItemRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class FirmadorServicio {
 

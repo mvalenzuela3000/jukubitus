@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.comun;
+package bo.firmadigital.jacobitus.escritorio.comun;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

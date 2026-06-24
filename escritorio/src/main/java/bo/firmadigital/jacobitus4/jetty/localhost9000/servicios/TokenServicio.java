@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -22,20 +22,20 @@ import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenAutenticacionDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateEmisorDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateTitularDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenCertificateValidezDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenConnectedDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenDataDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenDataRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenPrivateCertificateDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenPublicCertificateDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.TokenStatusDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenAutenticacionDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCertificateEmisorDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCertificateTitularDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenCertificateValidezDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenConnectedDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenDataDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenDataRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenPrivateCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenPublicCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.TokenStatusDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.ITokenCertificateDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class TokenServicio {
     public TokenServicio() {

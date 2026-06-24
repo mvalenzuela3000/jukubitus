@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

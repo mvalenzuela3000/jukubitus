@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty;
+package bo.firmadigital.jacobitus.escritorio.jetty;
 
 import java.io.IOException;
 

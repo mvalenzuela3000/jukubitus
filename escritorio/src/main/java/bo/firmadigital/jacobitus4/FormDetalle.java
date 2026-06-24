@@ -1,10 +1,10 @@
-package bo.firmadigital.jacobitus4;
+package bo.firmadigital.jacobitus.escritorio;
 
 import bo.firmadigital.jacobitus.validador.comun.DetalleValidacion;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
-import bo.firmadigital.jacobitus4.components.CertInformation;
-import bo.firmadigital.jacobitus4.components.TreeItemBlocked;
-import bo.firmadigital.jacobitus4.extendidos.ValidadorExtendido;
+import bo.firmadigital.jacobitus.escritorio.components.CertInformation;
+import bo.firmadigital.jacobitus.escritorio.components.TreeItemBlocked;
+import bo.firmadigital.jacobitus.escritorio.extendidos.ValidadorExtendido;
 import javafx.application.HostServices;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;

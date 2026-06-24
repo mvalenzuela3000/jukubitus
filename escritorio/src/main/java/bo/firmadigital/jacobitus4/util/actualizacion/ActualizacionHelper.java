@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.util.actualizacion;
+package bo.firmadigital.jacobitus.escritorio.util.actualizacion;
 
 import java.awt.Desktop;
 import java.io.IOException;

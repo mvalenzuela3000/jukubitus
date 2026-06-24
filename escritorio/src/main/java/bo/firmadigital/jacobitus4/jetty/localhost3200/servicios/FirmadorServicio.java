@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost3200.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.servicios;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,11 +26,11 @@ import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.CadenaConfianzaHelper;
-import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.CertificadoDto;
-import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost3200.dtos.FirmaPdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost4637.dtos.comun.RespuestaDto;
-import bo.firmadigital.jacobitus4.util.Config;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos.CertificadoDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos.FirmaPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost3200.dtos.FirmaPdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost4637.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.util.Config;
 
 public class FirmadorServicio {
 

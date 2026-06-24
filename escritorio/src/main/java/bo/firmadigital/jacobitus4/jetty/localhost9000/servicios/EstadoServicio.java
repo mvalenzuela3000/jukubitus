@@ -1,11 +1,11 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bo.firmadigital.jacobitus4.Informacion;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.VersionDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.Informacion;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.VersionDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
 
 public class EstadoServicio {
 

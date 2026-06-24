@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus4.jetty.localhost9000.servicios;
+package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.servicios;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,13 +15,13 @@ import bo.firmadigital.jacobitus.validador.ValidadorPdf;
 import bo.firmadigital.jacobitus.validador.ValidadorXml;
 import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import bo.firmadigital.jacobitus.validador.comun.Firma;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.CertificadoDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.FirmaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionArchivoRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.ValidacionPdfRespuestaDto;
-import bo.firmadigital.jacobitus4.jetty.localhost9000.dtos.comun.RespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.CertificadoDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.FirmaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionArchivoDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionArchivoRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionPdfDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.ValidacionPdfRespuestaDto;
+import bo.firmadigital.jacobitus.escritorio.jetty.localhost9000.dtos.comun.RespuestaDto;
 
 public class ValidadorServicio {
     public ValidadorServicio() {
