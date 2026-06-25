@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus.escritorio;
+package bo.firmadigital.jacobitus.escritorio.formularios;
 
 import java.awt.Desktop;
 import java.net.URI;

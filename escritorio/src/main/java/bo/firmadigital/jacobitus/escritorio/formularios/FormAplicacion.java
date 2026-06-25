@@ -1,5 +1,11 @@
-package bo.firmadigital.jacobitus.escritorio;
+package bo.firmadigital.jacobitus.escritorio.formularios;
 
+import java.awt.AWTException;
+import java.awt.Graphics2D;
+import java.awt.PopupMenu;
+import java.awt.RenderingHints;
+import java.awt.TrayIcon;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,12 +16,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.awt.AWTException;
-import java.awt.Graphics2D;
-import java.awt.PopupMenu;
-import java.awt.RenderingHints;
-import java.awt.TrayIcon;
-import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.cert.CertificateEncodingException;
@@ -27,29 +27,17 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+
 import org.codehaus.jettison.json.JSONArray;
 
 import com.itextpdf.kernel.exceptions.PdfException;
 
 import bo.firmadigital.jacobitus.comun.InfoCertificado;
 import bo.firmadigital.jacobitus.comun.JacobitusException;
-import bo.firmadigital.jacobitus.firmador.FirmadorJws;
-import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
-import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
-import bo.firmadigital.jacobitus.firmador.FirmadorXml;
-import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
-import bo.firmadigital.jacobitus.firmador.base.IFirmador;
-import bo.firmadigital.jacobitus.firmador.base.SmartCard;
-import bo.firmadigital.jacobitus.firmador.comun.MagicBytes;
-import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
-import bo.firmadigital.jacobitus.token.ChangePinJNI;
-import bo.firmadigital.jacobitus.token.GestorSlot;
-import bo.firmadigital.jacobitus.token.IToken;
-import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
-import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
-import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
-import bo.firmadigital.jacobitus.escritorio.components.CertInformation;
+import bo.firmadigital.jacobitus.escritorio.Informacion;
+import bo.firmadigital.jacobitus.escritorio.WebServer;
+import bo.firmadigital.jacobitus.escritorio.componentes.CertInformation;
 import bo.firmadigital.jacobitus.escritorio.comun.Config;
 import bo.firmadigital.jacobitus.escritorio.comun.Constants;
 import bo.firmadigital.jacobitus.escritorio.comun.ECA;
@@ -66,6 +54,22 @@ import bo.firmadigital.jacobitus.escritorio.utilidades.CertUtil;
 import bo.firmadigital.jacobitus.escritorio.utilidades.Conversor;
 import bo.firmadigital.jacobitus.escritorio.utilidades.PlataformaHelper;
 import bo.firmadigital.jacobitus.escritorio.utilidades.UrlFileName;
+import bo.firmadigital.jacobitus.firmador.FirmadorJws;
+import bo.firmadigital.jacobitus.firmador.FirmadorPKCS7;
+import bo.firmadigital.jacobitus.firmador.FirmadorPdf;
+import bo.firmadigital.jacobitus.firmador.FirmadorXml;
+import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
+import bo.firmadigital.jacobitus.firmador.base.IFirmador;
+import bo.firmadigital.jacobitus.firmador.base.SmartCard;
+import bo.firmadigital.jacobitus.firmador.comun.MagicBytes;
+import bo.firmadigital.jacobitus.pkcs11.CK_TOKEN_INFO;
+import bo.firmadigital.jacobitus.token.ChangePinJNI;
+import bo.firmadigital.jacobitus.token.GestorSlot;
+import bo.firmadigital.jacobitus.token.IToken;
+import bo.firmadigital.jacobitus.token.Slot;
+import bo.firmadigital.jacobitus.utilidades.CertificadoHelper;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
+import bo.firmadigital.jacobitus.validador.base.ConfiguracionValidador;
 import dorkbox.jna.rendering.ProviderType;
 import dorkbox.jna.rendering.RenderProvider;
 import dorkbox.jna.rendering.Renderer;
@@ -110,7 +114,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javax.imageio.ImageIO;
 
 @SuppressWarnings("rawtypes")
 public class FormAplicacion extends Application {

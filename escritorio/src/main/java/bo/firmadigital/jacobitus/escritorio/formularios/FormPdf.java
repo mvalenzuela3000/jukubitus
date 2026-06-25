@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus.escritorio;
+package bo.firmadigital.jacobitus.escritorio.formularios;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
