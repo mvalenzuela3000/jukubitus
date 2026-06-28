@@ -1,4 +1,4 @@
-package bo.firmadigital.jacobitus.escritorio;
+package bo.firmadigital.jacobitus.escritorio.formularios;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -11,7 +11,7 @@ import bo.firmadigital.jacobitus.firmador.base.ConfiguracionFirmador;
 import bo.firmadigital.jacobitus.token.GestorSlot;
 import bo.firmadigital.jacobitus.token.IToken;
 import bo.firmadigital.jacobitus.token.Slot;
-import bo.firmadigital.jacobitus.escritorio.components.CertInformation;
+import bo.firmadigital.jacobitus.escritorio.componentes.CertInformation;
 import bo.firmadigital.jacobitus.escritorio.comun.Config;
 import bo.firmadigital.jacobitus.escritorio.utilidades.TableViewHelper;
 import javafx.collections.FXCollections;

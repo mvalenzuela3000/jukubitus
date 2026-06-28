@@ -1,6 +1,5 @@
 package bo.firmadigital.jacobitus.escritorio.jetty.localhost9000;
 
-import bo.firmadigital.jacobitus.escritorio.FormAplicacion;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +10,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
+import bo.firmadigital.jacobitus.escritorio.formularios.FormAplicacion;
 
 @Path("/app")
 public class AppRest {
