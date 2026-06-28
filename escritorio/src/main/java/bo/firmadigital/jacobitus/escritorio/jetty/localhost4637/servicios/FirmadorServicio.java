@@ -24,7 +24,7 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private ConfiguracionFirmador getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
@@ -54,7 +54,7 @@ public class FirmadorServicio {
                 software = objetoDto.getSoftware();
             }
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(this.getOpciones());
+            gestorSlot.setConfigFirmador(this.getConfigFirmador());
             Slot[] slots = gestorSlot.listarSlots(software);
             if (slots.length != 1) {
                 throw new JacobitusException("Por favor conecte solo un token.");

@@ -80,7 +80,7 @@ public class FirmadorServicio {
     public FirmadorServicio() {
     }
 
-    private ConfiguracionFirmador getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
@@ -110,7 +110,7 @@ public class FirmadorServicio {
             Integer y = objetoDto.getPoint() != null ? objetoDto.getPoint().getY() : null;
             String image = objetoDto.getImage() != null ? objetoDto.getImage() : null;
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -126,9 +126,9 @@ public class FirmadorServicio {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             FirmadorPdf firmar;
             if (x == null) {
-                firmar = FirmadorPdf.getInstance(slot, alias, pin, this.getOpciones());
+                firmar = FirmadorPdf.getInstance(slot, alias, pin, this.getConfigFirmador());
             } else {
-                firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, this.getOpciones());
+                firmar = FirmadorPdf.getInstance(slot, alias, pin, image, x, y, this.getConfigFirmador());
             }
             firmar.firmar(new ByteArrayInputStream(file), out, bloquear);
             datos.setPdf_firmado(Base64.getEncoder().encodeToString(out.toByteArray()));
@@ -161,7 +161,7 @@ public class FirmadorServicio {
             Boolean detached = objetoDto.getDetached();
             byte[] file = Base64.getDecoder().decode(objetoDto.getFile().getBytes(StandardCharsets.UTF_8));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -175,7 +175,7 @@ public class FirmadorServicio {
             FirmaPkcs7RespuestaDto datos = new FirmaPkcs7RespuestaDto();
             respuesta.setDatos(datos);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IFirmador firmar = FirmadorPKCS7.getInstance(slot, alias, pin, this.getOpciones());
+            IFirmador firmar = FirmadorPKCS7.getInstance(slot, alias, pin, this.getConfigFirmador());
             firmar.firmar(new ByteArrayInputStream(file), out, detached);
             datos.setPkcs7(Base64.getEncoder().encodeToString(out.toByteArray()));
             respuesta.setFinalizado(true);
@@ -211,7 +211,7 @@ public class FirmadorServicio {
             Boolean enveloped = objetoDto.getEnveloped();
             Boolean prefix = objetoDto.getPrefix();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -227,9 +227,9 @@ public class FirmadorServicio {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             FirmadorXml firmar;
             if (node == null) {
-                firmar = FirmadorXml.getInstance(slot, alias, pin, this.getOpciones());
+                firmar = FirmadorXml.getInstance(slot, alias, pin, this.getConfigFirmador());
             } else {
-                firmar = FirmadorXml.getInstance(slot, alias, pin, node, this.getOpciones());
+                firmar = FirmadorXml.getInstance(slot, alias, pin, node, this.getConfigFirmador());
             }
 
             if (digest != null) {
@@ -295,7 +295,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             byte[] data = Base64.getDecoder().decode(objetoDto.getData().getBytes(StandardCharsets.UTF_8));
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -397,7 +397,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             List<FirmaPdfItemDto> pdfs = objetoDto.getPdfs();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -460,7 +460,7 @@ public class FirmadorServicio {
             String alias = objetoDto.getAlias();
             String hash = objetoDto.getHash();
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             if (slot == null) {
                 Slot[] slots = gestorSlot.listarSlots();
                 if (slots.length == 1) {
@@ -510,7 +510,7 @@ public class FirmadorServicio {
     public RespuestaDto<FirmaModoSeguroRespuestaDto> firmarModoSeguro(FirmaModoSeguroDto objetoDto) throws Exception {
         RespuestaDto<FirmaModoSeguroRespuestaDto> respuesta = new RespuestaDto<FirmaModoSeguroRespuestaDto>();
         GestorSlot gestorSlot = GestorSlot.getInstance();
-        gestorSlot.setConfigFirmador(this.getOpciones());
+        gestorSlot.setConfigFirmador(this.getConfigFirmador());
         Slot[] slots = gestorSlot.listarSlots(true);
         TokenSelected tokenSelected;
         try {

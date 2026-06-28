@@ -67,8 +67,8 @@ public class ValidadorExtendidoXml extends ValidadorExtendido {
         }
     }
 
-    public ValidadorExtendidoXml(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador opciones) {
-        this.configValidador = opciones;
+    public ValidadorExtendidoXml(InputStream is, Date fecFirmaPresunta, ConfiguracionValidador configValidador) {
+        this.configValidador = configValidador;
         try {
             this.fecFirmaPresunta = fecFirmaPresunta;
             firmas = listarCertificados(is);

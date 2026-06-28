@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 public class FormCambiarContrasena extends Stage {
     private Stage stage;
 
-    private ConfiguracionFirmador getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
@@ -117,7 +117,7 @@ public class FormCambiarContrasena extends Stage {
                     error = "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula.";
                 } else {
                     GestorSlot gestorSlot = GestorSlot.getInstance();
-                    gestorSlot.setConfigFirmador(this.getOpciones());
+                    gestorSlot.setConfigFirmador(this.getConfigFirmador());
                     Slot oSlot = gestorSlot.obtenerSlot(slot);
                     if (oSlot == null) {
                         throw new IOException("El slot " + slot + " no se encuentra disponible.");
