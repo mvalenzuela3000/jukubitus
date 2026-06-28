@@ -52,7 +52,7 @@ public class PlataformaServicio {
     public PlataformaServicio() {
     }
 
-    private ConfiguracionFirmador getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
@@ -94,7 +94,7 @@ public class PlataformaServicio {
 
                 if (num >= 1 && may >= 1 && minu >= 1) {
                     Config config = Config.getInstance();
-                    Slot slot = new Slot(config.getTokenToCreate(), this.getOpciones());
+                    Slot slot = new Slot(config.getTokenToCreate(), this.getConfigFirmador());
                     TokenPKCS12 token = new TokenPKCS12(slot);
 
                     try {
@@ -122,7 +122,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -163,7 +163,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -202,7 +202,7 @@ public class PlataformaServicio {
         RespuestaDto<String> respuesta = new RespuestaDto<String>();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 IToken token = slot.getToken();
@@ -234,7 +234,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -262,7 +262,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -290,7 +290,7 @@ public class PlataformaServicio {
 
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {
                 try {
@@ -317,7 +317,7 @@ public class PlataformaServicio {
         RespuestaDto<List<TokenSolicitudRespuestaDto>> respuesta = new RespuestaDto<List<TokenSolicitudRespuestaDto>>();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(this.getOpciones());
+            gestorSlot.setConfigFirmador(this.getConfigFirmador());
             gestorSlot.listarSlots();
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
             if (slot != null) {

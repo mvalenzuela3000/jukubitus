@@ -41,7 +41,7 @@ public class TokenServicio {
     public TokenServicio() {
     }
 
-    private ConfiguracionFirmador getOpciones() {
+    private ConfiguracionFirmador getConfigFirmador() {
         Config config = Config.getInstance();
         ConfiguracionFirmador configFirmador = new ConfiguracionFirmador();
         configFirmador.setControlador(config.getDriver());
@@ -62,7 +62,7 @@ public class TokenServicio {
         RespuestaDto<TokenStatusDto> respuesta = new RespuestaDto<TokenStatusDto>();
         try {
             List<String> listaToken = new ArrayList<String>();
-            List<JSONObject> tokens = SmartCard.cards(this.getOpciones());
+            List<JSONObject> tokens = SmartCard.cards(this.getConfigFirmador());
 
             for (JSONObject token : tokens) {
                 listaToken.add(token.get("name").toString());
@@ -88,7 +88,7 @@ public class TokenServicio {
         RespuestaDto<TokenConnectedDto> respuesta = new RespuestaDto<TokenConnectedDto>();
         try {
             GestorSlot gestorSlot = GestorSlot.getInstance();
-            gestorSlot.setConfigFirmador(getOpciones());
+            gestorSlot.setConfigFirmador(getConfigFirmador());
             Slot[] slots = gestorSlot.listarSlots();
             List<TokenDto> listaToken = new ArrayList<TokenDto>();
 
@@ -122,7 +122,7 @@ public class TokenServicio {
         RespuestaDto<TokenDataRespuestaDto> respuesta = new RespuestaDto<TokenDataRespuestaDto>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         GestorSlot gestorSlot = GestorSlot.getInstance();
-        gestorSlot.setConfigFirmador(getOpciones());
+        gestorSlot.setConfigFirmador(getConfigFirmador());
 
         if (objetoDto.getSlot() != null && objetoDto.getPin() != null) {
             Slot slot = gestorSlot.obtenerSlot(objetoDto.getSlot());
