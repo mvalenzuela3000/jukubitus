@@ -24,8 +24,8 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.escritorio.comun.Config;
-import bo.firmadigital.jacobitus.escritorio.formularios.FormAplicacion;
 
 public class WebServer {
     public static Server jettyServer = new Server();
@@ -91,7 +91,6 @@ public class WebServer {
         try {
             configurarHttps();
             jettyServer.start();
-            
         } catch (Exception ex) {
             try {
                 switch (ex.getMessage()) {
@@ -113,8 +112,8 @@ public class WebServer {
             } catch (Exception ex2) {
                 Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
             }
-            FormAplicacion.run(false, false, false);
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new JacobitusException("Error al iniciar el servidor local.");
         }
     }
 

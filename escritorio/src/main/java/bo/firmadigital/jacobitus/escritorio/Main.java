@@ -8,8 +8,6 @@ import org.codehaus.jettison.json.JSONObject;
 import bo.firmadigital.jacobitus.escritorio.formularios.FormAplicacion;
 
 public class Main {
-    // public static Server jettyServer = new Server();
-
     public static void main(String[] args) {
         Request req = new Request();
         if (req.estado()) {
@@ -25,13 +23,13 @@ public class Main {
                     String[] parts = args[0].split("\\?");
                     if (parts.length == 2) {
                         JSONObject body = Request.splitQuery(parts[1]);
-                        FormAplicacion.run(true, true, false, body.getString("url"), body.getString("token"),
+                        FormAplicacion.run(true, true, body.getString("url"), body.getString("token"),
                                 body.getString("urlpost"));
                     } else {
-                        FormAplicacion.run(true, true, false, args[0]);
+                        FormAplicacion.run(true, true, args[0]);
                     }
                 } else {
-                    FormAplicacion.run(true, true, false);
+                    FormAplicacion.run(true, true);
                 }
             } catch (Exception ex) {
                 try {
@@ -39,7 +37,7 @@ public class Main {
                 } catch (Exception ex2) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
                 }
-                FormAplicacion.run(false, false, false);
+                FormAplicacion.run(false, false);
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
