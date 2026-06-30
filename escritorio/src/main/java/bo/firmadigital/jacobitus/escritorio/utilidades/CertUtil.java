@@ -82,14 +82,27 @@ public class CertUtil {
             case "RHEL":
             case "ARCH":
                 boolean respuesta = true;
-                File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
+                
+                String[] posiblesRutasChromium = {
+                    System.getProperty("user.home") + "/.pki/nssdb/cert9.db",
+                    System.getProperty("user.home") + "/.local/share/pki/nssdb/cert9.db"
+                };
+                File chromiumBD = new File(posiblesRutasChromium[0]);
+                for (String ruta : posiblesRutasChromium) {
+                    File f = new File(ruta);
+                    if (f.exists()) {
+                        chromiumBD = f;
+                        break;
+                    }
+                }
+
                 boolean chromiumInstalado = false;
                 if (chromiumBD.exists()) {
                     p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + chromiumBD.getParent() });
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                         String s;
                         while ((s = in.readLine()) != null) {
-                            if (s.startsWith("adsib.gob.bo")) {
+                            if (s.contains("adsib.gob.bo")) {
                                 chromiumInstalado = true;
                             }
                         }
@@ -132,7 +145,7 @@ public class CertUtil {
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
-                                if (s.startsWith("adsib.gob.bo")) {
+                                if (s.contains("adsib.gob.bo")) { // Ajustado a .contains
                                     mozillaInstalado = true;
                                 }
                             }
@@ -219,14 +232,27 @@ public class CertUtil {
             case "RHEL":
             case "ARCH":
                 boolean respuesta = true;
-                File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
+                
+                String[] posiblesRutasChromium = {
+                    System.getProperty("user.home") + "/.pki/nssdb/cert9.db",
+                    System.getProperty("user.home") + "/.local/share/pki/nssdb/cert9.db"
+                };
+                File chromiumBD = new File(posiblesRutasChromium[0]);
+                for (String ruta : posiblesRutasChromium) {
+                    File f = new File(ruta);
+                    if (f.exists()) {
+                        chromiumBD = f;
+                        break;
+                    }
+                }
+
                 boolean chromiumInstalado = false;
                 if (chromiumBD.exists()) {
                     p = Runtime.getRuntime().exec(new String[] { "certutil", "-L", "-d", "sql:" + chromiumBD.getParent() });
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                         String s;
                         while ((s = in.readLine()) != null) {
-                            if (s.startsWith("adsib.gob.bo")) {
+                            if (s.contains("adsib.gob.bo")) {
                                 chromiumInstalado = true;
                             }
                         }
@@ -236,7 +262,7 @@ public class CertUtil {
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
-                                if (s.startsWith("adsib.gob.bo")) {
+                                if (s.contains("adsib.gob.bo")) {
                                     chromiumInstalado = true;
                                 }
                             }
@@ -280,7 +306,7 @@ public class CertUtil {
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                             String s;
                             while ((s = in.readLine()) != null) {
-                                if (s.startsWith("adsib.gob.bo")) {
+                                if (s.contains("adsib.gob.bo")) {
                                     mozillaInstalado = true;
                                 }
                             }
@@ -290,7 +316,7 @@ public class CertUtil {
                             try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                                 String s;
                                 while ((s = in.readLine()) != null) {
-                                    if (s.startsWith("adsib.gob.bo")) {
+                                    if (s.contains("adsib.gob.bo")) {
                                         mozillaInstalado = true;
                                     }
                                 }
@@ -333,7 +359,20 @@ public class CertUtil {
             case "DEBIAN":
             case "RHEL":
             case "ARCH":
-                File chromiumBD = new File(System.getProperty("user.home") + "/.pki/nssdb/cert9.db");
+                
+                String[] posiblesRutasChromium = {
+                    System.getProperty("user.home") + "/.pki/nssdb/cert9.db",
+                    System.getProperty("user.home") + "/.local/share/pki/nssdb/cert9.db"
+                };
+                File chromiumBD = new File(posiblesRutasChromium[0]);
+                for (String ruta : posiblesRutasChromium) {
+                    File f = new File(ruta);
+                    if (f.exists()) {
+                        chromiumBD = f;
+                        break;
+                    }
+                }
+
                 if (chromiumBD.exists()) {
                     p = Runtime.getRuntime().exec(new String[] { "certutil", "-D", "-n", "adsib.gob.bo", "-d", "sql:" + chromiumBD.getParent() });
                 }
@@ -382,9 +421,11 @@ public class CertUtil {
                     }
                 }
                 return false;
+
             case "MACOS":
                 p = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", "echo " + contrasenia + " | sudo -S security remove-trusted-cert -d " + CertUtil.obtenerRutaCertificadoServicioLocal() + " && sudo -S security delete-certificate -c adsib.gob.bo" });
                 return true;
+
             default:
                 return false;
         }
