@@ -164,13 +164,13 @@ public class FormAplicacion extends Application {
         FormAplicacion.app = this;
 
         TaskBar barraTareas = new TaskBar();
-        // if (SistemaOperativoHelper.esDebian()) {
-        //     usarBarraTareas = false;
-        // } else {
+        if (SistemaOperativoHelper.esDebian()) {
+            usarBarraTareas = false;
+        } else {
             if (usarBarraTareas) {
                 usarBarraTareas = barraTareas.iniciarBandejaSistema();
             }
-        // }
+        }
 
         String version = Informacion.VERSION;
         stage.setTitle("Jacobitus - " + version);
