@@ -112,7 +112,7 @@ public class TaskBar {
         popupMenu.add(abrirItem);
         popupMenu.add(salirItem);
 
-        TrayIcon trayIcon = new TrayIcon(iconImage, "Jacobitus", popupMenu);
+        trayIcon = new TrayIcon(iconImage, "Jacobitus", popupMenu);
         trayIcon.setImageAutoSize(true);
         trayIcon.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
