@@ -164,7 +164,7 @@ public class FormAplicacion extends Application {
         FormAplicacion.app = this;
 
         TaskBar barraTareas = new TaskBar();
-        if (SistemaOperativoHelper.esDebian()) {
+        if (SistemaOperativoHelper.esUnix()) {
             usarBarraTareas = false;
         } else {
             if (usarBarraTareas) {

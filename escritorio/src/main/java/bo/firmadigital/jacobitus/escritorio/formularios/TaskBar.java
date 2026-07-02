@@ -27,6 +27,10 @@ public class TaskBar {
     private SystemTray sysTray = null;
 
     public boolean iniciarBandejaSistema() {
+        if (SistemaOperativoHelper.esUnix()) {
+            return false;
+        }
+
         if (SistemaOperativoHelper.esWindows() || SistemaOperativoHelper.esMacOS()) {
             return iniciarBandejaAwtSeguro();
         }
