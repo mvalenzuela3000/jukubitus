@@ -153,6 +153,21 @@ public class FormConfiguracion extends Stage {
                     // }
                 });
         vbox1.getChildren().add(checkBoxPort3);
+        if (SistemaOperativoHelper.esUnix()) {
+            vbox1.getChildren().add(new Separator(Orientation.HORIZONTAL));
+
+            Label titleG = new Label("General");
+            titleG.setStyle("-fx-font-weight: bold");
+            vbox1.getChildren().add(titleG);
+            CheckBox checkBoxConfirmarSalida = new CheckBox("Confirmar antes de salir");
+            checkBoxConfirmarSalida.setSelected(config.isConfirmarSalidaEnabled());
+            checkBoxConfirmarSalida.selectedProperty()
+                    .addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                        config.setConfirmarSalidaEnabled(newValue);
+                        config.save();
+                    });
+            vbox1.getChildren().add(checkBoxConfirmarSalida);
+        }
 
         root.getChildren().add(vbox1);
 
@@ -368,7 +383,7 @@ public class FormConfiguracion extends Stage {
         // checkBoxTS.setSelected(true);
         // checkBoxTS.setSelected(config.isTSEnabled());
 
-        Scene scene = new Scene(root, 430, 300);
+        Scene scene = new Scene(root);
         setScene(scene);
     }
 }

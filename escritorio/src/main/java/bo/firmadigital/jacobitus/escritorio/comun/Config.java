@@ -110,6 +110,19 @@ public class Config {
         }
     }
 
+    public boolean isConfirmarSalidaEnabled() {
+        String confirmarSalida = options.getProperty("confirmarSalida");
+        return confirmarSalida == null || confirmarSalida.equals("true");
+    }
+
+    public void setConfirmarSalidaEnabled(boolean confirmarSalida) {
+        if (confirmarSalida) {
+            options.setProperty("confirmarSalida", "true");
+        } else {
+            options.setProperty("confirmarSalida", "false");
+        }
+    }
+
     public File getToken() {
         token = new File(user, "softoken.p12");
         if (!token.exists()) {

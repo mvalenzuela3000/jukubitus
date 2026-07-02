@@ -74,7 +74,9 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -152,6 +154,50 @@ public class FormAplicacion extends Application {
         configValidador.setProxyIp(config.getProxyIP());
         configValidador.setProxyPuerto(Integer.parseInt(config.getProxyPort()));
         return configValidador;
+    }
+
+    private boolean confirmarSalida() {
+        Config config = Config.getInstance();
+        boolean permitirNoPreguntar = SistemaOperativoHelper.esUnix();
+        if (permitirNoPreguntar && !config.isConfirmarSalidaEnabled()) {
+            return true;
+        }
+
+        ButtonType salirButton = new ButtonType("Salir", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelarButton = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmación");
+        alert.setHeaderText("¿Seguro que deseas salir?");
+        alert.getButtonTypes().setAll(cancelarButton, salirButton);
+        if (FormAplicacion.stage != null) {
+            alert.initOwner(FormAplicacion.stage);
+            alert.initModality(Modality.WINDOW_MODAL);
+            alert.setOnShown(event -> {
+                Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+                alertStage.getIcons().setAll(FormAplicacion.stage.getIcons());
+            });
+        }
+
+        Label mensaje = new Label("Se cerrarán la aplicación y sus servicios locales.");
+        mensaje.setWrapText(true);
+        mensaje.setMaxWidth(300);
+
+        CheckBox noPreguntar = new CheckBox("No volver a preguntar");
+        VBox contenido = new VBox(12);
+        contenido.getChildren().add(mensaje);
+        if (permitirNoPreguntar) {
+            contenido.getChildren().add(noPreguntar);
+        }
+        alert.getDialogPane().setContent(contenido);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        boolean confirmado = result.isPresent() && result.get() == salirButton;
+        if (permitirNoPreguntar && confirmado && noPreguntar.isSelected()) {
+            config.setConfirmarSalidaEnabled(false);
+            config.save();
+        }
+        return confirmado;
     }
 
     @SuppressWarnings("unchecked")
@@ -298,14 +344,7 @@ public class FormAplicacion extends Application {
         });
         MenuItem salirItem = new MenuItem("Salir");
         salirItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmación");
-            alert.setHeaderText("¿Seguro que deseas salir?");
-            alert.setContentText("Se cerrará la aplicación.");
-
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (confirmarSalida()) {
                 Platform.runLater(() -> {
                     try {
                         if (usarServicioLocalhost) {
@@ -706,14 +745,7 @@ public class FormAplicacion extends Application {
 
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (!usarBarraTareas) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Confirmación");
-                alert.setHeaderText("¿Seguro que deseas salir?");
-                alert.setContentText("Se cerrará la aplicación.");
-
-                Optional<ButtonType> result = alert.showAndWait();
-
-                if (result.isPresent() && result.get() == ButtonType.OK) {
+                if (confirmarSalida()) {
                     Platform.runLater(() -> {
                         try {
                             if (usarServicioLocalhost) {
