@@ -113,7 +113,7 @@ public class Config {
 
     public boolean isConfirmarSalidaEnabled() {
         String confirmarSalida = options.getProperty("confirmarSalida");
-        return confirmarSalida == null || confirmarSalida.equals("true");
+        return confirmarSalida == null ? SistemaOperativoHelper.esUnix() : confirmarSalida.equals("true");
     }
 
     public void setConfirmarSalidaEnabled(boolean confirmarSalida) {

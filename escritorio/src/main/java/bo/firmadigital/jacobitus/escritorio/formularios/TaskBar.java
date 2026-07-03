@@ -77,15 +77,7 @@ public class TaskBar {
             Logger.getLogger(FormAplicacion.class.getName()).log(Level.INFO,
                     "Icono de bandeja configurado: {0}", iconFile.getAbsolutePath());
             sysTray.getMenu().add(new dorkbox.systemTray.MenuItem("Abrir", event -> FormAplicacion.show()));
-            sysTray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> {
-                try {
-                    WebServer.detener();
-                } catch (Exception ex) {
-                    Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                Platform.exit();
-                sysTray.shutdown();
-            }));
+            sysTray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> FormAplicacion.salir()));
             return true;
         } catch (Exception ex) {
             ultimoDiagnostico = diagnosticoBandejaNoDisponible();
@@ -124,15 +116,7 @@ public class TaskBar {
         java.awt.MenuItem abrirItem = new java.awt.MenuItem("Abrir");
         abrirItem.addActionListener(event -> FormAplicacion.show());
         java.awt.MenuItem salirItem = new java.awt.MenuItem("Salir");
-        salirItem.addActionListener(event -> {
-            try {
-                WebServer.detener();
-            } catch (Exception ex) {
-                Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            quitarIconoBandejaAwt();
-            Platform.exit();
-        });
+        salirItem.addActionListener(event -> FormAplicacion.salir());
         popupMenu.add(abrirItem);
         popupMenu.add(salirItem);
 

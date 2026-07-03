@@ -200,16 +200,14 @@ public class FormConfiguracion extends Stage {
                 });
         vbox1.getChildren().add(checkBoxTrayIcon);
 
-        if (SistemaOperativoHelper.esUnix()) {
-            CheckBox checkBoxConfirmarSalida = new CheckBox("Confirmar antes de salir");
-            checkBoxConfirmarSalida.setSelected(config.isConfirmarSalidaEnabled());
-            checkBoxConfirmarSalida.selectedProperty()
-                    .addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                        config.setConfirmarSalidaEnabled(newValue);
-                        config.save();
-                    });
-            vbox1.getChildren().add(checkBoxConfirmarSalida);
-        }
+        CheckBox checkBoxConfirmarSalida = new CheckBox("Confirmar antes de salir");
+        checkBoxConfirmarSalida.setSelected(config.isConfirmarSalidaEnabled());
+        checkBoxConfirmarSalida.selectedProperty()
+                .addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    config.setConfirmarSalidaEnabled(newValue);
+                    config.save();
+                });
+        vbox1.getChildren().add(checkBoxConfirmarSalida);
 
         root.getChildren().add(vbox1);
 

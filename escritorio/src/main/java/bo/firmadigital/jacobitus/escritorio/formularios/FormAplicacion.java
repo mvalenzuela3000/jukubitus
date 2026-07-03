@@ -158,8 +158,7 @@ public class FormAplicacion extends Application {
 
     private boolean confirmarSalida() {
         Config config = Config.getInstance();
-        boolean permitirNoPreguntar = SistemaOperativoHelper.esUnix();
-        if (permitirNoPreguntar && !config.isConfirmarSalidaEnabled()) {
+        if (!config.isConfirmarSalidaEnabled()) {
             return true;
         }
 
@@ -173,7 +172,7 @@ public class FormAplicacion extends Application {
         if (FormAplicacion.stage != null) {
             alert.initOwner(FormAplicacion.stage);
             alert.initModality(Modality.WINDOW_MODAL);
-            alert.setOnShown(event -> {
+            alert.setOnShowing(event -> {
                 Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
                 alertStage.getIcons().setAll(FormAplicacion.stage.getIcons());
             });
@@ -186,18 +185,33 @@ public class FormAplicacion extends Application {
         CheckBox noPreguntar = new CheckBox("No volver a preguntar");
         VBox contenido = new VBox(12);
         contenido.getChildren().add(mensaje);
-        if (permitirNoPreguntar) {
-            contenido.getChildren().add(noPreguntar);
-        }
+        contenido.getChildren().add(noPreguntar);
         alert.getDialogPane().setContent(contenido);
 
         Optional<ButtonType> result = alert.showAndWait();
         boolean confirmado = result.isPresent() && result.get() == salirButton;
-        if (permitirNoPreguntar && confirmado && noPreguntar.isSelected()) {
+        if (confirmado && noPreguntar.isSelected()) {
             config.setConfirmarSalidaEnabled(false);
             config.save();
         }
         return confirmado;
+    }
+
+    public static void salir() {
+        Platform.runLater(() -> {
+            if (app != null && !app.confirmarSalida()) {
+                return;
+            }
+            try {
+                if (usarServicioLocalhost) {
+                    WebServer.detener();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -355,21 +369,7 @@ public class FormAplicacion extends Application {
         });
         MenuItem salirItem = new MenuItem("Salir");
         salirItem.setOnAction((ActionEvent e) -> {
-            if (confirmarSalida()) {
-                Platform.runLater(() -> {
-                    try {
-                        if (usarServicioLocalhost) {
-                            WebServer.detener();
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Platform.exit();
-                    System.exit(0);
-                });
-            } else {
-                e.consume();
-            }
+            salir();
         });
         archivoMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, convertirAPdf, limpiarItem, opcionesItem,
                 abrirCrt, salirItem);
@@ -735,11 +735,8 @@ public class FormAplicacion extends Application {
         scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-        stage.setIconified(true);
+        stage.setIconified(false);
         stage.toFront();
-        if (iniciarBarraTareasDiferido) {
-            stage.setIconified(false);
-        }
 
         if (iniciarBarraTareasDiferido) {
             Thread thread = new Thread(() -> {
@@ -769,9 +766,6 @@ public class FormAplicacion extends Application {
 
         if (usarBarraTareas) {
             Platform.setImplicitExit(false);
-            if (urlArchivo == null && urlParametro == null) {
-                stage.hide();
-            }
         } else {
             Platform.runLater(() -> {
                 if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
@@ -785,21 +779,8 @@ public class FormAplicacion extends Application {
 
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (!usarBarraTareas) {
-                if (confirmarSalida()) {
-                    Platform.runLater(() -> {
-                        try {
-                            if (usarServicioLocalhost) {
-                                WebServer.detener();
-                            }
-                        } catch (Exception ex) {
-                            Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        Platform.exit();
-                        System.exit(0);
-                    });
-                } else {
-                    e.consume();
-                }
+                e.consume();
+                salir();
             } else {
                 Platform.setImplicitExit(false);
                 stage.close();
