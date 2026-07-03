@@ -153,12 +153,54 @@ public class FormConfiguracion extends Stage {
                     // }
                 });
         vbox1.getChildren().add(checkBoxPort3);
-        if (SistemaOperativoHelper.esUnix()) {
-            vbox1.getChildren().add(new Separator(Orientation.HORIZONTAL));
+        vbox1.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
-            Label titleG = new Label("General");
-            titleG.setStyle("-fx-font-weight: bold");
-            vbox1.getChildren().add(titleG);
+        Label titleG = new Label("General");
+        titleG.setStyle("-fx-font-weight: bold");
+        vbox1.getChildren().add(titleG);
+        CheckBox checkBoxTrayIcon = new CheckBox("Mostrar icono en bandeja");
+        final boolean[] checkBoxTrayIconEvent = { true };
+        checkBoxTrayIcon.setSelected(config.isTrayIconEnabled());
+        checkBoxTrayIcon.selectedProperty()
+                .addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    if (!checkBoxTrayIconEvent[0]) {
+                        return;
+                    }
+                    if (newValue && !SistemaOperativoHelper.esUnix() && !java.awt.SystemTray.isSupported()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING,
+                                TaskBar.diagnosticoBandejaNoDisponible(), ButtonType.OK);
+                        alert.initOwner(parent);
+                        alert.initModality(Modality.APPLICATION_MODAL);
+                        alert.setTitle("Jacobitus");
+                        alert.setHeaderText(null);
+                        alert.showAndWait();
+                        checkBoxTrayIconEvent[0] = false;
+                        checkBoxTrayIcon.setSelected(false);
+                        checkBoxTrayIconEvent[0] = true;
+                        return;
+                    }
+                    config.setTrayIconEnabled(newValue);
+                    config.save();
+                    if (newValue && SistemaOperativoHelper.esUnix()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING,
+                                TaskBar.diagnosticoActivacionUnix(), ButtonType.OK);
+                        alert.initOwner(parent);
+                        alert.initModality(Modality.APPLICATION_MODAL);
+                        alert.setTitle("Jacobitus");
+                        alert.setHeaderText(null);
+                        alert.showAndWait();
+                    }
+                    Alert alert = new Alert(Alert.AlertType.WARNING,
+                            "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
+                    alert.initOwner(parent);
+                    alert.initModality(Modality.APPLICATION_MODAL);
+                    alert.setTitle("Jacobitus");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                });
+        vbox1.getChildren().add(checkBoxTrayIcon);
+
+        if (SistemaOperativoHelper.esUnix()) {
             CheckBox checkBoxConfirmarSalida = new CheckBox("Confirmar antes de salir");
             checkBoxConfirmarSalida.setSelected(config.isConfirmarSalidaEnabled());
             checkBoxConfirmarSalida.selectedProperty()

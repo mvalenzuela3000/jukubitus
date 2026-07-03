@@ -1,5 +1,6 @@
 package bo.firmadigital.jacobitus.escritorio.formularios;
 import java.awt.AWTException;
+import java.awt.GraphicsEnvironment;
 import java.awt.Graphics2D;
 import java.awt.PopupMenu;
 import java.awt.RenderingHints;
@@ -8,6 +9,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,17 +30,14 @@ import javafx.application.Platform;
 public class TaskBar {
     private TrayIcon trayIcon = null;
     private SystemTray sysTray = null;
+    private String ultimoDiagnostico = null;
 
     public boolean iniciarBandejaSistema() {
-        if (SistemaOperativoHelper.esUnix()) {
-            return false;
-        }
-
+        ultimoDiagnostico = null;
         if (SistemaOperativoHelper.esWindows() || SistemaOperativoHelper.esMacOS()) {
             return iniciarBandejaAwtSeguro();
         }
 
-        sysTray = SystemTray.get("Jacobitus");
         if (SistemaOperativoHelper.esUnix()) {
             return iniciarBandejaDorkbox();
         }
@@ -48,19 +50,32 @@ public class TaskBar {
             if (SistemaOperativoHelper.esUnix()) {
                 RenderProvider.set(new ProveedorRenderJavaFx());
                 SystemTray.AUTO_SIZE = false;
-                SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator;
+                if (hayAppIndicatorDisponible()) {
+                    SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator;
+                    prepararAliasAyatanaAppIndicator();
+                } else {
+                    SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.Gtk;
+                }
                 SizeAndScalingLinux.OVERRIDE_TRAY_SIZE = 24;
                 SizeAndScalingLinux.OVERRIDE_MENU_SIZE = 16;
             }
+            sysTray = SystemTray.get("Jacobitus");
             if (sysTray == null) {
+                ultimoDiagnostico = diagnosticoBandejaNoDisponible();
                 return false;
             }
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.INFO,
+                    "Dorkbox SystemTray iniciado. Tipo: {0}. Entorno: {1}",
+                    new Object[] { sysTray.getType(), detectarEntornoGrafico() });
             File iconFile = prepararIconoBandeja();
             if (iconFile == null) {
+                ultimoDiagnostico = "No se pudo preparar el icono de Jacobitus para la bandeja del sistema.";
                 return false;
             }
             sysTray.setTooltip("Jacobitus");
             sysTray.setImage(iconFile);
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.INFO,
+                    "Icono de bandeja configurado: {0}", iconFile.getAbsolutePath());
             sysTray.getMenu().add(new dorkbox.systemTray.MenuItem("Abrir", event -> FormAplicacion.show()));
             sysTray.getMenu().add(new dorkbox.systemTray.MenuItem("Salir", event -> {
                 try {
@@ -73,6 +88,7 @@ public class TaskBar {
             }));
             return true;
         } catch (Exception ex) {
+            ultimoDiagnostico = diagnosticoBandejaNoDisponible();
             Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar Dorkbox SystemTray", ex);
             return false;
         }
@@ -82,6 +98,7 @@ public class TaskBar {
         try {
             return iniciarBandejaAwt();
         } catch (IOException | AWTException ex) {
+            ultimoDiagnostico = diagnosticoBandejaNoDisponible();
             Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING, "No se pudo iniciar AWT SystemTray", ex);
             return false;
         }
@@ -89,14 +106,17 @@ public class TaskBar {
 
     private boolean iniciarBandejaAwt() throws IOException, AWTException {
         if (!java.awt.SystemTray.isSupported()) {
+            ultimoDiagnostico = diagnosticoBandejaNoDisponible();
             return false;
         }
         File iconFile = prepararIconoBandeja();
         if (iconFile == null) {
+            ultimoDiagnostico = "No se pudo preparar el icono de Jacobitus para la bandeja del sistema.";
             return false;
         }
         BufferedImage iconImage = ImageIO.read(iconFile);
         if (iconImage == null) {
+            ultimoDiagnostico = "No se pudo leer el icono de Jacobitus para la bandeja del sistema.";
             return false;
         }
 
@@ -168,6 +188,141 @@ public class TaskBar {
             ImageIO.write(trayIcon, "png", iconFile);
         }
         return iconFile;
+    }
+
+    private void prepararAliasAyatanaAppIndicator() {
+        File ayatana = buscarAyatanaAppIndicator();
+        if (ayatana == null) {
+            return;
+        }
+        try {
+            File dir = new File(System.getProperty("java.io.tmpdir"), "JacobitusAppIndicator_" + System.getProperty("user.name"));
+            if (!dir.exists() && !dir.mkdirs()) {
+                return;
+            }
+            String[] alias = { "libappindicator3.so", "libappindicator3-1.so", "libappindicator-gtk3.so",
+                    "libappindicator-gtk3-1.so" };
+            for (String nombre : alias) {
+                Path link = new File(dir, nombre).toPath();
+                if (!Files.exists(link)) {
+                    Files.createSymbolicLink(link, ayatana.toPath());
+                }
+            }
+            String jnaLibraryPath = System.getProperty("jna.library.path");
+            String dirPath = dir.getAbsolutePath();
+            if (jnaLibraryPath == null || jnaLibraryPath.trim().equals("")) {
+                System.setProperty("jna.library.path", dirPath);
+            } else if (!jnaLibraryPath.contains(dirPath)) {
+                System.setProperty("jna.library.path", dirPath + File.pathSeparator + jnaLibraryPath);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.WARNING,
+                    "No se pudo preparar alias para Ayatana AppIndicator", ex);
+        }
+    }
+
+    private File buscarAyatanaAppIndicator() {
+        File file = buscarLibreria("libayatana-appindicator3.so.1");
+        if (file != null) {
+            return file;
+        }
+        String[] rutasFallback = { "/usr/lib/x86_64-linux-gnu", "/lib/x86_64-linux-gnu", "/usr/lib", "/usr/lib64" };
+        for (String ruta : rutasFallback) {
+            file = new File(ruta, "libayatana-appindicator3.so.1");
+            if (file.exists()) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    private boolean hayAppIndicatorDisponible() {
+        return buscarAyatanaAppIndicator() != null
+                || buscarLibreria("libappindicator3.so") != null
+                || buscarLibreria("libappindicator3.so.1") != null
+                || buscarLibreria("libappindicator3-1.so") != null
+                || buscarLibreria("libappindicator-gtk3.so") != null
+                || buscarLibreria("libappindicator-gtk3-1.so") != null;
+    }
+
+    private File buscarLibreria(String nombre) {
+        try {
+            Process process = new ProcessBuilder("ldconfig", "-p").start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.contains(nombre) || !line.contains("=>")) {
+                        continue;
+                    }
+                    String ruta = line.substring(line.indexOf("=>") + 2).trim();
+                    File file = new File(ruta);
+                    if (file.exists()) {
+                        return file;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(FormAplicacion.class.getName()).log(Level.FINE,
+                    "No se pudo consultar ldconfig para AppIndicator", ex);
+        }
+        String javaLibraryPath = System.getProperty("java.library.path", "");
+        for (String ruta : javaLibraryPath.split(File.pathSeparator)) {
+            if (ruta.trim().equals("")) {
+                continue;
+            }
+            File file = new File(ruta, nombre);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    public String getUltimoDiagnostico() {
+        return ultimoDiagnostico;
+    }
+
+    public static String diagnosticoBandejaNoDisponible() {
+        if (GraphicsEnvironment.isHeadless()) {
+            return "No se puede iniciar el icono en bandeja porque Java está ejecutándose en modo headless.";
+        }
+        if (!SistemaOperativoHelper.esUnix()) {
+            if (!java.awt.SystemTray.isSupported()) {
+                return "No se puede iniciar el icono en bandeja porque Java/AWT reporta que SystemTray no está soportado en este sistema.";
+            }
+            return "Java/AWT reporta soporte para SystemTray, pero no pudo crear el icono. Revise los registros de la aplicación para ver la causa exacta.";
+        }
+        String entorno = detectarEntornoGrafico();
+        String entornoLower = entorno.toLowerCase();
+        if (entornoLower.contains("chrome")) {
+            return "No se puede iniciar el icono en bandeja porque Dorkbox SystemTray no soporta ChromeOS.";
+        }
+        return "Se detectó el entorno " + entorno
+                + ". No se pudo crear el icono en bandeja. Verifique que libayatana-appindicator3/libappindicator3 esté instalado o que el panel tenga habilitada el área de notificación.";
+    }
+
+    public static String diagnosticoActivacionUnix() {
+        String entorno = detectarEntornoGrafico();
+        String entornoLower = entorno.toLowerCase();
+        if (GraphicsEnvironment.isHeadless()) {
+            return "Java está ejecutándose en modo headless; el icono en bandeja no podrá mostrarse.";
+        }
+        if (entornoLower.contains("chrome")) {
+            return "Dorkbox SystemTray no soporta ChromeOS.";
+        }
+        return "Se detectó el entorno " + entorno
+                + ". Jacobitus intentará usar AppIndicator o el área de notificación GTK al reiniciar; verifique que el panel tenga habilitado el soporte para iconos de bandeja.";
+    }
+
+    private static String detectarEntornoGrafico() {
+        String entorno = System.getenv("XDG_CURRENT_DESKTOP");
+        if (entorno == null || entorno.trim().equals("")) {
+            entorno = System.getenv("DESKTOP_SESSION");
+        }
+        if (entorno == null || entorno.trim().equals("")) {
+            entorno = System.getenv("GDMSESSION");
+        }
+        return entorno == null || entorno.trim().equals("") ? "desconocido" : entorno;
     }
 
     private static class ProveedorRenderJavaFx implements Renderer {

@@ -208,14 +208,15 @@ public class FormAplicacion extends Application {
         ContextMenu tokenContextMenu;
         FormAplicacion.stage = stage;
         FormAplicacion.app = this;
+        Config config = Config.getInstance();
 
         TaskBar barraTareas = new TaskBar();
-        if (SistemaOperativoHelper.esUnix()) {
-            usarBarraTareas = false;
+        boolean usarBarraTareasSolicitado = usarBarraTareas && config.isTrayIconEnabled();
+        boolean iniciarBarraTareasDiferido = usarBarraTareasSolicitado && SistemaOperativoHelper.esUnix();
+        if (usarBarraTareasSolicitado) {
+            usarBarraTareas = iniciarBarraTareasDiferido ? false : barraTareas.iniciarBandejaSistema();
         } else {
-            if (usarBarraTareas) {
-                usarBarraTareas = barraTareas.iniciarBandejaSistema();
-            }
+            usarBarraTareas = false;
         }
 
         String version = Informacion.VERSION;
@@ -231,8 +232,18 @@ public class FormAplicacion extends Application {
             stage.setTitle("Jacobitus - " + version + " (Servicio detenido)");
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
-
-        Config config = Config.getInstance();
+        if (usarBarraTareasSolicitado && !usarBarraTareas && !iniciarBarraTareasDiferido) {
+            String mensaje = barraTareas.getUltimoDiagnostico();
+            if (mensaje == null) {
+                mensaje = TaskBar.diagnosticoBandejaNoDisponible();
+            }
+            Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setTitle("Jacobitus");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+        }
         PlataformaInfo plataformaInfo = PlataformaHelper.identificar();
         ActualizacionesHelper actualizacionHelper = new ActualizacionesHelper(
                 config.getEnlaceInstaladores());
@@ -726,6 +737,35 @@ public class FormAplicacion extends Application {
         stage.show();
         stage.setIconified(true);
         stage.toFront();
+        if (iniciarBarraTareasDiferido) {
+            stage.setIconified(false);
+        }
+
+        if (iniciarBarraTareasDiferido) {
+            Thread thread = new Thread(() -> {
+                if (barraTareas.iniciarBandejaSistema()) {
+                    Platform.runLater(() -> {
+                        usarBarraTareas = true;
+                        Platform.setImplicitExit(false);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        String mensaje = barraTareas.getUltimoDiagnostico();
+                        if (mensaje == null) {
+                            mensaje = TaskBar.diagnosticoBandejaNoDisponible();
+                        }
+                        Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
+                        alert.initOwner(stage);
+                        alert.initModality(Modality.APPLICATION_MODAL);
+                        alert.setTitle("Jacobitus");
+                        alert.setHeaderText(null);
+                        alert.showAndWait();
+                    });
+                }
+            }, "Jacobitus-TrayIcon");
+            thread.setDaemon(true);
+            thread.start();
+        }
 
         if (usarBarraTareas) {
             Platform.setImplicitExit(false);
