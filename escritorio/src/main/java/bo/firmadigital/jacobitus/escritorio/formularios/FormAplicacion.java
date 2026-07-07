@@ -178,7 +178,7 @@ public class FormAplicacion extends Application {
             });
         }
 
-        Label mensaje = new Label("Se cerrarán la aplicación y sus servicios locales.");
+        Label mensaje = new Label("Se cerrará la aplicación y todos sus servicios locales.");
         mensaje.setWrapText(true);
         mensaje.setMaxWidth(300);
 
@@ -225,10 +225,19 @@ public class FormAplicacion extends Application {
         Config config = Config.getInstance();
 
         TaskBar barraTareas = new TaskBar();
-        boolean usarBarraTareasSolicitado = usarBarraTareas && config.isTrayIconEnabled();
-        boolean iniciarBarraTareasDiferido = usarBarraTareasSolicitado && SistemaOperativoHelper.esUnix();
-        if (usarBarraTareasSolicitado) {
-            usarBarraTareas = iniciarBarraTareasDiferido ? false : barraTareas.iniciarBandejaSistema();
+
+        boolean usarBarraTareasConfiguracion;
+        boolean errorAlIniciarBandejaSistema = false;
+        if (SistemaOperativoHelper.esUnix()) {
+            usarBarraTareasConfiguracion = config.isTrayIconEnabled();
+        } else {
+            usarBarraTareasConfiguracion = usarBarraTareas && config.isTrayIconEnabled();
+        }
+        if (usarBarraTareasConfiguracion) {
+            usarBarraTareas = barraTareas.iniciarBandejaSistema();
+            if (!usarBarraTareas) {
+                errorAlIniciarBandejaSistema = true;
+            }
         } else {
             usarBarraTareas = false;
         }
@@ -246,7 +255,7 @@ public class FormAplicacion extends Application {
             stage.setTitle("Jacobitus - " + version + " (Servicio detenido)");
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
-        if (usarBarraTareasSolicitado && !usarBarraTareas && !iniciarBarraTareasDiferido) {
+        if (usarBarraTareasConfiguracion && !usarBarraTareas) {
             String mensaje = barraTareas.getUltimoDiagnostico();
             if (mensaje == null) {
                 mensaje = TaskBar.diagnosticoBandejaNoDisponible();
@@ -738,27 +747,20 @@ public class FormAplicacion extends Application {
         stage.setIconified(false);
         stage.toFront();
 
-        if (iniciarBarraTareasDiferido) {
+        if (errorAlIniciarBandejaSistema) {
             Thread thread = new Thread(() -> {
-                if (barraTareas.iniciarBandejaSistema()) {
-                    Platform.runLater(() -> {
-                        usarBarraTareas = true;
-                        Platform.setImplicitExit(false);
-                    });
-                } else {
-                    Platform.runLater(() -> {
-                        String mensaje = barraTareas.getUltimoDiagnostico();
-                        if (mensaje == null) {
-                            mensaje = TaskBar.diagnosticoBandejaNoDisponible();
-                        }
-                        Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
-                        alert.initOwner(stage);
-                        alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
-                        alert.setHeaderText(null);
-                        alert.showAndWait();
-                    });
-                }
+                Platform.runLater(() -> {
+                    String mensaje = barraTareas.getUltimoDiagnostico();
+                    if (mensaje == null) {
+                        mensaje = TaskBar.diagnosticoBandejaNoDisponible();
+                    }
+                    Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
+                    alert.setTitle("Jacobitus");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                });
             }, "Jacobitus-TrayIcon");
             thread.setDaemon(true);
             thread.start();
@@ -766,6 +768,7 @@ public class FormAplicacion extends Application {
 
         if (usarBarraTareas) {
             Platform.setImplicitExit(false);
+            new Thread(listarTokens()).start();
         } else {
             Platform.runLater(() -> {
                 if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
@@ -801,16 +804,15 @@ public class FormAplicacion extends Application {
         } else {
             new Thread(descargarArchivo(urlArchivo, tokenAutorizacion, urlRespuesta)).start();
         }
+        
         stage.setOnShown((WindowEvent e) -> {
             Platform.runLater(() -> {
-                //if (taskBar) {
-                    if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
-                        new FormActualizacionDisponible(stage, actualizacionInfo).showAndWait();
-                        new Thread(listarTokens()).start();
-                    } else {
-                        new Thread(listarTokens()).start();
-                    }
-                //}
+                if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
+                    new FormActualizacionDisponible(stage, actualizacionInfo).showAndWait();
+                    new Thread(listarTokens()).start();
+                } else {
+                    new Thread(listarTokens()).start();
+                }
             });
         });
     }
