@@ -1,15 +1,15 @@
 package bo.firmadigital.jacobitus.escritorio.formularios;
 import java.awt.AWTException;
-import java.awt.GraphicsEnvironment;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.PopupMenu;
 import java.awt.RenderingHints;
 import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
-import bo.firmadigital.jacobitus.escritorio.WebServer;
 import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 import dorkbox.jna.rendering.ProviderType;
 import dorkbox.jna.rendering.RenderProvider;
@@ -132,19 +131,6 @@ public class TaskBar {
         });
         java.awt.SystemTray.getSystemTray().add(trayIcon);
         return true;
-    }
-
-    private void quitarIconoBandejaAwt() {
-        if (trayIcon == null) {
-            return;
-        }
-        try {
-            if (java.awt.SystemTray.isSupported()) {
-                java.awt.SystemTray.getSystemTray().remove(trayIcon);
-            }
-        } finally {
-            trayIcon = null;
-        }
     }
 
     private File prepararIconoBandeja() throws IOException {
