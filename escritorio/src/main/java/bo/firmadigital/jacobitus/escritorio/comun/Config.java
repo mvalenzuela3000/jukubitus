@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import bo.firmadigital.jacobitus.comun.JacobitusException;
 import bo.firmadigital.jacobitus.escritorio.utilidades.Controlador;
+import bo.firmadigital.jacobitus.utilidades.SistemaOperativoHelper;
 
 public class Config {
     protected Properties options;
@@ -107,6 +108,32 @@ public class Config {
             options.setProperty("tertiaryPort", "true");
         } else {
             options.setProperty("tertiaryPort", "false");
+        }
+    }
+
+    public boolean isConfirmarSalidaEnabled() {
+        String confirmarSalida = options.getProperty("confirmarSalida");
+        return confirmarSalida == null ? SistemaOperativoHelper.esUnix() : confirmarSalida.equals("true");
+    }
+
+    public void setConfirmarSalidaEnabled(boolean confirmarSalida) {
+        if (confirmarSalida) {
+            options.setProperty("confirmarSalida", "true");
+        } else {
+            options.setProperty("confirmarSalida", "false");
+        }
+    }
+
+    public boolean isTrayIconEnabled() {
+        String trayIcon = options.getProperty("trayIcon");
+        return trayIcon == null ? !SistemaOperativoHelper.esUnix() : trayIcon.equals("true");
+    }
+
+    public void setTrayIconEnabled(boolean trayIcon) {
+        if (trayIcon) {
+            options.setProperty("trayIcon", "true");
+        } else {
+            options.setProperty("trayIcon", "false");
         }
     }
 

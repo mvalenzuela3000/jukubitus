@@ -74,7 +74,9 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -154,6 +156,64 @@ public class FormAplicacion extends Application {
         return configValidador;
     }
 
+    private boolean confirmarSalida() {
+        Config config = Config.getInstance();
+        if (!config.isConfirmarSalidaEnabled()) {
+            return true;
+        }
+
+        ButtonType salirButton = new ButtonType("Salir", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelarButton = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmación");
+        alert.setHeaderText("¿Seguro que deseas salir?");
+        alert.getButtonTypes().setAll(cancelarButton, salirButton);
+        if (FormAplicacion.stage != null) {
+            alert.initOwner(FormAplicacion.stage);
+            alert.initModality(Modality.WINDOW_MODAL);
+            alert.setOnShowing(event -> {
+                Stage alertStage = (Stage) alert.getDialogPane().getScene().getWindow();
+                alertStage.getIcons().setAll(FormAplicacion.stage.getIcons());
+            });
+        }
+
+        Label mensaje = new Label("Se cerrará la aplicación y todos sus servicios locales.");
+        mensaje.setWrapText(true);
+        mensaje.setMaxWidth(300);
+
+        CheckBox noPreguntar = new CheckBox("No volver a preguntar");
+        VBox contenido = new VBox(12);
+        contenido.getChildren().add(mensaje);
+        contenido.getChildren().add(noPreguntar);
+        alert.getDialogPane().setContent(contenido);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        boolean confirmado = result.isPresent() && result.get() == salirButton;
+        if (confirmado && noPreguntar.isSelected()) {
+            config.setConfirmarSalidaEnabled(false);
+            config.save();
+        }
+        return confirmado;
+    }
+
+    public static void salir() {
+        Platform.runLater(() -> {
+            if (app != null && !app.confirmarSalida()) {
+                return;
+            }
+            try {
+                if (usarServicioLocalhost) {
+                    WebServer.detener();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            Platform.exit();
+            System.exit(0);
+        });
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException, InterruptedException {
@@ -162,14 +222,24 @@ public class FormAplicacion extends Application {
         ContextMenu tokenContextMenu;
         FormAplicacion.stage = stage;
         FormAplicacion.app = this;
+        Config config = Config.getInstance();
 
         TaskBar barraTareas = new TaskBar();
-        if (SistemaOperativoHelper.esDebian()) {
-            usarBarraTareas = false;
+
+        boolean usarBarraTareasConfiguracion;
+        boolean errorAlIniciarBandejaSistema = false;
+        if (SistemaOperativoHelper.esUnix()) {
+            usarBarraTareasConfiguracion = config.isTrayIconEnabled();
         } else {
-            if (usarBarraTareas) {
-                usarBarraTareas = barraTareas.iniciarBandejaSistema();
+            usarBarraTareasConfiguracion = usarBarraTareas && config.isTrayIconEnabled();
+        }
+        if (usarBarraTareasConfiguracion) {
+            usarBarraTareas = barraTareas.iniciarBandejaSistema();
+            if (!usarBarraTareas) {
+                errorAlIniciarBandejaSistema = true;
             }
+        } else {
+            usarBarraTareas = false;
         }
 
         String version = Informacion.VERSION;
@@ -185,8 +255,18 @@ public class FormAplicacion extends Application {
             stage.setTitle("Jacobitus - " + version + " (Servicio detenido)");
         }
         stage.getIcons().add(new Image(this.getClass().getClassLoader().getResourceAsStream("icon.png")));
-
-        Config config = Config.getInstance();
+        if (usarBarraTareasConfiguracion && !usarBarraTareas) {
+            String mensaje = barraTareas.getUltimoDiagnostico();
+            if (mensaje == null) {
+                mensaje = TaskBar.diagnosticoBandejaNoDisponible();
+            }
+            Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
+            alert.initOwner(stage);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setTitle("Jacobitus");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+        }
         PlataformaInfo plataformaInfo = PlataformaHelper.identificar();
         ActualizacionesHelper actualizacionHelper = new ActualizacionesHelper(
                 config.getEnlaceInstaladores());
@@ -298,28 +378,7 @@ public class FormAplicacion extends Application {
         });
         MenuItem salirItem = new MenuItem("Salir");
         salirItem.setOnAction((ActionEvent e) -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmación");
-            alert.setHeaderText("¿Seguro que deseas salir?");
-            alert.setContentText("Se cerrará la aplicación.");
-
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                Platform.runLater(() -> {
-                    try {
-                        if (usarServicioLocalhost) {
-                            WebServer.detener();
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Platform.exit();
-                    System.exit(0);
-                });
-            } else {
-                e.consume();
-            }
+            salir();
         });
         archivoMenu.getItems().addAll(actualizarItem, abrirItem, abrirOtroItem, convertirAPdf, limpiarItem, opcionesItem,
                 abrirCrt, salirItem);
@@ -685,14 +744,31 @@ public class FormAplicacion extends Application {
         scene.getStylesheets().add(this.getClass().getClassLoader().getResource("jacobitus.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-        stage.setIconified(true);
+        stage.setIconified(false);
         stage.toFront();
+
+        if (errorAlIniciarBandejaSistema) {
+            Thread thread = new Thread(() -> {
+                Platform.runLater(() -> {
+                    String mensaje = barraTareas.getUltimoDiagnostico();
+                    if (mensaje == null) {
+                        mensaje = TaskBar.diagnosticoBandejaNoDisponible();
+                    }
+                    Alert alert = new Alert(AlertType.WARNING, mensaje, ButtonType.OK);
+                    alert.initOwner(stage);
+                    alert.initModality(Modality.APPLICATION_MODAL);
+                    alert.setTitle("Jacobitus");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                });
+            }, "Jacobitus-TrayIcon");
+            thread.setDaemon(true);
+            thread.start();
+        }
 
         if (usarBarraTareas) {
             Platform.setImplicitExit(false);
-            if (urlArchivo == null && urlParametro == null) {
-                stage.hide();
-            }
+            new Thread(listarTokens()).start();
         } else {
             Platform.runLater(() -> {
                 if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
@@ -706,28 +782,8 @@ public class FormAplicacion extends Application {
 
         stage.setOnCloseRequest((WindowEvent e) -> {
             if (!usarBarraTareas) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Confirmación");
-                alert.setHeaderText("¿Seguro que deseas salir?");
-                alert.setContentText("Se cerrará la aplicación.");
-
-                Optional<ButtonType> result = alert.showAndWait();
-
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    Platform.runLater(() -> {
-                        try {
-                            if (usarServicioLocalhost) {
-                                WebServer.detener();
-                            }
-                        } catch (Exception ex) {
-                            Logger.getLogger(FormAplicacion.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        Platform.exit();
-                        System.exit(0);
-                    });
-                } else {
-                    e.consume();
-                }
+                e.consume();
+                salir();
             } else {
                 Platform.setImplicitExit(false);
                 stage.close();
@@ -748,16 +804,15 @@ public class FormAplicacion extends Application {
         } else {
             new Thread(descargarArchivo(urlArchivo, tokenAutorizacion, urlRespuesta)).start();
         }
+        
         stage.setOnShown((WindowEvent e) -> {
             Platform.runLater(() -> {
-                //if (taskBar) {
-                    if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
-                        new FormActualizacionDisponible(stage, actualizacionInfo).showAndWait();
-                        new Thread(listarTokens()).start();
-                    } else {
-                        new Thread(listarTokens()).start();
-                    }
-                //}
+                if (actualizacionInfo != null && actualizacionInfo.isActualizacionDisponible()) {
+                    new FormActualizacionDisponible(stage, actualizacionInfo).showAndWait();
+                    new Thread(listarTokens()).start();
+                } else {
+                    new Thread(listarTokens()).start();
+                }
             });
         });
     }
