@@ -158,7 +158,7 @@ public class FormConfiguracion extends Stage {
         Label titleG = new Label("General");
         titleG.setStyle("-fx-font-weight: bold");
         vbox1.getChildren().add(titleG);
-        CheckBox checkBoxTrayIcon = new CheckBox("Mostrar icono en bandeja");
+        CheckBox checkBoxTrayIcon = new CheckBox("Ejecutar en segundo plano");
         final boolean[] checkBoxTrayIconEvent = { true };
         checkBoxTrayIcon.setSelected(config.isTrayIconEnabled());
         checkBoxTrayIcon.selectedProperty()
