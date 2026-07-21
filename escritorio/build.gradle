@@ -3,14 +3,13 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'org.openjfx.javafxplugin' version '0.0.10'
-    id 'bo.firmadigital.jacobitus4.java-conventions'
+    id 'bo.firmadigital.jacobitus.escritorio.java-conventions'
 }
 
-group = 'bo.firmadigital.jacobitus4'
-version = '1.4.0'
-mainClassName = 'bo.firmadigital.jacobitus4.Main'
+group = 'bo.firmadigital.jacobitus.escritorio'
+version = '2.0.0'
+mainClassName = 'bo.firmadigital.jacobitus.escritorio.Main'
 
 def appName = 'Jacobitus Escritorio'
 def appDescription = 'Solución completa para la administración de tu dispositivo criptográfico y firma digital'
@@ -30,7 +29,8 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: '*.jar')
-    implementation project(path: ':jacobitus-libreria', configuration: 'shadow')
+    implementation project(':jacobitus-libreria')
+    implementation 'com.dorkbox:SystemTray:4.4'
 
     implementation 'org.openjfx:javafx-controls:15.0.1'
     implementation 'org.openjfx:javafx-fxml:15.0.1'
@@ -42,8 +42,8 @@ dependencies {
     implementation 'org.glassfish.jersey.containers:jersey-container-jetty-servlet:2.43'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:2.43'
 
-    implementation 'org.bouncycastle:bcpkix-jdk15on:1.68'
-    implementation 'com.itextpdf:sign:7.1.15'
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.78'
+    implementation 'com.itextpdf:sign:7.2.6'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
     implementation 'org.codehaus.jettison:jettison:1.5.1'
     implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
@@ -76,15 +76,16 @@ jar {
     archiveBaseName = jarName
     archiveVersion = version
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes(
+            'Main-Class': mainClassName,
+            'Class-Path': configurations.runtimeClasspath.files.collect { file ->
+                if (file.name.contains("jacobitus-libreria")) {
+                    return file.name
+                }
+                return "dependencias/${file.name}"
+            }.join(' ')
+        )
     }
-}
-
-shadowJar {
-    archiveBaseName = jarName
-    archiveVersion = version
-    archiveClassifier = ''
-    mergeServiceFiles()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -155,13 +156,43 @@ def jpackageCmd = [
     '--license-file', 'license.txt'
 ]
 
+tasks.register('copyAllDependencies') {
+    group = 'build'
+
+    dependsOn configurations.runtimeClasspath
+    dependsOn ':jacobitus-libreria:jar'
+
+    doLast {
+        copy {
+            from configurations.runtimeClasspath
+            from project(':jacobitus-libreria').file("build/dependencies")
+            into layout.buildDirectory.dir('libs/dependencias')
+            
+            exclude { element -> element.file.name.contains("jacobitus-libreria") }
+            exclude '*.so', '*.dylib', '*.dll'
+            
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+
+        copy {
+            from project(':jacobitus-libreria').layout.buildDirectory.dir('libs')
+            into layout.buildDirectory.dir('libs')
+            include '*.jar'
+            exclude '*.so', '*.dylib', '*.dll'
+            
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
+
 tasks.register('packageApp', Exec) {
 
     group = 'distribution'
 
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildNative'
-    dependsOn shadowJar
+    dependsOn jar
+    dependsOn copyAllDependencies
     dependsOn importCA
     dependsOn addDrivers
     dependsOn importChangePin
@@ -212,10 +243,11 @@ tasks.register('packageApp', Exec) {
     }
 
     project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
     tasks.findByName('importCA').mustRunAfter('clean')
     tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
     tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
-    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
 
     commandLine(jpackageCmd + osArgs)
 }
@@ -235,16 +267,18 @@ tasks.register('packageRpm') {
 
     dependsOn clean
     dependsOn ':jacobitus-libreria:buildNative'
-    dependsOn shadowJar
+    dependsOn jar
+    dependsOn copyAllDependencies
     dependsOn importCA
     dependsOn addDrivers
     dependsOn importChangePin
 
     project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
     tasks.findByName('importCA').mustRunAfter('clean')
     tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
     tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
-    tasks.findByName('shadowJar').mustRunAfter(':jacobitus-libreria:buildNative', 'importChangePin', 'importCA')
 
     doFirst {
         if (tempAppImageDir.exists()) {
@@ -378,5 +412,179 @@ tasks.register('packageRpm') {
         }
 
         logger.lifecycle("RPM generado: ${rpmOutput.name}")
+    }
+}
+
+tasks.register('packageArch') {
+    group = 'distribution'
+
+    def appCategory = 'Utility'
+    def mimeTypes = 'application/jose;application/pkcs7-signature;application/pdf'
+
+    def archRoot = file("${buildDir}/arch")
+    def tempAppImageDir = file("${buildDir}/tmp/app-image")
+
+    dependsOn clean
+    dependsOn ':jacobitus-libreria:buildNative'
+    dependsOn jar
+    dependsOn copyAllDependencies
+    dependsOn importCA
+    dependsOn addDrivers
+    dependsOn importChangePin
+
+    project(':jacobitus-libreria').tasks.findByName('buildNative').mustRunAfter 'clean'
+    tasks.findByName('jar').mustRunAfter ':jacobitus-libreria:buildNative'
+    tasks.findByName('copyAllDependencies').mustRunAfter 'jar'
+    tasks.findByName('importCA').mustRunAfter('clean')
+    tasks.findByName('addDrivers').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+    tasks.findByName('importChangePin').mustRunAfter('clean', ':jacobitus-libreria:buildNative')
+
+    doFirst {
+        if (tempAppImageDir.exists()) {
+            logger.lifecycle("Eliminando app-image previo...")
+            delete tempAppImageDir
+        }
+        delete archRoot
+
+        tempAppImageDir.mkdirs()
+        archRoot.mkdirs()
+    }
+
+    doLast {
+        exec {
+            workingDir './'
+            commandLine([
+                    "${System.getProperty("java.home")}/bin/jpackage",
+                    '--verbose',
+                    '--input', 'build/libs',
+                    '--main-class', mainClassName,
+                    '--main-jar', "${jarName}-${version.replace('-1', '')}.jar",
+                    '--vendor', vendorName,
+                    '--dest', tempAppImageDir.absolutePath,
+                    '--name', appName,
+                    '--app-version', version.replace('-1', ''),
+                    '--description', appDescription,
+                    '--java-options', '-Dfile.encoding=UTF-8',
+                    '--type', 'app-image',
+                    '--icon', './iconos/icon.png',
+            ])
+        }
+
+        def appImageDir = tempAppImageDir.listFiles()?.find { it.isDirectory() }
+
+        if (appImageDir == null || !appImageDir.exists()) {
+            throw new GradleException("No se encontró el app-image generado por jpackage")
+        }
+
+        def packageDir = file("${archRoot}/${jarName}")
+
+        copy {
+            from appImageDir
+            into "${packageDir}/opt/${jarName}"
+        }
+
+        copy {
+            from(appImageDir) {
+                include '**/*.png'
+                eachFile { file ->
+                    if (file.name.contains(' ')) {
+                        file.name = file.name.replaceAll(/\s+/, '_')
+                    }
+                }
+                includeEmptyDirs = false
+            }
+            into "${packageDir}/opt/${jarName}"
+        }
+
+        copy {
+            from("${projectDir}/plantillas/arch/resources") {
+                exclude '*.desktop'
+            }
+            into "${packageDir}/opt/${jarName}/lib"
+        }
+
+        def installTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}.install")
+        def installFile = file("${archRoot}/${jarName.toLowerCase()}.install")
+
+        if (installTemplate.exists()) {
+            def installContent = installTemplate.text
+                    .replace('@APP_NAME@', appName)
+            
+            installFile.text = installContent
+            logger.lifecycle(".install file generado: ${installFile.absolutePath}")
+        } else {
+            throw new GradleException("No se encontró la plantilla app.install en ${installTemplate.absolutePath}")
+        }
+
+        def desktopTemplate = file("${projectDir}/plantillas/arch/resources/${jarName}-${appName.replace(' ', '')}.desktop")
+        def desktopFile = file("${packageDir}/opt/${jarName}/lib/${jarName}-${appName.replace(' ', '')}.desktop")
+
+        if (desktopTemplate.exists()) {
+            def desktopContent = desktopTemplate.text
+                    .replace('@APP_NAME@', appName)
+                    .replace('@DESCRIPTION@', appDescription)
+                    .replace('@INSTALL_DIR@', "/opt/${jarName}")
+                    .replace('@EXECUTABLE_NAME@', appName)
+                    .replace('@ICON_NAME@', "${appName.replace(' ', '_')}.png")
+                    .replace('@CATEGORY@', appCategory)
+                    .replace('@MIME_TYPES@', mimeTypes)
+            desktopFile.text = desktopContent
+            logger.lifecycle("Desktop file generado: ${desktopFile.absolutePath}")
+        }
+
+        def mimeSource = file("${projectDir}/plantillas/arch/${jarName}.xml")
+        if (mimeSource.exists()) {
+            copy {
+                from mimeSource
+                into archRoot
+            }
+        } else {
+            file("${archRoot}/${jarName}.xml").text = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\"></mime-info>"
+        }
+
+        def pkgbuildTemplate = file("${projectDir}/plantillas/arch/PKGBUILD")
+        def pkgbuildFile = file("${archRoot}/PKGBUILD")
+        def ARCH_DEPENDS = "'nss' 'pcsclite' 'ccid' 'pcsc-tools'"
+        def ARCH_OPTDEPENDS = ""        
+        
+        def pkgbuildContent = pkgbuildTemplate.text
+                .replace('@PKGNAME@', jarName.toLowerCase())
+                .replace('@PKGVER@', version.replace('-1', ''))
+                .replace('@PKGREL@', '1')
+                .replace('@PKGDESC@', appDescription)
+                .replace('@ARCH@', 'x86_64')
+                .replace('@URL@', 'https://firmadigital.bo/herramientas/jacobitus-escritorio')
+                .replace('@LICENSE@', 'LPG-Bolivia')
+                .replace("@REQUIRES@", ARCH_DEPENDS)
+                .replace("@OPTREQUIRES@", ARCH_OPTDEPENDS)
+                .replace('@VENDOR@', vendorName)
+                .replace('@APP_NAME@', appName.replace(' ', ''))
+                .replace('@JAR_NAME@', jarName)
+
+        pkgbuildFile.text = pkgbuildContent
+        logger.lifecycle("PKGBUILD generado: ${pkgbuildFile.absolutePath}")
+
+        exec {
+            workingDir archRoot
+            commandLine 'makepkg', '-f', '--nodeps', '--noextract'
+        }
+
+        def pkgFiles = fileTree(archRoot).matching {
+            include "${jarName}-*.pkg.tar.zst"
+            exclude '*-debug-*.pkg.tar.zst'
+        }.files
+
+        if (pkgFiles.empty) {
+            throw new GradleException("No se generó el paquete ArchLinux (.pkg.tar.zst)")
+        }
+
+        def pkgOutput = pkgFiles.first()
+
+        copy {
+            from pkgOutput
+            into "${projectDir}/dist"
+        }
+
+        logger.lifecycle("Paquete Arch compilado con éxito: ${pkgOutput.name} en dist/")
     }
 }

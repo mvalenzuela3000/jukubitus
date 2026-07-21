@@ -1,0 +1,28 @@
+pkgname=@PKGNAME@
+pkgver=@PKGVER@
+pkgrel=@PKGREL@
+pkgdesc="@PKGDESC@"
+arch=('x86_64')
+license=('@LICENSE@')
+depends=(@REQUIRES@)
+optdepends=(@OPTREQUIRES@)
+
+install=@PKGNAME@.install
+
+source=() 
+
+package() {
+  install -d "$pkgdir/opt/@JAR_NAME@"
+  install -d "$pkgdir/usr/share/applications"
+  install -d "$pkgdir/usr/share/mime/packages"
+
+  cp -r "$startdir/@JAR_NAME@/opt/@JAR_NAME@"/* "$pkgdir/opt/@JAR_NAME@/"
+
+  install -m 644 \
+    "$startdir/@JAR_NAME@/opt/@JAR_NAME@/lib/@JAR_NAME@-@APP_NAME@.desktop" \
+    "$pkgdir/usr/share/applications/@JAR_NAME@.desktop"
+
+  if [ -f "$startdir/@JAR_NAME@.xml" ]; then
+    install -m 644 "$startdir/@JAR_NAME@.xml" "$pkgdir/usr/share/mime/packages/@JAR_NAME@.xml"
+  fi
+}
