@@ -1,0 +1,45 @@
+package bo.firmadigital.jacobitus.escritorio;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.codehaus.jettison.json.JSONObject;
+
+import bo.firmadigital.jacobitus.escritorio.formularios.FormAplicacion;
+
+public class Main {
+    public static void main(String[] args) {
+        Request req = new Request();
+        if (req.estado()) {
+            if (args.length == 1) {
+                req.show(args[0]);
+            } else {
+                req.show();
+            }
+        } else {
+            try {
+                WebServer.iniciar();
+                if (args.length == 1) {
+                    String[] parts = args[0].split("\\?");
+                    if (parts.length == 2) {
+                        JSONObject body = Request.splitQuery(parts[1]);
+                        FormAplicacion.run(true, true, body.getString("url"), body.getString("token"),
+                                body.getString("urlpost"));
+                    } else {
+                        FormAplicacion.run(true, true, args[0]);
+                    }
+                } else {
+                    FormAplicacion.run(true, true);
+                }
+            } catch (Exception ex) {
+                try {
+                    WebServer.detener();
+                } catch (Exception ex2) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex2.getMessage(), ex2);
+                }
+                FormAplicacion.run(false, false);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+}

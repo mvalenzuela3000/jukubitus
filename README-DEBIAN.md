@@ -22,7 +22,7 @@ Descargamos el JDK desde el sitio oficial:
 
 Instalamos utilidades necesarias:
 ```bash
-$ sudo dnf install -y wget tar
+$ sudo apt install -y wget tar
 ```
 
 Descargamos OpenJDK 15.0.2:
@@ -105,7 +105,7 @@ $ cd jacobitus-escritorio
 
 Compilamos:
 ```bash
-$ ./gradlew jacobitus-libreria:buildNative escritorio:clean escritorio:importCA escritorio:addDrivers escritorio:importChangePin escritorio:shadowJar
+$ ./gradlew clean jacobitus-libreria:buildNative escritorio:jar escritorio:copyAllDependencies escritorio:importCA escritorio:addDrivers escritorio:importChangePin
 ```
 
 Ejecutamos:
