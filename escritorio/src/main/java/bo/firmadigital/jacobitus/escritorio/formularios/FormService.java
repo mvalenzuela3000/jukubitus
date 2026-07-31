@@ -343,7 +343,7 @@ public class FormService extends Stage {
             try {
                 String mensaje = ex.getMessage();
                 if (ex.getCause() instanceof IOException) {
-                    if (ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
+                    if (ex.getCause().getMessage() != null && ex.getCause().getMessage().equals("PKCS12 key store mac invalid - wrong password or corrupted file.")) {
                         mensaje = "Pin incorrecto, intente nuevamente.";
                     }
                 }
@@ -359,7 +359,7 @@ public class FormService extends Stage {
                     }
                 }
                 if (ex.getCause() instanceof javax.security.auth.login.LoginException) {
-                    if (ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
+                    if (ex.getCause().getCause() != null && ex.getCause().getCause().getMessage() != null && ex.getCause().getCause().getMessage().equals("CKR_PIN_LOCKED")) {
                         mensaje = "El token criptográfico se encuentra bloqueado por demasiados intentos fallidos al ingresar el PIN.";
                     }
                 }
