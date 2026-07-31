@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'bo.firmadigital.jacobitus.escritorio'
-version = '2.0.0'
+version = '2.0.1'
 mainClassName = 'bo.firmadigital.jacobitus.escritorio.Main'
 
 def appName = 'Jacobitus Escritorio'
