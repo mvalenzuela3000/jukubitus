@@ -956,7 +956,7 @@ public class FormAplicacion extends Application {
                         } catch (PdfException ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ")
-                                    .append(ex.getCause().getMessage()).append("\n");
+                                    .append(ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage()).append("\n");
                         } catch (Exception ex) {
                             updateProgress(i + 1, archivos.size());
                             errores.append(archivos.get(i).getAbsolutePath()).append(": ").append(ex.getMessage())
