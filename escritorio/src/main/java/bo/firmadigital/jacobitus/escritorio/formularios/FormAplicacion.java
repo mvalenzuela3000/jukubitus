@@ -721,7 +721,7 @@ public class FormAplicacion extends Application {
         BorderPane footer = new BorderPane();
         footer.setPadding(new Insets(5, 10, 5, 10));
 
-        Label pie = new Label("AGETIC - https://firmadigital.bo");
+        Label pie = new Label("AIT - https://firmadigital.bo");
         pie.setPadding(new Insets(5, 5, 5, 5));
         footer.setRight(pie);
 
