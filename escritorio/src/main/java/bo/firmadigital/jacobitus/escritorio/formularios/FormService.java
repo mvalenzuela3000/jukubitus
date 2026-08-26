@@ -294,7 +294,7 @@ public class FormService extends Stage {
             Alert alert = new Alert(AlertType.WARNING, task.getException().getMessage(), ButtonType.OK);
             alert.initOwner(this);
             alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setTitle("Jacobitus");
+            alert.setTitle("Jukubitus");
             alert.showAndWait();
             if (task.getException() instanceof CustomException) {
                 close();

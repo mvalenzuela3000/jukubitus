@@ -125,7 +125,7 @@ public class FormConfiguracion extends Stage {
                                 "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
                         alert.initOwner(parent);
                         alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
+                        alert.setTitle("Jukubitus");
                         alert.showAndWait();
                     }
                     // checkBoxEvent = true;
@@ -143,7 +143,7 @@ public class FormConfiguracion extends Stage {
                                 "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
                         alert.initOwner(parent);
                         alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
+                        alert.setTitle("Jukubitus");
                         alert.showAndWait();
                     }
                     // checkBoxEvent = true;
@@ -171,7 +171,7 @@ public class FormConfiguracion extends Stage {
                                 TaskBar.diagnosticoBandejaNoDisponible(), ButtonType.OK);
                         alert.initOwner(parent);
                         alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
+                        alert.setTitle("Jukubitus");
                         alert.setHeaderText(null);
                         alert.showAndWait();
                         checkBoxTrayIconEvent[0] = false;
@@ -186,7 +186,7 @@ public class FormConfiguracion extends Stage {
                                 TaskBar.diagnosticoActivacionUnix(), ButtonType.OK);
                         alert.initOwner(parent);
                         alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
+                        alert.setTitle("Jukubitus");
                         alert.setHeaderText(null);
                         alert.showAndWait();
                     }
@@ -194,7 +194,7 @@ public class FormConfiguracion extends Stage {
                             "Para que este cambio tenga efecto,\ndeberá reiniciar la aplicación.", ButtonType.OK);
                     alert.initOwner(parent);
                     alert.initModality(Modality.APPLICATION_MODAL);
-                    alert.setTitle("Jacobitus");
+                    alert.setTitle("Jukubitus");
                     alert.setHeaderText(null);
                     alert.showAndWait();
                 });
@@ -333,7 +333,7 @@ public class FormConfiguracion extends Stage {
                     Alert alert = new Alert(Alert.AlertType.WARNING, ex.getMessage(), ButtonType.OK);
                     alert.initOwner(parent);
                     alert.initModality(Modality.APPLICATION_MODAL);
-                    alert.setTitle("Jacobitus");
+                    alert.setTitle("Jukubitus");
                     alert.showAndWait();
                 }
             }

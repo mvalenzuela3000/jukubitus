@@ -136,7 +136,7 @@ public class FormCambiarContrasena extends Stage {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Se cambió la contraseña.", ButtonType.OK);
                         alert.initOwner(stage);
                         alert.initModality(Modality.APPLICATION_MODAL);
-                        alert.setTitle("Jacobitus");
+                        alert.setTitle("Jukubitus");
                         alert.showAndWait();
                         close();
                         return;
@@ -152,7 +152,7 @@ public class FormCambiarContrasena extends Stage {
         Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
         alert.initOwner(stage);
         alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle("Jacobitus");
+        alert.setTitle("Jukubitus");
         alert.showAndWait();
     }
 }

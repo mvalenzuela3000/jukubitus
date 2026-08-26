@@ -8,13 +8,13 @@ plugins {
 }
 
 group = 'bo.firmadigital.jacobitus.escritorio'
-version = '2.0.1'
+version = '1.0.0'
 mainClassName = 'bo.firmadigital.jacobitus.escritorio.Main'
 
-def appName = 'Jacobitus Escritorio'
+def appName = 'Jukubitus Escritorio'
 def appDescription = 'Solución completa para la administración de tu dispositivo criptográfico y firma digital'
-def jarName = "jacobitus-escritorio"
-def vendorName = 'AGETIC'
+def jarName = "jukubitus-escritorio"
+def vendorName = 'AIT'
 def maintainer = 'desarrollo@firmadigital.bo'
 
 def os = OperatingSystem.current()
@@ -223,7 +223,7 @@ tasks.register('packageApp', Exec) {
                 '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
-                '--win-menu-group', 'AGETIC',
+                '--win-menu-group', 'AIT',
                 '--win-upgrade-uuid', "47fdae43-82ca-40ca-887f-8e6459366643"
             ]
         } else {
@@ -234,7 +234,7 @@ tasks.register('packageApp', Exec) {
                 '--resource-dir', 'plantillas/windows',
                 '--win-shortcut',
                 '--win-menu',
-                '--win-menu-group', 'AGETIC',
+                '--win-menu-group', 'AIT',
                 '--win-upgrade-uuid', "47fdae43-82ca-40ca-887f-8e6459366643"
             ]
         }

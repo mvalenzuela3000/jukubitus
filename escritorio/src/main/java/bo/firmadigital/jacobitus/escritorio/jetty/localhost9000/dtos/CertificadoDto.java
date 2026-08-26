@@ -21,4 +21,5 @@ public class CertificadoDto {
     private String finValidez;
     private String revocado;
     private String numeroSerie;
+    private String unidadOrganizacionalSignatario;
 }

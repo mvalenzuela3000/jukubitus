@@ -102,7 +102,7 @@ public class FormContrasenaNueva extends Stage {
         Alert alert = new Alert(Alert.AlertType.ERROR, error, ButtonType.OK);
         alert.initOwner(stage);
         alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle("Jacobitus");
+        alert.setTitle("Jukubitus");
         alert.showAndWait();
     }
 }

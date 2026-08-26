@@ -30,13 +30,13 @@ public class FormActualizacionDisponible extends Stage {
 
         this.parent = parent;
 
-        setTitle("Jacobitus - Actualización disponible");
+        setTitle("Jukubitus - Actualización disponible");
 
         initOwner(parent);
         initModality(Modality.APPLICATION_MODAL);
 
         ImageView imagen = new ImageView(new Image(
-                            this.getClass().getClassLoader().getResource("logo-agetic.png").toExternalForm()));
+                            this.getClass().getClassLoader().getResource("logo-ait.png").toExternalForm()));
 
         Label titulo = new Label("Nueva actualización disponible");
         titulo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -112,7 +112,7 @@ public class FormActualizacionDisponible extends Stage {
     private void mostrarError(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initOwner(parent);
-        alert.setTitle("Jacobitus");
+        alert.setTitle("Jukubitus");
         alert.setHeaderText("Error");
         alert.setContentText(msg);
         alert.showAndWait();

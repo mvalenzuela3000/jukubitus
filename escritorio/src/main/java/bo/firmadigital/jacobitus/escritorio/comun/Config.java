@@ -303,7 +303,7 @@ public class Config {
                     throw new JacobitusException("No se pudo crear el directorio " + user);
                 }
             }
-            options.store(new FileWriter(fileOptions), "AGETIC - Jacobitus options");
+            options.store(new FileWriter(fileOptions), "Jukubitus options");
         } catch (IOException ex) {
             throw new JacobitusException(ex.getMessage());
         }

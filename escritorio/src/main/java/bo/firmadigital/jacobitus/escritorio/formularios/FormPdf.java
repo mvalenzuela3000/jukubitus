@@ -321,7 +321,7 @@ public class FormPdf extends Stage {
         Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
         alert.initOwner(this);
         alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle("Jacobitus");
+        alert.setTitle("Jukubitus");
         alert.showAndWait();
     }
     
@@ -329,7 +329,7 @@ public class FormPdf extends Stage {
         Alert alert = new Alert(Alert.AlertType.NONE);
         alert.initOwner(this);
         alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle("Jacobitus");
+        alert.setTitle("Jukubitus");
         GridPane content = new GridPane();
         Label labelAncho = new Label("Ancho:");
         TextField textAncho = new TextField(String.valueOf(WIDTH));

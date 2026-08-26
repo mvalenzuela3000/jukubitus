@@ -1,18 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Jacobitus Escritorio",
-    "version": "2.0.1",
+    "title": "Jukubitus Escritorio",
+    "version": "1.0.0",
     "summary": "Solución de escritorio para todo requerimiento de firma digital",
     "description": "Administra tu dispositivo criptográfico (token) de la manera más intuitiva y fácil con esta herramienta.",
     "contact": {
       "name": "AGETIC",
       "email": "desarrollo@firmadigital.bo",
-      "url": "https://firmadigital.bo/herramientas/jacobitus-escritorio/"
+      "url": "https://firmadigital.bo/herramientas/Jukubitus-escritorio/"
     },
     "x-logo": {
-      "url": "./assets/images/logo-agetic.png",
-      "altText": "AGETIC"
+      "url": "./assets/images/logo-ait.png",
+      "altText": "AIT"
     },
     "license": {
       "name": "LPG-Bolivia",

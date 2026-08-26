@@ -37,6 +37,7 @@ public class ValidadorServicio {
             List<FirmaDto> firmas = new ArrayList<FirmaDto>();
 
             for (Firma firma : validar) {
+
                 FirmaDto firmaDto = new FirmaDto();
                 firmaDto.setNoModificado(firma.getIntegridad());
                 firmaDto.setCadenaConfianza(firma.getCadenaConfianza());
@@ -50,8 +51,8 @@ public class ValidadorServicio {
 
                 firmaDto.setCertificado(certificadoDto);
                 firmas.add(firmaDto);
+                
             }
-
             ValidacionPdfRespuestaDto validacion = new ValidacionPdfRespuestaDto();
             validacion.setFirmas(firmas);
 
@@ -209,7 +210,8 @@ public class ValidadorServicio {
             certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
         }
 
-        certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));        
+        certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));    
+        certificadoDto.setUnidadOrganizacionalSignatario(firma.getInfoCertificado().getInfoSujeto().getUnidadOrganizacional());  
 
         return certificadoDto;
     }

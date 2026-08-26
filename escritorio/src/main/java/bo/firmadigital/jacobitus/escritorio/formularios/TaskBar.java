@@ -71,7 +71,7 @@ public class TaskBar {
                 ultimoDiagnostico = "No se pudo preparar el icono de Jacobitus para la bandeja del sistema.";
                 return false;
             }
-            sysTray.setTooltip("Jacobitus");
+            sysTray.setTooltip("Jukubitus");
             sysTray.setImage(iconFile);
             Logger.getLogger(FormAplicacion.class.getName()).log(Level.INFO,
                     "Icono de bandeja configurado: {0}", iconFile.getAbsolutePath());
