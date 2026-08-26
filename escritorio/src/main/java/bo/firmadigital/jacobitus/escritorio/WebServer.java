@@ -371,34 +371,116 @@ public class WebServer {
      * CONFIGURACION HTTPS
      * ================================================================
      */
-    private static void configurarHttps() throws Exception {
-        HttpConfiguration https = new HttpConfiguration();
-        https.addCustomizer(
-                new SecureRequestCustomizer()
-        );
+   
+private static void configurarHttps() throws Exception {
         /*
-         * ============================================================
-         * CERTIFICADO SSL
-         * ============================================================
-         */
+        * ============================================================
+        * CONFIGURACION HTTPS
+        * ============================================================
+        */
+        HttpConfiguration https = new HttpConfiguration();
+        /*
+        * Determinar si estamos ejecutando Jacobitus como
+        * servidor Linux/Debian headless.
+        */
+        boolean esServidorLinux = esServidorLinux();
+        /*
+        * ============================================================
+        * SECURE REQUEST CUSTOMIZER / SNI
+        * ============================================================
+        */
+        SecureRequestCustomizer secureRequestCustomizer = new SecureRequestCustomizer();
+
+        if (esServidorLinux) {
+            /*
+            * En Debian inicialmente permitimos acceso mediante IP
+            * o nombre distinto de localhost.
+            *
+            * Cuando el certificado institucional tenga configurado
+            * correctamente el DNS/SAN definitivo, estos valores
+            * pueden volver a true.
+            */
+            secureRequestCustomizer.setSniHostCheck(false);
+            secureRequestCustomizer.setSniRequired(false);
+
+        } else {
+            /*
+            * Windows:
+            * conservar comportamiento normal/seguro de Jacobitus.
+            */
+            secureRequestCustomizer.setSniHostCheck(true);
+            secureRequestCustomizer.setSniRequired(false);
+        }
+
+        /*
+        * IMPORTANTE:
+        * agregar ESTA instancia y no crear otra nueva.
+        */
+        https.addCustomizer(secureRequestCustomizer);
+        /*
+        * ============================================================
+        * SSL CONTEXT
+        * ============================================================
+        */
         SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStorePath(
-                jettyServer
-                        .getClass()
-                        .getClassLoader()
-                        .getResource("server.jks")
-                        .toExternalForm()
+
+        if (esServidorLinux) {
+            /*
+            * Mientras Debian pueda ser accedido por IP.
+            */
+            sslContextFactory.setSniRequired(false);
+
+        } else {
+
+            /*
+            * Comportamiento original Windows.
+            */
+            sslContextFactory.setSniRequired(false);
+        }
+        /*
+        * ============================================================
+        * CERTIFICADO SSL
+        * ============================================================
+        *
+        * Windows:
+        *      server.jks original de Jacobitus
+        *
+        * Debian headless:
+        *      certificado institucional PKCS12
+        */
+        configurarCertificadoSsl(
+                sslContextFactory
         );
-        sslContextFactory.setKeyStorePassword("12345678");
-        sslContextFactory.setKeyManagerPassword("12345678");
+
         List<ServerConnector> connectors = new ArrayList<ServerConnector>();
         /*
-         * ============================================================
-         * PUERTO 9000
-         * ============================================================
-         */
-        String host9000 = obtenerVariableEntorno("JACOBITUS_HOST", HOST_DEFAULT);
-        int puerto9000 = obtenerPuerto("JACOBITUS_PORT", PUERTO_9000_DEFAULT);
+        * ============================================================
+        * PUERTO 9000
+        * ============================================================
+        *
+        * Windows:
+        *
+        *      JACOBITUS_HOST no definido
+        *      => 127.0.0.1
+        *
+        * Debian:
+        *
+        *      JACOBITUS_HOST=0.0.0.0
+        *      => servicio disponible desde la red
+        */
+        String host9000 =
+                obtenerVariableEntorno(
+                        "JACOBITUS_HOST",
+                        HOST_DEFAULT
+                );
+
+        int puerto9000 =
+                obtenerPuerto(
+                        "JACOBITUS_PORT",
+                        PUERTO_9000_DEFAULT
+                );
+
+
         ServerConnector sslConnector9000 =
                 new ServerConnector(
                         jettyServer,
@@ -406,23 +488,43 @@ public class WebServer {
                                 sslContextFactory,
                                 "http/1.1"
                         ),
-                        new HttpConnectionFactory(https)
+                        new HttpConnectionFactory(
+                                https
+                        )
                 );
+        sslConnector9000.setHost(
+                host9000
+        );
 
-        sslConnector9000.setHost(host9000);
-        sslConnector9000.setPort(puerto9000);
-        sslConnector9000.setName("localhost9000");
-        connectors.add(sslConnector9000);
-        Config config = Config.getInstance();
+        sslConnector9000.setPort(
+                puerto9000
+        );
+
+        sslConnector9000.setName(
+                "localhost9000"
+        );
+
+        connectors.add(
+                sslConnector9000
+        );
+
+
+        Config config =
+                Config.getInstance();
+
+
         /*
-         * ============================================================
-         * PUERTO 4637
-         *
-         * IMPORTANTE:
-         * permanece ligado a localhost.
-         * ============================================================
-         */
+        * ============================================================
+        * PUERTO 4637
+        * ============================================================
+        *
+        * Firma local.
+        *
+        * Se mantiene SIEMPRE en localhost para no exponerlo
+        * externamente.
+        */
         if (config.isSecondaryPortEnabled()) {
+
             ServerConnector sslConnector4637 =
                     new ServerConnector(
                             jettyServer,
@@ -430,23 +532,32 @@ public class WebServer {
                                     sslContextFactory,
                                     "http/1.1"
                             ),
-                            new HttpConnectionFactory(https)
+                            new HttpConnectionFactory(
+                                    https
+                            )
                     );
-
-            sslConnector4637.setHost("127.0.0.1");
-            sslConnector4637.setPort(4637);
-            sslConnector4637.setName("localhost4637");
-            connectors.add(sslConnector4637);
+            sslConnector4637.setHost(
+                    "127.0.0.1"
+            );
+            sslConnector4637.setPort(
+                    4637
+            );
+            sslConnector4637.setName(
+                    "localhost4637"
+            );
+            connectors.add(
+                    sslConnector4637
+            );
         }
-        /*
-         * ============================================================
-         * PUERTO 3200
-         *
-         * IMPORTANTE:
-         * permanece ligado a localhost.
-         * ============================================================
-         */
+       /*
+        * ============================================================
+        * PUERTO 3200
+        * ============================================================
+        *
+        * También permanece SIEMPRE ligado a localhost.
+        */
         if (config.isTertiaryPortEnabled()) {
+
             ServerConnector sslConnector3200 =
                     new ServerConnector(
                             jettyServer,
@@ -454,19 +565,56 @@ public class WebServer {
                                     sslContextFactory,
                                     "http/1.1"
                             ),
-                            new HttpConnectionFactory(https)
+                            new HttpConnectionFactory(
+                                    https
+                            )
                     );
-            sslConnector3200.setHost("127.0.0.1");
-            sslConnector3200.setPort(3200);
-            sslConnector3200.setName("localhost3200");
-            connectors.add(sslConnector3200);
+
+
+            sslConnector3200.setHost(
+                    "127.0.0.1"
+            );
+            sslConnector3200.setPort(
+                    3200
+            );
+            sslConnector3200.setName(
+                    "localhost3200"
+            );
+            connectors.add(
+                    sslConnector3200
+            );
         }
+
+        /*
+        * ============================================================
+        * REGISTRAR CONNECTORS
+        * ============================================================
+        */
         jettyServer.setConnectors(
                 connectors.toArray(
                         new Connector[0]
                 )
         );
     }
+    private static boolean esServidorLinux() {
+        String osName =
+                System.getProperty(
+                        "os.name",
+                        ""
+                ).toLowerCase();
+        boolean esLinux =
+                osName.contains("linux");
+        String headlessEnv =
+                System.getenv(
+                        "JACOBITUS_HEADLESS"
+                );
+        boolean esHeadless =
+                headlessEnv != null
+                        && "true".equalsIgnoreCase(
+                                headlessEnv.trim()
+                        );
+        return esLinux && esHeadless;
+    }   
     /*
      * ================================================================
      * VARIABLE DE ENTORNO
@@ -565,5 +713,96 @@ public class WebServer {
             actual = actual.getCause();
         }
         return false;
+    }
+    private static void configurarCertificadoSsl(
+        SslContextFactory.Server sslContextFactory) {
+        boolean esServidorLinux = esServidorLinux();
+        /*
+        * ============================================================
+        * DEBIAN / LINUX HEADLESS
+        * ============================================================
+        */
+        if (esServidorLinux) {
+            String keyStorePath =
+                    System.getenv(
+                            "JACOBITUS_KEYSTORE_PATH"
+                    );
+            String keyStorePassword =
+                    System.getenv(
+                            "JACOBITUS_KEYSTORE_PASSWORD"
+                    );
+            if (keyStorePath == null
+                    || keyStorePath.trim().isEmpty()) {
+
+                throw new IllegalStateException(
+                        "La variable JACOBITUS_KEYSTORE_PATH "
+                                + "no está configurada."
+                );
+            }
+            if (keyStorePassword == null
+                    || keyStorePassword.trim().isEmpty()) {
+
+                throw new IllegalStateException(
+                        "La variable JACOBITUS_KEYSTORE_PASSWORD "
+                                + "no está configurada."
+                );
+            }
+            sslContextFactory.setKeyStorePath(
+                    keyStorePath.trim()
+            );
+            sslContextFactory.setKeyStoreType(
+                    "PKCS12"
+            );
+            sslContextFactory.setKeyStorePassword(
+                    keyStorePassword
+            );
+            sslContextFactory.setKeyManagerPassword(
+                    keyStorePassword
+            );
+            LOGGER.info(
+                    "HTTPS configurado con certificado "
+                            + "institucional para servidor Linux."
+            );
+            LOGGER.info(
+                    "KeyStore: "
+                            + keyStorePath
+            );
+        } else {
+
+            /*
+            * ============================================================
+            * WINDOWS / JACOBITUS ORIGINAL
+            * ============================================================
+            */
+            java.net.URL serverJks =
+                    jettyServer
+                            .getClass()
+                            .getClassLoader()
+                            .getResource(
+                                    "server.jks"
+                            );
+
+
+            if (serverJks == null) {
+
+                throw new IllegalStateException(
+                        "No se encontró el certificado "
+                                + "server.jks de Jacobitus."
+                );
+            }
+            sslContextFactory.setKeyStorePath(
+                    serverJks.toExternalForm()
+            );
+            sslContextFactory.setKeyStorePassword(
+                    "12345678"
+            );
+            sslContextFactory.setKeyManagerPassword(
+                    "12345678"
+            );
+            LOGGER.info(
+                    "HTTPS configurado con server.jks "
+                            + "original de Jacobitus."
+            );
+        }
     }
 }
