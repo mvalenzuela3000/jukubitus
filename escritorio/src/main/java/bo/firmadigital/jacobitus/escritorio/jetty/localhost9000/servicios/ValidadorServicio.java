@@ -192,27 +192,93 @@ public class ValidadorServicio {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         CertificadoDto certificadoDto = new CertificadoDto();
         InfoCertificado infoCertificado = firma.getInfoCertificado();
-        if (infoCertificado.getInfoSujeto().getComplemento() != null && !infoCertificado.getInfoSujeto().getComplemento().equals("")) {
-            certificadoDto.setCi(infoCertificado.getInfoSujeto().getNumeroDocumento() + "-" + infoCertificado.getInfoSujeto().getComplemento());
+        /*
+        |--------------------------------------------------------------------------
+        | Validacion basica
+        |--------------------------------------------------------------------------
+        */
+        if (infoCertificado == null) {
+            return certificadoDto;
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | TITULAR - CI
+        |--------------------------------------------------------------------------
+        */
+        String numeroDocumento = infoCertificado.getInfoSujeto().getNumeroDocumento();
+        String complemento = infoCertificado.getInfoSujeto().getComplemento();
+        if (complemento != null && !complemento.trim().isEmpty()) 
+        {
+            certificadoDto.setCi(numeroDocumento + "-" + complemento);
         } else {
-            certificadoDto.setCi(infoCertificado.getInfoSujeto().getNumeroDocumento());
+            certificadoDto.setCi(numeroDocumento);
         }
-
-        certificadoDto.setNombreSignatario(firma.getInfoCertificado().getInfoSujeto().getNombreComun());
-        certificadoDto.setCargoSignatario(firma.getInfoCertificado().getInfoSujeto().getCargo());
-        certificadoDto.setOrganizacionSignatario(firma.getInfoCertificado().getInfoSujeto().getOrganizacion());
-        certificadoDto.setEmailSignatario(firma.getInfoCertificado().getInfoSujeto().getCorreoElectronico());
-        certificadoDto.setNombreECA(firma.getInfoCertificado().getInfoEmisor().getNombreComun());
-        certificadoDto.setDescripcionECA(firma.getInfoCertificado().getInfoEmisor().getOrganizacion());
-        certificadoDto.setInicioValidez(dateFormat.format(firma.getInfoCertificado().getInicioValidez()));
-        certificadoDto.setFinValidez(dateFormat.format(firma.getInfoCertificado().getFinValidez()));
-        if (firma.getRevocacion() != null && firma.getRevocacion().getFecha() != null) {
+        /*
+        |--------------------------------------------------------------------------
+        | TITULAR - DATOS PERSONALES
+        |--------------------------------------------------------------------------
+        */
+        certificadoDto.setNombreSignatario(infoCertificado.getInfoSujeto().getNombreComun());
+        certificadoDto.setOrganizacionSignatario(infoCertificado.getInfoSujeto().getOrganizacion());
+        certificadoDto.setUnidadOrganizacionalSignatario(infoCertificado.getInfoSujeto().getUnidadOrganizacional());
+        certificadoDto.setCargoSignatario(infoCertificado.getInfoSujeto().getCargo());
+        certificadoDto.setEmailSignatario(infoCertificado.getCorreoElectronicoSujeto());
+        /*
+        |--------------------------------------------------------------------------
+        | EMISOR / ENTIDAD CERTIFICADORA
+        |--------------------------------------------------------------------------
+        */
+        certificadoDto.setNombreECA(infoCertificado.getInfoEmisor().getNombreComun());
+        certificadoDto.setDescripcionECA(infoCertificado.getInfoEmisor().getOrganizacion());
+        /*
+        |--------------------------------------------------------------------------
+        | PERIODO DE VALIDEZ
+        |--------------------------------------------------------------------------
+        */
+        if (infoCertificado.getInicioValidez() != null) {
+            certificadoDto.setInicioValidez(dateFormat.format(infoCertificado.getInicioValidez()));
+        }
+        if (infoCertificado.getFinValidez() != null) {
+            certificadoDto.setFinValidez(dateFormat.format(infoCertificado.getFinValidez()));
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | REVOCACION
+        |--------------------------------------------------------------------------
+        */
+        if (firma.getRevocacion() != null && firma.getRevocacion().getFecha() != null) 
+        {
             certificadoDto.setRevocado(dateFormat.format(firma.getRevocacion().getFecha()));
+        } else {
+            certificadoDto.setRevocado(null);
         }
-
-        certificadoDto.setNumeroSerie(((X509Certificate) firma.getCertificate()).getSerialNumber().toString(16));    
-        certificadoDto.setUnidadOrganizacionalSignatario(firma.getInfoCertificado().getInfoSujeto().getUnidadOrganizacional());  
-
+        /*
+        |--------------------------------------------------------------------------
+        | NUMERO DE SERIE
+        |--------------------------------------------------------------------------
+        */
+        if (firma.getCertificate() instanceof X509Certificate) {
+            X509Certificate certificadoX509 = (X509Certificate) firma.getCertificate();
+            certificadoDto.setNumeroSerie(certificadoX509.getSerialNumber().toString(16).toUpperCase());
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | TIPO DE CERTIFICADO
+        |--------------------------------------------------------------------------
+        */
+        certificadoDto.setTipoCertificado(infoCertificado.getPersona());
+        /*
+        |--------------------------------------------------------------------------
+        | NIVEL DE SEGURIDAD
+        |--------------------------------------------------------------------------
+        */
+        certificadoDto.setNivelSeguridad(infoCertificado.getAlmacenamiento());
+        /*
+        |--------------------------------------------------------------------------
+        | TIPO DE USO / FIRMA
+        |--------------------------------------------------------------------------
+        */
+        certificadoDto.setTipoUso(infoCertificado.getTipoFirma());
         return certificadoDto;
     }
 }
